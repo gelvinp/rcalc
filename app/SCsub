@@ -1,0 +1,7 @@
+Import("env")
+
+env.app_sources = []
+env.add_source_files(env.app_sources, "*.cpp", True)
+
+lib = env.add_library("app", env.app_sources)
+env.Prepend(LIBS=[lib])

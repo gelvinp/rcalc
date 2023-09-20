@@ -1,0 +1,5 @@
+Import("env")
+
+env.add_source_files(env.platform_sources, "*.cpp")
+
+env.Append(CPPPATH=["#/platform/linux/backends"])

@@ -1,0 +1,17 @@
+#pragma once
+
+#include "core/version_generated.gen.h"
+
+
+#ifndef _STR
+#define _STR(x) #x
+#define _MKSTR(x) _STR(x)
+#endif
+
+#define VERSION_BRANCH _MKSTR(VERSION_MAJOR) "." _MKSTR(VERSION_MINOR)
+#define VERSION_NUMBER VERSION_BRANCH "." _MKSTR(VERSION_PATCH)
+#define VERSION_FULL_CONFIG VERSION_NUMBER "." VERSION_STATUS
+#define VERSION_FULL_BUILD VERSION_FULL_CONFIG "." VERSION_BUILD
+#define VERSION_FULL_NAME VERSION_NAME " v" VERSION_FULL_BUILD
+
+extern const char* const VERSION_HASH;

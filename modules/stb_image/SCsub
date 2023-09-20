@@ -1,0 +1,10 @@
+Import("env")
+Import("env_modules")
+
+env_stb_image = env_modules.Clone()
+if "-Werror" in env_stb_image["CCFLAGS"]:
+    env_stb_image["CCFLAGS"].remove("-Werror")
+
+
+env_stb_image.add_source_files(env.modules_sources, "*.cpp")
+env.Append(CPPPATH=["#modules/stb_image"])
