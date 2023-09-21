@@ -10,6 +10,8 @@
 #include <optional>
 #include <vector>
 
+namespace RCalc {
+
 struct AppConfig {
     bool quiet = false;
     bool verbose = false;
@@ -17,10 +19,12 @@ struct AppConfig {
 
 class Application {
 public:
-    static void run(Platform& platform, AppConfig config);
+    static void step();
 
 private:
-    void _run(Platform& platform);
+    static Application singleton;
+    void _step();
+
     void process_input();
     std::string display_number(double number);
     std::optional<std::string> parse_command();
@@ -86,3 +90,5 @@ private:
         return StackPopResult<count>{ values, std::nullopt, false };
     }
 };
+
+}

@@ -1,37 +1,11 @@
 #include "core/logger.h"
 #include "core/version.h"
-#include "modules/register_modules.h"
 #include "main/main.h"
 
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
 #include <string_view>
 
-int main(int argc, char** pp_argv)
-{
-    Main m;
 
-    // parse_args will configure the logger (silent/normal/verbose), which may be used by modules during init
-    AppConfig config = m.parse_args(argc, pp_argv);
-    initialize_modules();
-    
-    // I should really add a to_string method to Err
-    Result<> res = m.run(config);
-    if (!res)
-    {
-        std::stringstream ss;
-        ss << res.unwrap_err();
-        Logger::log_err("%s", ss.str().c_str());
-    }
-
-    cleanup_modules();
-
-    return res ? 0 : 255;
-}
-
-
-AppConfig Main::parse_args(int argc, char** pp_argv)
+void Main::parse_args(int argc, char** pp_argv)
 {
     p_name = pp_argv[0];
     std::vector<std::string_view> args;
@@ -42,20 +16,13 @@ AppConfig Main::parse_args(int argc, char** pp_argv)
         args.emplace_back(pp_argv[idx]);
     }
 
-    return parse_args_internal(args);
-}
+    RCalc::AppConfig config = parse_args_internal(args);
 
-
-Result<> Main::run(AppConfig config)
-{
-    Platform& platform = Platform::get_singleton();
-    Result<> res = platform.init();
-    if (res)
-    {
-        Application::run(platform, config);
+    if (config.quiet) {
+        Logger::configure(Logger::LOG_ERROR);
+    } else if (config.verbose) {
+        Logger::configure(Logger::LOG_VERBOSE);
     }
-    platform.cleanup();
-    return res;
 }
 
 
@@ -92,9 +59,9 @@ void Main::print_version()
 }
 
 
-AppConfig Main::parse_args_internal(const std::vector<std::string_view>& args)
+RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& args)
 {
-    AppConfig config{};
+    RCalc::AppConfig config{};
 
     for (auto arg = args.begin(); arg < args.end(); arg++)
     {

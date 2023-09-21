@@ -11,9 +11,11 @@ public:
     static Platform& get_singleton() { return *singleton; }
 
     virtual Result<> init() = 0;
+    virtual void runloop() = 0;
+    virtual void cleanup() = 0;
+
     virtual void start_frame() = 0;
     virtual void render_frame() = 0;
-    virtual void cleanup() = 0;
 
     virtual void copy_to_clipboard(const std::string& string) = 0;
 

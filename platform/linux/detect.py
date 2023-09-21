@@ -7,6 +7,9 @@ def get_name():
 
 
 def is_available():
+    if os.name != "posix" or sys.platform == "darwin":
+        return False
+    
     if os.system("pkg-config --version > /dev/null"):
         print("Error: pkg-config not found. Linux platform is unavailable.")
         return False
@@ -90,5 +93,3 @@ def configure(env: "Environment"):
     
 
     env.Append(IMGUI_BACKEND="glfw_opengl3")
-
-    env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])

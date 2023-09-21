@@ -4,6 +4,8 @@ _RCALC_PLATFORM_IMPL(PlatformLinux);
 
 #include "core/logger.h"
 
+#include "app/application.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -57,6 +59,26 @@ Result<> PlatformLinux::init() {
     return Ok();
 }
 
+
+void PlatformLinux::runloop() {
+    while (!close_requested) {
+        start_frame();
+        RCalc::Application::step();
+        render_frame();
+    }
+}
+
+
+void PlatformLinux::cleanup() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(p_window);
+    glfwTerminate();
+}
+
+
 void PlatformLinux::start_frame() {
     close_requested = glfwWindowShouldClose(p_window);
 
@@ -79,16 +101,6 @@ void PlatformLinux::render_frame() {
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(p_window);
-}
-
-
-void PlatformLinux::cleanup() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glfwDestroyWindow(p_window);
-    glfwTerminate();
 }
 
 
