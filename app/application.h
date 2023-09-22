@@ -3,6 +3,8 @@
 #include "core/logger.h"
 #include "platform/platform.h"
 #include "imgui.h"
+#include "stack.h"
+#include "renderer.h"
 
 #include <array>
 #include <format>
@@ -25,6 +27,14 @@ private:
     static Application singleton;
     void _step();
 
+    Application();
+
+    RPNStack stack;
+    Renderer renderer;
+
+    void on_renderer_submit_text(const std::string& str) {}
+    void on_renderer_submit_operator(const std::string& str) {}
+/*
     void process_input();
     std::string display_number(double number);
     std::optional<std::string> parse_command();
@@ -88,7 +98,7 @@ private:
         }
 
         return StackPopResult<count>{ values, std::nullopt, false };
-    }
+    }*/
 };
 
 }

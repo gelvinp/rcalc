@@ -27,7 +27,20 @@ namespace RCalc {
 Application Application::singleton;
 void Application::step() { singleton._step(); }
 
+Application::Application() :
+    renderer(Renderer(
+        std::bind(&Application::on_renderer_submit_text, this, std::placeholders::_1),
+        std::bind(&Application::on_renderer_submit_operator, this, std::placeholders::_1))
+) {}
+
 void Application::_step() {
+    std::vector<RenderItem> render_items;
+    for (const StackItem& item : stack.get_items()) {
+        render_items.emplace_back(item.input, item.output);
+    }
+    renderer.render(render_items);
+}
+    /*
     Platform& platform = Platform::get_singleton();
 
     // Fullscreen window
@@ -295,5 +308,5 @@ void Application::StackItem::recalculate_size() {
         display_height = input_actual_size.y;
     }
 }
-
+*/
 }

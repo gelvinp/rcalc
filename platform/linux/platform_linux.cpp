@@ -104,6 +104,6 @@ void PlatformLinux::render_frame() {
 }
 
 
-void PlatformLinux::copy_to_clipboard(const std::string& string) {
-    glfwSetClipboardString(p_window, string.c_str());
+void PlatformLinux::copy_to_clipboard(const std::string_view& string) {
+    glfwSetClipboardString(p_window, string.data());
 }

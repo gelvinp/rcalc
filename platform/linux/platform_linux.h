@@ -11,7 +11,7 @@ public:
     virtual void start_frame() override;
     virtual void render_frame() override;
 
-    virtual void copy_to_clipboard(const std::string& string) override;
+    virtual void copy_to_clipboard(const std::string_view& string) override;
 
 private:
     GLFWwindow* p_window;

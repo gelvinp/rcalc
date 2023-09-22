@@ -17,7 +17,7 @@ public:
     virtual void start_frame() = 0;
     virtual void render_frame() = 0;
 
-    virtual void copy_to_clipboard(const std::string& string) = 0;
+    virtual void copy_to_clipboard(const std::string_view& string) = 0;
 
     bool close_requested = false;
 
