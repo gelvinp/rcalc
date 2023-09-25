@@ -17,6 +17,11 @@ namespace RCalc {
 const float STACK_HORIZ_PADDING = 8.0;
 const float STACK_SCROLLBAR_COMPENSATION = 16.0;
 
+Renderer::Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) :
+    cb_submit_text(cb_submit_text), cb_submit_op(cb_submit_op) {
+        command_map = get_command_map<Renderer>();
+}
+
 void Renderer::render(std::vector<RenderItem>& items) {
     Platform& platform = Platform::get_singleton();
 
@@ -272,6 +277,16 @@ int Renderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_
     p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
     self->scratchpad_needs_clear = false;
     return 0;
+}
+
+
+bool Renderer::try_renderer_command(const std::string& str) {
+    if (command_map.contains(str)) {
+        command_map.at(str)->execute(*this);
+        return true;
+    }
+
+    return false;
 }
 
 

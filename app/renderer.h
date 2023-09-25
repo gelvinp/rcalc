@@ -2,6 +2,7 @@
 
 #include "stack.h"
 #include "imgui.h"
+#include "app/commands/commands.h"
 
 #include <functional>
 #include <string>
@@ -28,7 +29,7 @@ public:
     typedef std::function<void(const std::string&)> SubmitTextCallback;
     typedef std::function<void(const std::string&)> SubmitOperatorCallback;
 
-    Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) : cb_submit_text(cb_submit_text), cb_submit_op(cb_submit_op) {}
+    Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
 
     void render(std::vector<RenderItem>& items);
     void submit_scratchpad();
@@ -36,11 +37,14 @@ public:
     void display_info(const std::string& str);
     void display_error(const std::string& str);
 
-    bool try_renderer_command(const std::string& str) { (void)(str); return false; }
+    bool try_renderer_command(const std::string& str);
+
+    REGISTER_COMMAND(Renderer, Help);
 
 private:
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
+    CommandMap<Renderer> command_map;
 
     std::string message;
     bool message_is_error = false;

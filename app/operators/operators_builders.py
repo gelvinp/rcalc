@@ -5,6 +5,7 @@ from string import ascii_lowercase, digits
 
 class OperatorMapBuilder:
     State = Enum('State', ['WAITING', 'WAITING_NAME', 'CAPTURING', 'ERROR'])
+    included_requires = []
 
     class Operator:
         included_filenames = []
@@ -19,30 +20,30 @@ class OperatorMapBuilder:
             
             def render(self, name, first):
                 lines = [
-                    f"{'if' if first else 'else if'} (types == \"{self._render_types()}\") {{",
-                    f"values = stack.pop_items({len(self.types)});"
+                    f"\t{'if' if first else 'else if'} (types == \"{self._render_types()}\") {{",
+                    f"\t\tvalues = stack.pop_items({len(self.types)});"
                 ]
 
                 arg_names = []
                 for type in self.types:
                     arg_name = f"arg{len(arg_names)}"
-                    lines.append(f"{type} {arg_name} = values[{len(arg_names)}].result;")
+                    lines.append(f"\t\t{type} {arg_name} = values[{len(arg_names)}].result;")
                     arg_names.append(arg_name)
                 
                 if 'stack_ref' in self.tags:
                     arg_names.insert(0, "stack")
                 
                 lines.extend([
-                    f"res = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
-                    "}",
+                    f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                    "\t}",
                 ])
 
                 if 'reversable' in self.tags:
                     self.types.reverse()
 
                     lines.extend([
-                        f"else if (types == \"{self._render_types()}\") {{",
-                        f"values = stack.pop_items({len(self.types)});"
+                        f"\telse if (types == \"{self._render_types()}\") {{",
+                        f"\t\tvalues = stack.pop_items({len(self.types)});"
                     ])
 
                     self.types.reverse()
@@ -51,15 +52,15 @@ class OperatorMapBuilder:
                     arg_names = []
                     for type in self.types:
                         arg_name = f"arg{len(arg_names)}"
-                        lines.append(f"{type} {arg_name} = values[{offset - len(arg_names)}].result;")
+                        lines.append(f"\t\t{type} {arg_name} = values[{offset - len(arg_names)}].result;")
                         arg_names.append(arg_name)
                 
                     if 'stack_ref' in self.tags:
                         arg_names.insert(0, "stack")
 
                     lines.extend([
-                        f"res = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
-                        "}",
+                        f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                        "\t}",
                     ])
 
                 return lines
@@ -70,21 +71,28 @@ class OperatorMapBuilder:
         def __init__(self, filename):
             self.parameter_count = None
             self.calls = []
+            self.type_sets = []
             self.description = ""
-            self.filename = filename
+            self.filenames = [filename]
             
         def render(self, name):
-            lines = []
+            lines = [f'/* Operator {name} */', '']
             
-            if not self.filename in self.__class__.included_filenames:
-                lines.append(f"#include \"{self.filename}\"")
-                self.__class__.included_filenames.append(self.filename)
+            included = False
+            for filename in self.filenames:
+                if not filename in self.__class__.included_filenames:
+                    lines.append(f"#include \"{filename}\"")
+                    self.__class__.included_filenames.append(filename)
+                    included = True
+            
+            if included:
+                lines.append('')
             
             lines.extend([
                 f"Result<> OP_Eval_{name}(RPNStack& stack) {{",
-                f"std::string types = stack.peek_types({self.parameter_count});",
-                "std::vector<StackItem> values;",
-                "Result<Value> res = Ok(Value());"
+                f"\tstd::string types = stack.peek_types({self.parameter_count});",
+                "\tstd::vector<StackItem> values;",
+                "\tResult<Value> res = Ok(Value());", ""
             ])
 
             first = True
@@ -108,25 +116,29 @@ class OperatorMapBuilder:
                     call_types.append(f"{{{', '.join(types)}}}")
 
             lines.extend([
-                f"else {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}",
-                "if (!res) { return res.unwrap_err(); }",
-                "Value value = res.unwrap_move(std::move(res));",
-                "stack.push_item(StackItem{",
-                f"OP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count)])}),",
-                "value.to_string(),",
-                "std::move(value),",
-                "true",
-                "});",
-                "return Ok();",
-                "}",
+                f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',
+                "\tif (!res) { return res.unwrap_err(); }",
+                "\tValue value = res.unwrap_move(std::move(res));", '',
+                "\tstack.push_item(StackItem{",
+                f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count)])}),",
+                "\t\tvalue.to_string(),",
+                "\t\tstd::move(value),",
+                "\t\ttrue",
+                "\t});", '',
+                "\treturn Ok();",
+                "}", '',
                 f"Operator OP_{name} {{",
-                f'"{name}",',
-                f'"{self.description}",',
-                f'{self.parameter_count},',
-                f'OP_Eval_{name},',
-                f"{{{', '.join(call_types)}}}"
-                "};"
+                f'\t"{name}",',
+                f'\t"{self.description}",',
+                f'\t{self.parameter_count},',
+                f'\tOP_Eval_{name},',
+                '\t{'
             ])
+
+            for call_type in call_types:
+                lines.append(f"\t\t{call_type},")
+            
+            lines.extend(['\t}', '};'])
 
             return lines
 
@@ -138,6 +150,7 @@ class OperatorMapBuilder:
         self.operators = {}
         self.line_no = 1
         self.filename = ""
+        self.requires = []
     
 
     def process_file(self, path):
@@ -154,26 +167,37 @@ class OperatorMapBuilder:
 
     def build(self):
         lines = [
-            "/* THIS FILE IS GENERATED DO NOT EDIT */",
+            "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"operators.h\"",
-            "#include \"operators_internal.h\"",
-            "namespace RCalc::Operators {"
+            "#include \"operators_internal.h\"", ""
         ]
+
+        included = False
+        for requires in self.requires:
+            if not requires in self.__class__.included_requires:
+                lines.append(f'#include "{requires}"')
+                self.__class__.included_requires.append(requires)
+                included = True
+        
+        if included:
+            lines.append('')
+        
+        lines.extend(["namespace RCalc::Operators {", ""])
 
         for [name, operator] in self.operators.items():
             lines.extend(operator.render(name))
         
         lines.extend([
-            "}",
+            "}", '',
             "RCalc::OperatorMap RCalc::get_operator_map() {",
-            "OperatorMap map{};"
+            "\tOperatorMap map{};", ''
         ])
 
         for [name, operator] in self.operators.items():
-            lines.append(f'map.emplace("{self._filter_name(name)}", &Operators::OP_{name});')
+            lines.append(f'\tmap.emplace("{self._filter_name(name)}", &Operators::OP_{name});')
         
-        lines.extend([
-            "return map;",
+        lines.extend(['',
+            "\treturn map;",
             "}"
         ])
 
@@ -212,7 +236,9 @@ class OperatorMapBuilder:
             self.current_name = name
             self.state = self.State.CAPTURING
 
-            if not name in self.operators:
+            if name in self.operators:
+                self.operators[name].filenames.append(self.filename)
+            else:
                 self.operators[name] = self.Operator(self.filename)
         else:
             self._set_error("Name must be the first statement in an operator!")
@@ -220,8 +246,17 @@ class OperatorMapBuilder:
     
     def _process_line_capturing(self, line):
         if not line.startswith("// "):
-            self.state = self.State.WAITING
-            self.operators[self.current_name].calls.append(self.current_call)
+            if self.current_call.types in self.operators[self.current_name].type_sets:
+                self._set_error(f"Operator {self.current_name} cannot redeclare types [{', '.join(self.current_call.types)}]")
+            else:
+                self.state = self.State.WAITING
+                self.operators[self.current_name].calls.append(self.current_call)
+                self.operators[self.current_name].type_sets.append(self.current_call.types)
+
+                if 'reversable' in self.current_call.tags:
+                    rev = self.current_call.types.copy()
+                    rev.reverse()
+                    self.operators[self.current_name].type_sets.append(rev)
             return
         
         self._process_statement(line[3:])
@@ -244,6 +279,8 @@ class OperatorMapBuilder:
                 self._process_statement_description(statement_arg)
             case "Tags":
                 self._process_statement_tags(statement_arg)
+            case "Requires":
+                self._process_statement_requires(statement_arg)
             case _:
                 self._set_error(f"Statement type '{statement_type}' is unknown!")
     
@@ -290,11 +327,12 @@ class OperatorMapBuilder:
             self.current_call.tags.append(tag)
         else:
             self._set_error(f"Tag `{tag}` is unknown!")
+    
+    def _process_statement_requires(self, requires):
+        self.requires.append(requires)
 
 
 def make_operators_map(target, source, env):
-    print(f"Target: {target}")
-    print(f"Source: {source}")
     dst = target[0]
     builder = OperatorMapBuilder()
 

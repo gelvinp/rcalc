@@ -1,0 +1,52 @@
+# Application commands
+- Pop (Remove top element from stack) (Bind to delete)
+- Swap (Swap top 2 elements)
+- Copy (Copy top element from stack) (Bound to control c)
+- Dup (Duplicate the top element on the stack) (Bind to control d)
+
+# Renderer commands
+- Queer (Rainbow!)
+- Help (Ahhh!)
+
+# Operators
+- pow (Power of, int_int will be weird because float only)
+- sqrt, cbrt, sqr, cube (convenience)
+- abs (Absolute value)
+- neg (Negate, basically a mul -1)
+- quot (Integer quotient)
+- rem (floating point remainder)
+- mod (Modulus)
+- sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+- min (1 param, then pop that many off the stack, and push the minimum of those)
+- max (Similar but for max)
+- avg (Similar but take the average)
+- log (two params, log base value)
+- ln (log base e value)
+- exp (pow e value)
+- ceil, floor, trunc, round
+- sign (turn into -1, 0, or 1)
+
+# Vector operators
+- dot
+- cross
+- len
+- lensqr
+- add, (scalar)mul, (scalar)div, sub, neg, min, max, avg
+
+# Matrix operators
+- add, sub, (scalar) mul, (scalar)div, tpose, (vec)mul, (mat)mul
+- det (determinate)
+- transmat (Vec2 -> mat2 translation matrix, vec3 vec4 same)
+- scalemat (Vec2 -> mat2 scale matrix, vec3 vec4 same)
+- rotmat (scalar -> mat2 rotation matrix, vec3 -> mat3 rotation matrix)
+
+# Technical Debt
+- CommandsMap Generator
+- Find a BigInt
+- Vec2/3/4, Mat2/3/4
+- Find better font
+- Options, allow changing font scale, light mode / dark mode / read from system?
+- Arrow keys up and down to scroll scratchpad history
+- Tab autocomplete commands and operators (that are valid based on param types)
+- Refactor Renderer into ImGuiRenderer enabled at build time, allow runtime renderer selection
+- TUI Renderer
