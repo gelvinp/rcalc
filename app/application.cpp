@@ -24,22 +24,87 @@ Recognized operators:
 
 namespace RCalc {
 
-Application Application::singleton;
-void Application::step() { singleton._step(); }
-
 Application::Application() :
     renderer(Renderer(
         std::bind(&Application::on_renderer_submit_text, this, std::placeholders::_1),
         std::bind(&Application::on_renderer_submit_operator, this, std::placeholders::_1))
-) {}
+) {
+    renderer.display_info("Welcome to RCalc! Type \\help to see what commands and operators are supported.");
 
-void Application::_step() {
+    AppCommand quit_command = std::bind(&Application::appcmd_quit, this);
+    app_commands.insert_or_assign("\\quit", quit_command);
+    app_commands.insert_or_assign("\\q", quit_command);
+
+    AppCommand clear_command = std::bind(&Application::appcmd_clear, this);
+    app_commands.insert_or_assign("\\clear", clear_command);
+
+    op_map = get_operator_map();
+}
+
+void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {
         render_items.emplace_back(item.input, item.output);
     }
     renderer.render(render_items);
 }
+
+void Application::on_renderer_submit_text(const std::string& str) {
+    // If it starts with '\', it's a command
+    if (str.starts_with('\\')) {
+        if (try_application_command(str)) { return; }
+        if (renderer.try_renderer_command(str)) { return; }
+
+        const char* error_format = "Unknown command: '%s'";
+        int size = snprintf(nullptr, 0, error_format, str.c_str()) + 1;
+        std::string error;
+        error.resize(size);
+        snprintf(error.data(), error.size(), error_format, str.c_str());
+        renderer.display_error(error);
+        return;
+    }
+
+    // Try to parse as Value first
+    std::optional<Value> value = Value::parse(str);
+    if (value) {
+        stack.push_item(StackItem{str, value.value().to_string(), std::move(value.value()), false});
+        return;
+    }
+
+    // Try to parse as Operator second
+
+    if (on_renderer_submit_operator(str)) { return; }
+
+    // Unknown command!
+    const char* error_format = "Unknown operator: '%s'";
+    int size = snprintf(nullptr, 0, error_format, str.c_str()) + 1;
+    std::string error;
+    error.resize(size);
+    snprintf(error.data(), error.size(), error_format, str.c_str());
+    renderer.display_error(error);
+}
+
+
+bool Application::on_renderer_submit_operator(const std::string& str) {
+    if (op_map.contains(str)) {
+        Result<> res = op_map.at(str)->evaluate(stack);
+        if (!res) { renderer.display_error(res.unwrap_err().get_message()); }
+        return true;
+    }
+    return false;
+}
+
+
+bool Application::try_application_command(const std::string& str) {
+    if (app_commands.contains(str)) {
+        app_commands.at(str)();
+        return true;
+    }
+
+    return false;
+}
+
+
     /*
     Platform& platform = Platform::get_singleton();
 

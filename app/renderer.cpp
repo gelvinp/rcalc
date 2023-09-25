@@ -50,15 +50,32 @@ void Renderer::render(std::vector<RenderItem>& items) {
     
     ImVec2 window_size = ImGui::GetWindowSize();
     if (window_size.x != last_window_size.x || window_size.y != last_window_size.y) {
-        Logger::log_info("Resizing window: %fx%f", window_size.x, window_size.y);
-
         for (RenderItem& item : items) {
             item.recalculate_size();
+        }
+    } else {
+        for (RenderItem& item : items) {
+            if (item.input_display_width < 0.001) { item.recalculate_size(); }
         }
     }
     last_window_size = window_size;
 
     // Calculate heights
+    const auto [window_width, window_height] = ImGui::GetContentRegionMax();
+    const float padding = ImGui::GetStyle().ItemSpacing.y;
+
+    const float input_height = ImGui::GetFrameHeight();
+    const float input_position = window_height - input_height;
+
+    const float message_height = message.empty() ? 0.0 : ImGui::CalcTextSize(message.c_str(), nullptr, false, window_width).y;
+    const float message_padding = message.empty() ? 0.0 : padding;
+    const float message_position = input_position - message_height - padding;
+
+    const float separator_position = message_position - message_padding;
+
+    const float menu_bar_height = ImGui::GetCursorPosY();
+    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height;
+
     float desired_stack_height = 0.0;
     if (!items.empty()) {
         for (const RenderItem& item : items) {
@@ -68,17 +85,12 @@ void Renderer::render(std::vector<RenderItem>& items) {
         desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
     }
 
-    const float input_height = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-    const float max_stack_height = ImGui::GetContentRegionAvail().y - input_height - ImGui::GetStyle().ItemSpacing.y;
-
-    const float stack_height = std::min(max_stack_height, desired_stack_height);
-    const float stack_offset = max_stack_height - stack_height;
-    const float separator_size = stack_offset;
-
-    ImGui::BeginChild("##separator", ImVec2(0, separator_size));
-    ImGui::EndChild();
+    const float stack_height = std::min(available_stack_height, desired_stack_height);
+    const float stack_position = separator_position - stack_height - padding;
 
     if (!items.empty()) {
+        ImGui::SetCursorPosY(stack_position);
+
         if (ImGui::BeginChild("##stack", ImVec2(0, stack_height))) {
             int index = 0;
 
@@ -113,28 +125,49 @@ void Renderer::render(std::vector<RenderItem>& items) {
         ImGui::EndChild();
     }
 
+    // Separator
+
+    ImGui::SetCursorPosY(separator_position);
     ImGui::Separator();
+
+    // Message
+
+    if (!message.empty()) {
+        ImGui::SetCursorPosY(message_position);
+        
+        if (message_is_error) {
+            ImGui::PushStyleColor(ImGuiCol_Text, {1.0f, 0.0f, 0.0f, 1.0f});
+        }
+
+        ImGui::PushTextWrapPos(0.0f);
+        ImGui::TextUnformatted(message.c_str());
+        
+        if (message_is_error) {
+            ImGui::PopStyleColor();
+        }
+    }
 
     // Scratchpad
 
     ImGui::SetNextItemWidth(-FLT_MIN);
+    ImGui::SetCursorPosY(input_position);
     if (ImGui::InputText(
         "##input",
-        &scratchpad,
+        (char*)scratchpad.c_str(),
+        scratchpad.capacity() + 1,
         ImGuiInputTextFlags_EnterReturnsTrue
-        | ImGuiInputTextFlags_EscapeClearsAll)
+        | ImGuiInputTextFlags_EscapeClearsAll
+        | ImGuiInputTextFlags_CallbackCharFilter
+        | ImGuiInputTextFlags_CallbackResize
+        | ImGuiInputTextFlags_CallbackAlways,
+        &scratchpad_input_callback,
+        (void*)this)
     ) {
-        scratchpad = "";
-        scratchpad_needs_focus = true;
-        stack_needs_scroll_down = true;
+        submit_scratchpad();
     }
 
     ImGui::SetItemDefaultFocus();
-    
-    if (scratchpad_needs_focus) {
-        ImGui::SetKeyboardFocusHere(-1);
-        scratchpad_needs_focus = false;
-    }
+    ImGui::SetKeyboardFocusHere(-1);
 
     ImGui::End(); // Window
 
@@ -163,11 +196,90 @@ void Renderer::display_error(const std::string& str) {
 }
 
 
+void Renderer::submit_scratchpad() {
+    message = "";
+    std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
+    cb_submit_text(scratchpad);
+    scratchpad.clear();
+    stack_needs_scroll_down = true;
+}
+
+
+int Renderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    switch (p_cb_data->EventFlag) {
+        case ImGuiInputTextFlags_CallbackCharFilter:
+            return scratchpad_input_filter_callback(p_cb_data);
+        case ImGuiInputTextFlags_CallbackResize:
+            return scratchpad_input_resize_callback(p_cb_data);
+        case ImGuiInputTextFlags_CallbackAlways:
+            return scratchpad_input_always_callback(p_cb_data);
+        default:
+            return 0;
+    }
+}
+
+
+int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    Renderer* self = (Renderer*)p_cb_data->UserData;
+
+    // Check for basic arithmetic operators
+    switch ((char)p_cb_data->EventChar) {
+        case '+':
+            if (!self->scratchpad.empty()) {
+                self->submit_scratchpad();
+                self->scratchpad_needs_clear = true;
+            }
+            self->cb_submit_op("add");
+            return 1;
+        case '-':
+            if (!self->scratchpad.empty()) {
+                self->submit_scratchpad();
+                self->scratchpad_needs_clear = true;
+            }
+            self->cb_submit_op("sub");
+            return 1;
+        case '*':
+            if (!self->scratchpad.empty()) {
+                self->submit_scratchpad();
+                self->scratchpad_needs_clear = true;
+            }
+            self->cb_submit_op("mul");
+            return 1;
+        case '/':
+            if (!self->scratchpad.empty()) {
+                self->submit_scratchpad();
+                self->scratchpad_needs_clear = true;
+            }
+            self->cb_submit_op("div");
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+
+int Renderer::scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    Renderer* self = (Renderer*)p_cb_data->UserData;
+    self->scratchpad.resize(p_cb_data->BufTextLen);
+    p_cb_data->Buf = (char*)self->scratchpad.c_str();
+    return 0;
+}
+
+
+int Renderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    Renderer* self = (Renderer*)p_cb_data->UserData;
+    if (!self->scratchpad_needs_clear) { return 0; }
+    p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+    self->scratchpad_needs_clear = false;
+    return 0;
+}
+
+
 void RenderItem::recalculate_size() {
-    float available_width = ImGui::GetContentRegionAvail().x - STACK_HORIZ_PADDING - STACK_SCROLLBAR_COMPENSATION;
+    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_PADDING - STACK_SCROLLBAR_COMPENSATION;
 
     float output_max_size = available_width / 2.0;
-    float output_desired_size = ImGui::CalcTextSize(output.data()).x;
+    float output_desired_size = ImGui::CalcTextSize(output.data(), nullptr, false, -1).x;
     output_display_width = std::min(output_max_size, output_desired_size);
     ImVec2 output_actual_size = ImGui::CalcTextSize(output.data(), nullptr, false, output_display_width);
 

@@ -51,6 +51,9 @@ Result<> PlatformLinux::init() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
+    io.IniFilename = nullptr;
+    io.LogFilename = nullptr;    
+
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
@@ -61,9 +64,11 @@ Result<> PlatformLinux::init() {
 
 
 void PlatformLinux::runloop() {
+    RCalc::Application app;
+
     while (!close_requested) {
         start_frame();
-        RCalc::Application::step();
+        app.step();
         render_frame();
     }
 }

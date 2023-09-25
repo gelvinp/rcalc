@@ -11,16 +11,18 @@ namespace RCalc {
 
 struct StackItem {
     std::string input;
-    bool input_is_expression; // When composing inputs, expressions should be wrapped in ()'s
-
     std::string output;
     Value result;
+    bool input_is_expression; // When composing inputs, expressions should be wrapped in ()'s
+
+    std::string get_input_formatted() const; // Wraps with parenthesis if expression
 };
 
 class RPNStack {
 public:
     void push_item(StackItem&& item);
-    std::vector<Value::Type> peek_types(uint64_t count) const;
+    std::string peek_types(uint64_t count) const;
+    size_t size() const;
     std::vector<StackItem> pop_items(uint64_t count);
     void clear();
 

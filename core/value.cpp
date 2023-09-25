@@ -3,6 +3,7 @@
 #include "core/logger.h"
 
 #include <algorithm>
+#include <charconv>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -23,7 +24,7 @@ class Pool_##type { \
 public: \
     static uint64_t allocate(type value) { \
         if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '%s'!\n\tPool size: %d\tMarshall size: %d", typeid(type).name(), _pool.size(), _free.size()); \
+            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
             throw std::logic_error("Pool size mismatch, check log output for more information."); \
         } \
 \
@@ -31,11 +32,13 @@ public: \
         if (it != _free.end()) { \
             /* Reuse slot */ \
             *it = true; \
+            uint64_t index = static_cast<uint64_t>(it - _free.begin()); \
+            _pool[index] = value; \
             return static_cast<uint64_t>(it - _free.begin()); \
         } \
 \
         if (_pool.size() > std::numeric_limits<uint64_t>::max()) { \
-            Logger::log_err("Cannot allocate any more Values of type '%s'!", typeid(type).name()); \
+            Logger::log_err("Cannot allocate any more Values of type '" #type "'!"); \
             throw std::overflow_error("Value pool full, check log output for more information."); \
         } \
 \
@@ -48,15 +51,15 @@ public: \
 \
     static type get(uint64_t index) { \
         if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '%s'!\n\tPool size: %d\tMarshall size: %d", typeid(type).name(), _pool.size(), _free.size()); \
+            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
             throw std::logic_error("Pool size mismatch, check log output for more information."); \
         } \
         if (index >= _pool.size()) { \
-            Logger::log_err("Pool access out of bounds for type '%s'!\n\tPool size: %d\tAccessed index: %d", typeid(type).name(), _pool.size(), index); \
+            Logger::log_err("Pool access out of bounds for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
             throw std::logic_error("Pool free out of bounds, check log output for more information."); \
         } \
         if (_free[index] == false) { \
-            Logger::log_err("Pool use after free for type '%s'!\n\tPool size: %d\tAccessed index: %d", typeid(type).name(), _pool.size(), index); \
+            Logger::log_err("Pool use after free for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
             throw std::logic_error("Pool use after free, check log output for more information."); \
         } \
 \
@@ -65,15 +68,15 @@ public: \
 \
     static void free(uint64_t index) { \
         if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '%s'!\n\tPool size: %d\tMarshall size: %d", typeid(type).name(), _pool.size(), _free.size()); \
+            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
             throw std::logic_error("Pool size mismatch, check log output for more information."); \
         } \
         if (index >= _pool.size()) { \
-            Logger::log_err("Pool free out of bounds for type '%s'!\n\tPool size: %d\tFreed index: %d", typeid(type).name(), _pool.size(), index); \
+            Logger::log_err("Pool free out of bounds for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), index); \
             throw std::logic_error("Pool free out of bounds, check log output for more information."); \
         } \
         if (_free[index] == false) { \
-            Logger::log_err("Pool double free for type '%s'!\n\tPool size: %d\tFreed index: %d", typeid(type).name(), _pool.size(), index); \
+            Logger::log_err("Pool double free for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), index); \
             throw std::logic_error("Pool double free, check log output for more information."); \
         } \
 \
@@ -86,7 +89,7 @@ public: \
 \
         for (auto itd = it; itd < _free.end(); ++itd) { \
             if (*itd) { \
-                Logger::log_err("Pool shrink non-free value for type '%s'!\n\tPool size: %d\tFreed index: %d", typeid(type).name(), _pool.size(), itd - _free.begin()); \
+                Logger::log_err("Pool shrink non-free value for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), itd - _free.begin()); \
             } \
         } \
 \
@@ -112,11 +115,13 @@ public: \
         if (it != _free.end()) { \
             /* Reuse slot */ \
             *it = true; \
+            uint64_t index = static_cast<uint64_t>(it - _free.begin()); \
+            _pool[index] = value; \
             return static_cast<uint64_t>(it - _free.begin()); \
         } \
 \
         if (_pool.size() > std::numeric_limits<uint64_t>::max()) { \
-            Logger::log_err("Cannot allocate any more Values of type '%s'!", typeid(type).name()); \
+            Logger::log_err("Cannot allocate any more Values of type '" #type "'!"); \
             throw std::overflow_error("Value pool full, check log output for more information."); \
         } \
 \
@@ -132,7 +137,6 @@ public: \
     } \
 \
     static void free(uint64_t index) { \
-        if (_pool.size() != _free.size()) { \
         _free[index] = false; \
 \
         /* Attempt to shrink */ \
@@ -165,8 +169,8 @@ DEFINE_POOL(double);
 
 const char* type_names[Value::MAX_TYPE] = {
     "Int",
-    "Double",
     "BigInt",
+    "Real",
     "Vec2",
     "Vec3",
     "Vec4",
@@ -221,7 +225,7 @@ Value::operator int64_t() const {
     return std::bit_cast<int64_t>(data);
 }
 
-POOL_CONVERT(double, TYPE_DOUBLE);
+POOL_CONVERT(double, TYPE_REAL);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -235,7 +239,7 @@ POOL_CONVERT(double, TYPE_DOUBLE);
 
 Value::Value(int64_t value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
 
-POOL_CONSTRUCT(double, TYPE_DOUBLE);
+POOL_CONSTRUCT(double, TYPE_REAL);
 
 #undef POOL_CONSTRUCT
 
@@ -249,7 +253,7 @@ Value::~Value() {
     switch (type) {
         case TYPE_INT: { break; }
 
-        POOL_FREE(double, TYPE_DOUBLE)
+        POOL_FREE(double, TYPE_REAL)
 
         default: {
             Logger::log_err("Value of type %s not handled during free!", get_type_name());
@@ -283,16 +287,26 @@ Value& Value::operator=(Value&& value) {
 
 std::optional<Value> Value::parse(const std::string& str) {
     std::stringstream ss;
-    ss.str(str);
 
     // Try to parse as number first
 
     // Check for numeric prefixes
     if (str.starts_with("0x")) {
-        ss.flags(ss.flags() | std::ios_base::hex);
+        int64_t i_value;
+        auto [ptr, ec] = std::from_chars(str.data() + 2, str.data() + str.size(), i_value, 16);
+        if (ec == std::errc()) {
+            return Value(i_value);
+        }
     }
     else if (str.starts_with("0o")) {
-        ss.flags(ss.flags() | std::ios_base::oct);
+        int64_t i_value;
+        auto [ptr, ec] = std::from_chars(str.data() + 2, str.data() + str.size(), i_value, 8);
+        if (ec == std::errc()) {
+            return Value(i_value);
+        }
+    }
+    else {
+        ss << str;
     }
 
     double d;
@@ -323,4 +337,29 @@ Value Value::parse_numeric(const std::string& str, double value) {
 }
 
 #pragma endregion parse
+
+
+#pragma region to_string
+
+std::string Value::to_string() {
+    switch (type) {
+        case TYPE_INT: {
+            return std::to_string(operator int64_t());
+        }
+        case TYPE_REAL: {
+            const char* display_format = "%g";
+            const double value = operator double();
+            int size = snprintf(nullptr, 0, display_format, value) + 1;
+            std::string display;
+            display.resize(size);
+            snprintf(display.data(), display.size(), display_format, value);
+            return display;
+        }
+        default: {
+            return "Value to_string not implemented for type!";
+        }
+    }
+}
+
+#pragma endregion to_string
 }

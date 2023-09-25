@@ -31,9 +31,12 @@ public:
     Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) : cb_submit_text(cb_submit_text), cb_submit_op(cb_submit_op) {}
 
     void render(std::vector<RenderItem>& items);
+    void submit_scratchpad();
 
     void display_info(const std::string& str);
     void display_error(const std::string& str);
+
+    bool try_renderer_command(const std::string& str) { (void)(str); return false; }
 
 private:
     SubmitTextCallback cb_submit_text;
@@ -44,9 +47,14 @@ private:
 
     std::string scratchpad;
     ImVec2 last_window_size{};
-    bool scratchpad_needs_focus = true;
     bool stack_needs_scroll_down = false;
     bool last_entry_needs_copy = false;
+    bool scratchpad_needs_clear = false;
+
+    static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
 };
 
 }

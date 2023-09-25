@@ -21,7 +21,7 @@ namespace OkTypes
     {
     public:
         Ok(const T &ok) : data(ok) {}
-        Ok(T &&ok) : data(ok) {}
+        Ok(T &&ok) : data(std::move(ok)) {}
 
         const T &get() const & { return data; }
         T &&get() && { return std::move(data); }
@@ -125,7 +125,24 @@ public:
     }
 
     template <typename U = T>
-    typename std::enable_if<std::is_same<U, void>::value, U>::type unwrap() const
+    static typename std::enable_if<!std::is_same<U, void>::value, U&&>::type unwrap_move(Result<T>&& res)
+    {
+        if (res.data.index() == 0)
+        {
+            return std::get<OkTypes::Ok<U>>(std::move(res.data)).get();
+        }
+
+        std::cerr << "CRITICAL ERROR: Attempted to call unwrap() on an Err Result!\n";
+        throw ResultTypeMismatchException(false);
+    }
+
+    template <typename U = T>
+    typename std::enable_if<std::is_same<U, void>::value, U&&>::type unwrap() const
+    {
+    }
+
+    template <typename U = T>
+    static typename std::enable_if<std::is_same<U, void>::value, U>::type unwrap_move()
     {
     }
 

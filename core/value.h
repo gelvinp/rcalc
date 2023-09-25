@@ -8,14 +8,14 @@
 namespace RCalc {
 
 typedef int64_t Int;
-typedef double Double;
+typedef double Real;
 
 class Value {
 public:
     enum Type: uint8_t {
         TYPE_INT,
         TYPE_BIGINT,
-        TYPE_DOUBLE,
+        TYPE_REAL,
         TYPE_VEC2,
         TYPE_VEC3,
         TYPE_VEC4,
@@ -38,6 +38,9 @@ public:
     Value(int64_t value);
     Value(double value);
 
+    std::string to_string();
+
+    Value() = default;
     ~Value();
 
     // Delete copy constructors, specify move

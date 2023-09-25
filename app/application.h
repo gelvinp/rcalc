@@ -5,11 +5,14 @@
 #include "imgui.h"
 #include "stack.h"
 #include "renderer.h"
+#include "app/operators/operators.h"
 
 #include <array>
 #include <format>
+#include <functional>
 #include <string>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 namespace RCalc {
@@ -21,19 +24,24 @@ struct AppConfig {
 
 class Application {
 public:
-    static void step();
+    Application();
+    void step();
 
 private:
-    static Application singleton;
-    void _step();
-
-    Application();
 
     RPNStack stack;
     Renderer renderer;
+    OperatorMap op_map;
 
-    void on_renderer_submit_text(const std::string& str) {}
-    void on_renderer_submit_operator(const std::string& str) {}
+    void on_renderer_submit_text(const std::string& str);
+    bool on_renderer_submit_operator(const std::string& str);
+
+    typedef std::function<void()> AppCommand;
+    bool try_application_command(const std::string& str);
+    std::unordered_map<std::string, AppCommand> app_commands;
+
+    void appcmd_clear();
+    void appcmd_quit();
 /*
     void process_input();
     std::string display_number(double number);

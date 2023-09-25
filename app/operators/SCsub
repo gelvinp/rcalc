@@ -1,0 +1,21 @@
+Import("env")
+from glob import glob
+
+import operators_builders
+
+env.operator_sources = []
+
+env_ops = env.Clone()
+
+env_ops.Depends("#app/operators/operators.gen.cpp", glob("*.inc"))
+env_ops.Depends("#app/operators/operators.gen.cpp", "#app/operators/operators_builders.py")
+env_ops.CommandNoCache(
+    "#app/operators/operators.gen.cpp",
+    glob("*.inc"),
+    env.Run(operators_builders.make_operators_map, "Building operators map.")
+)
+
+env_ops.add_source_files(env.operator_sources, "*.cpp", True)
+
+lib = env_ops.add_library("operators", env.operator_sources)
+env.Prepend(LIBS=[lib])
