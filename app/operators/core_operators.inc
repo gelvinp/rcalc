@@ -117,7 +117,7 @@ RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
     }
 
     // No floating point, check for int64_t
-    if (value <= std::numeric_limits<int64_t>::max() && value >= std::numeric_limits<int64_t>::min()) {
+    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
         return Ok(Value(static_cast<int64_t>(value)));
     }
 
@@ -160,7 +160,7 @@ RCALC_OP_1(Sqr, Int, arg0) {
     }
 
     // No floating point, check for int64_t
-    if (value <= std::numeric_limits<int64_t>::max() && value >= std::numeric_limits<int64_t>::min()) {
+    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
         return Ok(Value(static_cast<int64_t>(value)));
     }
 
@@ -202,7 +202,7 @@ RCALC_OP_1(Cube, Int, arg0) {
     }
 
     // No floating point, check for int64_t
-    if (value <= std::numeric_limits<int64_t>::max() && value >= std::numeric_limits<int64_t>::min()) {
+    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
         return Ok(Value(static_cast<int64_t>(value)));
     }
 

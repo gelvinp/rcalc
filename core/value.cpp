@@ -338,7 +338,7 @@ Value Value::parse_numeric(const std::string& str, double value) {
     }
 
     // No floating point, check for int64_t
-    if (value <= std::numeric_limits<int64_t>::max() && value >= std::numeric_limits<int64_t>::min()) {
+    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
         return Value(static_cast<int64_t>(value));
     }
 

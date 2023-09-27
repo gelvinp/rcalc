@@ -16,6 +16,7 @@
 - exp (pow e value)
 - ceil, floor, trunc, round
 - sign (turn into -1, 0, or 1)
+- fact (factorial)
 
 # Vector operators
 - dot

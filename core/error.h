@@ -6,12 +6,6 @@
 #include <string>
 #include <variant>
 
-/*
-    This is largely ~~ripped off~~ inspired by https://github.com/oktal/result,
-    except instead of the Error type being a template as well, it's always my
-    custom Err class. Additionally, I didn't bother with map/and_then/etc...
-*/
-
 
 #pragma region Ok
 namespace OkTypes

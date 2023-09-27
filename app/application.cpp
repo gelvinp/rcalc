@@ -8,19 +8,6 @@
 #include <ranges>
 #include <sstream>
 
-const float STACK_HORIZ_PADDING = 8.0;
-const float STACK_SCROLLBAR_COMPENSATION = 16.0;
-
-const char* HELP_TEXT = R"helptext(
-Recognized commands:
-    \q \quit    Quit RCalc
-    \clear      Clear the stack
-    \help       Print this help message
-
-Recognized operators:
-    +, -, *, /  Operates on two parameters
-)helptext";
-
 
 namespace RCalc {
 
