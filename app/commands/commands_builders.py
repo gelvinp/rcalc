@@ -7,6 +7,7 @@ class CommandMapBuilder:
     State = Enum('State', ['WAITING', 'WAITING_NAME', 'WAITING_SCOPE', 'CAPTURING', 'ERROR'])
     included_requires = []
     included_filenames = []
+    seen_usages = []
 
     class Scope:
 
@@ -24,7 +25,7 @@ class CommandMapBuilder:
                     '\t{'
                 ]
 
-                lines.extend([f'\t\t"{usage}",' for usage in self.usages])
+                lines.extend([f'\t\t"\\\\{usage}",' for usage in self.usages])
 
                 lines.extend([
                     '\t}',
@@ -101,7 +102,7 @@ class CommandMapBuilder:
         included = False
         for requires in self.requires:
             if not requires in self.__class__.included_requires:
-                lines.append(f'#include "{requires}"')
+                lines.append(f'#include {requires}')
                 self.__class__.included_requires.append(requires)
                 included = True
         
@@ -226,7 +227,11 @@ class CommandMapBuilder:
         self.current_command.description = description
     
     def _process_statement_usage(self, usage):
-        self.current_command.usages.append(usage)
+        if usage in self.seen_usages:
+            self._set_error(f'Usage "{usage}" cannot be redefined!')
+        else:
+            self.seen_usages.append(usage)
+            self.current_command.usages.append(usage)
     
     def _process_statement_requires(self, requires):
         self.requires.append(requires)

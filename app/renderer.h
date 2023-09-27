@@ -52,7 +52,6 @@ private:
     std::string scratchpad;
     ImVec2 last_window_size{};
     bool stack_needs_scroll_down = false;
-    bool last_entry_needs_copy = false;
     bool scratchpad_needs_clear = false;
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);

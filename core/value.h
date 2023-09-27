@@ -50,6 +50,9 @@ public:
     Value(Value&& value);
     Value& operator=(Value&& value);
 
+    // Explicit copy
+    Value make_copy() const;
+
 private:
     Type type = TYPE_INT;
     uint64_t data = 0;

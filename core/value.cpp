@@ -287,32 +287,43 @@ Value& Value::operator=(Value&& value) {
 
 std::optional<Value> Value::parse(const std::string& str) {
     std::stringstream ss;
+    std::string_view sv(str.c_str(), str.length());
+    bool negate = false;
+
+    // Check for negate
+    if (str.starts_with('n')) {
+        negate = true;
+        sv = std::string_view(str.c_str() + 1, str.length() - 1);
+    }
 
     // Try to parse as number first
 
     // Check for numeric prefixes
-    if (str.starts_with("0x")) {
+    if (sv.starts_with("0x")) {
         int64_t i_value;
-        auto [ptr, ec] = std::from_chars(str.data() + 2, str.data() + str.size(), i_value, 16);
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 16);
         if (ec == std::errc()) {
+            if (negate) { i_value *= -1; }
             return Value(i_value);
         }
     }
-    else if (str.starts_with("0o")) {
+    else if (sv.starts_with("0o")) {
         int64_t i_value;
-        auto [ptr, ec] = std::from_chars(str.data() + 2, str.data() + str.size(), i_value, 8);
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 8);
         if (ec == std::errc()) {
+            if (negate) { i_value *= -1; }
             return Value(i_value);
         }
     }
     else {
-        ss << str;
+        ss << sv;
     }
 
     double d;
     ss >> d;
 
     if (ss && ss.eof()) {
+        if (negate) { d *= -1; }
         return parse_numeric(str, d);
     }
 
@@ -362,4 +373,24 @@ std::string Value::to_string() {
 }
 
 #pragma endregion to_string
+
+
+#pragma region copies
+
+Value Value::make_copy() const {
+    switch (type) {
+        case TYPE_INT: {
+            return Value(operator int64_t());
+        }
+        case TYPE_REAL: {
+            return Value(operator double());
+        }
+        default: {
+            Logger::log_err("Value make_copy not implemented for type!");
+            return Value((int64_t)0);
+        }
+    }
+}
+
+#pragma endregion copies
 }

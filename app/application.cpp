@@ -62,7 +62,7 @@ void Application::on_renderer_submit_text(const std::string& str) {
     // Try to parse as Value first
     std::optional<Value> value = Value::parse(str);
     if (value) {
-        stack.push_item(StackItem{str, value.value().to_string(), std::move(value.value()), false});
+        stack.push_item(StackItem{value.value().to_string(), value.value().to_string(), std::move(value.value()), false});
         return;
     }
 

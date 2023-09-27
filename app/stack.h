@@ -21,10 +21,13 @@ struct StackItem {
 class RPNStack {
 public:
     void push_item(StackItem&& item);
-    std::string peek_types(uint64_t count) const;
+    void push_items(std::vector<StackItem>&& items);
+
     size_t size() const;
-    std::vector<StackItem> pop_items(uint64_t count);
     void clear();
+
+    std::string peek_types(uint64_t count) const;
+    std::vector<StackItem> pop_items(uint64_t count);
 
     const std::vector<StackItem>& get_items() const;
 

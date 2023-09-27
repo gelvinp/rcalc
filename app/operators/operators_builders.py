@@ -1,6 +1,7 @@
 from glob import glob
 from enum import Enum
 from string import ascii_lowercase, digits
+import itertools
 
 
 class OperatorMapBuilder:
@@ -12,7 +13,7 @@ class OperatorMapBuilder:
 
         class Call:
             Types = ['Int', 'BigInt', 'Real', 'Vec2', 'Vec3', 'Vec4', 'Mat2', 'Mat3', 'Mat4']
-            Tags = ['reversable', 'stack_ref']
+            Tags = ['reversable', 'stack_ref', 'real_cast', 'no_expr']
 
             def __init__(self):
                 self.types = []
@@ -32,6 +33,9 @@ class OperatorMapBuilder:
                 
                 if 'stack_ref' in self.tags:
                     arg_names.insert(0, "stack")
+
+                if 'no_expr' in self.tags:
+                    lines.append("\t\texpression = false;")
                 
                 lines.extend([
                     f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
@@ -58,6 +62,9 @@ class OperatorMapBuilder:
                     if 'stack_ref' in self.tags:
                         arg_names.insert(0, "stack")
 
+                    if 'no_expr' in self.tags:
+                        lines.append("\t\texpression = false;")
+
                     lines.extend([
                         f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
                         "\t}",
@@ -67,6 +74,50 @@ class OperatorMapBuilder:
             
             def _render_types(self):
                 return "_".join(self.types)
+
+            def real_cast_get_typesets(self):
+                typesets = []
+                
+                for type in self.types:
+                    if type == 'Real':
+                        typesets.append(['Real', 'Int', 'BigInt'])
+                    else:
+                        typesets.append([type])
+                
+                return [list(x) for x in list(itertools.product(*typesets))]
+
+            def render_cast_to(self, name, cast_types):
+                lines = [
+                    f'\telse if (types == "{"_".join(cast_types)}") {{',
+                    f"\t\tvalues = stack.pop_items({len(self.types)});"
+                ]
+
+                arg_names = []
+                for type in cast_types:
+                    arg_name = f"arg{len(arg_names)}"
+                    if type == 'Real':
+                        lines.append(f"\t\tReal {arg_name} = values[{len(arg_names)}].result;")
+                    elif type == 'Int':
+                        lines.append(f"\t\tReal {arg_name} = (Real)(values[{len(arg_names)}].result.operator Int());")
+                    elif type == 'BigInt':
+                        lines.append(f'\t\tLogger::log_err("TODO: Implement BigInt in operator builder");')
+                        lines.append(f"\t\tReal {arg_name} = 0.0;")
+
+                    arg_names.append(arg_name)
+            
+                if 'stack_ref' in self.tags:
+                    arg_names.insert(0, "stack")
+
+                if 'no_expr' in self.tags:
+                    lines.append("\t\texpression = false;")
+
+                lines.extend([
+                    f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                    "\t}",
+                ])
+
+                return lines
+
 
         def __init__(self, filename):
             self.parameter_count = None
@@ -92,6 +143,7 @@ class OperatorMapBuilder:
                 f"Result<> OP_Eval_{name}(RPNStack& stack) {{",
                 f"\tstd::string types = stack.peek_types({self.parameter_count});",
                 "\tstd::vector<StackItem> values;",
+                "\tbool expression = true;"
                 "\tResult<Value> res = Ok(Value());", ""
             ])
 
@@ -102,28 +154,33 @@ class OperatorMapBuilder:
             
             call_types = []
             for call in self.calls:
-                types = []
-                for type in call.types:
-                    types.append(f'Value::TYPE_{type.upper()}')
-                call_types.append(f"{{{', '.join(types)}}}")
+                call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in call.types])}}}")
                 
                 if 'reversable' in call.tags:
-                    types = []
                     rev = call.types.copy()
                     rev.reverse()
-                    for type in rev:
-                        types.append(f'Value::TYPE_{type.upper()}')
-                    call_types.append(f"{{{', '.join(types)}}}")
+                    call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in rev])}}}")
+                
+                if 'real_cast' in call.tags:
+                    for typeset in call.real_cast_get_typesets():
+                        if typeset in self.type_sets:
+                            continue
+                        
+                        lines.extend(call.render_cast_to(name, typeset))
+                        call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
 
             lines.extend([
                 f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',
-                "\tif (!res) { return res.unwrap_err(); }",
+                "\tif (!res) {",
+                "\t\tstack.push_items(std::move(values));",
+                "\t\treturn res.unwrap_err();",
+                "\t}", '',
                 "\tValue value = res.unwrap_move(std::move(res));", '',
                 "\tstack.push_item(StackItem{",
                 f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count)])}),",
                 "\t\tvalue.to_string(),",
                 "\t\tstd::move(value),",
-                "\t\ttrue",
+                "\t\texpression",
                 "\t});", '',
                 "\treturn Ok();",
                 "}", '',
@@ -138,7 +195,7 @@ class OperatorMapBuilder:
             for call_type in call_types:
                 lines.append(f"\t\t{call_type},")
             
-            lines.extend(['\t}', '};'])
+            lines.extend(['\t}', '};', ''])
 
             return lines
 
@@ -175,7 +232,7 @@ class OperatorMapBuilder:
         included = False
         for requires in self.requires:
             if not requires in self.__class__.included_requires:
-                lines.append(f'#include "{requires}"')
+                lines.append(f'#include {requires}')
                 self.__class__.included_requires.append(requires)
                 included = True
         

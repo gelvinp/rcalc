@@ -37,20 +37,10 @@ void Renderer::render(std::vector<RenderItem>& items) {
         | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoSavedSettings
         | ImGuiWindowFlags_NoBackground
-        | ImGuiWindowFlags_MenuBar
     )) {
         ImGui::End();
         Logger::log_err("Failed to render window!");
         return;
-    }
-
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            ImGui::MenuItem("Copy Answer", "Ctrl+C", &last_entry_needs_copy);
-            ImGui::MenuItem("Quit", "Ctrl+Q", &platform.close_requested);
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
     }
     
     ImVec2 window_size = ImGui::GetWindowSize();
@@ -78,8 +68,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
 
     const float separator_position = message_position - message_padding;
 
-    const float menu_bar_height = ImGui::GetCursorPosY();
-    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height;
+    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding;
 
     float desired_stack_height = 0.0;
     if (!items.empty()) {
@@ -180,11 +169,13 @@ void Renderer::render(std::vector<RenderItem>& items) {
     if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
         platform.close_requested = true;
     }
-    if (last_entry_needs_copy || (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
-        last_entry_needs_copy = false;
+    if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_C)) {
         if (!items.empty()) {
             platform.copy_to_clipboard(items.back().output);
         }
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D)) {
+        cb_submit_text("\\dup");
     }
 }
 
@@ -202,6 +193,11 @@ void Renderer::display_error(const std::string& str) {
 
 
 void Renderer::submit_scratchpad() {
+    if (scratchpad.empty()) {
+        cb_submit_text("\\dup");
+        return;
+    }
+
     message = "";
     std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
     cb_submit_text(scratchpad);

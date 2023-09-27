@@ -9,6 +9,13 @@ void RPNStack::push_item(StackItem&& item) {
 }
 
 
+void RPNStack::push_items(std::vector<StackItem>&& items) {
+    for (auto it = items.rbegin(); it < items.rend(); ++it) {
+        stack.push_back(std::move(*it));
+    }
+}
+
+
 std::string RPNStack::peek_types(uint64_t count) const {
     uint64_t safe_count = std::min(count, stack.size());
 
@@ -56,5 +63,7 @@ std::string StackItem::get_input_formatted() const {
         return input;
     }
 }
+
+
 
 }

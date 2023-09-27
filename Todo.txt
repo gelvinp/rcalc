@@ -1,18 +1,9 @@
-# Application commands
-- Pop (Remove top element from stack) (Bind to delete)
-- Swap (Swap top 2 elements)
-- Copy (Copy top element from stack) (Bound to control c)
-- Dup (Duplicate the top element on the stack) (Bind to control d)
-
 # Renderer commands
 - Queer (Rainbow!)
 - Help (Ahhh!)
+- Options (screaming)
 
 # Operators
-- pow (Power of, int_int will be weird because float only)
-- sqrt, cbrt, sqr, cube (convenience)
-- abs (Absolute value)
-- neg (Negate, basically a mul -1)
 - quot (Integer quotient)
 - rem (floating point remainder)
 - mod (Modulus)
@@ -41,7 +32,6 @@
 - rotmat (scalar -> mat2 rotation matrix, vec3 -> mat3 rotation matrix)
 
 # Technical Debt
-- CommandsMap Generator
 - Find a BigInt
 - Vec2/3/4, Mat2/3/4
 - Find better font
@@ -50,3 +40,5 @@
 - Tab autocomplete commands and operators (that are valid based on param types)
 - Refactor Renderer into ImGuiRenderer enabled at build time, allow runtime renderer selection
 - TUI Renderer
+- Something fucky wucky with rendering absolute values of negative numbers (left column)
+- Use a perfect hash generator for operator and command maps
