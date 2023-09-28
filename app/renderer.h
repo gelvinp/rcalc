@@ -21,7 +21,7 @@ struct RenderItem {
     RenderItem(std::string_view input, std::string_view output)
         : input(input), output(output) {}
 
-    void recalculate_size();
+    void recalculate_size(bool scrollbar_visible = false);
 };
 
 class Renderer {
@@ -53,6 +53,9 @@ private:
     ImVec2 last_window_size{};
     bool stack_needs_scroll_down = false;
     bool scratchpad_needs_clear = false;
+    bool scratchpad_needs_focus = true;
+    bool copy_requested = false;
+    bool scrollbar_visible = false;
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);

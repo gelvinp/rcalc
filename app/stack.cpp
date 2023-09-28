@@ -1,5 +1,6 @@
 #include "stack.h"
 
+#include <string>
 #include <sstream>
 
 namespace RCalc {
@@ -54,7 +55,6 @@ void RPNStack::clear() {
 
 
 const std::vector<StackItem>& RPNStack::get_items() const { return stack; }
-
 
 std::string StackItem::get_input_formatted() const {
     if (input_is_expression) {

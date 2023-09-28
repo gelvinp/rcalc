@@ -2,6 +2,7 @@
 #include "core/version.h"
 #include "main/main.h"
 
+#include <iostream>
 #include <string_view>
 
 

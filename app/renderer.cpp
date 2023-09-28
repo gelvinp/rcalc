@@ -14,8 +14,8 @@
 
 namespace RCalc {
 
-const float STACK_HORIZ_PADDING = 8.0;
-const float STACK_SCROLLBAR_COMPENSATION = 16.0;
+const float STACK_HORIZ_PADDING = 16.0;
+const float STACK_HORIZ_BIAS = 8.0;
 
 Renderer::Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) :
     cb_submit_text(cb_submit_text), cb_submit_op(cb_submit_op) {
@@ -42,6 +42,19 @@ void Renderer::render(std::vector<RenderItem>& items) {
         Logger::log_err("Failed to render window!");
         return;
     }
+
+    
+    if (platform.app_menu_bar()) {
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
+                ImGui::MenuItem("Quit", "Ctrl+Q", &platform.close_requested);
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+    }
+
     
     ImVec2 window_size = ImGui::GetWindowSize();
     if (window_size.x != last_window_size.x || window_size.y != last_window_size.y) {
@@ -50,13 +63,13 @@ void Renderer::render(std::vector<RenderItem>& items) {
         }
     } else {
         for (RenderItem& item : items) {
-            if (item.input_display_width < 0.001) { item.recalculate_size(); }
+            if (item.input_display_width < 0.001) { item.recalculate_size(scrollbar_visible); }
         }
     }
     last_window_size = window_size;
 
     // Calculate heights
-    const auto [window_width, window_height] = ImGui::GetContentRegionMax();
+    const auto [window_width, window_height] = ImGui::GetWindowContentRegionMax();
     const float padding = ImGui::GetStyle().ItemSpacing.y;
 
     const float input_height = ImGui::GetFrameHeight();
@@ -68,7 +81,8 @@ void Renderer::render(std::vector<RenderItem>& items) {
 
     const float separator_position = message_position - message_padding;
 
-    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding;
+    const float menu_bar_height = ImGui::GetCursorPosY();
+    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height;
 
     float desired_stack_height = 0.0;
     if (!items.empty()) {
@@ -79,7 +93,33 @@ void Renderer::render(std::vector<RenderItem>& items) {
         desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
     }
 
+    if ((desired_stack_height >= available_stack_height) && !scrollbar_visible) {
+        scrollbar_visible = true;
+        float desired_stack_height = 0.0;
+        if (!items.empty()) {
+            for (RenderItem& item : items) {
+                item.recalculate_size(true);
+                desired_stack_height += item.display_height;
+            }
+
+            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
+        }
+    }
+    else if ((desired_stack_height < available_stack_height) && scrollbar_visible) {
+        scrollbar_visible = false;
+        float desired_stack_height = 0.0;
+        if (!items.empty()) {
+            for (RenderItem& item : items) {
+                item.recalculate_size(false);
+                desired_stack_height += item.display_height;
+            }
+
+            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
+        }
+    }
+
     const float stack_height = std::min(available_stack_height, desired_stack_height);
+
     const float stack_position = separator_position - stack_height - padding;
 
     if (!items.empty()) {
@@ -89,7 +129,6 @@ void Renderer::render(std::vector<RenderItem>& items) {
             int index = 0;
 
             for (const RenderItem& item : items) {
-
                 ImGui::PushTextWrapPos(item.input_display_width);
                 ImGui::TextUnformatted(item.input.data());
                 ImGui::PopTextWrapPos();
@@ -99,7 +138,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
                 ImGui::TextUnformatted(item.output.data());
                 ImGui::PopTextWrapPos();
 
-                std::string item_id = std::format("##item-{:d}", index++); // TODO: Move away from format for compatibility with apple clang (unless sonoma fixes that?)
+                std::string item_id = std::format("##item-{:d}", index++); // TODO: Move away from format for compatibility with apple clang ~~(unless sonoma fixes that?)~~ (sobbing please tim apple just add std format to apple clang)
                 if (ImGui::BeginPopupContextItem(item_id.c_str())) {
                     if (ImGui::Button("Copy to Clipboard")) {
                         platform.copy_to_clipboard(item.output);
@@ -111,9 +150,10 @@ void Renderer::render(std::vector<RenderItem>& items) {
             }
         }
 
-        if (stack_needs_scroll_down) {
+        // Must do a complicated song and dance because UI is a nightmare
+        if (stack_needs_scroll_down && !scratchpad_needs_focus) {
             ImGui::SetScrollHereY(1.0);
-            stack_needs_scroll_down = false;
+            scratchpad_needs_focus = true;
         }
 
         ImGui::EndChild();
@@ -160,8 +200,19 @@ void Renderer::render(std::vector<RenderItem>& items) {
         submit_scratchpad();
     }
 
-    ImGui::SetItemDefaultFocus();
-    ImGui::SetKeyboardFocusHere(-1);
+    if (scratchpad_needs_focus) {
+        ImGui::SetKeyboardFocusHere(-1);
+        scratchpad_needs_focus = false;
+        stack_needs_scroll_down = false;
+    }
+
+    if (
+        !ImGui::IsAnyItemActive()
+        && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId)
+        && !stack_needs_scroll_down
+    ) {
+        ImGui::SetKeyboardFocusHere(-1);
+    }
 
     ImGui::End(); // Window
 
@@ -169,10 +220,11 @@ void Renderer::render(std::vector<RenderItem>& items) {
     if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
         platform.close_requested = true;
     }
-    if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_C)) {
+    if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
         if (!items.empty()) {
             platform.copy_to_clipboard(items.back().output);
         }
+        copy_requested = false;
     }
     if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D)) {
         cb_submit_text("\\dup");
@@ -193,16 +245,17 @@ void Renderer::display_error(const std::string& str) {
 
 
 void Renderer::submit_scratchpad() {
+    stack_needs_scroll_down = true;
+    message = "";
+
     if (scratchpad.empty()) {
         cb_submit_text("\\dup");
         return;
     }
 
-    message = "";
     std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
     cb_submit_text(scratchpad);
     scratchpad.clear();
-    stack_needs_scroll_down = true;
 }
 
 
@@ -286,15 +339,18 @@ bool Renderer::try_renderer_command(const std::string& str) {
 }
 
 
-void RenderItem::recalculate_size() {
-    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_PADDING - STACK_SCROLLBAR_COMPENSATION;
+void RenderItem::recalculate_size(bool scrollbar_visible) {
+    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_BIAS;
+    if (scrollbar_visible) {
+        available_width -= ImGui::GetStyle().ScrollbarSize;
+    }
 
-    float output_max_size = available_width / 2.0;
+    float output_max_size = available_width / 2.0 - STACK_HORIZ_PADDING;
     float output_desired_size = ImGui::CalcTextSize(output.data(), nullptr, false, -1).x;
     output_display_width = std::min(output_max_size, output_desired_size);
     ImVec2 output_actual_size = ImGui::CalcTextSize(output.data(), nullptr, false, output_display_width);
 
-    input_display_width = available_width - output_actual_size.x;
+    input_display_width = available_width - output_actual_size.x - STACK_HORIZ_PADDING;
     ImVec2 input_actual_size = ImGui::CalcTextSize(input.data(), nullptr, false, input_display_width);
     display_height = std::max(output_actual_size.y, input_actual_size.y);
 }

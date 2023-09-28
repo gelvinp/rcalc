@@ -1,8 +1,9 @@
 #pragma once
 
+#include "core/logger.h"
+
 #include <cstdio>
 #include <exception>
-#include <iostream>
 #include <string>
 #include <variant>
 
@@ -114,7 +115,7 @@ public:
             return std::get<OkTypes::Ok<U>>(data).get();
         }
 
-        std::cerr << "CRITICAL ERROR: Attempted to call unwrap() on an Err Result!\n";
+        Logger::log_err("CRITICAL ERROR: Attempted to call unwrap() on an Err Result!");
         throw ResultTypeMismatchException(false);
     }
 
@@ -126,7 +127,7 @@ public:
             return std::get<OkTypes::Ok<U>>(std::move(res.data)).get();
         }
 
-        std::cerr << "CRITICAL ERROR: Attempted to call unwrap() on an Err Result!\n";
+        Logger::log_err("CRITICAL ERROR: Attempted to call unwrap() on an Err Result!");
         throw ResultTypeMismatchException(false);
     }
 
@@ -158,7 +159,7 @@ public:
             return std::get<OkTypes::Ok<T>>(data).get();
         }
 
-        std::cerr << "CRITICAL ERROR: " << message << "\n";
+        Logger::log_err("CRITICAL ERROR: %s", message);
         throw ResultTypeMismatchException(false);
     }
 
@@ -174,7 +175,7 @@ public:
             return std::get<Err>(data);
         }
 
-        std::cerr << "CRITICAL ERROR: Attempted to call unwrap_err() on an Ok Result!\n";
+        Logger::log_err("CRITICAL ERROR: Attempted to call unwrap_err() on an Ok Result!");
         throw ResultTypeMismatchException(true);
     }
 

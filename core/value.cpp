@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <charconv>
+#include <cstring>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -361,10 +362,19 @@ std::string Value::to_string() {
             const char* display_format = "%g";
             const double value = operator double();
             int size = snprintf(nullptr, 0, display_format, value) + 1;
-            std::string display;
-            display.resize(size);
-            snprintf(display.data(), display.size(), display_format, value);
-            return display;
+            if (size <= 512) {
+                static char buf[512];
+                memset(&buf[0], 0, 512);
+                snprintf(&buf[0], 512, display_format, value);
+                return std::string(&buf[0]);
+            }
+            // I tried snprintf'ing directly into a string and it caused The Problems I don't feel like solving right now.
+            char* buf = (char*)malloc(sizeof(char) * size);
+            memset(&buf[0], 0, size);
+            snprintf(&buf[0], size, display_format, value);
+            std::string str(&buf[0]);
+            free(buf);
+            return str;
         }
         default: {
             return "Value to_string not implemented for type!";

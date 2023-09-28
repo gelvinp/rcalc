@@ -22,6 +22,7 @@ def get_opts():
 
     return [
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
+        BoolVariable("use_asan", "Compile with -fsanitize=address", False)
     ]
 
 
@@ -76,6 +77,10 @@ def configure(env: "Environment"):
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
 
+    if env["use_asan"]:
+        env.extra_suffix = ".asan" + env.extra_suffix
+        env.Append(CCFLAGS=["-fsanitize=address"])
+        env.Append(LINKFLAGS=["-fsanitize=address"])
 
     if os.system("pkg-config --exists glfw3 gl"):
         print("Error: X11 libraries not found. Aborting.")

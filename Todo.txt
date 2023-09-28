@@ -41,5 +41,4 @@
 - Tab autocomplete commands and operators (that are valid based on param types)
 - Refactor Renderer into ImGuiRenderer enabled at build time, allow runtime renderer selection
 - TUI Renderer
-- Something fucky wucky with rendering absolute values of negative numbers (left column)
 - Use a perfect hash generator for operator and command maps

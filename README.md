@@ -30,7 +30,6 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 ## Technical debt
  - [ ] Refactor renderer into buildtime-enabled, runtime-selected, inherited class
- - [ ] Figure out weird string cutoff behavior with floating point values
  - [ ] Use perfect hash generator for operator and command maps
  - [ ] Race condition in SCons when building operator and command maps
 
