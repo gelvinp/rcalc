@@ -15,7 +15,8 @@ env_cmd.CommandNoCache(
     env.Run(commands_builders.make_command_maps, "Building command maps.")
 )
 
-env_cmd.add_source_files(env.command_sources, "*.cpp", True)
+env_cmd.add_source_files(env.command_sources, "#app/commands/commands.gen.cpp")
+env_cmd.add_source_files(env.command_sources, "*.cpp")
 
 lib = env_cmd.add_library("commands", env.command_sources)
 env.Prepend(LIBS=[lib])

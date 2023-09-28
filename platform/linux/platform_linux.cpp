@@ -6,11 +6,11 @@ _RCALC_PLATFORM_IMPL(PlatformLinux);
 
 #include "app/application.h"
 
-#include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "main/app_icon.gen.h"
+#include "assets/app_icon.png.gen.h"
+#include "assets/B612Mono-Regular.ttf.gen.h"
 #include "stb_image.h"
 
 
@@ -37,7 +37,7 @@ Result<> PlatformLinux::init() {
 
     // Set app icon
     int x, y, n;
-    unsigned char* icon = stbi_load_from_memory(app_icon_png, sizeof(app_icon_png), &x, &y, &n, 4);
+    unsigned char* icon = stbi_load_from_memory(RCalc::Assets::app_icon_png, RCalc::Assets::app_icon_png_size, &x, &y, &n, 4);
     GLFWimage glfw_icon { 256, 256, icon };
     glfwSetWindowIcon(p_window, 1, &glfw_icon);
     stbi_image_free(icon);
@@ -52,7 +52,17 @@ Result<> PlatformLinux::init() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     io.IniFilename = nullptr;
-    io.LogFilename = nullptr;    
+    io.LogFilename = nullptr;
+
+    // Load font
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false;
+
+    glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    glyphs.AddText("⌈⌉⌊⌋");
+
+    glyphs.BuildRanges(&glyph_ranges);
+    p_font = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 16, &font_cfg, &glyph_ranges[0]);    
 
     ImGui::StyleColorsDark();
 

@@ -282,6 +282,16 @@ Value& Value::operator=(Value&& value) {
     return *this;
 }
 
+
+Value Value::find_int(double value) {
+    // No floating point, check for int64_t
+    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
+        return Value(static_cast<int64_t>(value));
+    }
+    Logger::log("TODO: Implement BigInt");
+    return Value((int64_t)0);
+}
+
 #pragma endregion constructors
 
 #pragma region parse

@@ -82,10 +82,11 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    if os.system("pkg-config --exists glfw3 gl"):
-        print("Error: X11 libraries not found. Aborting.")
+    deps = ['glfw3', 'gl', 'freetype2']
+    if os.system(f"pkg-config --exists {' '.join(deps)}"):
+        print("Error: Required libraries not found. Aborting.")
         sys.exit(255)
-    env.ParseConfig("pkg-config glfw3 gl --cflags --libs")
+    env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
 
     # Cross compilation
     host_is_64bit = sys.maxsize > 2**32

@@ -1,13 +1,14 @@
 Import("env")
 
-SConscript("operators/SCsub")
-SConscript("commands/SCsub")
-
 env.app_sources = []
 env_app = env.Clone()
 
 env_app.add_source_files(env.app_sources, "*.cpp", True)
 env_app.add_source_files(env.app_sources, "value/*.cpp", True)
+
+
+SConscript("operators/SCsub")
+SConscript("commands/SCsub")
 
 lib = env_app.add_library("app", env.app_sources)
 env.Prepend(LIBS=[lib])

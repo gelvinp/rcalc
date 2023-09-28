@@ -1,6 +1,7 @@
 #include "platform/platform.h"
 
 #include <GLFW/glfw3.h>
+#include "imgui.h"
 
 class PlatformLinux : public Platform {
 public:
@@ -16,4 +17,7 @@ public:
 
 private:
     GLFWwindow* p_window;
+    ImVector<ImWchar> glyph_ranges;
+    ImFontGlyphRangesBuilder glyphs;
+    ImFont* p_font;
 };

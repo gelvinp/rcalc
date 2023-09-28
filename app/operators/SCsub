@@ -15,7 +15,8 @@ env_ops.CommandNoCache(
     env.Run(operators_builders.make_operators_map, "Building operators map.")
 )
 
-env_ops.add_source_files(env.operator_sources, "*.cpp", True)
+env_ops.add_source_files(env.operator_sources, "#app/operators/operators.gen.cpp")
+env_ops.add_source_files(env.operator_sources, "*.cpp")
 
 lib = env_ops.add_library("operators", env.operator_sources)
 env.Prepend(LIBS=[lib])

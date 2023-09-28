@@ -11,12 +11,6 @@
 - min (1 param, then pop that many off the stack, and push the minimum of those)
 - max (Similar but for max)
 - avg (Similar but take the average)
-- log (two params, log base value)
-- ln (log base e value)
-- exp (pow e value)
-- ceil, floor, trunc, round
-- sign (turn into -1, 0, or 1)
-- fact (factorial)
 
 # Vector operators
 - dot

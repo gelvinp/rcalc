@@ -38,6 +38,8 @@ public:
     Value(int64_t value);
     Value(double value);
 
+    static Value find_int(double value);
+
     std::string to_string();
 
     Value() = default;

@@ -1,19 +1,10 @@
 Import("env")
 
-import main_builders
-
 env.main_sources = []
 
 env_main = env.Clone()
 
 env_main.add_source_files(env.main_sources, "*.cpp")
-
-env_main.Depends("#main/app_icon.gen.h", "#main/app_icon.png")
-env_main.CommandNoCache(
-    "#main/app_icon.gen.h",
-    "#main/app_icon.png",
-    env.Run(main_builders.make_app_icon, "Building application icon.")
-)
 
 lib = env_main.add_library("main", env.main_sources)
 env.Prepend(LIBS=[lib])

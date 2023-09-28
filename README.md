@@ -31,7 +31,6 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 ## Technical debt
  - [ ] Refactor renderer into buildtime-enabled, runtime-selected, inherited class
  - [ ] Use perfect hash generator for operator and command maps
- - [ ] Race condition in SCons when building operator and command maps
 
 
 ## Platform support
@@ -50,14 +49,15 @@ The following dependencies are required to build RCalc:
  - Python
  - SCons
  - pkg-config
- - glfw3 development headers
- - OpenGL development headers
+ - glfw3 + development headers
+ - OpenGL + development headers
+ - freetype2 + development headers
  - A version of GCC or clang that supports c++20
 
 For a debug build, run `scons` from the project root.
-For a release build, run `scons target=release` from the project root.
-If building with clang instead of GCC, use `scons use_llvm=yes`.
 
-Due to a race condition during build, if you get a linker error concerning
-`RCalc::get_command_map<...>()` or `RCalc::get_operator_map()`, just
-re-run scons.
+For a release build, run `scons target=release` from the project root.
+
+To build with clang instead of GCC, use `scons use_llvm=yes`.
+
+To build with asan, use `scons use_asan=yes`.

@@ -247,8 +247,10 @@ def make_command_maps(target, source, env):
     if builder.get_error() is not None:
         print(builder.get_error())
         return 255
+
+    built = builder.build()
     
     with open(dst, "w") as file:
-        file.write("\n".join(builder.build()))
+        file.write("\n".join(built))
     
     return 0

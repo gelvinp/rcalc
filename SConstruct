@@ -259,6 +259,7 @@ if selected_platform in available_platforms:
 
     Export("env")
 
+    SConscript("assets/SCsub")
     SConscript("core/SCsub")
     SConscript("modules/SCsub")
     SConscript("app/SCsub")
