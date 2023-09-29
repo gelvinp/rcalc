@@ -234,6 +234,9 @@ void Renderer::render(std::vector<RenderItem>& items) {
     if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D)) {
         cb_submit_text("\\dup");
     }
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+        cb_submit_text("\\pop");
+    }
 }
 
 

@@ -32,7 +32,6 @@ public:
     Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
 
     void render(std::vector<RenderItem>& items);
-    void submit_scratchpad();
 
     void display_info(const std::string& str);
     void display_error(const std::string& str);
@@ -56,6 +55,8 @@ private:
     bool scratchpad_needs_focus = true;
     bool copy_requested = false;
     bool scrollbar_visible = false;
+    
+    void submit_scratchpad();
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);
