@@ -3,7 +3,7 @@
 #include "core/logger.h"
 #include "platform/platform.h"
 
-#include "imgui_stdlib.h"
+#include "imgui_ext.h"
 
 #include <algorithm>
 #include <cmath>
@@ -136,10 +136,10 @@ void Renderer::render(std::vector<RenderItem>& items) {
                 ImGui::SameLine(item.input_display_width, STACK_HORIZ_PADDING);
                 ImGui::PushTextWrapPos(item.input_display_width + STACK_HORIZ_PADDING + item.output_display_width);
                 ImGui::TextUnformatted(item.output.data());
+                ImGui::EXT_SetIDForLastItem(index++);
                 ImGui::PopTextWrapPos();
 
-                std::string item_id = std::format("##item-{:d}", index++); // TODO: Move away from format for compatibility with apple clang ~~(unless sonoma fixes that?)~~ (sobbing please tim apple just add std format to apple clang)
-                if (ImGui::BeginPopupContextItem(item_id.c_str())) {
+                if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
                         platform.copy_to_clipboard(item.output);
                         ImGui::CloseCurrentPopup();
