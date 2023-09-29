@@ -59,7 +59,7 @@ Result<> PlatformLinux::init() {
     font_cfg.FontDataOwnedByAtlas = false;
 
     glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
-    glyphs.AddText("⌈⌉⌊⌋");
+    glyphs.AddText("⌈⌉⌊⌋°πτ");
 
     glyphs.BuildRanges(&glyph_ranges);
     p_font = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 16, &font_cfg, &glyph_ranges[0]);    

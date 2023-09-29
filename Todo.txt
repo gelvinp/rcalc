@@ -4,10 +4,6 @@
 - Options (screaming)
 
 # Operators
-- quot (Integer quotient)
-- rem (floating point remainder)
-- mod (Modulus)
-- sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
 - min (1 param, then pop that many off the stack, and push the minimum of those)
 - max (Similar but for max)
 - avg (Similar but take the average)
@@ -29,7 +25,6 @@
 # Technical Debt
 - Find a BigInt
 - Vec2/3/4, Mat2/3/4
-- Find better font
 - Options, allow changing font scale, light mode / dark mode / read from system?
 - Arrow keys up and down to scroll scratchpad history
 - Tab autocomplete commands and operators (that are valid based on param types)

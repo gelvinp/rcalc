@@ -2,7 +2,6 @@
 // Name: Add
 // Parameters: [Int, Int]
 // Description: Adds two values together.
-// Requires: "core/logger.h"
 RCALC_OP_2(Add, Int, Int, arg0, arg1) {
     return Ok(Value::find_int(arg0 + arg1));
 }
@@ -96,7 +95,7 @@ RCALC_OP_1(Abs, Real, arg0) {
 }
 
 RCALC_FMT_1(Abs, arg0) {
-    return "|" + arg0.get_input_formatted() + "|";
+    return "|" + arg0.input + "|";
 }
 
 

@@ -16,8 +16,8 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Mat2 / 3 / 4 datatypes                                        | Might not happen  |
 | Basic operators (add, sub, mul, div, neg, abs)                | Complete          |
 | Extended core operators (pow, log, ceil, sign, fact)          | Complete          |
-| Trig operators ({,a}{sin,cos,tan}{,h})                        | Not started       |
-| Floating point division (quot, rem, mod)                      | Not started       |
+| Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
+| Floating point division (quot, rem, mod)                      | Complete          |
 | Range operators (min, max, avg)                               | Not started       |
 | Vector operators                                              | Not started       |
 | Matrix operators                                              | Might not happen  |

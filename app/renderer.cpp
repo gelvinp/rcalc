@@ -159,6 +159,11 @@ void Renderer::render(std::vector<RenderItem>& items) {
         ImGui::EndChild();
     }
 
+    // Gets stuck when the stack is empty
+    if (stack_needs_scroll_down && !scratchpad_needs_focus) {
+        scratchpad_needs_focus = true;
+    }
+
     // Separator
 
     ImGui::SetCursorPosY(separator_position);

@@ -139,45 +139,64 @@ class OperatorMapBuilder:
             if included:
                 lines.append('')
             
-            lines.extend([
-                f"Result<> OP_Eval_{name}(RPNStack& stack) {{",
-                f"\tstd::string types = stack.peek_types({self.parameter_count});",
-                "\tstd::vector<StackItem> values;",
-                "\tbool expression = true;"
-                "\tResult<Value> res = Ok(Value());", ""
-            ])
-
-            first = True
-            for call in self.calls:
-                lines.extend(call.render(name, first))
-                first = False
-            
+            lines.append(f"Result<> OP_Eval_{name}(RPNStack& stack) {{")
             call_types = []
-            for call in self.calls:
-                call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in call.types])}}}")
+            
+            if self.parameter_count is None:
+                call = self.calls[0]
+                if 'stack_ref' in call.tags:
+                    lines.append(f"\tResult<Value> res = OP0S_{name}(stack);")
+                else:
+                    lines.append(f"\tResult<Value> res = OP0_{name}();")
                 
-                if 'reversable' in call.tags:
-                    rev = call.types.copy()
-                    rev.reverse()
-                    call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in rev])}}}")
+                if 'no_expr' in call.tags:
+                    lines.append("\tbool expression = false;")
+                else:
+                    lines.append("\tbool expression = true;")
                 
-                if 'real_cast' in call.tags:
-                    for typeset in call.real_cast_get_typesets():
-                        if typeset in self.type_sets:
-                            continue
-                        
-                        lines.extend(call.render_cast_to(name, typeset))
-                        call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+                lines.append("")
+            else:
+                lines.extend([
+                    f"\tstd::string types = stack.peek_types({self.parameter_count or 0});",
+                    "\tstd::vector<StackItem> values;",
+                    "\tbool expression = true;",
+                    "\tResult<Value> res = Ok(Value());", ""
+                ])
+
+                first = True
+                for call in self.calls:
+                    lines.extend(call.render(name, first))
+                    first = False
+                
+                for call in self.calls:
+                    call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in call.types])}}}")
+                    
+                    if 'reversable' in call.tags:
+                        rev = call.types.copy()
+                        rev.reverse()
+                        call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in rev])}}}")
+                    
+                    if 'real_cast' in call.tags:
+                        for typeset in call.real_cast_get_typesets():
+                            if typeset in self.type_sets:
+                                continue
+                            
+                            lines.extend(call.render_cast_to(name, typeset))
+                            call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+                
+                lines.extend([f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',])
+
+            lines.append("\tif (!res) {")
+
+            if self.parameter_count is not None:
+                lines.append("\t\tstack.push_items(std::move(values));")
 
             lines.extend([
-                f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',
-                "\tif (!res) {",
-                "\t\tstack.push_items(std::move(values));",
                 "\t\treturn res.unwrap_err();",
                 "\t}", '',
                 "\tValue value = res.unwrap_move(std::move(res));", '',
                 "\tstack.push_item(StackItem{",
-                f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count)])}),",
+                f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count or 0)])}),",
                 "\t\tvalue.to_string(),",
                 "\t\tstd::move(value),",
                 "\t\texpression",
@@ -187,7 +206,7 @@ class OperatorMapBuilder:
                 f"Operator OP_{name} {{",
                 f'\t"{name}",',
                 f'\t"{self.description}",',
-                f'\t{self.parameter_count},',
+                f'\t{self.parameter_count or 0},',
                 f'\tOP_Eval_{name},',
                 '\t{'
             ])
@@ -305,6 +324,9 @@ class OperatorMapBuilder:
         if not line.startswith("// "):
             if self.current_call.types in self.operators[self.current_name].type_sets:
                 self._set_error(f"Operator {self.current_name} cannot redeclare types [{', '.join(self.current_call.types)}]")
+            elif self.operators[self.current_name].parameter_count is None and len(self.operators[self.current_name].calls) != 0:
+                self._set_error("Operator {name} with no parameters may only have one implementation!")
+                return
             else:
                 self.state = self.State.WAITING
                 self.operators[self.current_name].calls.append(self.current_call)

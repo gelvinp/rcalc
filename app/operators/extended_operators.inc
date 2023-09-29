@@ -3,7 +3,6 @@
 // Parameters: [Int, Int]
 // Description: Raise arg0 to the power of arg1.
 // Requires: <cmath>
-// Requires: <limits>
 RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
     double value = std::pow(arg0, arg1);
 
@@ -40,7 +39,6 @@ RCALC_FMT_2(Pow, arg0, arg1) {
 // Parameters: [Int]
 // Description: Raise arg0 to the power of 2.
 // Requires: <cmath>
-// Requires: <limits>
 RCALC_OP_1(Sqr, Int, arg0) {
     double value = std::pow(arg0, 2.0);
 
@@ -76,7 +74,6 @@ RCALC_FMT_1(Sqr, arg0) {
 // Parameters: [Int]
 // Description: Raise arg0 to the power of 3.
 // Requires: <cmath>
-// Requires: <limits>
 RCALC_OP_1(Cube, Int, arg0) {
     double value = std::pow(arg0, 3.0);
 
@@ -124,7 +121,7 @@ RCALC_OP_1(Sqrt, Real, arg0) {
 }
 
 RCALC_FMT_1(Sqrt, arg0) {
-    return "sqrt(" + arg0.get_input_formatted() + ")";
+    return "sqrt(" + arg0.input + ")";
 }
 
 
@@ -145,7 +142,7 @@ RCALC_OP_1(Cbrt, Real, arg0) {
 }
 
 RCALC_FMT_1(Cbrt, arg0) {
-    return "cbrt(" + arg0.get_input_formatted() + ")";
+    return "cbrt(" + arg0.input + ")";
 }
 
 
@@ -160,7 +157,7 @@ RCALC_OP_2(Log, Real, Real, base, arg) {
 }
 
 RCALC_FMT_2(Log, base, arg) {
-    return "log_" + base.get_input_formatted() + "(" + arg.get_input_formatted() + ")";
+    return "log_" + base.get_input_formatted() + "(" + arg.input + ")";
 }
 
 
@@ -175,7 +172,7 @@ RCALC_OP_1(Ln, Real, arg) {
 }
 
 RCALC_FMT_1(Ln, arg) {
-    return "ln(" + arg.get_input_formatted() + ")";
+    return "ln(" + arg.input + ")";
 }
 
 
@@ -206,7 +203,7 @@ RCALC_OP_1(Ceil, Real, arg) {
 }
 
 RCALC_FMT_1(Ceil, arg) {
-    return "⌈" + arg.get_input_formatted() + "⌉";
+    return "⌈" + arg.input + "⌉";
 }
 
 
@@ -222,7 +219,7 @@ RCALC_OP_1(Floor, Real, arg) {
 }
 
 RCALC_FMT_1(Floor, arg) {
-    return "⌊" + arg.get_input_formatted() + "⌋";
+    return "⌊" + arg.input + "⌋";
 }
 
 
@@ -238,7 +235,7 @@ RCALC_OP_1(Trunc, Real, arg) {
 }
 
 RCALC_FMT_1(Trunc, arg) {
-    return "trunc(" + arg.get_input_formatted() + ")";
+    return "trunc(" + arg.input + ")";
 }
 
 
@@ -254,7 +251,7 @@ RCALC_OP_1(Round, Real, arg) {
 }
 
 RCALC_FMT_1(Round, arg) {
-    return "round(" + arg.get_input_formatted() + ")";
+    return "round(" + arg.input + ")";
 }
 
 
@@ -271,7 +268,7 @@ RCALC_OP_1(Sign, Real, arg) {
 }
 
 RCALC_FMT_1(Sign, arg) {
-    return "sign(" + arg.get_input_formatted() + ")";
+    return "sign(" + arg.input + ")";
 }
 
 
@@ -306,5 +303,44 @@ RCALC_OP_1(Gamma, Real, arg) {
 }
 
 RCALC_FMT_1(Gamma, arg) {
-    return "gamma(" + arg.get_input_formatted() + ")";
+    return "gamma(" + arg.input + ")";
+}
+
+
+// @RCalcOperator
+// Name: Quot
+// Parameters: [Int, Int]
+// Description: Computes the integer quotient when dividing arg0 by arg1.
+// Requires: <cstdlib>
+RCALC_OP_2(Quot, Int, Int, arg0, arg1) {
+    auto [quot, _rem] = std::div(arg0, arg1);
+    return Ok(Value((int64_t)quot));
+}
+
+RCALC_FMT_2(Quot, arg0, arg1) {
+    return arg0.get_input_formatted() + " //q " + arg1.get_input_formatted();
+}
+
+
+// @RCalcOperator
+// Name: Mod
+// Parameters: [Int, Int]
+// Description: Computes the remainder when dividing arg0 by arg1.
+// Requires: <cstdlib>
+RCALC_OP_2(Mod, Int, Int, arg0, arg1) {
+    auto [_quot, rem] = std::div(arg0, arg1);
+    return Ok(Value((int64_t)rem));
+}
+
+// @RCalcOperator
+// Name: Mod
+// Parameters: [Real, Real]
+// Tags: [real_cast]
+// Requires: <cstdlib>
+RCALC_OP_2(Mod, Real, Real, arg0, arg1) {
+    return Ok(Value(std::fmod(arg0, arg1)));
+}
+
+RCALC_FMT_2(Mod, arg0, arg1) {
+    return arg0.get_input_formatted() + " % " + arg1.get_input_formatted();
 }
