@@ -13,7 +13,7 @@ class OperatorMapBuilder:
 
         class Call:
             Types = ['Int', 'BigInt', 'Real', 'Vec2', 'Vec3', 'Vec4', 'Mat2', 'Mat3', 'Mat4']
-            Tags = ['reversable', 'stack_ref', 'real_cast', 'no_expr']
+            Tags = ['reversable', 'stack_ref', 'real_cast', 'no_expr', 'fmt_stack_ref']
 
             def __init__(self):
                 self.types = []
@@ -141,6 +141,8 @@ class OperatorMapBuilder:
             
             lines.append(f"Result<> OP_Eval_{name}(RPNStack& stack) {{")
             call_types = []
+
+            fmt_stack_ref = False
             
             if self.parameter_count is None:
                 call = self.calls[0]
@@ -167,6 +169,7 @@ class OperatorMapBuilder:
                 for call in self.calls:
                     lines.extend(call.render(name, first))
                     first = False
+                    fmt_stack_ref |= 'fmt_stack_ref' in call.tags
                 
                 for call in self.calls:
                     call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in call.types])}}}")
@@ -196,7 +199,14 @@ class OperatorMapBuilder:
                 "\t}", '',
                 "\tValue value = res.unwrap_move(std::move(res));", '',
                 "\tstack.push_item(StackItem{",
-                f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count or 0)])}),",
+            ])
+
+            if fmt_stack_ref:
+                lines.append(f"\t\tOPS_FormatInput_{name}(stack, {', '.join([f'values[{idx}]' for idx in range(self.parameter_count or 0)])}),")
+            else:
+                lines.append(f"\t\tOP_FormatInput_{name}({', '.join([f'values[{idx}]' for idx in range(self.parameter_count or 0)])}),")
+            
+            lines.extend([
                 "\t\tvalue.to_string(),",
                 "\t\tstd::move(value),",
                 "\t\texpression",

@@ -3,11 +3,6 @@
 - Help (Ahhh!)
 - Options (screaming)
 
-# Operators
-- min (1 param, then pop that many off the stack, and push the minimum of those)
-- max (Similar but for max)
-- avg (Similar but take the average)
-
 # Vector operators
 - dot
 - cross

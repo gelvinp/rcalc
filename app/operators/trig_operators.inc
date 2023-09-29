@@ -34,7 +34,7 @@ RCALC_FMT_1(Deg, arg) {
 // Requires: <numbers>
 // Tags: [no_expr]
 RCALC_OP_0(Pi) {
-    return Ok(Value(std::numbers::pi));
+    return Ok(Value(std::numbers::pi_v<Real>));
 }
 
 RCALC_FMT_0(Pi) {
@@ -48,7 +48,7 @@ RCALC_FMT_0(Pi) {
 // Requires: <numbers>
 // Tags: [no_expr]
 RCALC_OP_0(Tau) {
-    return Ok(Value(std::numbers::pi * 2.0));
+    return Ok(Value(std::numbers::pi_v<Real> * 2.0));
 }
 
 RCALC_FMT_0(Tau) {

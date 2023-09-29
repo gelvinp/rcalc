@@ -161,7 +161,7 @@ std::vector<bool> Pool_##type::_free;
 
 #pragma endregion pool_macro
 
-DEFINE_POOL(double);
+DEFINE_POOL(Real);
 
 #pragma endregion pool
 
@@ -221,12 +221,12 @@ Value::operator pool_type() const { \
     return Pool_##pool_type::get(data); \
 }
 
-Value::operator int64_t() const {
+Value::operator Int() const {
     ASSERT_TYPE(TYPE_INT);
-    return std::bit_cast<int64_t>(data);
+    return std::bit_cast<Int>(data);
 }
 
-POOL_CONVERT(double, TYPE_REAL);
+POOL_CONVERT(Real, TYPE_REAL);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -238,9 +238,9 @@ POOL_CONVERT(double, TYPE_REAL);
 
 #define POOL_CONSTRUCT(pool_type, enum_type) Value::Value(pool_type value) : type(enum_type), data(Pool_##pool_type::allocate(value)) {}
 
-Value::Value(int64_t value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
+Value::Value(Int value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
 
-POOL_CONSTRUCT(double, TYPE_REAL);
+POOL_CONSTRUCT(Real, TYPE_REAL);
 
 #undef POOL_CONSTRUCT
 
@@ -254,7 +254,7 @@ Value::~Value() {
     switch (type) {
         case TYPE_INT: { break; }
 
-        POOL_FREE(double, TYPE_REAL)
+        POOL_FREE(Real, TYPE_REAL)
 
         default: {
             Logger::log_err("Value of type %s not handled during free!", get_type_name());
@@ -283,13 +283,13 @@ Value& Value::operator=(Value&& value) {
 }
 
 
-Value Value::find_int(double value) {
+Value Value::find_int(Real value) {
     // No floating point, check for int64_t
-    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
-        return Value(static_cast<int64_t>(value));
+    if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
+        return Value(static_cast<Int>(value));
     }
     Logger::log("TODO: Implement BigInt");
-    return Value((int64_t)0);
+    return Value((Int)0);
 }
 
 #pragma endregion constructors
@@ -311,7 +311,7 @@ std::optional<Value> Value::parse(const std::string& str) {
 
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {
-        int64_t i_value;
+        Int i_value;
         auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 16);
         if (ec == std::errc()) {
             if (negate) { i_value *= -1; }
@@ -319,7 +319,7 @@ std::optional<Value> Value::parse(const std::string& str) {
         }
     }
     else if (sv.starts_with("0o")) {
-        int64_t i_value;
+        Int i_value;
         auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 8);
         if (ec == std::errc()) {
             if (negate) { i_value *= -1; }
@@ -330,7 +330,7 @@ std::optional<Value> Value::parse(const std::string& str) {
         ss << sv;
     }
 
-    double d;
+    Real d;
     ss >> d;
 
     if (ss && ss.eof()) {
@@ -341,7 +341,7 @@ std::optional<Value> Value::parse(const std::string& str) {
     return std::nullopt;
 }
 
-Value Value::parse_numeric(const std::string& str, double value) {
+Value Value::parse_numeric(const std::string& str, Real value) {
     // Check for floating point
     if (std::find(str.begin(), str.end(), '.') != str.end()) {
         // Contains a decimal separator, treat as float
@@ -349,13 +349,13 @@ Value Value::parse_numeric(const std::string& str, double value) {
     }
 
     // No floating point, check for int64_t
-    if (value <= (double)std::numeric_limits<int64_t>::max() && value >= (double)std::numeric_limits<int64_t>::min()) {
-        return Value(static_cast<int64_t>(value));
+    if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
+        return Value(static_cast<Int>(value));
     }
 
     // Too big, must use a BigInt
     Logger::log_err("TODO: BigInt");
-    return Value((int64_t)0);
+    return Value((Int)0);
 }
 
 #pragma endregion parse
@@ -366,11 +366,11 @@ Value Value::parse_numeric(const std::string& str, double value) {
 std::string Value::to_string() {
     switch (type) {
         case TYPE_INT: {
-            return std::to_string(operator int64_t());
+            return std::to_string(operator Int());
         }
         case TYPE_REAL: {
             const char* display_format = "%g";
-            const double value = operator double();
+            const Real value = operator Real();
             int size = snprintf(nullptr, 0, display_format, value) + 1;
             if (size <= 512) {
                 static char buf[512];
@@ -400,14 +400,14 @@ std::string Value::to_string() {
 Value Value::make_copy() const {
     switch (type) {
         case TYPE_INT: {
-            return Value(operator int64_t());
+            return Value(operator Int());
         }
         case TYPE_REAL: {
-            return Value(operator double());
+            return Value(operator Real());
         }
         default: {
             Logger::log_err("Value make_copy not implemented for type!");
-            return Value((int64_t)0);
+            return Value((Int)0);
         }
     }
 }

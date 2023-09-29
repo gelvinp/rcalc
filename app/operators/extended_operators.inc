@@ -4,7 +4,7 @@
 // Description: Raise arg0 to the power of arg1.
 // Requires: <cmath>
 RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
-    double value = std::pow(arg0, arg1);
+    Real value = std::pow(arg0, arg1);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -20,7 +20,7 @@ RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
 // Requires: <cmath>
 // Tags: [real_cast]
 RCALC_OP_2(Pow, Real, Real, arg0, arg1) {
-    double value = std::pow(arg0, arg1);
+    Real value = std::pow(arg0, arg1);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -40,7 +40,7 @@ RCALC_FMT_2(Pow, arg0, arg1) {
 // Description: Raise arg0 to the power of 2.
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Int, arg0) {
-    double value = std::pow(arg0, 2.0);
+    Real value = std::pow(arg0, 2.0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -55,7 +55,7 @@ RCALC_OP_1(Sqr, Int, arg0) {
 // Parameters: [Real]
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Real, arg0) {
-    double value = std::pow(arg0, 2.0);
+    Real value = std::pow(arg0, 2.0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -75,7 +75,7 @@ RCALC_FMT_1(Sqr, arg0) {
 // Description: Raise arg0 to the power of 3.
 // Requires: <cmath>
 RCALC_OP_1(Cube, Int, arg0) {
-    double value = std::pow(arg0, 3.0);
+    Real value = std::pow(arg0, 3.0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -90,7 +90,7 @@ RCALC_OP_1(Cube, Int, arg0) {
 // Parameters: [Real]
 // Requires: <cmath>
 RCALC_OP_1(Cube, Real, arg0) {
-    double value = std::pow(arg0, 3.0);
+    Real value = std::pow(arg0, 3.0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -111,7 +111,7 @@ RCALC_FMT_1(Cube, arg0) {
 // Requires: <cmath>
 // Tags: [real_cast]
 RCALC_OP_1(Sqrt, Real, arg0) {
-    double value = std::sqrt(arg0);
+    Real value = std::sqrt(arg0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -132,7 +132,7 @@ RCALC_FMT_1(Sqrt, arg0) {
 // Requires: <cmath>
 // Tags: [real_cast]
 RCALC_OP_1(Cbrt, Real, arg0) {
-    double value = std::sqrt(arg0);
+    Real value = std::sqrt(arg0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
@@ -198,7 +198,7 @@ RCALC_FMT_1(Exp, arg) {
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Ceil, Real, arg) {
-    double val = std::ceil(arg);
+    Real val = std::ceil(arg);
     return Ok(Value::find_int(val));
 }
 
@@ -214,7 +214,7 @@ RCALC_FMT_1(Ceil, arg) {
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Floor, Real, arg) {
-    double val = std::floor(arg);
+    Real val = std::floor(arg);
     return Ok(Value::find_int(val));
 }
 
@@ -230,7 +230,7 @@ RCALC_FMT_1(Floor, arg) {
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Trunc, Real, arg) {
-    double val = std::trunc(arg);
+    Real val = std::trunc(arg);
     return Ok(Value::find_int(val));
 }
 
@@ -246,7 +246,7 @@ RCALC_FMT_1(Trunc, arg) {
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Round, Real, arg) {
-    double val = std::round(arg);
+    Real val = std::round(arg);
     return Ok(Value::find_int(val));
 }
 
@@ -262,9 +262,9 @@ RCALC_FMT_1(Round, arg) {
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Sign, Real, arg) {
-    if (arg > 0) { return Ok(Value((int64_t)1)); }
-    if (arg < 0) { return Ok(Value((int64_t)-1)); }
-    return Ok(Value((int64_t)0));
+    if (arg > 0) { return Ok(Value((Int)1)); }
+    if (arg < 0) { return Ok(Value((Int)-1)); }
+    return Ok(Value((Int)0));
 }
 
 RCALC_FMT_1(Sign, arg) {
@@ -280,9 +280,9 @@ RCALC_FMT_1(Sign, arg) {
 // Tags: [no_expr]
 RCALC_OP_1(Fact, Int, arg) {
     if (arg < 0) { return Err(ERR_INVALID_PARAM, "Cannot take the factorial of a negative number!"); }
-    if (arg == 0) { return Ok(Value((int64_t)1)); }
+    if (arg == 0) { return Ok(Value((Int)1)); }
 
-    double res = std::tgamma((double)arg);
+    Real res = std::tgamma((Real)arg);
     return Ok(Value::find_int(res));
 }
 
@@ -298,7 +298,7 @@ RCALC_FMT_1(Fact, arg) {
 // Requires: <cmath>
 // Tags: [no_expr]
 RCALC_OP_1(Gamma, Real, arg) {
-    double res = std::tgamma((double)arg);
+    Real res = std::tgamma((Real)arg);
     return Ok(Value::find_int(res));
 }
 
@@ -314,7 +314,7 @@ RCALC_FMT_1(Gamma, arg) {
 // Requires: <cstdlib>
 RCALC_OP_2(Quot, Int, Int, arg0, arg1) {
     auto [quot, _rem] = std::div(arg0, arg1);
-    return Ok(Value((int64_t)quot));
+    return Ok(Value((Int)quot));
 }
 
 RCALC_FMT_2(Quot, arg0, arg1) {
@@ -329,7 +329,7 @@ RCALC_FMT_2(Quot, arg0, arg1) {
 // Requires: <cstdlib>
 RCALC_OP_2(Mod, Int, Int, arg0, arg1) {
     auto [_quot, rem] = std::div(arg0, arg1);
-    return Ok(Value((int64_t)rem));
+    return Ok(Value((Int)rem));
 }
 
 // @RCalcOperator
@@ -343,4 +343,18 @@ RCALC_OP_2(Mod, Real, Real, arg0, arg1) {
 
 RCALC_FMT_2(Mod, arg0, arg1) {
     return arg0.get_input_formatted() + " % " + arg1.get_input_formatted();
+}
+
+
+// @RCalcOperator
+// Name: E
+// Description: The mathematical constant e.
+// Requires: <numbers>
+// Tags: [no_expr]
+RCALC_OP_0(E) {
+    return Ok(Value(std::numbers::e_v<Real>));
+}
+
+RCALC_FMT_0(E) {
+    return "e";
 }

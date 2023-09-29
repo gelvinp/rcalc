@@ -32,13 +32,13 @@ public:
     Type get_type() const { return type; }
     const char* get_type_name() const;
 
-    operator int64_t() const;
-    operator double() const;
+    operator Int() const;
+    operator Real() const;
 
-    Value(int64_t value);
-    Value(double value);
+    Value(Int value);
+    Value(Real value);
 
-    static Value find_int(double value);
+    static Value find_int(Real value);
 
     std::string to_string();
 
@@ -59,7 +59,7 @@ private:
     Type type = TYPE_INT;
     uint64_t data = 0;
 
-    static Value parse_numeric(const std::string& str, double value);
+    static Value parse_numeric(const std::string& str, Real value);
 };
 
 }

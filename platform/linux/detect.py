@@ -76,6 +76,7 @@ def configure(env: "Environment"):
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
+    env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
 
     if env["use_asan"]:
         env.extra_suffix = ".asan" + env.extra_suffix

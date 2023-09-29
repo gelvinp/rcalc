@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "core/logger.h"
 
 #include <string>
 #include <sstream>
@@ -33,6 +34,18 @@ std::string RPNStack::peek_types(uint64_t count) const {
 }
 
 
+std::vector<Value::Type> RPNStack::peek_types_vec(uint64_t count) const {
+    uint64_t safe_count = std::min(count, stack.size());
+
+    std::vector<Value::Type> types;
+    for (uint64_t idx = safe_count; idx > 0; --idx) {
+        types.push_back(stack[stack.size() - idx].result.get_type());
+    }
+
+    return types;
+}
+
+
 size_t RPNStack::size() const { return stack.size(); }
 
 
@@ -63,7 +76,6 @@ std::string StackItem::get_input_formatted() const {
         return input;
     }
 }
-
 
 
 }

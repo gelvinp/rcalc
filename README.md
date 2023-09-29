@@ -18,7 +18,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Extended core operators (pow, log, ceil, sign, fact)          | Complete          |
 | Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
 | Floating point division (quot, rem, mod)                      | Complete          |
-| Range operators (min, max, avg)                               | Not started       |
+| Range operators (min, max, avg)                               | Complete          |
 | Vector operators                                              | Not started       |
 | Matrix operators                                              | Might not happen  |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
