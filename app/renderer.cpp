@@ -156,7 +156,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
 
     if ((desired_stack_height >= available_stack_height) && !scrollbar_visible) {
         scrollbar_visible = true;
-        float desired_stack_height = 0.0;
+        desired_stack_height = 0.0;
         if (!items.empty()) {
             for (RenderItem& item : items) {
                 item.recalculate_size(true);
@@ -168,7 +168,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
     }
     else if ((desired_stack_height < available_stack_height) && scrollbar_visible) {
         scrollbar_visible = false;
-        float desired_stack_height = 0.0;
+        desired_stack_height = 0.0;
         if (!items.empty()) {
             for (RenderItem& item : items) {
                 item.recalculate_size(false);

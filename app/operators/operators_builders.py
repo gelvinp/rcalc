@@ -13,7 +13,7 @@ class OperatorMapBuilder:
 
         class Call:
             Types = ['Int', 'BigInt', 'Real', 'Vec2', 'Vec3', 'Vec4', 'Mat2', 'Mat3', 'Mat4']
-            Tags = ['reversable', 'stack_ref', 'real_cast', 'no_expr', 'fmt_stack_ref']
+            Tags = ['reversable', 'stack_ref', 'bigint_cast', 'real_cast', 'no_expr', 'fmt_stack_ref']
 
             def __init__(self):
                 self.types = []
@@ -75,6 +75,46 @@ class OperatorMapBuilder:
             def _render_types(self):
                 return "_".join(self.types)
 
+            def bigint_cast_get_typesets(self):
+                typesets = []
+                
+                for type in self.types:
+                    if type == 'BigInt':
+                        typesets.append(['BigInt', 'Int'])
+                    else:
+                        typesets.append([type])
+                
+                return [list(x) for x in list(itertools.product(*typesets))]
+
+            def render_bigint_cast_from(self, name, cast_types):
+                lines = [
+                    f'\telse if (types == "{"_".join(cast_types)}") {{',
+                    f"\t\tvalues = stack.pop_items({len(self.types)});"
+                ]
+
+                arg_names = []
+                for type in cast_types:
+                    arg_name = f"arg{len(arg_names)}"
+                    if type == 'BigInt':
+                        lines.append(f"\t\tBigInt {arg_name} = values[{len(arg_names)}].result.operator BigInt();")
+                    elif type == 'Int':
+                        lines.append(f"\t\tBigInt {arg_name} = BigInt((long long int)(values[{len(arg_names)}].result.operator Int()));")
+
+                    arg_names.append(arg_name)
+            
+                if 'stack_ref' in self.tags:
+                    arg_names.insert(0, "stack")
+
+                if 'no_expr' in self.tags:
+                    lines.append("\t\texpression = false;")
+
+                lines.extend([
+                    f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                    "\t}",
+                ])
+
+                return lines
+
             def real_cast_get_typesets(self):
                 typesets = []
                 
@@ -86,7 +126,7 @@ class OperatorMapBuilder:
                 
                 return [list(x) for x in list(itertools.product(*typesets))]
 
-            def render_cast_to(self, name, cast_types):
+            def render_real_cast_from(self, name, cast_types):
                 lines = [
                     f'\telse if (types == "{"_".join(cast_types)}") {{',
                     f"\t\tvalues = stack.pop_items({len(self.types)});"
@@ -178,12 +218,21 @@ class OperatorMapBuilder:
                         rev.reverse()
                         call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in rev])}}}")
                     
+                    if 'bigint_cast' in call.tags:
+                        for typeset in call.bigint_cast_get_typesets():
+                            if typeset in self.type_sets:
+                                continue
+                            
+                            self.type_sets.append(typeset)
+                            lines.extend(call.render_bigint_cast_from(name, typeset))
+                            call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+                    
                     if 'real_cast' in call.tags:
                         for typeset in call.real_cast_get_typesets():
                             if typeset in self.type_sets:
                                 continue
                             
-                            lines.extend(call.render_cast_to(name, typeset))
+                            lines.extend(call.render_real_cast_from(name, typeset))
                             call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
                 
                 lines.extend([f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',])

@@ -293,6 +293,12 @@ Value Value::find_int(Real value, std::optional<const std::string*> source) {
         return Value(static_cast<Int>(value));
     }
     if (source) {
+        const std::string* str = source.value();
+        if (str->starts_with("n")) {
+            std::string new_str(*str);
+            new_str.data()[0] = '-';
+            return Value(new_str);
+        }
         return Value(BigInt(*source.value()));
     }
 

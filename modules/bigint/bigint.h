@@ -136,6 +136,11 @@ class bigint {
             return real;
         }
 
+        bigint& operator=(bigint other) {
+            str = other.str;
+            return *this;
+        }
+
         // operator overloading for output stream {<<}
         friend std::ostream &operator << (std::ostream& stream, const bigint &n) {
             stream << n.str;

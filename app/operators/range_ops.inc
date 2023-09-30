@@ -40,19 +40,19 @@ RCALC_OP_1_S(Min, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Int>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*min));
         }
         case Value::TYPE_BIGINT:
         {
-            std::vector<Real> values;
+            std::vector<BigInt> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case Value::TYPE_INT:
-                    values.push_back((Real)(item.result.operator Int()));
+                    values.push_back(BigInt((long long int)(item.result.operator Int())));
                     break;
                 case Value::TYPE_BIGINT:
-                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    values.push_back(item.result.operator BigInt());
                     break;
                 default:
                     UNREACHABLE();
@@ -60,8 +60,8 @@ RCALC_OP_1_S(Min, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Real>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            std::vector<BigInt>::iterator min = std::min_element(values.begin(), values.end());
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*min));
         }
         case Value::TYPE_REAL:
@@ -85,7 +85,7 @@ RCALC_OP_1_S(Min, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Real>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*min));
         }
         default:
@@ -143,19 +143,19 @@ RCALC_OP_1_S(Max, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Int>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*max));
         }
         case Value::TYPE_BIGINT:
         {
-            std::vector<Real> values;
+            std::vector<BigInt> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case Value::TYPE_INT:
-                    values.push_back((Real)(item.result.operator Int()));
+                    values.push_back(BigInt((long long int)(item.result.operator Int())));
                     break;
                 case Value::TYPE_BIGINT:
-                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    values.push_back(item.result.operator BigInt());
                     break;
                 default:
                     UNREACHABLE();
@@ -163,8 +163,8 @@ RCALC_OP_1_S(Max, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Real>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            std::vector<BigInt>::iterator max = std::max_element(values.begin(), values.end());
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*max));
         }
         case Value::TYPE_REAL:
@@ -188,7 +188,7 @@ RCALC_OP_1_S(Max, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Real>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            stack.set_message<std::string>(new std::string(ss.str()));
             return Ok(Value(*max));
         }
         default:
@@ -251,7 +251,7 @@ RCALC_OP_1_S(Avg, Int, count) {
     }
     
     Real sum = std::accumulate(values.begin(), values.end(), 0.0);
-    stack.set_message<std::string>(new std::string(std::move(ss.str())));
+    stack.set_message<std::string>(new std::string(ss.str()));
     return Ok(Value(sum / count));
 }
 
@@ -313,7 +313,7 @@ RCALC_OP_1_S(Sum, Int, count) {
         ss << item.result.to_string();
     }
 
-    stack.set_message<std::string>(new std::string(std::move(ss.str())));
+    stack.set_message<std::string>(new std::string(ss.str()));
 
     if (is_real) {
         return Ok(Value(sum));
