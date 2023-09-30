@@ -10,7 +10,6 @@ _RCALC_PLATFORM_IMPL(PlatformLinux);
 #include "imgui_impl_opengl3.h"
 
 #include "assets/app_icon.png.gen.h"
-#include "assets/B612Mono-Regular.ttf.gen.h"
 #include "stb_image.h"
 
 
@@ -53,16 +52,6 @@ Result<> PlatformLinux::init() {
 
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
-
-    // Load font
-    ImFontConfig font_cfg;
-    font_cfg.FontDataOwnedByAtlas = false;
-
-    glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
-    glyphs.AddText("⌈⌉⌊⌋°πτ");
-
-    glyphs.BuildRanges(&glyph_ranges);
-    p_font = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 16, &font_cfg, &glyph_ranges[0]);    
 
     ImGui::StyleColorsDark();
 

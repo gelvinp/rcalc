@@ -5,7 +5,7 @@
 
 #include <functional>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 
@@ -19,7 +19,7 @@ struct Operator {
     std::vector<std::vector<Value::Type>> allowed_types;
 };
 
-typedef std::unordered_map<std::string, Operator const * const> OperatorMap;
+typedef std::map<std::string, Operator const * const> OperatorMap;
 OperatorMap get_operator_map();
 
 }

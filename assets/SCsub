@@ -10,3 +10,8 @@ for asset in glob("*", root_dir="embed/"):
     path = f'embed/{asset}'
     env.Depends(header, path)
     env.CommandNoCache(header, path, env.Run(asset_builders.embed_asset, f"Embedding {asset}."))
+
+license_header = 'license.gen.h'
+license_path = '#/LICENSE.md'
+env.Depends(license_header, license_path)
+env.CommandNoCache(license_header, license_path, env.Run(asset_builders.embed_text, f"Embedding license info."))

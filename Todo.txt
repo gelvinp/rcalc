@@ -1,6 +1,5 @@
 # Renderer commands
 - Queer (Rainbow!)
-- Help (Ahhh!)
 - Options (screaming)
 
 # Vector operators

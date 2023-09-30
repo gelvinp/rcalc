@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 #define REGISTER_COMMAND(scope, name) static void _CMDIMPL_##name(scope&)
@@ -19,7 +19,7 @@ struct Command {
 };
 
 template<typename Scope>
-using CommandMap = std::unordered_map<std::string, Command<Scope> const * const>;
+using CommandMap = std::map<std::string, Command<Scope> const * const>;
 
 template<typename Scope>
 CommandMap<Scope> get_command_map();

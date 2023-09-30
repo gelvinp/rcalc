@@ -5,6 +5,5 @@
 // Usage: help
 // Requires: "app/renderer.h"
 RCALC_CMD(Renderer, Help, renderer) {
-    UNUSED(renderer);
-    Logger::log_info("Todo: Make a help window!");
+    renderer.help_requested = true;
 }

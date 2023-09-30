@@ -28,8 +28,12 @@ class Renderer {
 public:
     typedef std::function<void(const std::string&)> SubmitTextCallback;
     typedef std::function<void(const std::string&)> SubmitOperatorCallback;
+    typedef std::function<void(const char*, const char*, const std::vector<const char*>&)> AppCommandCallback;
+    typedef std::function<void(AppCommandCallback)> RequestAppCommandsCallback;
+    typedef std::function<void(const char*, const char*, const std::vector<std::vector<Value::Type>>&)> OperatorCallback;
+    typedef std::function<void(OperatorCallback)> RequestOperatorsCallback;
 
-    Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
+    Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds, RequestOperatorsCallback cb_request_ops);
 
     void render(std::vector<RenderItem>& items);
 
@@ -43,6 +47,8 @@ public:
 private:
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
+    RequestAppCommandsCallback cb_request_app_cmds;
+    RequestOperatorsCallback cb_request_ops;
     CommandMap<Renderer> command_map;
 
     std::string message;
@@ -54,14 +60,26 @@ private:
     bool scratchpad_needs_clear = false;
     bool scratchpad_needs_focus = true;
     bool copy_requested = false;
+    bool dup_requested = false;
+    bool help_requested = false;
+    bool help_open = false;
     bool scrollbar_visible = false;
-    
+
+    ImVector<ImWchar> glyph_ranges;
+    ImFontGlyphRangesBuilder glyphs;
+    ImFont* p_font_standard;
+    ImFont* p_font_large;
+
     void submit_scratchpad();
+    void render_help();
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
+
+    static void render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures);
+    static void render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types);
 };
 
 }

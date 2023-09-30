@@ -17,7 +17,4 @@ public:
 
 private:
     GLFWwindow* p_window;
-    ImVector<ImWchar> glyph_ranges;
-    ImFontGlyphRangesBuilder glyphs;
-    ImFont* p_font;
 };

@@ -22,7 +22,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Vector operators                                              | Not started       |
 | Matrix operators                                              | Might not happen  |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
-| Renderer commands (help, options)                             | Not started       |
+| Renderer commands (help, options)                             | In Progress       |
 | Renderer scratchpad history                                   | Not started       |
 | Renderer scratchpad autocomplete                              | Not started       |
 | Alternate renderer (TUI)                                      | Not started       |

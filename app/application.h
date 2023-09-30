@@ -44,6 +44,8 @@ private:
 
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);
+    void on_renderer_requested_app_commands(Renderer::AppCommandCallback cb_app_cmd);
+    void on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd);
 
     typedef std::function<void()> AppCommand;
     bool try_application_command(const std::string& str);

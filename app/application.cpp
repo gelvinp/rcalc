@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ranges>
+#include <set>
 #include <sstream>
 
 
@@ -14,7 +15,9 @@ namespace RCalc {
 Application::Application() :
     renderer(Renderer(
         std::bind(&Application::on_renderer_submit_text, this, std::placeholders::_1),
-        std::bind(&Application::on_renderer_submit_operator, this, std::placeholders::_1))
+        std::bind(&Application::on_renderer_submit_operator, this, std::placeholders::_1),
+        std::bind(&Application::on_renderer_requested_app_commands, this, std::placeholders::_1),
+        std::bind(&Application::on_renderer_requested_operators, this, std::placeholders::_1))
 ) {
     renderer.display_info("Welcome to RCalc! Type \\help to see what commands and operators are supported.");
 
@@ -74,6 +77,25 @@ bool Application::on_renderer_submit_operator(const std::string& str) {
         return true;
     }
     return false;
+}
+
+
+void Application::on_renderer_requested_app_commands(Renderer::AppCommandCallback cb_app_cmd) {
+    // Some commands have multiple aliases
+    std::set<std::string> displayed_commands;
+    for (const auto& [key, command] : command_map) {
+        if (displayed_commands.contains(command->name)) { continue; }
+        displayed_commands.insert(command->name);
+        cb_app_cmd(command->name, command->description, command->signatures);
+    }
+}
+
+
+void Application::on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd) {
+    std::set<std::string> displayed_ops;
+    for (const auto& [key, op] : op_map) {
+        cb_ops_cmd(op->name, op->description, op->allowed_types);
+    }
 }
 
 

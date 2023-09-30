@@ -2,6 +2,10 @@
 
 #include "core/logger.h"
 #include "platform/platform.h"
+#include "core/version.h"
+#include "core/help_text.h"
+#include "assets/B612Mono-Regular.ttf.gen.h"
+#include "assets/license.gen.h"
 
 #include "imgui_ext.h"
 
@@ -10,6 +14,7 @@
 #include <format>
 #include <ranges>
 #include <sstream>
+#include <set>
 
 
 namespace RCalc {
@@ -17,9 +22,31 @@ namespace RCalc {
 const float STACK_HORIZ_PADDING = 16.0;
 const float STACK_HORIZ_BIAS = 8.0;
 
-Renderer::Renderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) :
-    cb_submit_text(cb_submit_text), cb_submit_op(cb_submit_op) {
-        command_map = get_command_map<Renderer>();
+Renderer::Renderer(
+    SubmitTextCallback cb_submit_text,
+    SubmitOperatorCallback cb_submit_op,
+    RequestAppCommandsCallback cb_request_app_cmds,
+    RequestOperatorsCallback cb_request_ops) :
+        cb_submit_text(cb_submit_text),
+        cb_submit_op(cb_submit_op),
+        cb_request_app_cmds(cb_request_app_cmds),
+        cb_request_ops(cb_request_ops)
+{
+    command_map = get_command_map<Renderer>();
+
+    // Load font
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false;
+
+    glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    glyphs.AddText("⌈⌉⌊⌋°πτ");
+
+    glyphs.BuildRanges(&glyph_ranges);
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 16, &font_cfg, &glyph_ranges[0]);    
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 24, &font_cfg, &glyph_ranges[0]);    
+
 }
 
 void Renderer::render(std::vector<RenderItem>& items) {
@@ -48,6 +75,9 @@ void Renderer::render(std::vector<RenderItem>& items) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
+                ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
+                ImGui::MenuItem("Show Help", "Ctrl+H", &help_requested);
+                ImGui::Separator();
                 ImGui::MenuItem("Quit", "Ctrl+Q", &platform.close_requested);
                 ImGui::EndMenu();
             }
@@ -205,7 +235,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
         submit_scratchpad();
     }
 
-    if (scratchpad_needs_focus) {
+    if (scratchpad_needs_focus && !help_requested && !help_open) {
         ImGui::SetKeyboardFocusHere(-1);
         scratchpad_needs_focus = false;
         stack_needs_scroll_down = false;
@@ -215,11 +245,20 @@ void Renderer::render(std::vector<RenderItem>& items) {
         !ImGui::IsAnyItemActive()
         && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId)
         && !stack_needs_scroll_down
+        && !help_requested
+        && !help_open
     ) {
         ImGui::SetKeyboardFocusHere(-1);
     }
 
     ImGui::End(); // Window
+
+    if (help_requested) {
+        help_open = true;
+        ImGui::OpenPopup("Help");
+        help_requested = false;
+    }
+    render_help();
 
     // Handle shortcuts
     if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
@@ -231,8 +270,12 @@ void Renderer::render(std::vector<RenderItem>& items) {
         }
         copy_requested = false;
     }
-    if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D)) {
+    if (dup_requested || (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))) {
         cb_submit_text("\\dup");
+        dup_requested = false;
+    }
+    if ((ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
+        help_requested = true;
     }
     if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
         cb_submit_text("\\pop");
@@ -361,6 +404,179 @@ void RenderItem::recalculate_size(bool scrollbar_visible) {
     input_display_width = available_width - output_actual_size.x - STACK_HORIZ_PADDING;
     ImVec2 input_actual_size = ImGui::CalcTextSize(input.data(), nullptr, false, input_display_width);
     display_height = std::max(output_actual_size.y, input_actual_size.y);
+}
+
+
+void Renderer::render_help() {
+    ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
+    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.80, viewport_size.y * 0.60), ImGuiCond_Appearing);
+    ImGui::SetNextWindowFocus();
+
+    if (!ImGui::BeginPopupModal("Help", &help_open)) { return; }
+
+    ImGui::PushTextWrapPos(0.0);
+
+    ImGui::PushFont(p_font_large);
+    ImGui::TextUnformatted("RCalc");
+    ImGui::PopFont();
+
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0);
+    ImGui::TextUnformatted("v" VERSION_FULL_BUILD);
+    
+    ImGui::SameLine();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0);
+    ImGui::Text("(%.6s)", VERSION_HASH);
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Click to copy: %s", VERSION_HASH);
+    }
+
+    ImGui::PopStyleColor();
+
+    if (ImGui::IsItemClicked()) {
+        Platform::get_singleton().copy_to_clipboard(VERSION_HASH);
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::TextUnformatted(HelpText::program_info);
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushFont(p_font_large);
+    ImGui::TextUnformatted("Commands");
+    ImGui::PopFont();
+
+    cb_request_app_cmds(&Renderer::render_help_command);
+
+    // Some commands have multiple aliases
+    std::set<std::string> displayed_commands;
+    for (const auto& [key, command] : command_map) {
+        displayed_commands.insert(key);
+        render_help_command(command->name, command->description, command->signatures);
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushFont(p_font_large);
+    ImGui::TextUnformatted("Operators");
+    ImGui::PopFont();
+
+    cb_request_ops(&Renderer::render_help_operator);
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushFont(p_font_large);
+    ImGui::TextUnformatted("Licenses");
+    ImGui::PopFont();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PopTextWrapPos();
+
+    if (ImGui::BeginChild(
+        "LicenseInfo",
+        ImVec2(ImGui::GetContentRegionAvail().x * 0.85, 300),
+        true
+    )) {
+        ImGui::PushTextWrapPos(0.0);
+        ImGui::TextUnformatted(Assets::license_md);
+        ImGui::PopTextWrapPos();
+    }
+    ImGui::EndChild();
+
+    ImGui::EndPopup();
+}
+
+
+void Renderer::render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures) {
+    constexpr ImVec4 command_color { 0.412, 0.655, 1.0, 1.0 };
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, command_color);
+    ImGui::TextUnformatted(name);
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    ImGui::SameLine();
+    ImGui::TextUnformatted("(");
+
+    bool first = true;
+    for (const char* sig : signatures) {
+        ImGui::SameLine(0.0, 0.0);
+
+        if (first) {
+            ImGui::TextUnformatted(sig);
+            first = false;
+        }
+        else {
+            ImGui::Text(", %s", sig);
+        }
+    }
+
+    ImGui::SameLine(0.0, 0.0);
+    ImGui::TextUnformatted(")");
+    ImGui::PopStyleColor();
+
+    ImGui::TextUnformatted(description);
+}
+
+
+void Renderer::render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types) {
+    constexpr ImVec4 command_color { 0.412, 1.0, 0.611, 1.0 };
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, command_color);
+    ImGui::TextUnformatted(name);
+    ImGui::PopStyleColor();
+
+    ImGui::TextUnformatted(description);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    
+    if (!types.empty()) {
+        if (types.front().size() == 1) {
+            ImGui::Text("Accepts 1 argument:");
+        }
+        else {
+            ImGui::Text("Accepts %ld arguments: ", types.front().size());
+        }
+
+        bool first_set = true;
+        for (const std::vector<Value::Type>& call_types : types) {
+            ImGui::SetCursorPosX(20.0);
+            bool first = true;
+
+            if (first_set) {
+                first_set = false;
+            }
+            else {
+                ImGui::TextUnformatted("or");
+                ImGui::SameLine();
+            }
+
+            for (Value::Type type : call_types) {
+                if (first) {
+                    ImGui::TextUnformatted(Value::get_type_name(type));
+                    first = false;
+                }
+                else {
+                    ImGui::SameLine(0.0, 0.0);
+                    ImGui::Text(", %s", Value::get_type_name(type));
+                }
+            }
+        }
+    }
+
+    ImGui::PopStyleColor();
 }
 
 }
