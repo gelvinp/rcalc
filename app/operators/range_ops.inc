@@ -45,7 +45,24 @@ RCALC_OP_1_S(Min, Int, count) {
         }
         case Value::TYPE_BIGINT:
         {
-            return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+            std::vector<Real> values;
+            for (StackItem& item : stack.pop_items(count)) {
+                switch (item.result.get_type()) {
+                case Value::TYPE_INT:
+                    values.push_back((Real)(item.result.operator Int()));
+                    break;
+                case Value::TYPE_BIGINT:
+                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    break;
+                default:
+                    UNREACHABLE();
+                }
+                if (first) { first = false; } else { ss << ", "; }
+                ss << item.result.to_string();
+            }
+            std::vector<Real>::iterator min = std::min_element(values.begin(), values.end());
+            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            return Ok(Value(*min));
         }
         case Value::TYPE_REAL:
         {
@@ -56,7 +73,8 @@ RCALC_OP_1_S(Min, Int, count) {
                     values.push_back((Real)(item.result.operator Int()));
                     break;
                 case Value::TYPE_BIGINT:
-                    return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    break;
                 case Value::TYPE_REAL:
                     values.push_back((Real)item.result);
                     break;
@@ -130,7 +148,24 @@ RCALC_OP_1_S(Max, Int, count) {
         }
         case Value::TYPE_BIGINT:
         {
-            return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+            std::vector<Real> values;
+            for (StackItem& item : stack.pop_items(count)) {
+                switch (item.result.get_type()) {
+                case Value::TYPE_INT:
+                    values.push_back((Real)(item.result.operator Int()));
+                    break;
+                case Value::TYPE_BIGINT:
+                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    break;
+                default:
+                    UNREACHABLE();
+                }
+                if (first) { first = false; } else { ss << ", "; }
+                ss << item.result.to_string();
+            }
+            std::vector<Real>::iterator max = std::max_element(values.begin(), values.end());
+            stack.set_message<std::string>(new std::string(std::move(ss.str())));
+            return Ok(Value(*max));
         }
         case Value::TYPE_REAL:
         {
@@ -141,7 +176,8 @@ RCALC_OP_1_S(Max, Int, count) {
                     values.push_back((Real)(item.result.operator Int()));
                     break;
                 case Value::TYPE_BIGINT:
-                    return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+                    values.push_back((item.result.operator BigInt()).get_real<Real>());
+                    break;
                 case Value::TYPE_REAL:
                     values.push_back((Real)item.result);
                     break;
@@ -202,7 +238,8 @@ RCALC_OP_1_S(Avg, Int, count) {
             values.push_back((Real)(item.result.operator Int()));
             break;
         case Value::TYPE_BIGINT:
-            return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+            values.push_back((item.result.operator BigInt()).get_real<Real>());
+            break;
         case Value::TYPE_REAL:
             values.push_back((Real)item.result);
             break;
@@ -264,7 +301,8 @@ RCALC_OP_1_S(Sum, Int, count) {
             sum += (Real)(item.result.operator Int());
             break;
         case Value::TYPE_BIGINT:
-            return Err(ERR_INVALID_PARAM, "TODO: BigInt");
+            sum += (item.result.operator BigInt()).get_real<Real>();
+            break;
         case Value::TYPE_REAL:
             sum += (Real)item.result;
             break;

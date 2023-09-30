@@ -98,5 +98,8 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
-
     env.Append(IMGUI_BACKEND="glfw_opengl3")
+
+    # RELRO
+    if env["target"] == "release":
+        env.Append(LINKFLAGS=["-Wl,-z,now"])

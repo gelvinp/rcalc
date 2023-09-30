@@ -16,7 +16,6 @@
 - rotmat (scalar -> mat2 rotation matrix, vec3 -> mat3 rotation matrix)
 
 # Technical Debt
-- Find a BigInt
 - Vec2/3/4, Mat2/3/4
 - Options, allow changing font scale, light mode / dark mode / read from system?
 - Arrow keys up and down to scroll scratchpad history

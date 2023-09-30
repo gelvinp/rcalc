@@ -100,8 +100,7 @@ class OperatorMapBuilder:
                     elif type == 'Int':
                         lines.append(f"\t\tReal {arg_name} = (Real)(values[{len(arg_names)}].result.operator Int());")
                     elif type == 'BigInt':
-                        lines.append(f'\t\tLogger::log_err("TODO: Implement BigInt in operator builder");')
-                        lines.append(f"\t\tReal {arg_name} = 0.0;")
+                        lines.append(f"\t\tReal {arg_name} = (values[{len(arg_names)}].result.operator BigInt()).get_real<Real>();")
 
                     arg_names.append(arg_name)
             

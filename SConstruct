@@ -1,5 +1,5 @@
-EnsureSConsVersion(4, 0, 0)
-EnsurePythonVersion(3, 6)
+EnsureSConsVersion(4, 5, 0)
+EnsurePythonVersion(3, 11)
 
 import atexit
 import glob
@@ -260,8 +260,8 @@ if selected_platform in available_platforms:
     Export("env")
 
     SConscript("assets/SCsub")
-    SConscript("core/SCsub")
     SConscript("modules/SCsub")
+    SConscript("core/SCsub")
     SConscript("app/SCsub")
     SConscript("main/SCsub")
     SConscript("platform/SCsub")

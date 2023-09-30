@@ -1,0 +1,8 @@
+Import("env")
+Import("env_modules")
+
+env_bigint = env_modules.Clone()
+if "-Werror" in env_bigint["CCFLAGS"]:
+    env_imgui["CCFLAGS"].remove("-Werror")
+
+env_bigint.add_source_files(env.modules_sources, "*cpp")

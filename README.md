@@ -11,7 +11,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Feature                                                       | Status            |
 | -------                                                       | ------            |
 | Standard datatypes (ints and doubles)                         | Complete          |
-| BigInt datatype                                               | Not started       |
+| BigInt datatype                                               | In Progress       |
 | Vec2 / 3 / 4 datatypes                                        | Not started       |
 | Mat2 / 3 / 4 datatypes                                        | Might not happen  |
 | Basic operators (add, sub, mul, div, neg, abs)                | Complete          |

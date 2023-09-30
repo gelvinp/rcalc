@@ -5,9 +5,12 @@
 #include <string>
 #include <vector>
 
+#include "modules/bigint/bigint.h"
+
 namespace RCalc {
 
 typedef int64_t Int;
+typedef bigint BigInt;
 typedef double Real;
 
 class Value {
@@ -33,12 +36,14 @@ public:
     const char* get_type_name() const;
 
     operator Int() const;
+    operator BigInt() const;
     operator Real() const;
 
     Value(Int value);
+    Value(BigInt value);
     Value(Real value);
 
-    static Value find_int(Real value);
+    static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt);
 
     std::string to_string();
 

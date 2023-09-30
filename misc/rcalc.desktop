@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=RCalc
+GenericName=Calculator
+Comment=A Simple RPN Calculator
+Icon=rcalc
+Exec=/usr/bin/rcalc
+Categories=Utility;Calculator
+Keywords=RPN;Reverse Polish Notation

@@ -10,6 +10,15 @@ RCALC_OP_1(Type, Int, _arg) {
 
 // @RCalcOperator
 // Name: Type
+// Parameters: [BigInt]
+// Tags: [no_expr]
+RCALC_OP_1(Type, BigInt, _arg) {
+    UNUSED(_arg);
+    return Ok(Value((Int)Value::TYPE_BIGINT));
+}
+
+// @RCalcOperator
+// Name: Type
 // Parameters: [Real]
 // Tags: [no_expr]
 RCALC_OP_1(Type, Real, _arg) {

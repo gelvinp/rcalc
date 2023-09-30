@@ -161,6 +161,7 @@ std::vector<bool> Pool_##type::_free;
 
 #pragma endregion pool_macro
 
+DEFINE_POOL(BigInt);
 DEFINE_POOL(Real);
 
 #pragma endregion pool
@@ -226,6 +227,7 @@ Value::operator Int() const {
     return std::bit_cast<Int>(data);
 }
 
+POOL_CONVERT(BigInt, TYPE_BIGINT);
 POOL_CONVERT(Real, TYPE_REAL);
 
 #undef ASSERT_TYPE
@@ -240,6 +242,7 @@ POOL_CONVERT(Real, TYPE_REAL);
 
 Value::Value(Int value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
 
+POOL_CONSTRUCT(BigInt, TYPE_BIGINT);
 POOL_CONSTRUCT(Real, TYPE_REAL);
 
 #undef POOL_CONSTRUCT
@@ -254,6 +257,7 @@ Value::~Value() {
     switch (type) {
         case TYPE_INT: { break; }
 
+        POOL_FREE(BigInt, TYPE_BIGINT)
         POOL_FREE(Real, TYPE_REAL)
 
         default: {
@@ -283,13 +287,25 @@ Value& Value::operator=(Value&& value) {
 }
 
 
-Value Value::find_int(Real value) {
+Value Value::find_int(Real value, std::optional<const std::string*> source) {
     // No floating point, check for int64_t
     if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
         return Value(static_cast<Int>(value));
     }
-    Logger::log("TODO: Implement BigInt");
-    return Value((Int)0);
+    if (source) {
+        return Value(BigInt(*source.value()));
+    }
+
+    // BigInt, have to convert through string first
+    const char* display_format = "%.0f";
+    int size = snprintf(nullptr, 0, display_format, value) + 1;
+    char* buf = (char*)malloc(sizeof(char) * size);
+    memset(&buf[0], 0, size);
+    snprintf(&buf[0], size, display_format, value);
+    std::string str(&buf[0]);
+    free(buf);
+
+    return Value(BigInt(str));
 }
 
 #pragma endregion constructors
@@ -347,15 +363,8 @@ Value Value::parse_numeric(const std::string& str, Real value) {
         // Contains a decimal separator, treat as float
         return Value(value);
     }
-
-    // No floating point, check for int64_t
-    if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
-        return Value(static_cast<Int>(value));
-    }
-
-    // Too big, must use a BigInt
-    Logger::log_err("TODO: BigInt");
-    return Value((Int)0);
+    
+    return find_int(value, &str);
 }
 
 #pragma endregion parse
@@ -367,6 +376,9 @@ std::string Value::to_string() {
     switch (type) {
         case TYPE_INT: {
             return std::to_string(operator Int());
+        }
+        case TYPE_BIGINT: {
+            return (operator BigInt()).get_str();
         }
         case TYPE_REAL: {
             const char* display_format = "%g";
@@ -401,6 +413,9 @@ Value Value::make_copy() const {
     switch (type) {
         case TYPE_INT: {
             return Value(operator Int());
+        }
+        case TYPE_BIGINT: {
+            return Value(operator BigInt());
         }
         case TYPE_REAL: {
             return Value(operator Real());

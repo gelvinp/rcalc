@@ -85,7 +85,13 @@ RCALC_CMD(Application, Count, app) {
 
     // No floating point, check for int64_t
     if (count > std::numeric_limits<int64_t>::max()) {
-        app.renderer.display_error("TODO: Count command BigInt");
+        Value value { BigInt((long long int)count) };
+        app.stack.push_item(StackItem {
+            "count",
+            value.to_string(),
+            std::move(value),
+            false
+        });
         return;
     }
 
