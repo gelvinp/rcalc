@@ -7,3 +7,14 @@
 RCALC_CMD(Renderer, Help, renderer) {
     renderer.help_requested = true;
 }
+
+
+// @RCalcCommand
+// Name: Queer
+// Scope: Renderer
+// Description: Toggles queer mode.
+// Usage: queer
+// Requires: "app/renderer.h"
+RCALC_CMD(Renderer, Queer, renderer) {
+    renderer.queer_active = !renderer.queer_active;
+}

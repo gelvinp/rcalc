@@ -358,3 +358,26 @@ RCALC_OP_0(E) {
 RCALC_FMT_0(E) {
     return "e";
 }
+
+
+// @RCalcOperator
+// Name: Range
+// Description: Generates a range of numbers from 0 to arg0.
+// Parameters: [Int]
+// Tags: [no_expr, stack_ref]
+RCALC_OP_1_S(Range, Int, arg0) {
+    for (Int index = 0; index < (arg0 - 1); index++) {
+        Value value = Value(index);
+        stack.push_item(StackItem{
+            value.to_string(),
+            value.to_string(),
+            std::move(value),
+            false
+        });
+    }
+    return Ok(Value(arg0));
+}
+
+RCALC_FMT_1(Range, arg0) {
+    return arg0.input;
+}

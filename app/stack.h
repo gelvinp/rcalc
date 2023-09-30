@@ -70,6 +70,7 @@ public:
         }
         #endif
         delete (U)p_message;
+        p_message = nullptr;
         message_type = 0;
     }
 

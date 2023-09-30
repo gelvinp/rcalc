@@ -43,6 +43,7 @@ public:
     bool try_renderer_command(const std::string& str);
 
     REGISTER_COMMAND(Renderer, Help);
+    REGISTER_COMMAND(Renderer, Queer);
 
 private:
     SubmitTextCallback cb_submit_text;
@@ -64,6 +65,8 @@ private:
     bool help_requested = false;
     bool help_open = false;
     bool scrollbar_visible = false;
+    bool queer_active = false;
+    bool enter_pressed = false;
 
     ImVector<ImWchar> glyph_ranges;
     ImFontGlyphRangesBuilder glyphs;

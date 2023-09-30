@@ -21,6 +21,37 @@ namespace RCalc {
 
 const float STACK_HORIZ_PADDING = 16.0;
 const float STACK_HORIZ_BIAS = 8.0;
+const float STACK_OUTER_PADDING = 4.0;
+
+constexpr ImVec4 COLORS[] = {
+    { 1.0, 0.239, 0.239, 1.0 },     // Red
+    { 1.0, 0.619, 0.329, 1.0 },   // Orange
+    { 1.0, 0.909, 0.388, 1.0 },     // Yellow
+    { 0.439, 1.0, 0.388, 1.0 },     // Green
+    { 0.412, 0.655, 1.0, 1.0 },     // Blue
+    { 0.698, 0.451, 1.0, 1.0 },     // Purple
+    { 1.0, 1.0, 1.0, 1.0 },         // White
+    { 1.0, 0.561, 0.847, 1.0 },     // Pink
+    { 0.309, 0.898, 1.0, 1.0 },     // Light Blue
+    { 0.361, 0.196, 0.039, 1.0 },   // Brown
+    { 0.0, 0.0, 0.0, 1.0 },         // Black
+    { 0.8, 0.8, 0.8, 1.0 },         // Gray
+};
+
+enum ColorNames : int {
+    COLOR_RED,
+    COLOR_ORANGE,
+    COLOR_YELLOW,
+    COLOR_GREEN,
+    COLOR_BLUE,
+    COLOR_PURPLE,
+    COLOR_WHITE,
+    COLOR_PINK,
+    COLOR_LIGHT_BLUE,
+    COLOR_BROWN,
+    COLOR_BLACK,
+    COLOR_GRAY
+};
 
 Renderer::Renderer(
     SubmitTextCallback cb_submit_text,
@@ -159,7 +190,32 @@ void Renderer::render(std::vector<RenderItem>& items) {
             int index = 0;
 
             for (const RenderItem& item : items) {
-                ImGui::PushTextWrapPos(item.input_display_width);
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + STACK_OUTER_PADDING);
+
+                if (queer_active) {
+                    int color_index = index % COLOR_GRAY;
+                    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[color_index]);
+                    if (color_index >= COLOR_BROWN) {
+                        const float padding = 2.0f;
+                        ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+                        ImVec2 input_size = ImGui::CalcTextSize(item.input.data(), nullptr, false, item.input_display_width);
+                        ImGui::GetWindowDrawList()->AddRectFilled(
+                            ImVec2(cursor_pos.x - padding, cursor_pos.y - padding),
+                            ImVec2(cursor_pos.x + input_size.x + padding, cursor_pos.y + input_size.y + padding),
+                            ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
+                            
+                        );
+                        double output_offset = item.input_display_width + STACK_HORIZ_PADDING - STACK_OUTER_PADDING;
+                        ImVec2 output_size = ImGui::CalcTextSize(item.output.data(), nullptr, false, item.output_display_width);
+                        ImGui::GetWindowDrawList()->AddRectFilled(
+                            ImVec2(cursor_pos.x + output_offset - padding, cursor_pos.y - padding),
+                            ImVec2(cursor_pos.x + output_offset + output_size.x + padding, cursor_pos.y + output_size.y + padding),
+                            ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
+                        );
+                    }
+                }
+
+                ImGui::PushTextWrapPos(item.input_display_width + STACK_OUTER_PADDING);
                 ImGui::TextUnformatted(item.input.data());
                 ImGui::PopTextWrapPos();
 
@@ -168,6 +224,10 @@ void Renderer::render(std::vector<RenderItem>& items) {
                 ImGui::TextUnformatted(item.output.data());
                 ImGui::EXT_SetIDForLastItem(index++);
                 ImGui::PopTextWrapPos();
+
+                if (queer_active) {
+                    ImGui::PopStyleColor();
+                }
 
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
@@ -261,24 +321,27 @@ void Renderer::render(std::vector<RenderItem>& items) {
     render_help();
 
     // Handle shortcuts
-    if (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
+    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
         platform.close_requested = true;
     }
-    if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
+    if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
         if (!items.empty()) {
             platform.copy_to_clipboard(items.back().output);
         }
         copy_requested = false;
     }
-    if (dup_requested || (ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))) {
+    if (dup_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))) {
         cb_submit_text("\\dup");
         dup_requested = false;
     }
-    if ((ImGui::IsKeyDown(ImGuiKey_ModCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
+    if ((ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
         help_requested = true;
     }
     if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
         cb_submit_text("\\pop");
+    }
+    if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
+        enter_pressed = false;
     }
 }
 
@@ -296,6 +359,9 @@ void Renderer::display_error(const std::string& str) {
 
 
 void Renderer::submit_scratchpad() {
+    if (enter_pressed) { return; }
+    enter_pressed = true;
+
     stack_needs_scroll_down = true;
     message = "";
 
@@ -333,6 +399,7 @@ int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
+                self->enter_pressed = false;
             }
             self->cb_submit_op("add");
             return 1;
@@ -340,6 +407,7 @@ int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
+                self->enter_pressed = false;
             }
             self->cb_submit_op("sub");
             return 1;
@@ -347,6 +415,7 @@ int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
+                self->enter_pressed = false;
             }
             self->cb_submit_op("mul");
             return 1;
@@ -354,6 +423,7 @@ int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
+                self->enter_pressed = false;
             }
             self->cb_submit_op("div");
             return 1;
@@ -391,7 +461,7 @@ bool Renderer::try_renderer_command(const std::string& str) {
 
 
 void RenderItem::recalculate_size(bool scrollbar_visible) {
-    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_BIAS;
+    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
     if (scrollbar_visible) {
         available_width -= ImGui::GetStyle().ScrollbarSize;
     }
@@ -421,7 +491,7 @@ void Renderer::render_help() {
     ImGui::PopFont();
 
     ImGui::SameLine();
-    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0);
     ImGui::TextUnformatted("v" VERSION_FULL_BUILD);
     
@@ -496,15 +566,13 @@ void Renderer::render_help() {
 
 
 void Renderer::render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures) {
-    constexpr ImVec4 command_color { 0.412, 0.655, 1.0, 1.0 };
-
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, command_color);
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_BLUE]);
     ImGui::TextUnformatted(name);
     ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
     ImGui::SameLine();
     ImGui::TextUnformatted("(");
 
@@ -530,17 +598,15 @@ void Renderer::render_help_command(const char* name, const char* description, co
 
 
 void Renderer::render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types) {
-    constexpr ImVec4 command_color { 0.412, 1.0, 0.611, 1.0 };
-
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, command_color);
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
     ImGui::TextUnformatted(name);
     ImGui::PopStyleColor();
 
     ImGui::TextUnformatted(description);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, { 0.8, 0.8, 0.8, 1.0 });
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
     
     if (!types.empty()) {
         if (types.front().size() == 1) {
