@@ -29,7 +29,7 @@ void Main::parse_args(int argc, char** pp_argv)
 
 std::string get_full_version_string()
 {
-    return std::string { VERSION_FULL_BUILD } + "." + std::string { VERSION_HASH, 9 };
+    return std::string { VERSION_FULL_BUILD } + "." + std::string { VERSION_HASH, 6 };
 }
 
 

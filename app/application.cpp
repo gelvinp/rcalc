@@ -19,10 +19,7 @@ Application::Application() :
         std::bind(&Application::on_renderer_requested_app_commands, this, std::placeholders::_1),
         std::bind(&Application::on_renderer_requested_operators, this, std::placeholders::_1))
 ) {
-    renderer.display_info("Welcome to RCalc! Type \\help to see what commands and operators are supported.");
-
     command_map = get_command_map<Application>();
-
     op_map = get_operator_map();
 }
 

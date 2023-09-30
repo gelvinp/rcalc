@@ -52,7 +52,7 @@ private:
     RequestOperatorsCallback cb_request_ops;
     CommandMap<Renderer> command_map;
 
-    std::string message;
+    std::string message = "Welcome to RCalc! Type \\help to see what commands and operators are supported.";
     bool message_is_error = false;
 
     std::string scratchpad;
