@@ -1,5 +1,5 @@
-EnsureSConsVersion(4, 5, 0)
-EnsurePythonVersion(3, 11)
+EnsureSConsVersion(4, 4, 0)
+EnsurePythonVersion(3, 10)
 
 import atexit
 import glob
