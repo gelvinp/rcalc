@@ -1,0 +1,9 @@
+Import("env")
+Import("env_modules")
+
+env_glm = env_modules.Clone()
+if "-Werror" in env_glm["CCFLAGS"]:
+    env_glm["CCFLAGS"].remove("-Werror")
+
+env_glm.add_source_files(env.modules_sources, "*cpp")
+env_glm.add_source_files(env.modules_sources, "detail/glm.cpp")
