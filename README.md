@@ -12,15 +12,16 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | -------                                                       | ------            |
 | Standard datatypes (ints and doubles)                         | Complete          |
 | BigInt datatype                                               | Complete          |
-| Vec2 / 3 / 4 datatypes                                        | Not started       |
+| Vec2 / 3 / 4 datatypes                                        | Complete          |
 | Mat2 / 3 / 4 datatypes                                        | Might not happen  |
 | Basic operators (add, sub, mul, div, neg, abs)                | Complete          |
 | Extended core operators (pow, log, ceil, sign, fact)          | Complete          |
 | Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
 | Floating point division (quot, rem, mod)                      | Complete          |
 | Range operators (min, max, avg)                               | Complete          |
-| Vector operators                                              | Not started       |
+| Vector operators                                              | In Progress       |
 | Matrix operators                                              | Might not happen  |
+| Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | In Progress       |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
 | Renderer commands (help, options)                             | In Progress       |
 | Renderer scratchpad history                                   | Not started       |
@@ -31,6 +32,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 ## Technical debt
  - [ ] Refactor renderer into buildtime-enabled, runtime-selected, inherited class
  - [ ] Use perfect hash generator for operator and command maps
+ - [ ] Operator map generator is getting pretty complex, could maybe use a rewrite?
 
 
 ## Platform support

@@ -1,6 +1,7 @@
 #include "value.h"
 
 #include "core/logger.h"
+#include "core/format.h"
 
 #include <algorithm>
 #include <charconv>
@@ -163,6 +164,9 @@ std::vector<bool> Pool_##type::_free;
 
 DEFINE_POOL(BigInt);
 DEFINE_POOL(Real);
+DEFINE_POOL(Vec2);
+DEFINE_POOL(Vec3);
+DEFINE_POOL(Vec4);
 
 #pragma endregion pool
 
@@ -229,6 +233,9 @@ Value::operator Int() const {
 
 POOL_CONVERT(BigInt, TYPE_BIGINT);
 POOL_CONVERT(Real, TYPE_REAL);
+POOL_CONVERT(Vec2, TYPE_VEC2);
+POOL_CONVERT(Vec3, TYPE_VEC3);
+POOL_CONVERT(Vec4, TYPE_VEC4);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -244,6 +251,9 @@ Value::Value(Int value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {
 
 POOL_CONSTRUCT(BigInt, TYPE_BIGINT);
 POOL_CONSTRUCT(Real, TYPE_REAL);
+POOL_CONSTRUCT(Vec2, TYPE_VEC2);
+POOL_CONSTRUCT(Vec3, TYPE_VEC3);
+POOL_CONSTRUCT(Vec4, TYPE_VEC4);
 
 #undef POOL_CONSTRUCT
 
@@ -259,6 +269,9 @@ Value::~Value() {
 
         POOL_FREE(BigInt, TYPE_BIGINT)
         POOL_FREE(Real, TYPE_REAL)
+        POOL_FREE(Vec2, TYPE_VEC2)
+        POOL_FREE(Vec3, TYPE_VEC3)
+        POOL_FREE(Vec4, TYPE_VEC4)
 
         default: {
             Logger::log_err("Value of type %s not handled during free!", get_type_name());
@@ -319,6 +332,9 @@ Value Value::find_int(Real value, std::optional<const std::string*> source) {
 #pragma region parse
 
 std::optional<Value> Value::parse(const std::string& str) {
+    // Check for vec types
+    if (str.starts_with('[')) { return parse_vec(str); }
+
     std::stringstream ss;
     std::string_view sv(str.c_str(), str.length());
     bool negate = false;
@@ -329,7 +345,7 @@ std::optional<Value> Value::parse(const std::string& str) {
         sv = std::string_view(str.c_str() + 1, str.length() - 1);
     }
 
-    // Try to parse as number first
+    // Try to parse as number
 
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {
@@ -373,6 +389,60 @@ Value Value::parse_numeric(const std::string& str, Real value) {
     return find_int(value, &str);
 }
 
+
+std::optional<Value> Value::parse_vec(const std::string& str) {
+    if (!str.starts_with('[') || !str.ends_with(']')) { return std::nullopt; }
+
+    std::string source { str.c_str() + 1, str.length() - 2 };
+    const char* delims = ",";
+    char* ctx = nullptr;
+    std::vector<Real> components;
+
+    char* token = strtok_p(source.data(), delims, &ctx);
+    while (token) {
+        // Trim whitespace
+        std::string_view sv(token);
+        size_t begin = sv.find_first_not_of(" ");
+        size_t end = sv.find_last_not_of(" ") + 1;
+
+        // Negate
+        bool negate = false;
+        if (*(token + begin) == 'n') {
+            negate = true;
+            begin += 1;
+        }
+
+        sv = std::string_view(token + begin, end - begin);
+
+        // String to real
+        std::stringstream ss;
+        Real real;
+        ss.write(sv.data(), sv.size());
+        ss >> real;
+
+        if (ss && ss.eof()) {
+            if (components.size() >= 4) { return std::nullopt; }
+
+            if (negate) { real *= -1; }
+
+            components.push_back(real);
+            token = strtok_p(nullptr, delims, &ctx);
+        }
+        else { return std::nullopt; }
+    }
+
+    switch (components.size()) {
+        case 2:
+            return Value(Vec2(components[0], components[1]));
+        case 3:
+            return Value(Vec3(components[0], components[1], components[2]));
+        case 4:
+            return Value(Vec4(components[0], components[1], components[2], components[3]));
+        default:
+            return std::nullopt;
+    }
+}
+
 #pragma endregion parse
 
 
@@ -387,22 +457,19 @@ std::string Value::to_string() {
             return (operator BigInt()).get_str();
         }
         case TYPE_REAL: {
-            const char* display_format = "%g";
-            const Real value = operator Real();
-            int size = snprintf(nullptr, 0, display_format, value) + 1;
-            if (size <= 512) {
-                static char buf[512];
-                memset(&buf[0], 0, 512);
-                snprintf(&buf[0], 512, display_format, value);
-                return std::string(&buf[0]);
-            }
-            // I tried snprintf'ing directly into a string and it caused The Problems I don't feel like solving right now.
-            char* buf = (char*)malloc(sizeof(char) * size);
-            memset(&buf[0], 0, size);
-            snprintf(&buf[0], size, display_format, value);
-            std::string str(&buf[0]);
-            free(buf);
-            return str;
+            return fmt("%g", operator Real());
+        }
+        case TYPE_VEC2: {
+            const Vec2 value = operator Vec2();
+            return fmt("[%g, %g]", value.x, value.y);
+        }
+        case TYPE_VEC3: {
+            const Vec3 value = operator Vec3();
+            return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+        }
+        case TYPE_VEC4: {
+            const Vec4 value = operator Vec4();
+            return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
         }
         default: {
             return "Value to_string not implemented for type!";
@@ -425,6 +492,15 @@ Value Value::make_copy() const {
         }
         case TYPE_REAL: {
             return Value(operator Real());
+        }
+        case TYPE_VEC2: {
+            return Value(operator Vec2());
+        }
+        case TYPE_VEC3: {
+            return Value(operator Vec3());
+        }
+        case TYPE_VEC4: {
+            return Value(operator Vec4());
         }
         default: {
             Logger::log_err("Value make_copy not implemented for type!");

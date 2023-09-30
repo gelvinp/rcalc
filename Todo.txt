@@ -2,11 +2,12 @@
 - Options (screaming)
 
 # Vector operators
-- dot
-- cross
-- len
-- lensqr
-- add, (scalar)mul, (scalar)div, sub, neg, min, max, avg
+- min, max, avg
+- swizzle operators (.[xyzwrgba])
+- polar [angle, radius] <==> [cos, sin]
+- cylindrical
+- spherical
+- RGB <=> HSL <=> HSV <=> OKLAB
 
 # Matrix operators
 - add, sub, (scalar) mul, (scalar)div, tpose, (vec)mul, (mat)mul
@@ -14,9 +15,16 @@
 - transmat (Vec2 -> mat2 translation matrix, vec3 vec4 same)
 - scalemat (Vec2 -> mat2 scale matrix, vec3 vec4 same)
 - rotmat (scalar -> mat2 rotation matrix, vec3 -> mat3 rotation matrix)
+- Construct from vectors
+- Column and row accessors
+
+# Conversion operators
+- Fahrenheit to Celsius
+- Feet to meters
+- Miles to kilometers
 
 # Technical Debt
-- Vec2/3/4, Mat2/3/4
+- Mat2/3/4
 - Options, allow changing font scale, light mode / dark mode / read from system?
 - Arrow keys up and down to scroll scratchpad history
 - Tab autocomplete commands and operators (that are valid based on param types)

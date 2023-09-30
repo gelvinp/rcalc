@@ -1,34 +1,4 @@
 // @RCalcOperator
-// Name: Rad
-// Parameters: [Real]
-// Description: Convert arg0 degrees to radians.
-// Requires: <numbers>
-// Tags: [no_expr, real_cast]
-RCALC_OP_1(Rad, Real, arg) {
-    return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi));
-}
-
-RCALC_FMT_1(Rad, arg) {
-    return arg.get_input_formatted() + "°";
-}
-
-
-// @RCalcOperator
-// Name: Deg
-// Parameters: [Real]
-// Description: Convert arg0 radians to degrees.
-// Requires: <numbers>
-// Tags: [no_expr, real_cast]
-RCALC_OP_1(Deg, Real, arg) {
-    return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi)));
-}
-
-RCALC_FMT_1(Deg, arg) {
-    return arg.get_input_formatted() + " rad";
-}
-
-
-// @RCalcOperator
 // Name: Pi
 // Description: The mathematical constant Pi.
 // Requires: <numbers>

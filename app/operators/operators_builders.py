@@ -95,10 +95,45 @@ class OperatorMapBuilder:
                 arg_names = []
                 for type in cast_types:
                     arg_name = f"arg{len(arg_names)}"
-                    if type == 'BigInt':
-                        lines.append(f"\t\tBigInt {arg_name} = values[{len(arg_names)}].result.operator BigInt();")
-                    elif type == 'Int':
+                    if type == 'Int':
                         lines.append(f"\t\tBigInt {arg_name} = BigInt((long long int)(values[{len(arg_names)}].result.operator Int()));")
+                    else:
+                        lines.append(f"\t\t{type} {arg_name} = values[{len(arg_names)}].result;")
+
+                    arg_names.append(arg_name)
+            
+                if 'stack_ref' in self.tags:
+                    arg_names.insert(0, "stack")
+
+                if 'no_expr' in self.tags:
+                    lines.append("\t\texpression = false;")
+
+                lines.extend([
+                    f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                    "\t}",
+                ])
+
+                return lines
+
+            def render_reverse_bigint_cast_from(self, name, cast_types):
+                cast_types.reverse()
+
+                lines = [
+                    f'\telse if (types == "{"_".join(cast_types)}") {{',
+                    f"\t\tvalues = stack.pop_items({len(self.types)});"
+                ]
+
+                cast_types.reverse()
+
+                offset = len(cast_types) - 1
+                arg_names = []
+                for type in cast_types:
+                    arg_name = f"arg{len(arg_names)}"
+
+                    if type == 'Int':
+                        lines.append(f"\t\tBigInt {arg_name} = BigInt((long long int)(values[{offset - len(arg_names)}].result.operator Int()));")
+                    else:
+                        lines.append(f"\t\t{type} {arg_name} = values[{offset - len(arg_names)}].result;")
 
                     arg_names.append(arg_name)
             
@@ -135,12 +170,49 @@ class OperatorMapBuilder:
                 arg_names = []
                 for type in cast_types:
                     arg_name = f"arg{len(arg_names)}"
-                    if type == 'Real':
-                        lines.append(f"\t\tReal {arg_name} = values[{len(arg_names)}].result;")
-                    elif type == 'Int':
+                    if type == 'Int':
                         lines.append(f"\t\tReal {arg_name} = (Real)(values[{len(arg_names)}].result.operator Int());")
                     elif type == 'BigInt':
                         lines.append(f"\t\tReal {arg_name} = (values[{len(arg_names)}].result.operator BigInt()).get_real<Real>();")
+                    else:
+                        lines.append(f"\t\t{type} {arg_name} = values[{len(arg_names)}].result;")
+
+                    arg_names.append(arg_name)
+            
+                if 'stack_ref' in self.tags:
+                    arg_names.insert(0, "stack")
+
+                if 'no_expr' in self.tags:
+                    lines.append("\t\texpression = false;")
+
+                lines.extend([
+                    f"\t\tres = OP{len(self.types)}{'S' if 'stack_ref' in self.tags else ''}_{self._render_types()}_{name}({', '.join(arg_names)});",
+                    "\t}",
+                ])
+
+                return lines
+
+            def render_reverse_real_cast_from(self, name, cast_types):
+                cast_types.reverse()
+
+                lines = [
+                    f'\telse if (types == "{"_".join(cast_types)}") {{',
+                    f"\t\tvalues = stack.pop_items({len(self.types)});"
+                ]
+                
+                cast_types.reverse()
+
+                offset = len(cast_types) - 1
+                arg_names = []
+                for type in cast_types:
+                    arg_name = f"arg{len(arg_names)}"
+
+                    if type == 'Int':
+                        lines.append(f"\t\tReal {arg_name} = (Real)(values[{offset - len(arg_names)}].result.operator Int());")
+                    elif type == 'BigInt':
+                        lines.append(f"\t\tReal {arg_name} = (values[{offset - len(arg_names)}].result.operator BigInt()).get_real<Real>();")
+                    else:
+                        lines.append(f"\t\t{type} {arg_name} = values[{offset - len(arg_names)}].result;")
 
                     arg_names.append(arg_name)
             
@@ -226,6 +298,16 @@ class OperatorMapBuilder:
                             self.type_sets.append(typeset)
                             lines.extend(call.render_bigint_cast_from(name, typeset))
                             call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+                        
+                        if 'reversable' in call.tags:
+                            for typeset in call.bigint_cast_get_typesets():
+                                if typeset in self.type_sets:
+                                    continue
+                                
+                                self.type_sets.append(typeset)
+                                lines.extend(call.render_reverse_bigint_cast_from(name, typeset))
+                                call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+
                     
                     if 'real_cast' in call.tags:
                         for typeset in call.real_cast_get_typesets():
@@ -234,6 +316,15 @@ class OperatorMapBuilder:
                             
                             lines.extend(call.render_real_cast_from(name, typeset))
                             call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
+                        
+                        if 'reversable' in call.tags:
+                            for typeset in call.real_cast_get_typesets():
+                                if typeset in self.type_sets:
+                                    continue
+                                
+                                self.type_sets.append(typeset)
+                                lines.extend(call.render_reverse_real_cast_from(name, typeset))
+                                call_types.append(f"{{{', '.join([f'Value::TYPE_{type.upper()}' for type in typeset])}}}")
                 
                 lines.extend([f"\telse {{ return Err(ERR_INVALID_PARAM, \"{name} operator does not recognize types \" + types); }}", '',])
 
@@ -303,7 +394,7 @@ class OperatorMapBuilder:
         lines = [
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"operators.h\"",
-            "#include \"operators_internal.h\"", ""
+            "#include \"operators_internal.gen.h\"", ""
         ]
 
         included = False
@@ -486,3 +577,45 @@ def make_operators_map(target, source, env):
         file.write("\n".join(built))
     
     return 0
+
+
+####
+
+
+def make_internal_header(target, src, env):
+    dst = target[0]
+
+    MAX_PARAM_COUNT = 4
+
+    lines = [
+        '/* THIS FILE IS GENERATED DO NOT EDIT */',
+        '',
+        '#pragma once',
+        '',
+        '#include "core/error.h"',
+        '#include "app/stack.h"',
+        ''
+    ]
+
+    for count in range(MAX_PARAM_COUNT + 1):
+        macro_def = f"{''.join([f', type_{idx}' for idx in range(count)])}{''.join([f', arg_{idx}' for idx in range(count)])}"
+        func_name = ''.join([f'##type_{idx}##_' for idx in range(count)])
+        func_args = ', '.join([f'type_{idx} arg_{idx}' for idx in range(count)])
+        fmt_def = ''.join([f', arg_{idx}' for idx in range(count)])
+        fmt_args = ', '.join([f'const StackItem& arg_{idx}' for idx in range(count)])
+
+        lines.extend([
+            f'/* {count} Parameter{"s" if count != 1 else ""} */',
+            '',
+            f'#define RCALC_OP_{count}(name{macro_def}) Result<Value> OP{count}_{func_name}##name({func_args})',
+            f'#define RCALC_OP_{count}_S(name{macro_def}) Result<Value> OP{count}S_{func_name}##name(RPNStack& stack{", " if count > 0 else ""}{func_args})',
+            '',
+            f'#define RCALC_FMT_{count}(name{fmt_def}) std::string OP_FormatInput_##name({fmt_args})',
+            f'#define RCALC_FMT_{count}_S(name{fmt_def}) std::string OPS_FormatInput_##name(RPNStack& stack{", " if count > 0 else ""}{fmt_args})',
+            ''
+        ])
+    
+    lines.append('#define UNUSED(arg) (void)(arg)')
+
+    with open(dst, 'w') as file:
+        file.write('\n'.join(lines))

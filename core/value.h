@@ -6,12 +6,18 @@
 #include <vector>
 
 #include "modules/bigint/bigint.h"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 namespace RCalc {
 
 typedef int64_t Int;
 typedef bigint BigInt;
 typedef double Real;
+typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
+typedef glm::dvec4 Vec4;
 
 class Value {
 public:
@@ -38,10 +44,16 @@ public:
     operator Int() const;
     operator BigInt() const;
     operator Real() const;
+    operator Vec2() const;
+    operator Vec3() const;
+    operator Vec4() const;
 
     Value(Int value);
     Value(BigInt value);
     Value(Real value);
+    Value(Vec2 value);
+    Value(Vec3 value);
+    Value(Vec4 value);
 
     static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt);
 
@@ -65,6 +77,7 @@ private:
     uint64_t data = 0;
 
     static Value parse_numeric(const std::string& str, Real value);
+    static std::optional<Value> parse_vec(const std::string& str);
 };
 
 }

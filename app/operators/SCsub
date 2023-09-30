@@ -7,6 +7,15 @@ env.operator_sources = []
 
 env_ops = env.Clone()
 
+env_ops.Depends(glob("*.inc"), "#app/operators/operators_internal.gen.h")
+env_ops.Depends("#app/operators/operators.gen.cpp", "#app/operators/operators_internal.gen.h")
+env_ops.Depends("#app/operators/operators_internal.gen.h", "#app/operators/operators_builders.py")
+env_ops.CommandNoCache(
+    "#app/operators/operators_internal.gen.h",
+    None,
+    env.Run(operators_builders.make_internal_header, "Building operators internal header.")
+)
+
 env_ops.Depends("#app/operators/operators.gen.cpp", glob("*.inc"))
 env_ops.Depends("#app/operators/operators.gen.cpp", "#app/operators/operators_builders.py")
 env_ops.CommandNoCache(
