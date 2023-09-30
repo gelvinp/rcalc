@@ -5,7 +5,7 @@
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(DegToRad, Real, arg) {
-    return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi));
+    return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi_v<Real>));
 }
 
 RCALC_FMT_1(DegToRad, arg) {
@@ -20,7 +20,7 @@ RCALC_FMT_1(DegToRad, arg) {
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(RadToDeg, Real, arg) {
-    return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi)));
+    return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi_v<Real>)));
 }
 
 RCALC_FMT_1(RadToDeg, arg) {
