@@ -45,3 +45,8 @@ void PlatformMacOS::render_frame() {
 void PlatformMacOS::copy_to_clipboard(const std::string_view& string) {
     binding.copy_to_clipboard(string);
 }
+
+
+float PlatformMacOS::get_screen_dpi() {
+    return binding.get_screen_dpi();
+}

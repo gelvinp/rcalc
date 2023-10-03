@@ -56,4 +56,11 @@ void MacOS::copy_to_clipboard(const std::string_view& string) {
     [p_binding->p_impl copyToClipboard:string.data()];
 }
 
+
+float MacOS::get_screen_dpi() {
+    if (!p_binding) { return 1.0; }
+    return [p_binding->p_impl getScreenDPI];
+}
+
+
 }

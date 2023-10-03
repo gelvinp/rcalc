@@ -73,11 +73,15 @@ Renderer::Renderer(
 
     glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
     glyphs.AddText("⌈⌉⌊⌋°πτ·×");
-
     glyphs.BuildRanges(&glyph_ranges);
-    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 16, &font_cfg, &glyph_ranges[0]);    
-    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, 24, &font_cfg, &glyph_ranges[0]);    
 
+    float screen_dpi = Platform::get_singleton().get_screen_dpi();
+    float font_size_standard = std::floor(14 * screen_dpi);
+    float font_size_large = std::floor(24 * screen_dpi);
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_standard, &font_cfg, &glyph_ranges[0]);    
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);    
+
+    io.FontGlobalScale = 1.0f / screen_dpi;
 }
 
 void Renderer::render(std::vector<RenderItem>& items) {
@@ -321,27 +325,29 @@ void Renderer::render(std::vector<RenderItem>& items) {
     render_help();
 
     // Handle shortcuts
-    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
-        platform.close_requested = true;
-    }
-    if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
-        if (!items.empty()) {
-            platform.copy_to_clipboard(items.back().output);
+    if (platform.app_menu_bar()) {
+        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
+            platform.close_requested = true;
         }
-        copy_requested = false;
-    }
-    if (dup_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))) {
-        cb_submit_text("\\dup");
-        dup_requested = false;
-    }
-    if ((ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
-        help_requested = true;
-    }
-    if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
-        cb_submit_text("\\pop");
-    }
-    if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
-        enter_pressed = false;
+        if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
+            if (!items.empty()) {
+                platform.copy_to_clipboard(items.back().output);
+            }
+            copy_requested = false;
+        }
+        if (dup_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))) {
+            cb_submit_text("\\dup");
+            dup_requested = false;
+        }
+        if ((ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
+            help_requested = true;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+            cb_submit_text("\\pop");
+        }
+        if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
+            enter_pressed = false;
+        }
     }
 }
 

@@ -33,6 +33,7 @@ static void glfw_error_callback(int error, const char* description) {
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 
     p_window = glfwCreateWindow(640, 480, "RCalc", nullptr, nullptr);
     if (p_window == nullptr) {
@@ -116,6 +117,10 @@ static void glfw_error_callback(int error, const char* description) {
 
 - (void) copyToClipboard:(const char*)string {
     glfwSetClipboardString(p_window, string);
+}
+
+- (CGFloat) getScreenDPI {
+    return p_native_window.screen.backingScaleFactor;
 }
 
 @end

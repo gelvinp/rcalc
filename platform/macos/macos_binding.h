@@ -22,6 +22,7 @@ public:
     void render_frame();
 
     void copy_to_clipboard(const std::string_view& string);
+    float get_screen_dpi();
 
     // Rule of 5
     #ifndef __OBJC

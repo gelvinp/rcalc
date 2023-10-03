@@ -40,6 +40,8 @@
 - (bool) windowShouldClose;
 - (void) copyToClipboard:(const char*)string;
 
+- (CGFloat) getScreenDPI;
+
 @end
 
 
