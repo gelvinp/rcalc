@@ -253,9 +253,6 @@ if selected_platform in available_platforms:
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
     env["LIBSUFFIX"] = suffix + env["OBJSUFFIX"]
 
-    sys.path.remove(tmp_path)
-    sys.modules.pop("detect")
-
     # compile_commands.json
     env.Tool("compilation_db")
     env.Alias("compiledb", env.CompilationDatabase())
@@ -272,7 +269,14 @@ if selected_platform in available_platforms:
 
     # Prevent from using C compiler (can't infer without sources)
     env["CC"] = env["CXX"]
-    env.add_program("#bin/rcalc", [])
+    exe = env.add_program("#bin/rcalc", [])
+
+    if hasattr(detect, "post_build"):
+        post_build = env.CommandNoCache('post_build', exe, detect.post_build)
+    
+    if env.GetOption('clean'):
+        if hasattr(detect, "platform_clean"):
+            detect.platform_clean(env)
 
 elif selected_platform != "":
     if selected_platform == "list":

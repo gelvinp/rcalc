@@ -1,6 +1,10 @@
 import os
 import sys
 from platform_methods import detect_arch
+import shutil
+import zipfile
+import version
+
 
 def get_name():
     return "MacOS"
@@ -108,3 +112,58 @@ def configure(env: "Environment"):
     # RELRO
     if env["target"] == "release":
         env.Append(LINKFLAGS=["-Wl,-z,now"])
+
+
+def post_build(target, source, env):
+    bundle_name = "bin/RCalc"
+
+    if env["target"] == "debug":
+        bundle_name += "_debug"
+    
+    bundle_name += ".app"
+    
+    if os.path.isdir(bundle_name):
+        shutil.rmtree(bundle_name)
+    
+    os.mkdir(bundle_name)
+
+    src = str(source[0])
+    dst = bundle_name + "/Contents/MacOS/rcalc"
+
+    with zipfile.ZipFile("misc/macos_bundle.zip", "r") as zip:
+        zip.extractall(bundle_name + "/")
+    
+    shutil.copyfile(src, dst)
+
+    # Make executable
+    mode = os.stat(dst).st_mode
+    mode |= (mode & 0o444) >> 2 # Convert read bits to execute bits
+    os.chmod(dst, mode)
+
+    # Fix the Info.plist file
+    plist = []
+    plist_path = bundle_name + "/Contents/Info.plist"
+    with open(plist_path, 'r') as file:
+        plist.extend(file)
+    
+    replace = {
+        "$VERSION": f'{version.major}.{version.minor}.{version.patch}'
+    }
+    
+    with open(plist_path, 'w') as file:
+        for line in plist:
+            for [replace_target, replace_with] in replace.items():
+                line = line.replace(replace_target, replace_with)
+            file.write(line)
+
+
+def platform_clean(env):
+    bundle_name = "bin/RCalc"
+
+    if env["target"] == "debug":
+        bundle_name += "_debug"
+    
+    bundle_name += ".app"
+    
+    if os.path.isdir(bundle_name):
+        shutil.rmtree(bundle_name)
