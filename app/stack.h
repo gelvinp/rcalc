@@ -2,6 +2,7 @@
 
 #include "core/value.h"
 
+#include <any>
 #include <optional>
 #include <string>
 #include <stdexcept>
@@ -34,50 +35,52 @@ public:
 
     const std::vector<StackItem>& get_items() const;
 
-    // I'm sorry for this
-    template<typename T, typename U = T*>
-    void set_message(U message) {
+    template<typename T, typename... Args>
+    void set_message(Args&&... args) {
         #ifndef NDEBUG
-        if (p_message) {
+        if (message.has_value()) {
             throw std::logic_error("Cannot set message on RPNStack without clearing the existing message!");
         }
         #endif
-        p_message = static_cast<void*>(message);
-        message_type = typeid(T).hash_code();
+        message.emplace<T>(args...);
     }
 
-    template<typename T, typename U = T*>
+    template<typename T, typename U, typename... Args>
+    void set_message(std::initializer_list<U> il, Args&&... args) {
+        #ifndef NDEBUG
+        if (message.has_value()) {
+            throw std::logic_error("Cannot set message on RPNStack without clearing the existing message!");
+        }
+        #endif
+        message.emplace<T>(il, args...);
+    }
+
+    template<typename T, typename U = T&>
     U get_message() {
         #ifndef NDEBUG
-        if (!p_message) {
+        if (!message.has_value()) {
             throw std::logic_error("Cannot get message on RPNStack without setting one first!");
         }
-        if (typeid(T).hash_code() != message_type) {
+        if (typeid(T) != message.type()) {
             throw std::logic_error("Cannot get message on RPNStack of different type!");
         }
         #endif
-        return static_cast<U>(p_message);
+        // Dereference address into ref to avoid creating copies
+        return *std::any_cast<T>(&message);
     }
 
-    template<typename T, typename U = T*>
     void clear_message() {
         #ifndef NDEBUG
-        if (!p_message) {
+        if (!message.has_value()) {
             throw std::logic_error("Cannot clear message on RPNStack without setting one first!");
         }
-        if (typeid(T).hash_code() != message_type) {
-            throw std::logic_error("Cannot clear message on RPNStack of different type!");
-        }
         #endif
-        delete (U)p_message;
-        p_message = nullptr;
-        message_type = 0;
+        message.reset();
     }
 
 private:
     std::vector<StackItem> stack;
-    void* p_message = nullptr; // Used to communicate between operator implementations and formatting functions
-    size_t message_type = 0;
+    std::any message;
 };
 
 }

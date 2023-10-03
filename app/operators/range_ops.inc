@@ -40,7 +40,7 @@ RCALC_OP_1_S(Min, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Int>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
         case Value::TYPE_BIGINT:
@@ -61,7 +61,7 @@ RCALC_OP_1_S(Min, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<BigInt>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
         case Value::TYPE_REAL:
@@ -85,7 +85,7 @@ RCALC_OP_1_S(Min, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Real>::iterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
         default:
@@ -95,8 +95,8 @@ RCALC_OP_1_S(Min, Int, count) {
 
 RCALC_FMT_1_S(Min, _arg) {
     UNUSED(_arg);
-    std::string str = "min(" + *stack.get_message<std::string>() + ")";
-    stack.clear_message<std::string>();
+    std::string str = "min(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
     return str;
 }
 
@@ -143,7 +143,7 @@ RCALC_OP_1_S(Max, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Int>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
         case Value::TYPE_BIGINT:
@@ -164,7 +164,7 @@ RCALC_OP_1_S(Max, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<BigInt>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
         case Value::TYPE_REAL:
@@ -188,7 +188,7 @@ RCALC_OP_1_S(Max, Int, count) {
                 ss << item.result.to_string();
             }
             std::vector<Real>::iterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(new std::string(ss.str()));
+            stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
         default:
@@ -198,8 +198,8 @@ RCALC_OP_1_S(Max, Int, count) {
 
 RCALC_FMT_1_S(Max, _arg) {
     UNUSED(_arg);
-    std::string str = "max(" + *stack.get_message<std::string>() + ")";
-    stack.clear_message<std::string>();
+    std::string str = "max(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
     return str;
 }
 
@@ -251,14 +251,14 @@ RCALC_OP_1_S(Avg, Int, count) {
     }
     
     Real sum = std::accumulate(values.begin(), values.end(), 0.0);
-    stack.set_message<std::string>(new std::string(ss.str()));
+    stack.set_message<std::string>(ss.str());
     return Ok(Value(sum / count));
 }
 
 RCALC_FMT_1_S(Avg, _arg) {
     UNUSED(_arg);
-    std::string str = "avg(" + *stack.get_message<std::string>() + ")";
-    stack.clear_message<std::string>();
+    std::string str = "avg(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
     return str;
 }
 
@@ -313,7 +313,7 @@ RCALC_OP_1_S(Sum, Int, count) {
         ss << item.result.to_string();
     }
 
-    stack.set_message<std::string>(new std::string(ss.str()));
+    stack.set_message<std::string>(ss.str());
 
     if (is_real) {
         return Ok(Value(sum));
@@ -325,7 +325,7 @@ RCALC_OP_1_S(Sum, Int, count) {
 
 RCALC_FMT_1_S(Sum, _arg) {
     UNUSED(_arg);
-    std::string str = "sum(" + *stack.get_message<std::string>() + ")";
-    stack.clear_message<std::string>();
+    std::string str = "sum(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
     return str;
 }

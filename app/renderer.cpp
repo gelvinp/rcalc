@@ -479,7 +479,7 @@ void RenderItem::recalculate_size(bool scrollbar_visible) {
 
 void Renderer::render_help() {
     ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.80, viewport_size.y * 0.60), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95, viewport_size.y * 0.95), ImGuiCond_Appearing);
     ImGui::SetNextWindowFocus();
 
     if (!ImGui::BeginPopupModal("Help", &help_open)) { return; }

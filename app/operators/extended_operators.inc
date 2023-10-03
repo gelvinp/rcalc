@@ -364,7 +364,7 @@ RCALC_FMT_0(E) {
 // Name: Range
 // Description: Generates a range of numbers from 0 to arg0.
 // Parameters: [Int]
-// Tags: [no_expr, stack_ref]
+// Tags: [no_expr, stack_ref, fmt_stack_ref]
 RCALC_OP_1_S(Range, Int, arg0) {
     for (Int index = 0; index < (arg0 - 1); index++) {
         Value value = Value(index);
@@ -375,9 +375,14 @@ RCALC_OP_1_S(Range, Int, arg0) {
             false
         });
     }
-    return Ok(Value(arg0));
+    Value last = Value(arg0 - 1);
+    stack.set_message<std::string>(last.to_string());
+    return Ok(std::move(last));
 }
 
-RCALC_FMT_1(Range, arg0) {
-    return arg0.input;
+RCALC_FMT_1_S(Range, arg0) {
+    UNUSED(arg0);
+    std::string str = stack.get_message<std::string>();
+    stack.clear_message();
+    return str;
 }
