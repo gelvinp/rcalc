@@ -1,0 +1,59 @@
+#include "macos_binding.h"
+#include "macos_binding_impl.h"
+
+#include "platform_macos.h"
+
+namespace RCalc
+{
+
+struct MacOSBinding {
+    _RCALC_MacOS_BindingImpl* p_impl;
+};
+
+
+MacOS::MacOS(PlatformMacOS* p_platform)
+    : p_binding(new MacOSBinding()), p_platform(p_platform)
+{
+    p_binding->p_impl = [[_RCALC_MacOS_BindingImpl alloc] init];
+}
+
+MacOS::~MacOS() {
+    if (p_binding) {
+        [p_binding->p_impl release];
+    }
+
+    delete p_binding;
+}
+
+
+Result<> MacOS::init() {
+    if (!p_binding) { return Err(ERR_INIT_FAILURE, "MacOS Binding was not initialized!"); }
+    return [p_binding->p_impl start];
+}
+
+
+void MacOS::cleanup() {
+    if (!p_binding) { return; }
+    [p_binding->p_impl stop];
+}
+
+
+void MacOS::start_frame() {
+    if (!p_binding) { return; }
+    p_platform->close_requested = [p_binding->p_impl windowShouldClose];
+    [p_binding->p_impl beginFrame];
+}
+
+
+void MacOS::render_frame() {
+    if (!p_binding) { return; }
+    [p_binding->p_impl renderFrame];
+}
+
+
+void MacOS::copy_to_clipboard(const std::string_view& string) {
+    if (!p_binding) { return; }
+    [p_binding->p_impl copyToClipboard:string.data()];
+}
+
+}
