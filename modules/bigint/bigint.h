@@ -448,7 +448,7 @@ class bigint {
         /* Operator {<} Overloadings, for different kind of 
         parameter for the programmer's convinience  */
 
-        bool operator < (bigint const &n) {
+        bool operator < (bigint const &n) const {
             return is_strictlyMinimum(str, n.str);
         }
         friend bool operator < (bigint const &n1, int n2) {

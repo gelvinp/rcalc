@@ -40,7 +40,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Platform  | Status                            |
 | --------  | ------                            |
 | Linux     | [Supported](#building-for-linux)  |
-| Mac OS    | Not started                       |
+| Mac OS    | In Progress                       |
 | Windows   | Not started                       |
 
 

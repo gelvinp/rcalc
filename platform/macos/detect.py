@@ -3,25 +3,25 @@ import sys
 from platform_methods import detect_arch
 
 def get_name():
-    return "Linux"
+    return "MacOS"
 
 
 def is_available():
-    if os.name != "posix" or sys.platform == "darwin":
+    if sys.platform != "darwin":
         return False
     
     if os.system("pkg-config --version > /dev/null"):
-        print("Error: pkg-config not found. Linux platform is unavailable.")
+        print("Error: pkg-config not found. MacOS platform is unavailable.")
         return False
 
-    return sys.platform == "linux"
+    return True
 
 
 def get_opts():
     from SCons.Variables import BoolVariable
 
     return [
-        BoolVariable("use_llvm", "Use the LLVM compiler", False),
+        BoolVariable("use_gcc", "Use the GCC compiler", False),
         BoolVariable("use_asan", "Compile with -fsanitize=address", False)
     ]
 
@@ -34,7 +34,7 @@ def get_flags():
 
 def configure(env: "Environment"):
     # Validate architecture
-    supported_arches = ["x86_32", "x86_64"]
+    supported_arches = ["x86_32", "x86_64", "arm64"]
     if env["arch"] not in supported_arches:
         print(
             "Unsupported CPU architecture %s for platform Linux. Supported architectures are: [%s]"
@@ -43,33 +43,31 @@ def configure(env: "Environment"):
 
         sys.exit(255)
     
-    if "CXX" in env and "clang" in os.path.basename(env["CXX"]):
-        env["use_llvm"] = True
+    if "CXX" in env and ("gcc-" in os.path.basename(env["CC"]) or "g++-" in os.path.basename(env["CXX"])):
+        env["use_gcc"] = True
     
-    if env["use_llvm"]:
-        if "clang++" not in os.path.basename(env["CXX"]):
-            env["CC"] = "clang"
-            env["CXX"] = "clang++"
-        env.extra_suffix = ".llvm" + env.extra_suffix
+    if env["use_gcc"]:
+        if (not "gcc-" in os.path.basename(env["CC"])) or (not "g++-" in os.path.basename(env["CXX"])) or (not "gcc-ranlib-" in os.path.basename(env["RANLIB"])) or (not "gcc-ar-" in os.path.basename(env["AR"])):
+            print("To compile with GCC on MacOS, please set the 'CC', 'CXX', 'RANLIB', and 'AR' environment variables manually!\n\t(i.e. CC=gcc-13 CXX=g++-13, RANLIB=gcc-ranlib-13 AR=gcc-ar-13)")
+            sys.exit(255)
+        env.extra_suffix = ".gcc" + env.extra_suffix
 
     
     # LTO
     if env["target"] == "release":
-        if env["use_llvm"]:
-            env.Append(CCFLAGS=["-flto=thin"])
-            env.Append(LINKFLAGS=["-flto=thin"])
-            env["lto"] = "thin"
-        else:
+        if env["use_gcc"]:
             env.Append(CCFLAGS=["-flto"])
 
             if env.GetOption("num_jobs") > 1:
                 env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
             else:
                 env.Append(LINKFLAGS=["-flto"])
-            
-            env["RANLIB"] = "gcc-ranlib"
-            env["AR"] = "gcc-ar"
+
             env["lto"] = "full"
+        else:
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
+            env["lto"] = "thin"
     else:
         env["lto"] = "none"
     
@@ -84,7 +82,7 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    deps = ['glfw3', 'gl', 'freetype2']
+    deps = ['glfw3', 'freetype2']
     if os.system(f"pkg-config --exists {' '.join(deps)}"):
         print("Error: Required libraries not found. Aborting.")
         sys.exit(255)
@@ -99,7 +97,7 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
-    env.Append(IMGUI_BACKEND="opengl3")
+    env.Append(IMGUI_BACKEND="metal")
 
     # RELRO
     if env["target"] == "release":

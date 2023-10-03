@@ -69,6 +69,8 @@ env_base = Environment()
 if "TERM" in os.environ:
     env_base["ENV"]["TERM"] = os.environ["TERM"]
 
+env_base["ENV"]["PATH"] = os.environ["PATH"]
+
 
 # Set up env functions
 env_base.__class__.add_source_files = methods.add_source_files
@@ -114,6 +116,8 @@ else:
     # Detect automatically
     if sys.platform == "linux":
         selected_platform = "linux"
+    if sys.platform == "darwin":
+        selected_platform = "macos"
     else:
         print("Could not detect platform automatically. Available platforms:")
         

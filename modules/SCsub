@@ -2,6 +2,8 @@ import os
 
 Import("env")
 
+env.Append(CPPPATH=["#/modules"])
+
 env_modules = env.Clone()
 
 Export("env_modules")
