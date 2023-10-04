@@ -2,7 +2,6 @@
 - Options (screaming)
 
 # Vector operators
-- min, max, avg
 - swizzle operators (.[xyzwrgba])
 - polar [angle, radius] <==> [cos, sin]
 - cylindrical

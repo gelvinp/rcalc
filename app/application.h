@@ -42,7 +42,6 @@ public:
     void on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd);
 
 private:
-
     RPNStack stack;
     Renderer renderer;
     OperatorMap op_map;
@@ -50,6 +49,8 @@ private:
     typedef std::function<void()> AppCommand;
     bool try_application_command(const std::string& str);
     CommandMap<Application> command_map;
+
+    bool try_swizzle(const std::string& str);
 };
 
 }
