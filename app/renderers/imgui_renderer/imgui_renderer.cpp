@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "imgui_renderer.h"
 
 #include "core/logger.h"
 #include "platform/platform.h"
@@ -53,7 +53,7 @@ enum ColorNames : int {
     COLOR_GRAY
 };
 
-Renderer::Renderer(
+ImGuiRenderer::ImGuiRenderer(
     SubmitTextCallback cb_submit_text,
     SubmitOperatorCallback cb_submit_op,
     RequestAppCommandsCallback cb_request_app_cmds,
@@ -84,8 +84,14 @@ Renderer::Renderer(
     io.FontGlobalScale = 1.0f / screen_dpi;
 }
 
-void Renderer::render(std::vector<RenderItem>& items) {
+void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     Platform& platform = Platform::get_singleton();
+
+    std::vector<ImGuiRenderItem> im_items;
+    im_items.reserve(items.size());
+    for (const RenderItem& item : items) {
+        im_items.emplace_back(item);
+    }
 
     // Fullscreen window
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -123,11 +129,11 @@ void Renderer::render(std::vector<RenderItem>& items) {
     
     ImVec2 window_size = ImGui::GetWindowSize();
     if (window_size.x != last_window_size.x || window_size.y != last_window_size.y) {
-        for (RenderItem& item : items) {
+        for (ImGuiRenderItem& item : im_items) {
             item.recalculate_size();
         }
     } else {
-        for (RenderItem& item : items) {
+        for (ImGuiRenderItem& item : im_items) {
             if (item.input_display_width < 0.001) { item.recalculate_size(scrollbar_visible); }
         }
     }
@@ -151,7 +157,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
 
     float desired_stack_height = 0.0;
     if (!items.empty()) {
-        for (const RenderItem& item : items) {
+        for (const ImGuiRenderItem& item : im_items) {
             desired_stack_height += item.display_height;
         }
 
@@ -162,7 +168,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
         scrollbar_visible = true;
         desired_stack_height = 0.0;
         if (!items.empty()) {
-            for (RenderItem& item : items) {
+            for (ImGuiRenderItem& item : im_items) {
                 item.recalculate_size(true);
                 desired_stack_height += item.display_height;
             }
@@ -174,7 +180,7 @@ void Renderer::render(std::vector<RenderItem>& items) {
         scrollbar_visible = false;
         desired_stack_height = 0.0;
         if (!items.empty()) {
-            for (RenderItem& item : items) {
+            for (ImGuiRenderItem& item : im_items) {
                 item.recalculate_size(false);
                 desired_stack_height += item.display_height;
             }
@@ -187,13 +193,13 @@ void Renderer::render(std::vector<RenderItem>& items) {
 
     const float stack_position = separator_position - stack_height - padding;
 
-    if (!items.empty()) {
+    if (!im_items.empty()) {
         ImGui::SetCursorPosY(stack_position);
 
         if (ImGui::BeginChild("##stack", ImVec2(0, stack_height))) {
             int index = 0;
 
-            for (const RenderItem& item : items) {
+            for (const ImGuiRenderItem& item : im_items) {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + STACK_OUTER_PADDING);
 
                 if (queer_active) {
@@ -356,19 +362,19 @@ void Renderer::render(std::vector<RenderItem>& items) {
 }
 
 
-void Renderer::display_info(const std::string& str) {
+void ImGuiRenderer::display_info(const std::string& str) {
     message = str;
     message_is_error = false;
 }
 
 
-void Renderer::display_error(const std::string& str) {
+void ImGuiRenderer::display_error(const std::string& str) {
     message = str;
     message_is_error = true;
 }
 
 
-void Renderer::submit_scratchpad() {
+void ImGuiRenderer::submit_scratchpad() {
     if (enter_pressed) { return; }
     enter_pressed = true;
 
@@ -389,7 +395,7 @@ void Renderer::submit_scratchpad() {
 }
 
 
-int Renderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
+int ImGuiRenderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
     switch (p_cb_data->EventFlag) {
         case ImGuiInputTextFlags_CallbackCharFilter:
             return scratchpad_input_filter_callback(p_cb_data);
@@ -405,8 +411,8 @@ int Renderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
 }
 
 
-int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data) {
-    Renderer* self = (Renderer*)p_cb_data->UserData;
+int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
 
     // Check for basic arithmetic operators
     switch ((char)p_cb_data->EventChar) {
@@ -448,16 +454,16 @@ int Renderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_
 }
 
 
-int Renderer::scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data) {
-    Renderer* self = (Renderer*)p_cb_data->UserData;
+int ImGuiRenderer::scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
     self->scratchpad.resize(p_cb_data->BufTextLen);
     p_cb_data->Buf = (char*)self->scratchpad.c_str();
     return 0;
 }
 
 
-int Renderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data) {
-    Renderer* self = (Renderer*)p_cb_data->UserData;
+int ImGuiRenderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
     if (!self->scratchpad_needs_clear) { return 0; }
     p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
     self->scratchpad_needs_clear = false;
@@ -465,8 +471,8 @@ int Renderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_
 }
 
 
-int Renderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data) {
-    Renderer* self = (Renderer*)p_cb_data->UserData;
+int ImGuiRenderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
 
     switch (p_cb_data->EventKey) {
         case ImGuiKey_UpArrow: {
@@ -514,7 +520,7 @@ int Renderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb
 }
 
 
-bool Renderer::try_renderer_command(const std::string& str) {
+bool ImGuiRenderer::try_renderer_command(const std::string& str) {
     if (command_map.contains(str)) {
         command_map.at(str)->execute(*this);
         return true;
@@ -524,7 +530,7 @@ bool Renderer::try_renderer_command(const std::string& str) {
 }
 
 
-void RenderItem::recalculate_size(bool scrollbar_visible) {
+void ImGuiRenderItem::recalculate_size(bool scrollbar_visible) {
     float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
     if (scrollbar_visible) {
         available_width -= ImGui::GetStyle().ScrollbarSize;
@@ -541,7 +547,7 @@ void RenderItem::recalculate_size(bool scrollbar_visible) {
 }
 
 
-void Renderer::render_help() {
+void ImGuiRenderer::render_help() {
     ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
     ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95, viewport_size.y * 0.95), ImGuiCond_Appearing);
     ImGui::SetNextWindowFocus();
@@ -584,7 +590,7 @@ void Renderer::render_help() {
     ImGui::TextUnformatted("Commands");
     ImGui::PopFont();
 
-    cb_request_app_cmds(&Renderer::render_help_command);
+    cb_request_app_cmds(&ImGuiRenderer::render_help_command);
 
     // Some commands have multiple aliases
     std::set<std::string> displayed_commands;
@@ -601,7 +607,7 @@ void Renderer::render_help() {
     ImGui::TextUnformatted("Operators");
     ImGui::PopFont();
 
-    cb_request_ops(&Renderer::render_help_operator);
+    cb_request_ops(&ImGuiRenderer::render_help_operator);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
     ImGui::Separator();
@@ -629,7 +635,7 @@ void Renderer::render_help() {
 }
 
 
-void Renderer::render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures) {
+void ImGuiRenderer::render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_BLUE]);
@@ -661,7 +667,7 @@ void Renderer::render_help_command(const char* name, const char* description, co
 }
 
 
-void Renderer::render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types) {
+void ImGuiRenderer::render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
