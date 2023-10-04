@@ -27,6 +27,8 @@ static void glfw_error_callback(int error, const char* description) {
 - (Result<>) start {
     glfwSetErrorCallback(glfw_error_callback);
 
+    glfwInitHint(GLFW_COCOA_MENUBAR, GLFW_FALSE); // We'll make our own
+
     if (!glfwInit()) {
         Logger::log_err("Unable to initialize GLFW!");
         return Err(ERR_INIT_FAILURE);
@@ -66,6 +68,52 @@ static void glfw_error_callback(int error, const char* description) {
     p_native_window.contentView.wantsLayer = YES;
 
     p_render_pass_descriptor = [MTLRenderPassDescriptor new];
+
+    // Create menubar
+    id menuBar = [NSMenu new];
+
+    // App menu
+    id appMenu = [NSMenu new];
+
+    id quitMenuItem = [[NSMenuItem alloc] initWithTitle: @"Quit RCalc" action:@selector(terminate:) keyEquivalent:@"q"];
+
+    [appMenu addItem:quitMenuItem];
+
+    id appMenuItem = [NSMenuItem new];
+    [appMenuItem setSubmenu:appMenu];
+
+    // File menu
+    id fileMenu = [[NSMenu alloc] initWithTitle: @"File"];
+
+    id copyMenuItem = [[NSMenuItem alloc] initWithTitle: @"Copy Answer" action:@selector(menuCallbackCopy) keyEquivalent: @"c"];
+    id duplicateMenuItem = [[NSMenuItem alloc] initWithTitle: @"Duplicate Item" action:@selector(menuCallbackDuplicate) keyEquivalent: @"d"];
+
+    [copyMenuItem setTarget:self];
+    [duplicateMenuItem setTarget:self];
+
+    [fileMenu addItem:copyMenuItem];
+    [fileMenu addItem:duplicateMenuItem];
+
+    id fileMenuItem = [NSMenuItem new];
+    [fileMenuItem setSubmenu:fileMenu];
+
+    // Help menu
+    id helpMenu = [[NSMenu alloc] initWithTitle: @"Help"];
+
+    id rcalcHelpMenuItem = [[NSMenuItem alloc] initWithTitle: @"RCalc Help" action:@selector(menuCallbackHelp) keyEquivalent: @"h"];
+
+    [rcalcHelpMenuItem setTarget:self];
+
+    [helpMenu addItem:rcalcHelpMenuItem];
+
+    id helpMenuItem = [NSMenuItem new];
+    [helpMenuItem setSubmenu:helpMenu];
+
+    [menuBar addItem:appMenuItem];
+    [menuBar addItem:fileMenuItem];
+    [menuBar addItem:helpMenuItem];
+
+    [NSApp setMainMenu:menuBar];
 
     return Ok();
 }
@@ -121,6 +169,18 @@ static void glfw_error_callback(int error, const char* description) {
 
 - (CGFloat) getScreenDPI {
     return p_native_window.screen.backingScaleFactor;
+}
+
+- (void) menuCallbackCopy {
+    _application->on_renderer_submit_text("\\copy");
+}
+
+- (void) menuCallbackDuplicate {
+    _application->on_renderer_submit_text("\\dup");
+}
+
+- (void) menuCallbackHelp {
+    _application->on_renderer_submit_text("\\help");
 }
 
 @end

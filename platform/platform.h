@@ -17,7 +17,7 @@ public:
     virtual void start_frame() = 0;
     virtual void render_frame() = 0;
 
-    virtual bool app_menu_bar() = 0;
+    virtual bool app_menu_bar() { return true; };
     virtual void copy_to_clipboard(const std::string_view& string) = 0;
     virtual float get_screen_dpi() { return 1.0; }
 

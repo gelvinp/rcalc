@@ -345,9 +345,12 @@ void Renderer::render(std::vector<RenderItem>& items) {
         if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
             cb_submit_text("\\pop");
         }
-        if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
-            enter_pressed = false;
-        }
+    }
+    if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
+        enter_pressed = false;
+    }
+    if (help_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        help_open = false;
     }
 }
 

@@ -38,6 +38,12 @@ void MacOS::cleanup() {
 }
 
 
+void MacOS::set_application(Application* p_application) {
+    if (!p_binding) { return; }
+    [p_binding->p_impl setApplication:p_application];
+}
+
+
 void MacOS::start_frame() {
     if (!p_binding) { return; }
     p_platform->close_requested = [p_binding->p_impl windowShouldClose];

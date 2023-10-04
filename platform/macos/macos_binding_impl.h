@@ -13,6 +13,13 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+namespace RCalc
+{
+
+class Application;
+
+}
+
 
 @interface _RCALC_MacOS_BindingImpl : NSObject {
     GLFWwindow* p_window;
@@ -29,6 +36,8 @@
     id <MTLRenderCommandEncoder> renderEncoder;
 }
 
+@property RCalc::Application* application;
+
 - (instancetype) init;
 
 - (Result<>) start;
@@ -41,6 +50,10 @@
 - (void) copyToClipboard:(const char*)string;
 
 - (CGFloat) getScreenDPI;
+
+- (void) menuCallbackCopy;
+- (void) menuCallbackDuplicate;
+- (void) menuCallbackHelp;
 
 @end
 

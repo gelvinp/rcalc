@@ -8,6 +8,7 @@ class PlatformMacOS;
 namespace RCalc
 {
 
+class Application;
 struct MacOSBinding;
 
 class MacOS {
@@ -17,6 +18,8 @@ public:
 
     Result<> init();
     void cleanup();
+
+    void set_application(Application* p_application);
 
     void start_frame();
     void render_frame();

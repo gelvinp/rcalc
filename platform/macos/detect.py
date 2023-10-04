@@ -95,7 +95,8 @@ def configure(env: "Environment"):
     env.Append(LINKFLAGS=[
         "-framework", "Foundation",
         "-framework", "Metal",
-        "-framework", "QuartzCore"
+        "-framework", "QuartzCore",
+        "-framework", "AppKit"
     ])
 
     # Cross compilation
@@ -108,10 +109,6 @@ def configure(env: "Environment"):
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
     env.Append(IMGUI_BACKEND="metal")
-
-    # RELRO
-    if env["target"] == "release":
-        env.Append(LINKFLAGS=["-Wl,-z,now"])
 
 
 def post_build(target, source, env):

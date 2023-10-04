@@ -18,6 +18,7 @@ Result<> PlatformMacOS::init() {
 
 void PlatformMacOS::runloop() {
     RCalc::Application app;
+    binding.set_application(&app);
 
     while (!close_requested) {
         start_frame();
