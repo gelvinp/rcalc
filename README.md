@@ -40,7 +40,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Platform  | Status                            |
 | --------  | ------                            |
 | Linux     | [Supported](#building-for-linux)  |
-| Mac OS    | In Progress                       |
+| Mac OS    | [Supported](#building-for-macos)  |
 | Windows   | Not started                       |
 
 
@@ -61,5 +61,28 @@ For a debug build, run `scons` from the project root.
 For a release build, run `scons target=release` from the project root.
 
 To build with clang instead of GCC, use `scons use_llvm=yes`.
+
+To build with asan, use `scons use_asan=yes`.
+
+
+### Building for MacOS
+
+The following dependencies are required to build RCalc:
+
+ - Python
+ - SCons
+ - pkg-config
+ - glfw3 + development headers
+ - freetype2 + development headers
+ - A version of apple-clang, clang or gcc that supports c++20
+
+For a debug build, run `scons` from the project root.
+
+For a release build, run `scons target=release` from the project root.
+
+Building on MacOS will always produce a `.app` bundle.
+
+To build with GCC instead of clang, use `scons use_gcc=yes`, and make sure your `CC`, `CXX`, `RANLIB` and `AR` are set appropriately.
+You must set these yourself as MacOS aliases `gcc` and `g++` to use Apple Clang instead.
 
 To build with asan, use `scons use_asan=yes`.

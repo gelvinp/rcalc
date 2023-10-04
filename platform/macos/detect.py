@@ -130,7 +130,7 @@ def post_build(target, source, env):
     with zipfile.ZipFile("misc/macos_bundle.zip", "r") as zip:
         zip.extractall(bundle_name + "/")
     
-    shutil.copyfile(src, dst)
+    shutil.move(src, dst)
 
     # Make executable
     mode = os.stat(dst).st_mode
