@@ -100,7 +100,8 @@
         "ios": "cpp",
         "locale": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "__memory": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20",
     "python.analysis.ignore": [

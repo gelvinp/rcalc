@@ -72,7 +72,7 @@ Renderer::Renderer(
     font_cfg.FontDataOwnedByAtlas = false;
 
     glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
-    glyphs.AddText("⌈⌉⌊⌋°πτ·×");
+    glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
     glyphs.BuildRanges(&glyph_ranges);
 
     float screen_dpi = Platform::get_singleton().get_screen_dpi();

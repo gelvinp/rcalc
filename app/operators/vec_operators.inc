@@ -294,3 +294,109 @@ RCALC_OP_1(Norm, Vec4, arg0) {
 RCALC_FMT_1(Norm, arg0) {
     return "norm(" + arg0.input + ")";
 }
+
+
+// @RCalcOperator
+// Name: Concat
+// Description: Joins two values together.
+// Parameters: [Real, Real]
+// Requires: <glm/vec2.hpp>
+// Tags: [real_cast, stack_ref]
+RCALC_OP_2_S(Concat, Real, Real, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g | %g]", arg0, arg1));
+    return Ok(Value(Vec2(arg0, arg1)));
+}
+
+// @RCalcOperator
+// Name: Concat
+// Parameters: [Vec2, Real]
+// Requires: <glm/vec3.hpp>
+// Requires: "core/format.h"
+// Tags: [real_cast, stack_ref, fmt_stack_ref]
+RCALC_OP_2_S(Concat, Vec2, Real, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g, %g | %g]", arg0.x, arg0.y, arg1));
+    return Ok(Value(Vec3(arg0.x, arg0.y, arg1)));
+}
+
+// @RCalcOperator
+// Name: Concat
+// Parameters: [Real, Vec2]
+// Requires: <glm/vec3.hpp>
+// Requires: "core/format.h"
+// Tags: [real_cast, stack_ref, fmt_stack_ref]
+RCALC_OP_2_S(Concat, Real, Vec2, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g | %g, %g]", arg0, arg1.x, arg1.y));
+    return Ok(Value(Vec3(arg0, arg1.x, arg1.y)));
+}
+
+// @RCalcOperator
+// Name: Concat
+// Parameters: [Vec3, Real]
+// Requires: <glm/vec4.hpp>
+// Requires: "core/format.h"
+// Tags: [real_cast, stack_ref, fmt_stack_ref]
+RCALC_OP_2_S(Concat, Vec3, Real, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g, %g, %g | %g]", arg0.x, arg0.y, arg0.z, arg1));
+    return Ok(Value(Vec4(arg0.x, arg0.y, arg0.z, arg1)));
+}
+
+// @RCalcOperator
+// Name: Concat
+// Parameters: [Real, Vec3]
+// Requires: <glm/vec4.hpp>
+// Requires: "core/format.h"
+// Tags: [real_cast, stack_ref, fmt_stack_ref]
+RCALC_OP_2_S(Concat, Real, Vec3, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g | %g, %g, %g]", arg0, arg1.x, arg1.y, arg1.z));
+    return Ok(Value(Vec4(arg0, arg1.x, arg1.y, arg1.z)));
+}
+
+// @RCalcOperator
+// Name: Concat
+// Parameters: [Vec2, Vec2]
+// Requires: <glm/vec4.hpp>
+// Requires: "core/format.h"
+// Tags: [real_cast, stack_ref, fmt_stack_ref]
+RCALC_OP_2_S(Concat, Vec2, Vec2, arg0, arg1) {
+    stack.set_message<std::string>(fmt("[%g, %g | %g, %g]", arg0.x, arg0.y, arg1.x, arg1.y));
+    return Ok(Value(Vec4(arg0.x, arg0.y, arg1.x, arg1.y)));
+}
+
+RCALC_FMT_2_S(Concat, arg0, arg1) {
+    UNUSED(arg0);
+    UNUSED(arg1);
+
+    std::string str = stack.get_message<std::string>();
+    stack.clear_message();
+    return str;
+}
+
+
+// @RCalcOperator
+// Name: Rev
+// Parameters: [Vec2]
+// Description: Reverses a vector.
+// Requires: <glm/vec2.hpp>
+RCALC_OP_1(Rev, Vec2, arg0) {
+    return Ok(Value(Vec2(arg0.y, arg0.x)));
+}
+
+// @RCalcOperator
+// Name: Rev
+// Parameters: [Vec3]
+// Requires: <glm/vec3.hpp>
+RCALC_OP_1(Rev, Vec3, arg0) {
+    return Ok(Value(Vec3(arg0.z, arg0.y, arg0.x)));
+}
+
+// @RCalcOperator
+// Name: Rev
+// Parameters: [Vec4]
+// Requires: <glm/vec4.hpp>
+RCALC_OP_1(Rev, Vec4, arg0) {
+    return Ok(Value(Vec4(arg0.w, arg0.z, arg0.y, arg0.x)));
+}
+
+RCALC_FMT_1(Rev, arg0) {
+    return "rev(" + arg0.input + ")";
+}

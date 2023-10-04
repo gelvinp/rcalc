@@ -1,13 +1,6 @@
 # Renderer commands
 - Options (screaming)
 
-# Vector operators
-- swizzle operators (.[xyzwrgba])
-- polar [angle, radius] <==> [cos, sin]
-- cylindrical
-- spherical
-- RGB <=> HSL <=> HSV <=> OKLAB
-
 # Matrix operators
 - add, sub, (scalar) mul, (scalar)div, tpose, (vec)mul, (mat)mul
 - det (determinate)

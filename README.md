@@ -19,7 +19,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
 | Floating point division (quot, rem, mod)                      | Complete          |
 | Range operators (min, max, avg)                               | Complete          |
-| Vector operators                                              | In Progress       |
+| Vector operators                                              | Complete          |
 | Matrix operators                                              | Might not happen  |
 | Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | In Progress       |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
