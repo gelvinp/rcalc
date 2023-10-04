@@ -116,7 +116,7 @@ else:
     # Detect automatically
     if sys.platform == "linux":
         selected_platform = "linux"
-    if sys.platform == "darwin":
+    elif sys.platform == "darwin":
         selected_platform = "macos"
     else:
         print("Could not detect platform automatically. Available platforms:")
