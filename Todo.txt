@@ -13,7 +13,6 @@
 # Technical Debt
 - Mat2/3/4
 - Options, allow changing font scale, light mode / dark mode / read from system?
-- Arrow keys up and down to scroll scratchpad history
 - Tab autocomplete commands and operators (that are valid based on param types)
 - Refactor Renderer into ImGuiRenderer enabled at build time, allow runtime renderer selection
 - TUI Renderer

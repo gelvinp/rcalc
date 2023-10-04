@@ -292,7 +292,8 @@ void Renderer::render(std::vector<RenderItem>& items) {
         | ImGuiInputTextFlags_EscapeClearsAll
         | ImGuiInputTextFlags_CallbackCharFilter
         | ImGuiInputTextFlags_CallbackResize
-        | ImGuiInputTextFlags_CallbackAlways,
+        | ImGuiInputTextFlags_CallbackAlways
+        | ImGuiInputTextFlags_CallbackHistory,
         &scratchpad_input_callback,
         (void*)this)
     ) {
@@ -379,6 +380,9 @@ void Renderer::submit_scratchpad() {
         return;
     }
 
+    history.push_back(scratchpad);
+    history_state = std::nullopt;
+
     std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
     cb_submit_text(scratchpad);
     scratchpad.clear();
@@ -393,6 +397,8 @@ int Renderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
             return scratchpad_input_resize_callback(p_cb_data);
         case ImGuiInputTextFlags_CallbackAlways:
             return scratchpad_input_always_callback(p_cb_data);
+        case ImGuiInputTextFlags_CallbackHistory:
+            return scratchpad_input_history_callback(p_cb_data);
         default:
             return 0;
     }
@@ -456,6 +462,55 @@ int Renderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_
     p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
     self->scratchpad_needs_clear = false;
     return 0;
+}
+
+
+int Renderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    Renderer* self = (Renderer*)p_cb_data->UserData;
+
+    switch (p_cb_data->EventKey) {
+        case ImGuiKey_UpArrow: {
+            size_t next_state;
+
+            if (self->history_state) {
+                next_state = self->history_state.value() + 1;
+                if (next_state > self->history.size()) { return 0; }
+            }
+            else if (!self->history.empty()) {
+                next_state = 1;
+            }
+            else { return 0; }
+
+            const std::string& str = *(self->history.end() - next_state);
+            p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+            p_cb_data->InsertChars(0, str.data(), str.data() + str.length());
+
+            self->history_state = next_state;
+            return 0;
+        }
+        case ImGuiKey_DownArrow: {
+            std::optional<size_t> next_state;
+
+            if (self->history_state) {
+                next_state = self->history_state.value() - 1;
+                if (next_state == 0) { next_state = std::nullopt; }
+                if (next_state > self->history.size()) /* Shouldn't happen but who knows */ { next_state = std::nullopt; }
+            }
+            else { return 0; }
+
+            p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+            
+            if (next_state) {
+                const std::string& str = *(self->history.end() - next_state.value());
+                p_cb_data->InsertChars(0, str.data(), str.data() + str.length());
+            }
+
+            self->history_state = next_state;
+            return 0;
+        }
+        default:
+            return 0;
+    }
 }
 
 

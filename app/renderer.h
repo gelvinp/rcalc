@@ -68,6 +68,9 @@ private:
     bool queer_active = false;
     bool enter_pressed = false;
 
+    std::vector<std::string> history;
+    std::optional<size_t> history_state = std::nullopt;
+
     ImVector<ImWchar> glyph_ranges;
     ImFontGlyphRangesBuilder glyphs;
     ImFont* p_font_standard;
@@ -80,6 +83,7 @@ private:
     static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
 
     static void render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures);
     static void render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types);
