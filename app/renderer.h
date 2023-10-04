@@ -44,6 +44,7 @@ public:
 
     REGISTER_COMMAND(Renderer, Help);
     REGISTER_COMMAND(Renderer, Queer);
+    REGISTER_COMMAND(Renderer, ClearHist);
 
 private:
     SubmitTextCallback cb_submit_text;
