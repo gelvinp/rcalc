@@ -75,6 +75,10 @@ def configure(env: "Environment"):
     else:
         env["lto"] = "none"
     
+    # RPath
+    if not env["use_gcc"]:
+        env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
+    
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
