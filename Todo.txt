@@ -10,11 +10,6 @@
 - Construct from vectors
 - Column and row accessors
 
-# Conversion operators
-- Fahrenheit to Celsius
-- Feet to meters
-- Miles to kilometers
-
 # Technical Debt
 - Mat2/3/4
 - Options, allow changing font scale, light mode / dark mode / read from system?

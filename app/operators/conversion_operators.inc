@@ -9,7 +9,7 @@ RCALC_OP_1(DegToRad, Real, arg) {
 }
 
 RCALC_FMT_1(DegToRad, arg) {
-    return arg.get_input_formatted() + "°";
+    return "rad(" + arg.get_input_formatted() + "°)";
 }
 
 
@@ -24,7 +24,7 @@ RCALC_OP_1(RadToDeg, Real, arg) {
 }
 
 RCALC_FMT_1(RadToDeg, arg) {
-    return arg.get_input_formatted() + " rad";
+    return "deg(" + arg.get_input_formatted() + " rad)";
 }
 
 
@@ -634,4 +634,154 @@ RCALC_OP_1(OklabToHSV, Vec3, arg) {
 
 RCALC_FMT_1(OklabToHSV, arg) {
     return "OklabToHSV(" + arg.get_input_formatted() + ")";
+}
+
+
+// @RCalcOperator
+// Name: FToC
+// Parameters: [Real]
+// Description: Convert arg0 fahrenheit to celsius.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(FToC, Real, arg) {
+    return Ok(Value((5.0 / 9.0) * (arg - 32.0)));
+}
+
+RCALC_FMT_1(FToC, arg) {
+    return "c(" + arg.get_input_formatted() + " °f)";
+}
+
+
+// @RCalcOperator
+// Name: CToF
+// Parameters: [Real]
+// Description: Convert arg0 celsius to fahrenheit.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(CToF, Real, arg) {
+    return Ok(Value((9.0 / 5.0) * arg + 32.0));
+}
+
+RCALC_FMT_1(CToF, arg) {
+    return "f(" + arg.get_input_formatted() + " °c)";
+}
+
+
+// @RCalcOperator
+// Name: FtToM
+// Parameters: [Real]
+// Description: Convert arg0 feet to meters.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(FtToM, Real, arg) {
+    return Ok(Value(arg * 0.3048));
+}
+
+RCALC_FMT_1(FtToM, arg) {
+    return "m(" + arg.get_input_formatted() + " ft)";
+}
+
+
+// @RCalcOperator
+// Name: MToFt
+// Parameters: [Real]
+// Description: Convert arg0 meters to feet.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(MToFt, Real, arg) {
+    return Ok(Value(arg * 3.28084));
+}
+
+RCALC_FMT_1(MToFt, arg) {
+    return "ft(" + arg.get_input_formatted() + " m)";
+}
+
+
+// @RCalcOperator
+// Name: InToCm
+// Parameters: [Real]
+// Description: Convert arg0 inches to centimeters.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(InToCm, Real, arg) {
+    return Ok(Value(arg * 2.54));
+}
+
+RCALC_FMT_1(InToCm, arg) {
+    return "cm(" + arg.get_input_formatted() + " in)";
+}
+
+
+// @RCalcOperator
+// Name: CmToIn
+// Parameters: [Real]
+// Description: Convert arg0 centimeters to inches.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(CmToIn, Real, arg) {
+    return Ok(Value(arg * 0.393701));
+}
+
+RCALC_FMT_1(CmToIn, arg) {
+    return "in(" + arg.get_input_formatted() + " cm)";
+}
+
+
+// @RCalcOperator
+// Name: MiToKm
+// Parameters: [Real]
+// Description: Convert arg0 statute miles to kilometers.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(MiToKm, Real, arg) {
+    return Ok(Value(arg * 1.609344));
+}
+
+RCALC_FMT_1(MiToKm, arg) {
+    return "km(" + arg.get_input_formatted() + " mi)";
+}
+
+
+// @RCalcOperator
+// Name: KmToMi
+// Parameters: [Real]
+// Description: Convert arg0 kilometers to statute miles.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(KmToMi, Real, arg) {
+    return Ok(Value(arg * 0.621371));
+}
+
+RCALC_FMT_1(KmToMi, arg) {
+    return "mi(" + arg.get_input_formatted() + " kmm)";
+}
+
+
+// @RCalcOperator
+// Name: LbsToKg
+// Parameters: [Real]
+// Description: Convert arg0 US pounds to kilograms.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(LbsToKg, Real, arg) {
+    return Ok(Value(arg * 0.45359237));
+}
+
+RCALC_FMT_1(LbsToKg, arg) {
+    return "kg(" + arg.get_input_formatted() + " lbs)";
+}
+
+
+// @RCalcOperator
+// Name: KgToLbs
+// Parameters: [Real]
+// Description: Convert arg0 kilograms to US pounds.
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(KgToLbs, Real, arg) {
+    return Ok(Value(arg * 2.204623));
+}
+
+RCALC_FMT_1(KgToLbs, arg) {
+    return "lbs(" + arg.get_input_formatted() + " kg)";
 }

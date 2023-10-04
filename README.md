@@ -21,7 +21,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Range operators (min, max, avg)                               | Complete          |
 | Vector operators                                              | Complete          |
 | Matrix operators                                              | Might not happen  |
-| Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | In Progress       |
+| Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | Complete          |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
 | Renderer commands (help, options)                             | In Progress       |
 | Renderer scratchpad history                                   | Not started       |
@@ -34,6 +34,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
  - [ ] Use perfect hash generator for operator and command maps
  - [ ] Operator map generator is getting pretty complex, could maybe use a rewrite?
  - [ ] Look into statically linking things because wow mac os is a headache when you don't use xcode
+ - [ ] Rewrite help page (Collapsable param types, examples, how to enter values, how does rpn work, group ops by category)
 
 
 ## Platform support
