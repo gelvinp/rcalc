@@ -264,8 +264,8 @@ if selected_platform in available_platforms:
     SConscript("modules/SCsub")
     SConscript("core/SCsub")
     SConscript("app/SCsub")
-    SConscript("main/SCsub")
     SConscript("platform/SCsub")
+    SConscript("main/SCsub")
 
     # Prevent from using C compiler (can't infer without sources)
     env["CC"] = env["CXX"]
