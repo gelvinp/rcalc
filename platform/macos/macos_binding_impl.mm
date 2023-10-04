@@ -119,6 +119,10 @@ static void glfw_error_callback(int error, const char* description) {
 }
 
 - (void) stop {
+    ImGui_ImplMetal_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    
     glfwDestroyWindow(p_window);
     glfwTerminate();
 }
