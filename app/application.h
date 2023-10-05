@@ -1,32 +1,27 @@
 #pragma once
 
-#include "core/logger.h"
-#include "platform/platform.h"
-#include "imgui.h"
 #include "stack.h"
-#include "renderer.h"
+#include "app/renderers/renderer.h"
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
 
-#include <array>
-#include <format>
 #include <functional>
 #include <string>
-#include <optional>
-#include <unordered_map>
-#include <vector>
+#include <string_view>
 
 namespace RCalc {
 
 struct AppConfig {
     bool quiet = false;
     bool verbose = false;
+    std::string renderer_name;
 };
 
 class Application {
 public:
-    Application();
     void step();
+
+    static Result<Application*> create(AppConfig config);
 
     REGISTER_COMMAND(Application, Clear);
     REGISTER_COMMAND(Application, Quit);
@@ -42,8 +37,10 @@ public:
     void on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd);
 
 private:
+    Application();
+
     RPNStack stack;
-    Renderer renderer;
+    Renderer* p_renderer;
     OperatorMap op_map;
 
     typedef std::function<void()> AppCommand;

@@ -11,18 +11,20 @@ PlatformMacOS::PlatformMacOS()
 {}
 
 
-Result<> PlatformMacOS::init() {
-    return binding.init();
+Result<> PlatformMacOS::init(RCalc::AppConfig config) {
+    Result<> res = binding.init();
+    UNWRAP_R(res);
+    res = create_application(config);
+    return res;
 }
 
 
 void PlatformMacOS::runloop() {
-    RCalc::Application app;
-    binding.set_application(&app);
+    binding.set_application(p_application);
 
     while (!close_requested) {
         start_frame();
-        app.step();
+        p_application->step();
         render_frame();
     }
 }

@@ -7,7 +7,7 @@ class PlatformMacOS : public Platform {
 public:
     PlatformMacOS();
 
-    virtual Result<> init() override;
+    virtual Result<> init(RCalc::AppConfig config) override;
     virtual void runloop() override;
     virtual void cleanup() override;
 

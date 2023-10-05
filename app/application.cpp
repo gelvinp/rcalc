@@ -2,6 +2,7 @@
 
 #include "core/logger.h"
 #include "core/format.h"
+#include "imgui.h"
 #include "imgui_stdlib.h"
 
 #include <algorithm>
@@ -13,13 +14,28 @@
 
 namespace RCalc {
 
-Application::Application() :
-    renderer(Renderer(
-        std::bind(&Application::on_renderer_submit_text, this, std::placeholders::_1),
-        std::bind(&Application::on_renderer_submit_operator, this, std::placeholders::_1),
-        std::bind(&Application::on_renderer_requested_app_commands, this, std::placeholders::_1),
-        std::bind(&Application::on_renderer_requested_operators, this, std::placeholders::_1))
-) {
+Result<Application*> Application::create(AppConfig config) {
+    Application* p_application = new Application();
+
+    Result<Renderer*> renderer_res = Renderer::create(
+        config.renderer_name.data(),
+        std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
+        std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1),
+        std::bind(&Application::on_renderer_requested_app_commands, p_application, std::placeholders::_1),
+        std::bind(&Application::on_renderer_requested_operators, p_application, std::placeholders::_1)
+    );
+
+    if (renderer_res) {
+        p_application->p_renderer = renderer_res.unwrap();
+        return Ok(p_application);
+    }
+    else {
+        delete p_application;
+        return renderer_res.unwrap_err();
+    }
+}
+
+Application::Application() {
     command_map = get_command_map<Application>();
     op_map = get_operator_map();
 }
@@ -27,30 +43,31 @@ Application::Application() :
 void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {
-        render_items.emplace_back(item.input, item.output);
+        RenderItem render_item { item.input, item.output };
+        render_items.push_back(render_item);
     }
-    renderer.render(render_items);
+    p_renderer->render(render_items);
 }
 
 void Application::on_renderer_submit_text(const std::string& str) {
     // If it starts with '\', it's a command
     if (str.starts_with('\\')) {
         if (try_application_command(str)) { return; }
-        if (renderer.try_renderer_command(str)) { return; }
+        if (p_renderer->try_renderer_command(str)) { return; }
 
         const char* error_format = "Unknown command: '%s'";
         int size = snprintf(nullptr, 0, error_format, str.c_str()) + 1;
         std::string error;
         error.resize(size);
         snprintf(error.data(), error.size(), error_format, str.c_str());
-        renderer.display_error(error);
+        p_renderer->display_error(error);
         return;
     }
 
     // Try to parse as Value first
     std::optional<Value> value = Value::parse(str);
     if (value) {
-        stack.push_item(StackItem{value.value().to_string(), value.value().to_string(), std::move(value.value()), false});
+        stack.push_item(StackItem{value.value().to_string(), value.value().to_string(), std::move(value).value(), false});
         return;
     }
 
@@ -62,14 +79,14 @@ void Application::on_renderer_submit_text(const std::string& str) {
     if (try_swizzle(str)) { return; }
 
     // Unknown command!
-    renderer.display_error(fmt("Unknown operator: '%s'", str.c_str()));
+    p_renderer->display_error(fmt("Unknown operator: '%s'", str.c_str()));
 }
 
 
 bool Application::on_renderer_submit_operator(const std::string& str) {
     if (op_map.contains(str)) {
         Result<> res = op_map.at(str)->evaluate(stack);
-        if (!res) { renderer.display_error(res.unwrap_err().get_message()); }
+        if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
         return true;
     }
     return false;
@@ -137,11 +154,11 @@ bool Application::try_swizzle(const std::string& str) {
                     case 'z':
                     case 'a':
                     case 'w':
-                        renderer.display_error(fmt("Swizzle out of bounds for Vec2: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec2: '%s'", str.c_str()));
                         stack.push_items(std::move(source_value));
                         return true;
                     default:
-                        renderer.display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }
@@ -170,11 +187,11 @@ bool Application::try_swizzle(const std::string& str) {
                         break;
                     case 'a':
                     case 'w':
-                        renderer.display_error(fmt("Swizzle out of bounds for Vec3: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec3: '%s'", str.c_str()));
                         stack.push_items(std::move(source_value));
                         return true;
                     default:
-                        renderer.display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }
@@ -206,7 +223,7 @@ bool Application::try_swizzle(const std::string& str) {
                         values.push_back(value.a);
                         break;
                     default:
-                        renderer.display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }

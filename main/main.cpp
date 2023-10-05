@@ -3,10 +3,12 @@
 #include "main/main.h"
 #include "platform/platform.h"
 #include "modules/register_modules.h"
+#include "app/renderers/renderer.h"
 
 #include <iostream>
 #include <string_view>
 #include <sstream>
+#include <cstring>
 
 
 int main(int argc, char** pp_argv)
@@ -14,9 +16,9 @@ int main(int argc, char** pp_argv)
     Main m;
     Platform& platform = Platform::get_singleton();
 
-    m.parse_args(argc, pp_argv);
+    RCalc::AppConfig config = m.parse_args(argc, pp_argv);
     initialize_modules();
-    Result<> res = platform.init();
+    Result<> res = platform.init(config);
     
     if (!res) {
         std::stringstream ss;
@@ -33,7 +35,7 @@ int main(int argc, char** pp_argv)
 }
 
 
-void Main::parse_args(int argc, char** pp_argv)
+RCalc::AppConfig Main::parse_args(int argc, char** pp_argv)
 {
     p_name = pp_argv[0];
     std::vector<std::string_view> args;
@@ -51,6 +53,8 @@ void Main::parse_args(int argc, char** pp_argv)
     } else if (config.verbose) {
         Logger::configure(Logger::LOG_VERBOSE);
     }
+
+    return config;
 }
 
 
@@ -77,6 +81,11 @@ void Main::print_help(bool print_description)
     std::cout << "  -v, --version               Display the version string.\n";
     std::cout << "  --verbose                   Enable verbose logging.\n";
     std::cout << "  --quiet                     Silence all logging, except for errors.\n";
+    std::cout << "  --list-renderers            List the available renderers.\n";
+    std::cout << "\n";
+
+    std::cout << "Run Options:\n";
+    std::cout << "  --renderer <renderer>       Select an available renderer.\n";
     std::cout << "\n";
 }
 
@@ -84,6 +93,34 @@ void Main::print_help(bool print_description)
 void Main::print_version()
 {
     std::cout << get_full_version_string() << "\n";
+}
+
+
+void Main::list_renderers()
+{
+    std::cout << "Supported renderers:\n";
+
+    for (const char* renderer : RCalc::Renderer::get_enabled_renderers()) {
+        std::cout << "\t" << renderer << "\n";
+    }
+
+    std::cout << "\n";
+    std::cout << "You can choose a renderer to use with the --renderer option.\n";
+    std::cout << "  e.g. " << p_name << " --renderer " << RCalc::Renderer::default_renderer << "\n";
+}
+
+
+const char* Main::validate_renderer(const std::vector<std::string_view>::const_iterator& name)
+{
+    for (const char* renderer : RCalc::Renderer::get_enabled_renderers()) {
+        if (name->compare(renderer) == 0) {
+            return renderer;
+        }
+    }
+
+    std::cout << "Error: \"" << *name << "\" is not a supported renderer.\n\n";
+    list_renderers();
+    exit(255);
 }
 
 
@@ -122,6 +159,18 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
             continue;
         }
 
+        if (arg->compare("--list-renderers") == 0)
+        {
+            list_renderers();
+            exit(0);
+        }
+
+        if (arg->compare("--renderer") == 0)
+        {
+            config.renderer_name = validate_renderer(++arg);
+            continue;
+        }
+
         
         std::cout << "Unrecognized option: " << *arg << "\n";
         print_help(false);
@@ -132,6 +181,10 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
     {
         std::cout << "Error: Cannot specify both --quiet and --verbose at the same time.\n";
         exit(255);
+    }
+
+    if (config.renderer_name.empty()) {
+        config.renderer_name = RCalc::Renderer::default_renderer;
     }
 
     return config;

@@ -4,7 +4,7 @@ from string import ascii_lowercase, digits
 
 
 class CommandMapBuilder:
-    State = Enum('State', ['WAITING', 'WAITING_NAME', 'WAITING_SCOPE', 'CAPTURING', 'ERROR'])
+    State = Enum('State', ['WAITING', 'WAITING_NAME', 'WAITING_SCOPE', 'SKIP_SCOPE', 'CAPTURING', 'ERROR'])
     included_requires = []
     included_filenames = []
     seen_usages = []
@@ -68,7 +68,7 @@ class CommandMapBuilder:
             allowed = list(ascii_lowercase + digits)
             return ''.join([c for c in lower if c in allowed])
 
-    def __init__(self):
+    def __init__(self, enabled_scopes):
         self.state = self.State.WAITING
         self.error = ""
         self.current_scope = ""
@@ -78,6 +78,7 @@ class CommandMapBuilder:
         self.line_no = 1
         self.filename = ""
         self.requires = []
+        self.enabled_scopes = enabled_scopes
     
 
     def process_file(self, path):
@@ -154,6 +155,8 @@ class CommandMapBuilder:
                 self._process_line_waiting_name(line)
             case self.State.WAITING_SCOPE:
                 self._process_line_waiting_scope(line)
+            case self.State.SKIP_SCOPE:
+                self._process_line_skip_scope(line)
             case self.State.CAPTURING:
                 self._process_line_capturing(line)
             case self.State.ERROR:
@@ -176,6 +179,11 @@ class CommandMapBuilder:
     def _process_line_waiting_scope(self, line):
         if line.startswith("// Scope: "):
             scope = line[10:]
+
+            if not scope in self.enabled_scopes:
+                self.state = self.State.SKIP_SCOPE
+                return
+            
             self.current_scope = scope
             self.state = self.State.CAPTURING
             self.current_command = self.Scope.Command()
@@ -190,6 +198,12 @@ class CommandMapBuilder:
                 self.scopes[scope] = self.Scope(self.filename)
         else:
             self._set_error("Name must be the first statement in an operator!")
+            
+    
+    def _process_line_skip_scope(self, line):
+        if not line.startswith("// "):
+            self.state = self.State.WAITING
+            return
             
     
     def _process_line_capturing(self, line):
@@ -239,7 +253,7 @@ class CommandMapBuilder:
 
 def make_command_maps(target, source, env):
     dst = target[0]
-    builder = CommandMapBuilder()
+    builder = CommandMapBuilder(env["enabled_command_scopes"])
 
     for file in source:
         builder.process_file(file)

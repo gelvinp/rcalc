@@ -1,0 +1,17 @@
+Import("env")
+Import("env_app")
+
+import renderer_builders
+
+for renderer in env["enabled_renderers"]:
+    SConscript(f'{renderer}/SCsub')
+
+
+env_app.CommandNoCache(
+    "#app/renderers/default_renderer.gen.cpp",
+    None,
+    env.Run(renderer_builders.set_default_renderer, "Defining default renderer.")
+)
+
+env_app.add_source_files(env.app_sources, "#app/renderers/default_renderer.gen.cpp")
+env_app.add_source_files(env.app_sources, "*.cpp")

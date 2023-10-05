@@ -6,9 +6,18 @@ env_app = env.Clone()
 env_app.add_source_files(env.app_sources, "*.cpp", True)
 env_app.add_source_files(env.app_sources, "value/*.cpp", True)
 
+Export("env_app")
 
+env["enabled_command_scopes"].append("Application")
+
+SConscript("renderers/SCsub")
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")
 
 lib = env_app.add_library("app", env.app_sources)
+
+# Dependency stuff
+env_app.Depends("#app/commands/commands.gen.cpp", "#app/renderers/default_renderer.gen.cpp")
+env_app.Depends(lib, "#app/renderers/default_renderer.gen.cpp")
+
 env.Prepend(LIBS=[lib])

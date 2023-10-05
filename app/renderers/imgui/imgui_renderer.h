@@ -1,8 +1,8 @@
 #pragma once
 
-#include "app/renderer.h"
+#include "app/renderers/renderer.h"
 
-#include "stack.h"
+#include "app/stack.h"
 #include "imgui.h"
 #include "app/commands/commands.h"
 
@@ -33,16 +33,16 @@ public:
 
     virtual bool try_renderer_command(const std::string& str) override;
 
-    REGISTER_COMMAND(Renderer, Help);
-    REGISTER_COMMAND(Renderer, Queer);
-    REGISTER_COMMAND(Renderer, ClearHist);
+    REGISTER_COMMAND(ImGuiRenderer, Help);
+    REGISTER_COMMAND(ImGuiRenderer, Queer);
+    REGISTER_COMMAND(ImGuiRenderer, ClearHist);
 
 private:
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
     RequestAppCommandsCallback cb_request_app_cmds;
     RequestOperatorsCallback cb_request_ops;
-    CommandMap<Renderer> command_map;
+    CommandMap<ImGuiRenderer> command_map;
 
     std::string message = "Welcome to RCalc! Type \\help to see what commands and operators are supported.";
     bool message_is_error = false;

@@ -63,7 +63,7 @@ ImGuiRenderer::ImGuiRenderer(
         cb_request_app_cmds(cb_request_app_cmds),
         cb_request_ops(cb_request_ops)
 {
-    command_map = get_command_map<Renderer>();
+    command_map = get_command_map<ImGuiRenderer>();
 
     // Load font
     ImGuiIO& io = ImGui::GetIO();

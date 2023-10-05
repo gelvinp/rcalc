@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/value.h"
+#include "core/error.h"
 
 #include <functional>
 #include <string>
@@ -23,7 +24,8 @@ public:
     typedef std::function<void(const char*, const char*, const std::vector<std::vector<Value::Type>>&)> OperatorCallback;
     typedef std::function<void(OperatorCallback)> RequestOperatorsCallback;
 
-    static Renderer* create(const std::string& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds, RequestOperatorsCallback cb_request_ops);
+    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds, RequestOperatorsCallback cb_request_ops);
+    static std::vector<const char*> get_enabled_renderers();
 
     virtual void render(const std::vector<RenderItem>& items) = 0;
 
@@ -31,6 +33,8 @@ public:
     virtual void display_error(const std::string& str) = 0;
 
     virtual bool try_renderer_command(const std::string& str) = 0;
+
+    static const char* default_renderer;
 };
 
 }

@@ -43,11 +43,14 @@ available_platforms = []
 platform_opts = {}
 platform_flags = {}
 
+available_renderers = []
+renderer_priorities = {}
+
 start_time = time.time()
 
 for platform_path in sorted(glob.glob("platform/*")):
     if not os.path.isdir(platform_path) or not os.path.exists(platform_path + "/detect.py"):
-        continue;
+        continue
     
     tmp_path = "./" + platform_path
     sys.path.insert(0, tmp_path)
@@ -65,11 +68,34 @@ for platform_path in sorted(glob.glob("platform/*")):
     sys.modules.pop("detect")
 
 
+for renderer_path in sorted(glob.glob("app/renderers/*")):
+    if not os.path.isdir(renderer_path) or not os.path.exists(renderer_path + "/renderer.py"):
+        continue
+    
+    print(renderer_path)
+    
+    tmp_path = "./" + renderer_path
+    sys.path.insert(0, tmp_path)
+    import renderer
+
+    if renderer.is_available():
+        print(renderer_path)
+        renderer_name = renderer_path.replace("app/renderers/", "")
+        renderer_name = renderer_name.replace("app\\renderers\\", "")
+        available_renderers.append(renderer_name)
+        renderer_priorities[renderer_name] = renderer.get_priority()
+    
+    sys.path.remove(tmp_path)
+    sys.modules.pop("renderer")
+
+
 env_base = Environment()
 if "TERM" in os.environ:
     env_base["ENV"]["TERM"] = os.environ["TERM"]
 
 env_base["ENV"]["PATH"] = os.environ["PATH"]
+
+env_base["enabled_command_scopes"] = []
 
 
 # Set up env functions
@@ -96,6 +122,7 @@ opts.Add("platform", "Target platform (%s)" % ("|".join(available_platforms)), "
 opts.Add(EnumVariable("target", "Compilation target", "debug", ("debug", "release")))
 opts.Add(EnumVariable("arch", "CPU architecture", "auto", ["auto"] + platform_methods.architectures))
 opts.Add("extra_suffix", "Extra suffix for all binary files", "")
+opts.Add("default_renderer", "The default renderer to use on program start", "")
 
 opts.Add("CXX", "C++ compiler")
 opts.Add("CC", "C compiler")
@@ -104,6 +131,9 @@ opts.Add("CCFLAGS", "Flags for the C and C++ compilers")
 opts.Add("CFLAGS", "Flags for the C compiler only")
 opts.Add("CXXFLAGS", "Flags for the C++ compiler only")
 opts.Add("LINKFLAGS", "Flags for the linker")
+
+for renderer in available_renderers:
+    opts.Add(BoolVariable(f"enable_{renderer}_renderer", f"Enable the {renderer} renderer.", True))
 
 opts.Update(env_base)
 
@@ -140,6 +170,33 @@ opts.Update(env_base)
 env_base["platform"] = selected_platform
 env_base.module_list = methods.detect_modules("modules")
 methods.write_modules(env_base.module_list)
+
+# Select renderers
+enabled_renderers = []
+default_renderer = ""
+
+for renderer in available_renderers:
+    if env_base[f"enable_{renderer}_renderer"]:
+        enabled_renderers.append(renderer)
+        env_base.Append(CPPDEFINES=[f'{renderer.upper()}_RENDERER_ENABLED'])
+
+if len(enabled_renderers) == 0:
+    print("Cannot compile executable target without any renderers!")
+    sys.exit(255)
+
+if env_base["default_renderer"]:
+    if env_base["default_renderer"] in enabled_renderers:
+        default_renderer = env_base["default_renderer"]
+    else:
+        print(f'Default renderer {env_base["default_renderer"]} is not enabled')
+        sys.exit(255)
+else:
+    enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
+    default_renderer = enabled_renderers[0]
+
+env_base["enabled_renderers"] = enabled_renderers
+env_base["default_renderer"] = default_renderer
+
 Help(opts.GenerateHelpText(env_base))
 
 
