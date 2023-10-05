@@ -17,7 +17,7 @@ static void glfw_error_callback(int error, const char* description) {
     Logger::log_err("[GLFW] Error %d: %s\n", error, description);
 }
 
-Result<> PlatformLinux::init() {
+Result<> PlatformLinux::init(RCalc::AppConfig config) {
     glfwSetErrorCallback(glfw_error_callback);
 
     if (!glfwInit()) {
@@ -58,16 +58,14 @@ Result<> PlatformLinux::init() {
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    return Ok();
+    return create_application(config);
 }
 
 
 void PlatformLinux::runloop() {
-    RCalc::Application app;
-
     while (!close_requested) {
         start_frame();
-        app.step();
+        p_application->step();
         render_frame();
     }
 }

@@ -10,7 +10,7 @@
     - Column and row accessors
 
 # Track 1
- - Refactor renderer
+ - ~~Refactor renderer~~
  - Modules "enable" system (platform enables glfw, stb_image; renderer enables imgui, backends)
  - Modules "static" system (when module is enabled, potentially offer a way to statically link)
  - Add sqlite module (enabled by platforms, have a built in preferences system) (maybe?)

@@ -5,7 +5,7 @@
 
 class PlatformLinux : public Platform {
 public:
-    virtual Result<> init() override;
+    virtual Result<> init(RCalc::AppConfig config) override;
     virtual void runloop() override;
     virtual void cleanup() override;
 
