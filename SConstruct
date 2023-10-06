@@ -267,9 +267,9 @@ if selected_platform in available_platforms:
     
     detect.configure(env)
 
+    # Now that everything has had a chance to configure, we can properly detect modules
     env.module_list = methods.detect_modules("modules", env["enabled_modules"])
     methods.write_modules(env.module_list)
-    print(env.module_list)
 
     print("Building for %s-%s-%s" % (selected_platform, env["arch"], env["target"]))
 

@@ -13,7 +13,7 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-#include "imgui.h"      // IMGUI_IMPL_API
+#include "modules/imgui-core/imgui.h"      // IMGUI_IMPL_API
 #ifndef IMGUI_DISABLE
 
 //-----------------------------------------------------------------------------
