@@ -99,7 +99,10 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
-    env.Append(IMGUI_BACKEND="opengl3")
+    env["enabled_modules"].extend([
+        "imgui-opengl3",
+        "stb_image"
+    ])
 
     # RELRO
     if env["target"] == "release":

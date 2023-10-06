@@ -8,7 +8,9 @@ env_modules = env.Clone()
 
 Export("env_modules")
 
-for name, path in env.module_list.items():
+for name, module in env.module_list.items():
+    path = module["path"]
+    
     env.modules_sources = []
 
     base_path = path if os.path.isabs(path) else name

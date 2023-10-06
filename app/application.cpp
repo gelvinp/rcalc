@@ -2,8 +2,6 @@
 
 #include "core/logger.h"
 #include "core/format.h"
-#include "imgui.h"
-#include "imgui_stdlib.h"
 
 #include <algorithm>
 #include <cmath>

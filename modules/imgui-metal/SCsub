@@ -1,0 +1,10 @@
+Import("env")
+Import("env_modules")
+
+env_imgui = env_modules.Clone()
+if "-Werror" in env_imgui["CCFLAGS"]:
+    env_imgui["CCFLAGS"].remove("-Werror")
+
+env.Append(CPPPATH=["#/modules/imgui-opengl3/"])
+
+env_imgui.add_source_files(env.modules_sources, "*.cpp")

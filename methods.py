@@ -178,37 +178,48 @@ const char *const VERSION_HASH = "{git_hash}";
     fhash.close()
 
 
-def detect_modules(search_path):
+def detect_modules(search_path, enabled_modules):
     modules = OrderedDict()
 
-    def add_module(path):
+    def add_module(path, registered):
         module_name = os.path.basename(path)
         module_path = path.replace("\\", "/")
-        modules[module_name] = module_path
+        modules[module_name] = { "path": module_path, "registered": registered }
     
     def get_files(path):
         files = glob.glob(os.path.join(path, "*"))
         files.sort()
         return files
     
-    if is_module(search_path):
-        add_module(search_path)
+    if is_module(search_path, enabled_modules):
+        add_module(search_path, is_module_registered(search_path))
     
     for path in get_files(search_path):
-        if is_module(path):
-            add_module(path)
+        if is_module(path, enabled_modules):
+            add_module(path, is_module_registered(path))
     
     return modules
     
 
-def is_module(path):
+def is_module(path, enabled_modules):
+    if not os.path.basename(path) in enabled_modules:
+        return False
+
     if not os.path.isdir(path):
         return False
     
-    must_exist = ["register_module.h", "SCsub"]
-    for f in must_exist:
-        if not os.path.exists(os.path.join(path, f)):
-            return False
+    if not os.path.exists(os.path.join(path, "SCsub")):
+        return False
+    
+    return True
+
+
+def is_module_registered(path):
+    if not os.path.isdir(path):
+        return False
+    
+    if not os.path.exists(os.path.join(path, "register_module.h")):
+        return False
     
     return True
 
@@ -218,7 +229,11 @@ def write_modules(modules):
     initialize_cpp = ""
     cleanup_cpp = ""
 
-    for name, path in modules.items():
+    for name, module in modules.items():
+        if not module["registered"]:
+            continue
+            
+        path = module["path"]
         try:
             with open(os.path.join(path, "register_module.h")):
                 includes_cpp += '#include "' + path + '/register_module.h"\n'

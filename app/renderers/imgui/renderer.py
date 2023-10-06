@@ -7,4 +7,4 @@ def is_available():
 
 
 def configure(env: "Environment"):
-    pass
+    env["enabled_modules"].append("imgui-core")

@@ -2,7 +2,7 @@
 // (headers)
 
 #pragma once
-#include "imgui.h"      // IMGUI_API
+#include "modules/imgui-core/imgui.h"      // IMGUI_API
 #ifndef IMGUI_DISABLE
 
 // Forward declarations

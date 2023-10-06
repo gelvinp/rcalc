@@ -72,14 +72,11 @@ for renderer_path in sorted(glob.glob("app/renderers/*")):
     if not os.path.isdir(renderer_path) or not os.path.exists(renderer_path + "/renderer.py"):
         continue
     
-    print(renderer_path)
-    
     tmp_path = "./" + renderer_path
     sys.path.insert(0, tmp_path)
     import renderer
 
     if renderer.is_available():
-        print(renderer_path)
         renderer_name = renderer_path.replace("app/renderers/", "")
         renderer_name = renderer_name.replace("app\\renderers\\", "")
         available_renderers.append(renderer_name)
@@ -96,6 +93,10 @@ if "TERM" in os.environ:
 env_base["ENV"]["PATH"] = os.environ["PATH"]
 
 env_base["enabled_command_scopes"] = []
+env_base["enabled_modules"] = [
+    "bigint",
+    "glm"
+]
 
 
 # Set up env functions
@@ -165,12 +166,6 @@ if selected_platform in platform_opts:
         if not opt[0] in opts.keys():
             opts.Add(opt)
 
-
-opts.Update(env_base)
-env_base["platform"] = selected_platform
-env_base.module_list = methods.detect_modules("modules")
-methods.write_modules(env_base.module_list)
-
 # Select renderers
 enabled_renderers = []
 default_renderer = ""
@@ -179,6 +174,17 @@ for renderer in available_renderers:
     if env_base[f"enable_{renderer}_renderer"]:
         enabled_renderers.append(renderer)
         env_base.Append(CPPDEFINES=[f'{renderer.upper()}_RENDERER_ENABLED'])
+
+        tmp_path = "./app/renderers/" + renderer
+        sys.path.insert(0, tmp_path)
+        import renderer
+
+        renderer.configure(env_base)
+
+        sys.path.remove(tmp_path)
+        sys.modules.pop("renderer")
+
+
 
 if len(enabled_renderers) == 0:
     print("Cannot compile executable target without any renderers!")
@@ -196,6 +202,10 @@ else:
 
 env_base["enabled_renderers"] = enabled_renderers
 env_base["default_renderer"] = default_renderer
+
+
+opts.Update(env_base)
+env_base["platform"] = selected_platform
 
 Help(opts.GenerateHelpText(env_base))
 
@@ -256,6 +266,10 @@ if selected_platform in available_platforms:
             env[flag[0]] = flag[1]
     
     detect.configure(env)
+
+    env.module_list = methods.detect_modules("modules", env["enabled_modules"])
+    methods.write_modules(env.module_list)
+    print(env.module_list)
 
     print("Building for %s-%s-%s" % (selected_platform, env["arch"], env["target"]))
 
