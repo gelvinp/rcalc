@@ -1,0 +1,44 @@
+import sys
+
+Import("env")
+
+common_sources = [
+    "upstream/src/context.c",
+    "upstream/src/init.c",
+    "upstream/src/input.c",
+    "upstream/src/monitor.c",
+    "upstream/src/vulkan.c",
+    "upstream/src/window.c"
+]
+
+if env["platform"] == "linux":
+    if env["builtin_glfw"]:
+        env.Append(CPPPATH=["#/modules/glfw/upstream/include"])
+
+        env_glfw = env.Clone()
+        if "-Werror" in env_glfw["CCFLAGS"]:
+            env_glfw["CCFLAGS"].remove("-Werror")
+        
+        env_glfw.Append(CCFLAGS=["-std=c99"])
+
+        env_glfw.add_source_files(env.modules_sources, common_sources)
+        env_glfw.add_source_files(env.modules_sources, [
+            "upstream/src/linux_joystick.c"
+        ])
+
+        if env["windowing"] == "x11":
+            env_glfw.add_source_files(env.modules_sources, [
+                "upstream/src/x11_init.c",
+                "upstream/src/x11_monitor.c",
+                "upstream/src/x11_window.c",
+                "upstream/src/xkb_unicode.c",
+                "upstream/src/posix_time.c",
+                "upstream/src/posix_thread.c",
+                "upstream/src/glx_context.c",
+                "upstream/src/egl_context.c",
+                "upstream/src/osmesa_context.c"
+            ])
+            env_glfw.Append(CPPDEFINES=["_GLFW_X11"])
+        else:
+            print(f"Windowing '{env['windowing']}' is not implemented for GLFW module!")
+            sys.exit(255)

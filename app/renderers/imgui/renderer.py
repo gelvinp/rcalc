@@ -7,4 +7,8 @@ def is_available():
 
 
 def configure(env: "Environment"):
-    env["enabled_modules"].append("imgui-core")
+    env["enabled_modules"].extend([
+        "imgui_core",
+        "glfw",
+        "freetype"
+    ])

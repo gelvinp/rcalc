@@ -173,7 +173,7 @@ default_renderer = ""
 for renderer in available_renderers:
     if env_base[f"enable_{renderer}_renderer"]:
         enabled_renderers.append(renderer)
-        env_base.Append(CPPDEFINES=[f'{renderer.upper()}_RENDERER_ENABLED'])
+        env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_ENABLED'])
 
         tmp_path = "./app/renderers/" + renderer
         sys.path.insert(0, tmp_path)
@@ -200,15 +200,11 @@ else:
     enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
     default_renderer = enabled_renderers[0]
 
-env_base["enabled_renderers"] = enabled_renderers
-env_base["default_renderer"] = default_renderer
-
-
 opts.Update(env_base)
 env_base["platform"] = selected_platform
 
-Help(opts.GenerateHelpText(env_base))
-
+env_base["enabled_renderers"] = enabled_renderers
+env_base["default_renderer"] = default_renderer
 
 env_base.Prepend(CPPPATH=["#"])
 
@@ -267,9 +263,41 @@ if selected_platform in available_platforms:
     
     detect.configure(env)
 
-    # Now that everything has had a chance to configure, we can properly detect modules
+    # Now that everything else has had a chance to configure, we can properly detect and configure modules
     env.module_list = methods.detect_modules("modules", env["enabled_modules"])
     methods.write_modules(env.module_list)
+
+    for module_name in env.module_list:
+        env.Append(CPPDEFINES=[f'MODULE_{module_name.upper()}_ENABLED'])
+
+        if os.path.exists("./modules/" + module_name + "/module.py"):
+            tmp_path = "./modules/" + module_name
+            sys.path.insert(0, tmp_path)
+            import module
+
+            if "get_opts" in dir(module):
+                for opt in module.get_opts(env):
+                    if opt[0] in opts.args.keys():
+                        env[opt[0]] = opts.args[opt[0]]
+                    else:
+                        opts.Add(opt)
+                        env[opt[0]] = opt[2]
+
+            sys.path.remove(tmp_path)
+            sys.modules.pop("module")
+
+    for module_name in env.module_list:
+        if os.path.exists("./modules/" + module_name + "/module.py"):
+            tmp_path = "./modules/" + module_name
+            sys.path.insert(0, tmp_path)
+            import module
+
+            module.configure(env)
+
+            sys.path.remove(tmp_path)
+            sys.modules.pop("module")
+
+    Help(opts.GenerateHelpText(env_base))
 
     print("Building for %s-%s-%s" % (selected_platform, env["arch"], env["target"]))
 
@@ -322,7 +350,7 @@ if selected_platform in available_platforms:
 
     env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
-    env["LIBSUFFIX"] = suffix + env["OBJSUFFIX"]
+    env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
 
     # compile_commands.json
     env.Tool("compilation_db")
@@ -330,7 +358,7 @@ if selected_platform in available_platforms:
     env.NoClean("compile_commands.json")
 
     Export("env")
-
+    
     SConscript("assets/SCsub")
     SConscript("modules/SCsub")
     SConscript("core/SCsub")

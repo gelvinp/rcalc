@@ -1,0 +1,6 @@
+[submodule "modules/glfw/upstream"]
+	path = modules/glfw/upstream
+	url = https://github.com/glfw/glfw
+[submodule "modules/freetype/upstream"]
+	path = modules/freetype/upstream
+	url = https://gitlab.freedesktop.org/freetype/freetype.git

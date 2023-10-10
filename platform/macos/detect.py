@@ -90,11 +90,11 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    deps = ['glfw3', 'freetype2']
-    if os.system(f"pkg-config --exists {' '.join(deps)}"):
-        print("Error: Required libraries not found. Aborting.")
-        sys.exit(255)
-    env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
+    # deps = []
+    # if os.system(f"pkg-config --exists {' '.join(deps)}"):
+    #     print("Error: Required libraries not found. Aborting.")
+    #     sys.exit(255)
+    # env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
 
     env.Append(LINKFLAGS=[
         "-framework", "Foundation",
@@ -112,7 +112,7 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
-    env["enabled_modules"].append("imgui-metal")
+    env["enabled_modules"].append("imgui_metal")
 
 
 def post_build(target, source, env):

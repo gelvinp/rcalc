@@ -84,7 +84,7 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    deps = ['glfw3', 'gl', 'freetype2']
+    deps = ['gl']
     if os.system(f"pkg-config --exists {' '.join(deps)}"):
         print("Error: Required libraries not found. Aborting.")
         sys.exit(255)
@@ -100,7 +100,7 @@ def configure(env: "Environment"):
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
     
     env["enabled_modules"].extend([
-        "imgui-opengl3",
+        "imgui_opengl3",
         "stb_image"
     ])
 
