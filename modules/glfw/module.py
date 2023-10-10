@@ -22,6 +22,9 @@ def get_opts(env: "Environment"):
     return opts
 
 def configure(env: "Environment"):
+    if env["builtin_glfw"]:
+        env.Append(CPPPATH=["#/modules/glfw/upstream/include"])
+    
     if env["platform"] == "linux":
         deps = []
 
@@ -42,3 +45,22 @@ def configure(env: "Environment"):
             sys.exit(255)
         
         env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
+    elif env["platform"] == "macos":
+        env.Append(LINKFLAGS=[
+            "-framework", "Foundation",
+            "-framework", "Metal",
+            "-framework", "QuartzCore",
+            "-framework", "AppKit",
+            "-framework", "Cocoa",
+            "-framework", "IOKit",
+            "-framework", "CoreFoundation"
+        ])
+        
+        if env["builtin_glfw"]:
+            pass
+        else:
+            if os.system("pkg-config --exists glfw3"):
+                print("Error: Required libraries not found. Aborting.")
+                sys.exit(255)
+            
+            env.ParseConfig("pkg-config --cflags --libs glfw3")

@@ -45,24 +45,38 @@ common_sources = [
   "upstream/src/winfonts/winfnt.c"
 ]
 
-if env["platform"] == "linux":
-    if env["builtin_freetype"]:
-        env_freetype = env.Clone()
-        if "-Werror" in env_freetype["CCFLAGS"]:
-            env_freetype["CCFLAGS"].remove("-Werror")
-        
+if env["builtin_freetype"]:
+    env_freetype = env.Clone()
+    if "-Werror" in env_freetype["CCFLAGS"]:
+        env_freetype["CCFLAGS"].remove("-Werror")
+    
+    env_freetype.Append(CPPDEFINES=[
+        "FT_DISABLE_ZLIB=TRUE",
+        "FT_DISABLE_BZIP2=TRUE",
+        "FT_DISABLE_PNG=TRUE",
+        "FT_DISABLE_HARFBUZZ=TRUE",
+        "FT_DISABLE_BROTLI=TRUE",
+        "FT2_BUILD_LIBRARY"
+    ])
+
+    env_freetype.add_source_files(env.modules_sources, common_sources)
+
+    if env["platform"] == "linux":
         env_freetype.Append(CPPDEFINES=[
-            "FT_DISABLE_ZLIB=TRUE",
-            "FT_DISABLE_BZIP2=TRUE",
-            "FT_DISABLE_PNG=TRUE",
-            "FT_DISABLE_HARFBUZZ=TRUE",
-            "FT_DISABLE_BROTLI=TRUE",
-            "FT2_BUILD_LIBRARY",
             "HAVE_UNISTD_H",
             "HAVE_FCNTL_H"
         ])
-
-        env_freetype.add_source_files(env.modules_sources, common_sources)
+    
+        env_freetype.add_source_files(env.modules_sources, [
+            "upstream/builds/unix/ftsystem.c",
+            "upstream/src/base/ftdebug.c"
+        ])
+    if env["platform"] == "macos":
+        env_freetype.Append(CPPDEFINES=[
+            "HAVE_UNISTD_H",
+            "HAVE_FCNTL_H"
+        ])
+    
         env_freetype.add_source_files(env.modules_sources, [
             "upstream/builds/unix/ftsystem.c",
             "upstream/src/base/ftdebug.c"

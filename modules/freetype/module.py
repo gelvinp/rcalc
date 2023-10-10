@@ -12,9 +12,11 @@ def get_opts(env: "Environment"):
 
 
 def configure(env: "Environment"):
+    if env["builtin_freetype"]:
+        env.Append(CPPPATH=["#/modules/freetype/upstream/include"])
+    
     if env["platform"] == "linux":
         if env["builtin_freetype"]:
-            env.Append(CPPPATH=["#/modules/freetype/upstream/include"])
             env.ParseFlags("-isystem modules/freetype/upstream/include")
         else:
             deps = [
@@ -26,3 +28,12 @@ def configure(env: "Environment"):
                 sys.exit(255)
         
             env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
+    elif env["platform"] == "macos":
+        if env["builtin_freetype"]:
+            pass
+        else:
+            if os.system("pkg-config --exists freetype2"):
+                print("Error: Required libraries not found. Aborting.")
+                sys.exit(255)
+            
+            env.ParseConfig("pkg-config --cflags --libs freetype2")

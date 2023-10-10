@@ -96,13 +96,6 @@ def configure(env: "Environment"):
     #     sys.exit(255)
     # env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
 
-    env.Append(LINKFLAGS=[
-        "-framework", "Foundation",
-        "-framework", "Metal",
-        "-framework", "QuartzCore",
-        "-framework", "AppKit"
-    ])
-
     # Cross compilation
     host_is_64bit = sys.maxsize > 2**32
     if host_is_64bit and env["arch"] == "x86_32":

@@ -11,17 +11,17 @@ common_sources = [
     "upstream/src/window.c"
 ]
 
-if env["platform"] == "linux":
-    if env["builtin_glfw"]:
-        env.Append(CPPPATH=["#/modules/glfw/upstream/include"])
 
-        env_glfw = env.Clone()
-        if "-Werror" in env_glfw["CCFLAGS"]:
-            env_glfw["CCFLAGS"].remove("-Werror")
-        
-        env_glfw.Append(CCFLAGS=["-std=c99"])
+if env["builtin_glfw"]:
+    env_glfw = env.Clone()
+    if "-Werror" in env_glfw["CCFLAGS"]:
+        env_glfw["CCFLAGS"].remove("-Werror")
+    
+    env_glfw.Append(CCFLAGS=["-std=c99"])
 
-        env_glfw.add_source_files(env.modules_sources, common_sources)
+    env_glfw.add_source_files(env.modules_sources, common_sources)
+
+    if env["platform"] == "linux":
         env_glfw.add_source_files(env.modules_sources, [
             "upstream/src/linux_joystick.c"
         ])
@@ -34,11 +34,22 @@ if env["platform"] == "linux":
                 "upstream/src/xkb_unicode.c",
                 "upstream/src/posix_time.c",
                 "upstream/src/posix_thread.c",
-                "upstream/src/glx_context.c",
-                "upstream/src/egl_context.c",
-                "upstream/src/osmesa_context.c"
             ])
             env_glfw.Append(CPPDEFINES=["_GLFW_X11"])
         else:
             print(f"Windowing '{env['windowing']}' is not implemented for GLFW module!")
             sys.exit(255)
+    elif env["platform"] == "macos":
+        env_glfw.add_source_files(env.modules_sources, [
+            "upstream/src/cocoa_init.m",
+            "upstream/src/cocoa_joystick.m",
+            "upstream/src/cocoa_monitor.m",
+            "upstream/src/cocoa_window.m",
+            "upstream/src/nsgl_context.m",
+            "upstream/src/cocoa_time.c",
+            "upstream/src/posix_thread.c",
+            "upstream/src/egl_context.c",
+            "upstream/src/osmesa_context.c"
+        ])
+
+        env_glfw.Append(CPPDEFINES=["_GLFW_COCOA"])
