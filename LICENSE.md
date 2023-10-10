@@ -454,7 +454,7 @@ THE SOFTWARE.
 ====
 
 
-The files in modules/glfw are available under the following license:
+The files in modules/glfw/upstream are available under the following license:
 
 Copyright (c) 2002-2006 Marcus Geelnard
 
@@ -478,3 +478,12 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source
    distribution.
+
+
+====
+
+
+Portions of this software are copyright © 2023 The FreeType
+Project (www.freetype.org).  All rights reserved.
+
+These portions can be found in modules/freetype/upstream.

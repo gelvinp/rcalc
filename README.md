@@ -52,10 +52,15 @@ The following dependencies are required to build RCalc:
  - Python
  - SCons
  - pkg-config
- - glfw3 + development headers
+ - glfw3 + development headers*
  - OpenGL + development headers
- - freetype2 + development headers
+ - freetype2 + development headers*
  - A version of GCC or clang that supports c++20
+
+\* GLFW and FreeType can be statically linked using the vendored modules.
+To do this, first make sure to initialize the git submodules, and then
+run `scons builtin_glfw=yes builtin_freetype=yes`.
+(You can also choose to only statically link one or the other.)
 
 For a debug build, run `scons` from the project root.
 
@@ -73,9 +78,14 @@ The following dependencies are required to build RCalc:
  - Python
  - SCons
  - pkg-config
- - glfw3 + development headers
- - freetype2 + development headers
+ - glfw3 + development headers*
+ - freetype2 + development headers*
  - A version of apple-clang, clang or gcc that supports c++20
+
+\* GLFW and FreeType can be statically linked using the vendored modules.
+To do this, first make sure to initialize the git submodules, and then
+run `scons builtin_glfw=yes builtin_freetype=yes`.
+(You can also choose to only statically link one or the other.)
 
 For a debug build, run `scons` from the project root.
 
