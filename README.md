@@ -32,7 +32,6 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 ## Technical debt
  - [ ] Use perfect hash generator for operator and command maps
  - [ ] Operator map generator is getting pretty complex, could maybe use a rewrite?
- - [ ] Look into statically linking things because wow mac os is a headache when you don't use xcode
  - [ ] Rewrite help page (Collapsable param types, examples, how to enter values, how does rpn work, group ops by category)
 
 
