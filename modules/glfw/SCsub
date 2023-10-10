@@ -34,6 +34,9 @@ if env["builtin_glfw"]:
                 "upstream/src/xkb_unicode.c",
                 "upstream/src/posix_time.c",
                 "upstream/src/posix_thread.c",
+                "upstream/src/glx_context.c",
+                "upstream/src/egl_context.c",
+                "upstream/src/osmesa_context.c"
             ])
             env_glfw.Append(CPPDEFINES=["_GLFW_X11"])
         else:
