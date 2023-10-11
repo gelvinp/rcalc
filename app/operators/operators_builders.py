@@ -72,11 +72,7 @@ class Permutation:
     
 
     def build(self, name: str, tags: list[str]):
-        lines = [
-            f'\t\t\tvalues = stack.pop_items({len(self.types)});'
-        ]
-
-        lines.extend([type.build() for type in self.types])
+        lines = [type.build() for type in self.types]
 
         arg_names = [f'arg{type.arg_number}' for type in self.types]
         if self.stack_ref:
@@ -308,7 +304,6 @@ class Operator:
         else:
             lines.extend([
                 f"\tstd::vector<Value::Type> types = stack.peek_types_vec({self.param_count});",
-                "\tstd::vector<StackItem> values;",
                 "\tbool expression = true;",
                 "\tResult<Value> res = Ok(Value());",
                 "",
@@ -317,6 +312,7 @@ class Operator:
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op does not recognize types " + stack.peek_types({self.param_count}));',
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
+                f"\tstd::vector<StackItem> values = stack.pop_items({self.param_count});",
                 "",
                 "\tswitch (index) {"
             ])

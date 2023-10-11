@@ -19,12 +19,12 @@
  - Create TUI renderer
 
 # Track 2
- - Refactor OperatorMap generator
-    - Get rid of string comparisons for type dispatch
-    - Get rid of duplication in implementation generation
-    - Add consistent ordering for type sets, and expose an alphabetical list of operators, in alphabetical by category
+ - ~~Refactor OperatorMap generator~~
+    - ~~Get rid of string comparisons for type dispatch~~
+    - ~~Get rid of duplication in implementation generation~~
+    - ~~Add consistent ordering for type sets, and expose an alphabetical list of operators, in alphabetical by category~~
  - Add use_gperf=/usr/bin/gperf option
- - Add Examples doctag
+ - ~~Add Examples doctag~~
  - Add "Category" doctag (No category is an option, goes at the top of the list)
  - Refactor CommandMap generator
     - Scons flags to enable/disable scopes
