@@ -1,8 +1,6 @@
 // @RCalcOperator
-// Name: Min
-// Parameters: [Int]
 // Description: Calculate the minimum of the top arg0 values on the stack.
-// Tags: [no_expr, stack_ref, fmt_stack_ref]
+// Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
 RCALC_OP_1_S(Min, Int, count) {
@@ -102,10 +100,8 @@ RCALC_FMT_1_S(Min, _arg) {
 
 
 // @RCalcOperator
-// Name: Max
-// Parameters: [Int]
 // Description: Calculate the maximum of the top arg0 values on the stack.
-// Tags: [no_expr, stack_ref, fmt_stack_ref]
+// Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
 RCALC_OP_1_S(Max, Int, count) {
@@ -205,10 +201,8 @@ RCALC_FMT_1_S(Max, _arg) {
 
 
 // @RCalcOperator
-// Name: Avg
-// Parameters: [Int]
 // Description: Calculate the average of the top arg0 values on the stack.
-// Tags: [no_expr, stack_ref, fmt_stack_ref]
+// Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
 RCALC_OP_1_S(Avg, Int, count) {
@@ -264,10 +258,8 @@ RCALC_FMT_1_S(Avg, _arg) {
 
 
 // @RCalcOperator
-// Name: Sum
-// Parameters: [Int]
 // Description: Calculate the sum of the top arg0 values on the stack.
-// Tags: [no_expr, stack_ref, fmt_stack_ref]
+// Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
 RCALC_OP_1_S(Sum, Int, count) {

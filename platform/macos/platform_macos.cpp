@@ -31,6 +31,7 @@ void PlatformMacOS::runloop() {
 
 
 void PlatformMacOS::cleanup() {
+    p_application->cleanup();
     binding.cleanup();
 }
 

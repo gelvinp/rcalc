@@ -1,6 +1,4 @@
 // @RCalcOperator
-// Name: Type
-// Parameters: [Int]
 // Description: Returns a unique value identifying the type.
 // Tags: [no_expr]
 RCALC_OP_1(Type, Int, _arg) {
@@ -9,8 +7,6 @@ RCALC_OP_1(Type, Int, _arg) {
 }
 
 // @RCalcOperator
-// Name: Type
-// Parameters: [BigInt]
 // Tags: [no_expr]
 RCALC_OP_1(Type, BigInt, _arg) {
     UNUSED(_arg);
@@ -18,8 +14,6 @@ RCALC_OP_1(Type, BigInt, _arg) {
 }
 
 // @RCalcOperator
-// Name: Type
-// Parameters: [Real]
 // Tags: [no_expr]
 RCALC_OP_1(Type, Real, _arg) {
     UNUSED(_arg);
@@ -27,8 +21,6 @@ RCALC_OP_1(Type, Real, _arg) {
 }
 
 // @RCalcOperator
-// Name: Type
-// Parameters: [Vec2]
 // Tags: [no_expr]
 RCALC_OP_1(Type, Vec2, _arg) {
     UNUSED(_arg);
@@ -36,8 +28,6 @@ RCALC_OP_1(Type, Vec2, _arg) {
 }
 
 // @RCalcOperator
-// Name: Type
-// Parameters: [Vec3]
 // Tags: [no_expr]
 RCALC_OP_1(Type, Vec3, _arg) {
     UNUSED(_arg);
@@ -45,8 +35,6 @@ RCALC_OP_1(Type, Vec3, _arg) {
 }
 
 // @RCalcOperator
-// Name: Type
-// Parameters: [Vec4]
 // Tags: [no_expr]
 RCALC_OP_1(Type, Vec4, _arg) {
     UNUSED(_arg);

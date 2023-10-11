@@ -72,6 +72,8 @@ void PlatformLinux::runloop() {
 
 
 void PlatformLinux::cleanup() {
+    p_application->cleanup();
+    
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

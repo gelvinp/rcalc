@@ -33,9 +33,10 @@ Result<Application*> Application::create(AppConfig config) {
     }
 }
 
-Application::Application() {
+Application::Application() :
+    op_map(OperatorMap::get_operator_map())
+{
     command_map = get_command_map<Application>();
-    op_map = get_operator_map();
 }
 
 void Application::step() {
@@ -82,8 +83,8 @@ void Application::on_renderer_submit_text(const std::string& str) {
 
 
 bool Application::on_renderer_submit_operator(const std::string& str) {
-    if (op_map.contains(str)) {
-        Result<> res = op_map.at(str)->evaluate(stack);
+    if (op_map.has_operator(str)) {
+        Result<> res = op_map.evaluate(str, stack);
         if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
         return true;
     }
@@ -104,7 +105,7 @@ void Application::on_renderer_requested_app_commands(Renderer::AppCommandCallbac
 
 void Application::on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd) {
     std::set<std::string> displayed_ops;
-    for (const auto& [key, op] : op_map) {
+    for (const auto op : op_map.get_alphabetical()) {
         cb_ops_cmd(op->name, op->description, op->allowed_types);
     }
 }
@@ -281,5 +282,11 @@ bool Application::try_swizzle(const std::string& str) {
             UNREACHABLE();
     }
 }
+
+
+void Application::cleanup() {
+    stack.clear();
+}
+
 
 }

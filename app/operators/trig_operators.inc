@@ -1,5 +1,4 @@
 // @RCalcOperator
-// Name: Pi
 // Description: The mathematical constant Pi.
 // Requires: <numbers>
 // Tags: [no_expr]
@@ -13,7 +12,6 @@ RCALC_FMT_0(Pi) {
 
 
 // @RCalcOperator
-// Name: Tau
 // Description: The mathematical constant Tau.
 // Requires: <numbers>
 // Tags: [no_expr]
@@ -27,8 +25,6 @@ RCALC_FMT_0(Tau) {
 
 
 // @RCalcOperator
-// Name: Sin
-// Parameters: [Real]
 // Description: Computes the sine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -42,8 +38,6 @@ RCALC_FMT_1(Sin, arg) {
 
 
 // @RCalcOperator
-// Name: Cos
-// Parameters: [Real]
 // Description: Computes the cosine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -57,8 +51,6 @@ RCALC_FMT_1(Cos, arg) {
 
 
 // @RCalcOperator
-// Name: Tan
-// Parameters: [Real]
 // Description: Computes the tangent of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -72,8 +64,6 @@ RCALC_FMT_1(Tan, arg) {
 
 
 // @RCalcOperator
-// Name: Asin
-// Parameters: [Real]
 // Description: Computes the inverse sine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -87,8 +77,6 @@ RCALC_FMT_1(Asin, arg) {
 
 
 // @RCalcOperator
-// Name: Acos
-// Parameters: [Real]
 // Description: Computes the inverse cosine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -102,8 +90,6 @@ RCALC_FMT_1(Acos, arg) {
 
 
 // @RCalcOperator
-// Name: Atan
-// Parameters: [Real]
 // Description: Computes the inverse tangent of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -117,8 +103,6 @@ RCALC_FMT_1(Atan, arg) {
 
 
 // @RCalcOperator
-// Name: Sinh
-// Parameters: [Real]
 // Description: Computes the hyperbolic sine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -132,8 +116,6 @@ RCALC_FMT_1(Sinh, arg) {
 
 
 // @RCalcOperator
-// Name: Cosh
-// Parameters: [Real]
 // Description: Computes the hyperbolic cosine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -147,8 +129,6 @@ RCALC_FMT_1(Cosh, arg) {
 
 
 // @RCalcOperator
-// Name: Tanh
-// Parameters: [Real]
 // Description: Computes the hyperbolic tangent of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -162,8 +142,6 @@ RCALC_FMT_1(Tanh, arg) {
 
 
 // @RCalcOperator
-// Name: Asinh
-// Parameters: [Real]
 // Description: Computes the inverse hyperbolic sine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -177,8 +155,6 @@ RCALC_FMT_1(Asinh, arg) {
 
 
 // @RCalcOperator
-// Name: Acosh
-// Parameters: [Real]
 // Description: Computes the inverse hyperbolic cosine of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -192,8 +168,6 @@ RCALC_FMT_1(Acosh, arg) {
 
 
 // @RCalcOperator
-// Name: Atanh
-// Parameters: [Real]
 // Description: Computes the inverse hyperbolic tangent of arg0 (in radians).
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]

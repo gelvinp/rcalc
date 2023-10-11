@@ -1,6 +1,4 @@
 // @RCalcOperator
-// Name: Pow
-// Parameters: [Int, Int]
 // Description: Raise arg0 to the power of arg1.
 // Requires: <cmath>
 RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
@@ -15,8 +13,6 @@ RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
 
 
 // @RCalcOperator
-// Name: Pow
-// Parameters: [Real, Real]
 // Requires: <cmath>
 // Tags: [real_cast]
 RCALC_OP_2(Pow, Real, Real, arg0, arg1) {
@@ -35,8 +31,6 @@ RCALC_FMT_2(Pow, arg0, arg1) {
 
 
 // @RCalcOperator
-// Name: Sqr
-// Parameters: [Int]
 // Description: Raise arg0 to the power of 2.
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Int, arg0) {
@@ -51,8 +45,6 @@ RCALC_OP_1(Sqr, Int, arg0) {
 
 
 // @RCalcOperator
-// Name: Sqr
-// Parameters: [Real]
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Real, arg0) {
     Real value = std::pow(arg0, 2.0);
@@ -70,8 +62,6 @@ RCALC_FMT_1(Sqr, arg0) {
 
 
 // @RCalcOperator
-// Name: Cube
-// Parameters: [Int]
 // Description: Raise arg0 to the power of 3.
 // Requires: <cmath>
 RCALC_OP_1(Cube, Int, arg0) {
@@ -86,8 +76,6 @@ RCALC_OP_1(Cube, Int, arg0) {
 
 
 // @RCalcOperator
-// Name: Cube
-// Parameters: [Real]
 // Requires: <cmath>
 RCALC_OP_1(Cube, Real, arg0) {
     Real value = std::pow(arg0, 3.0);
@@ -105,8 +93,6 @@ RCALC_FMT_1(Cube, arg0) {
 
 
 // @RCalcOperator
-// Name: Sqrt
-// Parameters: [Real]
 // Description: Takes the square root of arg0.
 // Requires: <cmath>
 // Tags: [real_cast]
@@ -126,8 +112,6 @@ RCALC_FMT_1(Sqrt, arg0) {
 
 
 // @RCalcOperator
-// Name: Cbrt
-// Parameters: [Real]
 // Description: Takes the cube root of arg0.
 // Requires: <cmath>
 // Tags: [real_cast]
@@ -147,8 +131,6 @@ RCALC_FMT_1(Cbrt, arg0) {
 
 
 // @RCalcOperator
-// Name: Log
-// Parameters: [Real, Real]
 // Description: Calculates log base arg0 of arg1.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -162,8 +144,6 @@ RCALC_FMT_2(Log, base, arg) {
 
 
 // @RCalcOperator
-// Name: Ln
-// Parameters: [Real]
 // Description: Calculates natural log of arg0.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -177,8 +157,6 @@ RCALC_FMT_1(Ln, arg) {
 
 
 // @RCalcOperator
-// Name: Exp
-// Parameters: [Real]
 // Description: Calculates e to the power of arg0.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -192,8 +170,6 @@ RCALC_FMT_1(Exp, arg) {
 
 
 // @RCalcOperator
-// Name: Ceil
-// Parameters: [Real]
 // Description: Calculates the nearest integer not less than the given value.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -208,8 +184,6 @@ RCALC_FMT_1(Ceil, arg) {
 
 
 // @RCalcOperator
-// Name: Floor
-// Parameters: [Real]
 // Description: Calculates the nearest integer not greater than the given value.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -224,8 +198,6 @@ RCALC_FMT_1(Floor, arg) {
 
 
 // @RCalcOperator
-// Name: Trunc
-// Parameters: [Real]
 // Description: Calculates the nearest integer not greater in magnitude than the given value.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -240,8 +212,6 @@ RCALC_FMT_1(Trunc, arg) {
 
 
 // @RCalcOperator
-// Name: Round
-// Parameters: [Real]
 // Description: Calculates the nearest integer to the given value, rounding halfway cases away from zero.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -256,8 +226,6 @@ RCALC_FMT_1(Round, arg) {
 
 
 // @RCalcOperator
-// Name: Sign
-// Parameters: [Real]
 // Description: Calculates 1 if the value is positive, -1 if the value is negative, and 0 otherwise.
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -273,8 +241,6 @@ RCALC_FMT_1(Sign, arg) {
 
 
 // @RCalcOperator
-// Name: Fact
-// Parameters: [Int]
 // Description: Calculates the factorial of an integer.
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -292,8 +258,6 @@ RCALC_FMT_1(Fact, arg) {
 
 
 // @RCalcOperator
-// Name: Gamma
-// Parameters: [Real]
 // Description: Calculates the gamma function of a given number.
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -308,8 +272,6 @@ RCALC_FMT_1(Gamma, arg) {
 
 
 // @RCalcOperator
-// Name: Quot
-// Parameters: [Int, Int]
 // Description: Computes the integer quotient when dividing arg0 by arg1.
 // Requires: <cstdlib>
 RCALC_OP_2(Quot, Int, Int, arg0, arg1) {
@@ -323,8 +285,6 @@ RCALC_FMT_2(Quot, arg0, arg1) {
 
 
 // @RCalcOperator
-// Name: Mod
-// Parameters: [Int, Int]
 // Description: Computes the remainder when dividing arg0 by arg1.
 // Requires: <cstdlib>
 RCALC_OP_2(Mod, Int, Int, arg0, arg1) {
@@ -333,8 +293,6 @@ RCALC_OP_2(Mod, Int, Int, arg0, arg1) {
 }
 
 // @RCalcOperator
-// Name: Mod
-// Parameters: [Real, Real]
 // Tags: [real_cast]
 // Requires: <cstdlib>
 RCALC_OP_2(Mod, Real, Real, arg0, arg1) {
@@ -347,7 +305,6 @@ RCALC_FMT_2(Mod, arg0, arg1) {
 
 
 // @RCalcOperator
-// Name: E
 // Description: The mathematical constant e.
 // Requires: <numbers>
 // Tags: [no_expr]
@@ -361,10 +318,8 @@ RCALC_FMT_0(E) {
 
 
 // @RCalcOperator
-// Name: Range
 // Description: Generates a range of numbers from 0 to arg0.
-// Parameters: [Int]
-// Tags: [no_expr, stack_ref, fmt_stack_ref]
+// Tags: [no_expr]
 RCALC_OP_1_S(Range, Int, arg0) {
     for (Int index = 0; index < (arg0 - 1); index++) {
         Value value = Value(index);

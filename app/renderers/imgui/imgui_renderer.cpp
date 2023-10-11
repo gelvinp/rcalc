@@ -22,6 +22,7 @@ namespace RCalc {
 const float STACK_HORIZ_PADDING = 16.0;
 const float STACK_HORIZ_BIAS = 8.0;
 const float STACK_OUTER_PADDING = 4.0;
+const float STACK_BOTTOM_PADDING = 8.0;
 
 constexpr ImVec4 COLORS[] = {
     { 1.0, 0.239, 0.239, 1.0 },     // Red
@@ -153,7 +154,7 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     const float separator_position = message_position - message_padding;
 
     const float menu_bar_height = ImGui::GetCursorPosY();
-    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height;
+    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height - STACK_BOTTOM_PADDING;
 
     float desired_stack_height = 0.0;
     if (!items.empty()) {
@@ -191,12 +192,12 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
 
     const float stack_height = std::min(available_stack_height, desired_stack_height);
 
-    const float stack_position = separator_position - stack_height - padding;
+    const float stack_position = separator_position - stack_height - padding - STACK_BOTTOM_PADDING;
 
     if (!im_items.empty()) {
         ImGui::SetCursorPosY(stack_position);
 
-        if (ImGui::BeginChild("##stack", ImVec2(0, stack_height))) {
+        if (ImGui::BeginChild("##stack", ImVec2(0, stack_height + STACK_BOTTOM_PADDING))) {
             int index = 0;
 
             for (const ImGuiRenderItem& item : im_items) {

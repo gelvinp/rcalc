@@ -1,6 +1,4 @@
 // @RCalcOperator
-// Name: DegToRad
-// Parameters: [Real]
 // Description: Convert arg0 degrees to radians.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -14,8 +12,6 @@ RCALC_FMT_1(DegToRad, arg) {
 
 
 // @RCalcOperator
-// Name: RadToDeg
-// Parameters: [Real]
 // Description: Convert arg0 radians to degrees.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -29,8 +25,6 @@ RCALC_FMT_1(RadToDeg, arg) {
 
 
 // @RCalcOperator
-// Name: CartToPolar
-// Parameters: [Vec2]
 // Description: Convert [x, y] to [r, θ].
 // Requires: <glm/geometric.hpp>
 // Requires: <cmath>
@@ -52,8 +46,6 @@ RCALC_FMT_1(CartToPolar, arg) {
 
 
 // @RCalcOperator
-// Name: PolarToCart
-// Parameters: [Vec2]
 // Description: Convert [r, θ] to [x, y].
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -69,8 +61,6 @@ RCALC_FMT_1(PolarToCart, arg) {
 
 
 // @RCalcOperator
-// Name: CartToCylindrical
-// Parameters: [Vec3]
 // Description: Convert [x, y, z] to [r, φ, z].
 // Requires: <glm/geometric.hpp>
 // Requires: <cmath>
@@ -92,8 +82,6 @@ RCALC_FMT_1(CartToCylindrical, arg) {
 
 
 // @RCalcOperator
-// Name: CylindricalToCart
-// Parameters: [Vec3]
 // Description: Convert [r, φ, z] to [x, y, z].
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -109,8 +97,6 @@ RCALC_FMT_1(CylindricalToCart, arg) {
 
 
 // @RCalcOperator
-// Name: CartToSpherical
-// Parameters: [Vec3]
 // Description: Convert [x, y, z] to [r, φ, θ].
 // Requires: <glm/geometric.hpp>
 // Requires: <cmath>
@@ -133,8 +119,6 @@ RCALC_FMT_1(CartToSpherical, arg) {
 
 
 // @RCalcOperator
-// Name: SphericalToCart
-// Parameters: [Vec3]
 // Description: Convert [r, φ, θ] to [x, y, z].
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
@@ -154,8 +138,6 @@ RCALC_FMT_1(SphericalToCart, arg) {
 
 
 // @RCalcOperator
-// Name: RGBToHSL
-// Parameters: [Vec3]
 // Description: Convert linear [r, g, b] to [h, s, l].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -205,8 +187,6 @@ RCALC_FMT_1(RGBToHSL, arg) {
 
 
 // @RCalcOperator
-// Name: RGBToHSV
-// Parameters: [Vec3]
 // Description: Convert linear [r, g, b] to [h, s, v].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -256,8 +236,6 @@ RCALC_FMT_1(RGBToHSV, arg) {
 
 
 // @RCalcOperator
-// Name: RGBToOkLab
-// Parameters: [Vec3]
 // Description: Convert linear [r, g, b] to [L, a, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -289,8 +267,6 @@ RCALC_FMT_1(RGBToOkLab, arg) {
 
 
 // @RCalcOperator
-// Name: HSLToRGB
-// Parameters: [Vec3]
 // Description: Convert [h, s, l] to linear [r, g, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -318,8 +294,6 @@ RCALC_FMT_1(HSLToRGB, arg) {
 
 
 // @RCalcOperator
-// Name: HSLToHSV
-// Parameters: [Vec3]
 // Description: Convert [h, s, l] to [h, s, v].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -340,8 +314,6 @@ RCALC_FMT_1(HSLToHSV, arg) {
 
 
 // @RCalcOperator
-// Name: HSLToOklab
-// Parameters: [Vec3]
 // Description: Convert [h, s, l] to [L, a, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -383,8 +355,6 @@ RCALC_FMT_1(HSLToOklab, arg) {
 
 
 // @RCalcOperator
-// Name: HSVToRGB
-// Parameters: [Vec3]
 // Description: Convert [h, s, v] to linear [r, g, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -411,8 +381,6 @@ RCALC_FMT_1(HSVToRGB, arg) {
 
 
 // @RCalcOperator
-// Name: HSVToHSL
-// Parameters: [Vec3]
 // Description: Convert [h, s, v] to [h, s, l].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -433,8 +401,6 @@ RCALC_FMT_1(HSVToHSL, arg) {
 
 
 // @RCalcOperator
-// Name: HSVToOklab
-// Parameters: [Vec3]
 // Description: Convert [h, s, v] to [L, a, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -475,8 +441,6 @@ RCALC_FMT_1(HSVToOklab, arg) {
 
 
 // @RCalcOperator
-// Name: OklabToRGB
-// Parameters: [Vec3]
 // Description: Convert [L, a, b] to linear [r, g, b].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -508,8 +472,6 @@ RCALC_FMT_1(OklabToRGB, arg) {
 
 
 // @RCalcOperator
-// Name: OklabToHSL
-// Parameters: [Vec3]
 // Description: Convert [L, a, b] to [h, s, l].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -573,8 +535,6 @@ RCALC_FMT_1(OklabToHSL, arg) {
 
 
 // @RCalcOperator
-// Name: OklabToHSV
-// Parameters: [Vec3]
 // Description: Convert [L, a, b] to [h, s, v].
 // Requires: <cmath>
 // Tags: [no_expr]
@@ -638,8 +598,6 @@ RCALC_FMT_1(OklabToHSV, arg) {
 
 
 // @RCalcOperator
-// Name: FToC
-// Parameters: [Real]
 // Description: Convert arg0 fahrenheit to celsius.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -653,8 +611,6 @@ RCALC_FMT_1(FToC, arg) {
 
 
 // @RCalcOperator
-// Name: CToF
-// Parameters: [Real]
 // Description: Convert arg0 celsius to fahrenheit.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -668,8 +624,6 @@ RCALC_FMT_1(CToF, arg) {
 
 
 // @RCalcOperator
-// Name: FtToM
-// Parameters: [Real]
 // Description: Convert arg0 feet to meters.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -683,8 +637,6 @@ RCALC_FMT_1(FtToM, arg) {
 
 
 // @RCalcOperator
-// Name: MToFt
-// Parameters: [Real]
 // Description: Convert arg0 meters to feet.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -698,8 +650,6 @@ RCALC_FMT_1(MToFt, arg) {
 
 
 // @RCalcOperator
-// Name: InToCm
-// Parameters: [Real]
 // Description: Convert arg0 inches to centimeters.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -713,8 +663,6 @@ RCALC_FMT_1(InToCm, arg) {
 
 
 // @RCalcOperator
-// Name: CmToIn
-// Parameters: [Real]
 // Description: Convert arg0 centimeters to inches.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -728,8 +676,6 @@ RCALC_FMT_1(CmToIn, arg) {
 
 
 // @RCalcOperator
-// Name: MiToKm
-// Parameters: [Real]
 // Description: Convert arg0 statute miles to kilometers.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -743,8 +689,6 @@ RCALC_FMT_1(MiToKm, arg) {
 
 
 // @RCalcOperator
-// Name: KmToMi
-// Parameters: [Real]
 // Description: Convert arg0 kilometers to statute miles.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -758,8 +702,6 @@ RCALC_FMT_1(KmToMi, arg) {
 
 
 // @RCalcOperator
-// Name: LbsToKg
-// Parameters: [Real]
 // Description: Convert arg0 US pounds to kilograms.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
@@ -773,8 +715,6 @@ RCALC_FMT_1(LbsToKg, arg) {
 
 
 // @RCalcOperator
-// Name: KgToLbs
-// Parameters: [Real]
 // Description: Convert arg0 kilograms to US pounds.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]

@@ -36,12 +36,14 @@ public:
     void on_renderer_requested_app_commands(Renderer::AppCommandCallback cb_app_cmd);
     void on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd);
 
+    void cleanup();
+
 private:
     Application();
 
     RPNStack stack;
     Renderer* p_renderer;
-    OperatorMap op_map;
+    OperatorMap& op_map;
 
     typedef std::function<void()> AppCommand;
     bool try_application_command(const std::string& str);
