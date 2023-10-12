@@ -816,7 +816,6 @@ class OperatorMapBuilder:
             lines.append(gperf)
         
         lines.extend([
-            '',
             '}',
             '',
             'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE] = {};',
