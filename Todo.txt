@@ -16,7 +16,6 @@
  - Create TUI renderer
 
 # Track 2
- - Add use_gperf=/usr/bin/gperf option
  - Refactor CommandMap generator
     - Scons flags to enable/disable scopes
     - Inherit improvements from OperatorMap

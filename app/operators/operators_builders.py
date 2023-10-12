@@ -3,6 +3,9 @@ from string import ascii_lowercase, digits
 import itertools
 import re
 from copy import deepcopy
+import subprocess
+import tempfile
+import os
 
 
 Tags = ['reversable', 'bigint_cast', 'real_cast', 'no_expr'] # Need a string in set check, not ordered
@@ -432,7 +435,7 @@ class OperatorMapBuilder:
         return None
 
 
-    def build(self):
+    def build(self, gperf_path: str):
         if self.state == self.State.ERROR:
             return
 
@@ -464,11 +467,66 @@ class OperatorMapBuilder:
         
         lines.extend([
             '}',
+            '',
+            'namespace RCalc {',
+            '',
+            'namespace OperatorCategories {',
+            '',
+            'std::vector<Operator const *> NoCategoryOperators {'
+        ])
+
+        lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[None]]))
+
+        lines.extend([
+            '};',
+            'constexpr OperatorCategory NoCategory {',
+            '\tstd::nullopt,',
+            '\tNoCategoryOperators',
+            '};',
             ''
         ])
 
-        # TODO: gperf
-        lines.extend(self._build_std_map(operators))
+        category_names = list(self.categories.keys())
+        category_names.remove(None)
+        category_names.sort(key=lambda e: e.lower())
+        for category_name in category_names:
+            lines.append(f'std::vector<Operator const *> {category_name}CategoryOperators {{')
+            lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[category_name]]))
+            lines.extend([
+                '};',
+                f'constexpr OperatorCategory {category_name}Category {{',
+                f'\t"{category_name}",',
+                f'\t{category_name}CategoryOperators',
+                '};',
+                ''
+            ])
+
+        lines.append('std::vector<OperatorCategory const *> alphabetical_categories {')
+
+        category_lines = [
+            '\t&OperatorCategories::NoCategory'
+        ]
+        category_lines.extend([f'\t&OperatorCategories::{category_name}Category' for category_name in category_names])
+
+        lines.append(',\n'.join(category_lines))
+
+        lines.extend([
+            '};',
+            '',
+            '}',
+            '',
+            'const std::vector<OperatorCategory const *>& OperatorMap::get_alphabetical() const {',
+            '\treturn OperatorCategories::alphabetical_categories;',
+            '}',
+            '',
+            '}',
+            ''
+        ])
+
+        if gperf_path == '':
+            lines.extend(self._build_std_map(operators))
+        else:
+            lines.extend(self._build_gperf_map(operators, gperf_path))
         
         return lines
 
@@ -707,55 +765,10 @@ class OperatorMapBuilder:
             '',
             'std::map<std::string, Operator const * const> operator_map;',
             '',
-            'namespace OperatorCategories {',
-            '',
-            'std::vector<Operator const *> NoCategoryOperators {'
-        ]
-
-        lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[None]]))
-
-        lines.extend([
-            '};',
-            'constexpr OperatorCategory NoCategory {',
-            '\tstd::nullopt,',
-            '\tNoCategoryOperators',
-            '};',
-            ''
-        ])
-
-        category_names = list(self.categories.keys())
-        category_names.remove(None)
-        for category_name in category_names:
-            lines.append(f'std::vector<Operator const *> {category_name}CategoryOperators {{')
-            lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[category_name]]))
-            lines.extend([
-                '};',
-                f'constexpr OperatorCategory {category_name}Category {{',
-                f'\t"{category_name}",',
-                f'\t{category_name}CategoryOperators',
-                '};',
-                ''
-            ])
-
-        lines.extend([
-            '}',
-            ''
-            'std::vector<OperatorCategory const *> alphabetical_categories {',
-        ])
-
-        category_lines = [
-            '\t&OperatorCategories::NoCategory'
-        ]
-        category_lines.extend([f'\t&OperatorCategories::{category_name}Category' for category_name in category_names])
-
-        lines.append(',\n'.join(category_lines))
-
-        lines.extend([
-            '};',
-            '',
             'void OperatorMap::build() {',
-        ])
+        ]
 
+        operators.sort(key=lambda e: e.lower())
         lines.extend([f'\toperator_map.emplace("{self._filter_name(op_name)}", &Operators::OP_{op_name});' for op_name in operators])
         
         lines.extend([
@@ -767,19 +780,69 @@ class OperatorMapBuilder:
             '}',
             '',
             'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) const {',
-            '\tconst Operator& op = *operator_map.at(str);'
+            '\tconst Operator& op = *operator_map.at(str);',
             '\treturn op.evaluate(stack, op);',
-            '}',
-            '',
-            'const std::vector<OperatorCategory const *>& OperatorMap::get_alphabetical() const {',
-            '\treturn alphabetical_categories;',
             '}',
             '',
             '}'
         ])
 
         return lines
+    
 
+    def _build_gperf_map(self, operators: list[str], gperf_path: str):
+        lines = [
+            '// Using gperf',
+            '',
+            '#include <cstring>',
+            '',
+            'namespace RCalc {',
+            '',
+            'namespace GPerf {',
+            ''
+        ]
+
+        operators.sort(key=lambda e: e.lower())
+
+        # Write operators list to temporary file and run gperf
+        with tempfile.NamedTemporaryFile("w") as op_file:
+            for op_name in operators:
+                op_file.write(f'{self._filter_name(op_name)}\n')
+            op_file.flush()
+            op_file.flush()
+            proc = subprocess.run([gperf_path, "--language=ANSI-C", "--compare-lengths", "--compare-strncmp", "--readonly-tables", "--switch=4", "--multiple-iterations=10", os.path.realpath(op_file.name)], capture_output=True, encoding="utf-8")
+            proc.check_returncode()
+            gperf = str(proc.stdout).replace("register ", "")
+            lines.append(gperf)
+        
+        lines.extend([
+            '',
+            '}',
+            '',
+            'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE] = {};',
+            '',
+            'void OperatorMap::build() {',
+            '\tfor (const OperatorCategory* category : get_alphabetical()) {',
+            '\t\tfor (const Operator* op : category->category_ops) {',
+            '\t\t\toperator_map[GPerf::hash(op->name, strlen(op->name)) - MIN_HASH_VALUE] = op;',
+            '\t\t}',
+            '\t}',
+            '\tbuilt = true;',
+            '}',
+            '',
+            'bool OperatorMap::has_operator(const std::string& str) const {',
+            '\treturn GPerf::in_word_set(str.c_str(), str.size()) != nullptr;',
+            '}',
+            '',
+            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) const {',
+            '\tconst Operator& op = *operator_map[GPerf::hash(str.c_str(), str.size()) - MIN_HASH_VALUE];',
+            '\treturn op.evaluate(stack, op);',
+            '}',
+            '',
+            '}'
+        ])
+
+        return lines
 
 
 def make_operators_map(target, source, env):
@@ -789,7 +852,7 @@ def make_operators_map(target, source, env):
     for file in source:
         builder.process_file(file)
 
-    built = builder.build()
+    built = builder.build(env['gperf_path'])
     
     if builder.get_error() is not None:
         print(builder.get_error())

@@ -609,8 +609,8 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Operators");
     ImGui::PopFont();
 
-    for (auto category : OperatorMap::get_operator_map().get_alphabetical()) {
-        for (auto op : category->category_ops) {
+    for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
+        for (const RCalc::Operator* op : category->category_ops) {
             render_help_operator(category->category_name, op);
         }
     }

@@ -124,6 +124,7 @@ opts.Add(EnumVariable("target", "Compilation target", "debug", ("debug", "releas
 opts.Add(EnumVariable("arch", "CPU architecture", "auto", ["auto"] + platform_methods.architectures))
 opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
+opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
 
 opts.Add("CXX", "C++ compiler")
 opts.Add("CC", "C compiler")
