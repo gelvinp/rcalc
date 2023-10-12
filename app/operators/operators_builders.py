@@ -818,7 +818,7 @@ class OperatorMapBuilder:
         lines.extend([
             '}',
             '',
-            'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE] = {};',
+            'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE+1] = {};',
             '',
             'void OperatorMap::build() {',
             '\tfor (const OperatorCategory* category : get_alphabetical()) {',
