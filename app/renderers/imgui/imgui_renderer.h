@@ -5,6 +5,7 @@
 #include "app/stack.h"
 #include "imgui.h"
 #include "app/commands/commands.h"
+#include "app/operators/operators.h"
 
 namespace RCalc {
 
@@ -24,7 +25,7 @@ struct ImGuiRenderItem {
 
 class ImGuiRenderer : public Renderer {
 public:
-    ImGuiRenderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds, RequestOperatorsCallback cb_request_ops);
+    ImGuiRenderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds);
 
     virtual void render(const std::vector<RenderItem>& items) override;
 
@@ -41,7 +42,6 @@ private:
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
     RequestAppCommandsCallback cb_request_app_cmds;
-    RequestOperatorsCallback cb_request_ops;
     CommandMap<ImGuiRenderer> command_map;
 
     std::string message = "Welcome to RCalc! Type \\help to see what commands and operators are supported.";
@@ -59,6 +59,7 @@ private:
     bool scrollbar_visible = false;
     bool queer_active = false;
     bool enter_pressed = false;
+    std::optional<const char*> help_last_category_seen = std::nullopt;
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
@@ -66,6 +67,7 @@ private:
     ImVector<ImWchar> glyph_ranges;
     ImFontGlyphRangesBuilder glyphs;
     ImFont* p_font_standard;
+    ImFont* p_font_medium;
     ImFont* p_font_large;
 
     void submit_scratchpad();
@@ -77,8 +79,8 @@ private:
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
 
-    static void render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures);
-    static void render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types);
+    void render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures);
+    void render_help_operator(std::optional<const char*> category, const Operator* op);
 };
 
 }

@@ -46,6 +46,27 @@ std::vector<Value::Type> RPNStack::peek_types_vec(uint64_t count) const {
 }
 
 
+std::string RPNStack::display_types(uint64_t count) const {
+    uint64_t safe_count = std::min((size_t)count, stack.size());
+
+    std::stringstream ss;
+
+    if (safe_count == 1) {
+        ss << "type ";
+    }
+    else {
+        ss << "types ";
+    }
+
+    for (uint64_t idx = safe_count; idx > 0; --idx) {
+        if (idx < safe_count) { ss << ", "; }
+        ss << (stack[stack.size() - idx].result.get_type_name());
+    }
+
+    return ss.str();
+}
+
+
 size_t RPNStack::size() const { return stack.size(); }
 
 

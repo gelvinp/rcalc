@@ -13,6 +13,7 @@ class Capture:
     def __init__(self, filename: str):
         self.op_name = None
         self.op_description = None
+        self.op_category = None
 
         self.call_types = []
         self.call_tags = []
@@ -221,6 +222,7 @@ class Operator:
     def __init__(self, capture: Capture):
         self.name = capture.op_name
         self.description = capture.op_description
+        self.category = capture.op_category
         self.param_count = len(capture.call_types)
 
         self.calls = { ",".join(capture.call_types): Call(capture) }
@@ -249,6 +251,9 @@ class Operator:
 
         if self.description is None:
             self.description = capture.op_description
+
+        if self.category is None:
+            self.category = capture.op_category
         
         return None
 
@@ -309,7 +314,7 @@ class Operator:
                 "",
                 "\tauto it = std::find(op.allowed_types.begin(), op.allowed_types.end(), types);",
                 "\tif (it == op.allowed_types.end()) {",
-                f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op does not recognize types " + stack.peek_types({self.param_count}));',
+                f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op does not recognize " + stack.display_types({self.param_count}));',
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
                 f"\tstd::vector<StackItem> values = stack.pop_items({self.param_count});",
@@ -368,9 +373,10 @@ class Operator:
             '\t{'
         ])
 
-        for typeset in perm_types:
-            typestrings = [f'Value::TYPE_{type.upper()}' for type in typeset]
-            lines.append(f"\t\t{{ {', '.join(typestrings)} }},")
+        if self.param_count > 0:
+            for typeset in perm_types:
+                typestrings = [f'Value::TYPE_{type.upper()}' for type in typeset]
+                lines.append(f"\t\t{{ {', '.join(typestrings)} }},")
         
         lines.extend([
             '\t},',
@@ -408,6 +414,8 @@ class OperatorMapBuilder:
 
         self.operators = {}
         self.operator_requires = ["<algorithm>", "<iterator>", ]
+
+        self.categories = {}
     
 
     def process_file(self, path):
@@ -520,6 +528,8 @@ class OperatorMapBuilder:
         
         if statement_type == "Description":
             self.current_capture.op_description = statement_arg
+        elif statement_type == "Category":
+            self.current_capture.op_category = statement_arg
         elif statement_type == "Tags":
             self._validate_tags(statement_arg)
         elif statement_type == "Requires":
@@ -676,6 +686,15 @@ class OperatorMapBuilder:
                     return
             
             operator.generate_permutations()
+
+            # Track operator categories
+            if operator.category in self.categories:
+                self.categories[operator.category].append(op_name)
+            else:
+                self.categories[operator.category] = [op_name]
+        
+        for category_name in self.categories:
+            self.categories[category_name].sort(key=lambda e: e.lower())
     
 
     def _build_std_map(self, operators: list[str]):
@@ -687,10 +706,49 @@ class OperatorMapBuilder:
             'namespace RCalc {',
             '',
             'std::map<std::string, Operator const * const> operator_map;',
-            'std::vector<Operator const *> alphabetical_operators {'
+            '',
+            'namespace OperatorCategories {',
+            '',
+            'std::vector<Operator const *> NoCategoryOperators {'
         ]
 
-        lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in operators]))
+        lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[None]]))
+
+        lines.extend([
+            '};',
+            'constexpr OperatorCategory NoCategory {',
+            '\tstd::nullopt,',
+            '\tNoCategoryOperators',
+            '};',
+            ''
+        ])
+
+        category_names = list(self.categories.keys())
+        category_names.remove(None)
+        for category_name in category_names:
+            lines.append(f'std::vector<Operator const *> {category_name}CategoryOperators {{')
+            lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[category_name]]))
+            lines.extend([
+                '};',
+                f'constexpr OperatorCategory {category_name}Category {{',
+                f'\t"{category_name}",',
+                f'\t{category_name}CategoryOperators',
+                '};',
+                ''
+            ])
+
+        lines.extend([
+            '}',
+            ''
+            'std::vector<OperatorCategory const *> alphabetical_categories {',
+        ])
+
+        category_lines = [
+            '\t&OperatorCategories::NoCategory'
+        ]
+        category_lines.extend([f'\t&OperatorCategories::{category_name}Category' for category_name in category_names])
+
+        lines.append(',\n'.join(category_lines))
 
         lines.extend([
             '};',
@@ -713,8 +771,8 @@ class OperatorMapBuilder:
             '\treturn op.evaluate(stack, op);',
             '}',
             '',
-            'const std::vector<Operator const *>& OperatorMap::get_alphabetical() const {',
-            '\treturn alphabetical_operators;',
+            'const std::vector<OperatorCategory const *>& OperatorMap::get_alphabetical() const {',
+            '\treturn alphabetical_categories;',
             '}',
             '',
             '}'

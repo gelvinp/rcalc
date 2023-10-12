@@ -10,24 +10,23 @@
     - Column and row accessors
 
 # Track 1
- - ~~Refactor renderer~~
- - ~~Modules "enable" system (platform enables glfw, stb_image; renderer enables imgui, backends)~~
- - ~~Modules "static" system (when module is enabled, potentially offer a way to statically link)~~
  - Add sqlite module (enabled by platforms, have a built in preferences system) (maybe?)
  - Create options controller, platform integration with data directory, save/load interface
  - Create lib target
  - Create TUI renderer
 
 # Track 2
- - ~~Refactor OperatorMap generator~~
-    - ~~Get rid of string comparisons for type dispatch~~
-    - ~~Get rid of duplication in implementation generation~~
-    - ~~Add consistent ordering for type sets, and expose an alphabetical list of operators, in alphabetical by category~~
  - Add use_gperf=/usr/bin/gperf option
- - ~~Add Examples doctag~~
- - Add "Category" doctag (No category is an option, goes at the top of the list)
  - Refactor CommandMap generator
     - Scons flags to enable/disable scopes
     - Inherit improvements from OperatorMap
     - Expose all the registered scopes 
  - Improve help page for imgui renderer
+
+# Track 3
+ - Add a "Units" datatype (base unit type (length, weight, etc...), to_base, from_base)
+   - Each base unit type has a specific backing datatype (Real, Vec3, etc...)
+ - Add a UnitsMap generator, learning from Track 2
+ - Add a `convert` command, takes 1 real_cast or vec and two unit types, makes sure base unit types are the same, and backing datatype matches, then convert through base.
+ - Convert existing "conversion" functions to new Units method, and add new Unit types
+ - Expose base unit types and all units, to help page

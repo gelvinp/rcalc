@@ -1,5 +1,6 @@
 // @RCalcOperator
 // Description: Calculate the minimum of the top arg0 values on the stack.
+// Category: Range
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
@@ -101,6 +102,7 @@ RCALC_FMT_1_S(Min, _arg) {
 
 // @RCalcOperator
 // Description: Calculate the maximum of the top arg0 values on the stack.
+// Category: Range
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
@@ -202,6 +204,7 @@ RCALC_FMT_1_S(Max, _arg) {
 
 // @RCalcOperator
 // Description: Calculate the average of the top arg0 values on the stack.
+// Category: Range
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
@@ -259,6 +262,7 @@ RCALC_FMT_1_S(Avg, _arg) {
 
 // @RCalcOperator
 // Description: Calculate the sum of the top arg0 values on the stack.
+// Category: Range
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
@@ -318,6 +322,33 @@ RCALC_OP_1_S(Sum, Int, count) {
 RCALC_FMT_1_S(Sum, _arg) {
     UNUSED(_arg);
     std::string str = "sum(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
+    return str;
+}
+
+
+// @RCalcOperator
+// Description: Generates a range of numbers from 0 to arg0.
+// Category: Range
+// Tags: [no_expr]
+RCALC_OP_1_S(Range, Int, arg0) {
+    for (Int index = 0; index < (arg0 - 1); index++) {
+        Value value = Value(index);
+        stack.push_item(StackItem{
+            value.to_string(),
+            value.to_string(),
+            std::move(value),
+            false
+        });
+    }
+    Value last = Value(arg0 - 1);
+    stack.set_message<std::string>(last.to_string());
+    return Ok(std::move(last));
+}
+
+RCALC_FMT_1_S(Range, arg0) {
+    UNUSED(arg0);
+    std::string str = stack.get_message<std::string>();
     stack.clear_message();
     return str;
 }

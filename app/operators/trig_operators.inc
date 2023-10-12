@@ -1,5 +1,6 @@
 // @RCalcOperator
 // Description: The mathematical constant Pi.
+// Category: Constant
 // Requires: <numbers>
 // Tags: [no_expr]
 RCALC_OP_0(Pi) {
@@ -13,6 +14,7 @@ RCALC_FMT_0(Pi) {
 
 // @RCalcOperator
 // Description: The mathematical constant Tau.
+// Category: Constant
 // Requires: <numbers>
 // Tags: [no_expr]
 RCALC_OP_0(Tau) {
@@ -26,6 +28,7 @@ RCALC_FMT_0(Tau) {
 
 // @RCalcOperator
 // Description: Computes the sine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Sin, Real, arg) {
@@ -39,6 +42,7 @@ RCALC_FMT_1(Sin, arg) {
 
 // @RCalcOperator
 // Description: Computes the cosine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Cos, Real, arg) {
@@ -52,6 +56,7 @@ RCALC_FMT_1(Cos, arg) {
 
 // @RCalcOperator
 // Description: Computes the tangent of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Tan, Real, arg) {
@@ -65,6 +70,7 @@ RCALC_FMT_1(Tan, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse sine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Asin, Real, arg) {
@@ -78,6 +84,7 @@ RCALC_FMT_1(Asin, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse cosine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Acos, Real, arg) {
@@ -91,6 +98,7 @@ RCALC_FMT_1(Acos, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse tangent of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Atan, Real, arg) {
@@ -104,6 +112,7 @@ RCALC_FMT_1(Atan, arg) {
 
 // @RCalcOperator
 // Description: Computes the hyperbolic sine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Sinh, Real, arg) {
@@ -117,6 +126,7 @@ RCALC_FMT_1(Sinh, arg) {
 
 // @RCalcOperator
 // Description: Computes the hyperbolic cosine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Cosh, Real, arg) {
@@ -130,6 +140,7 @@ RCALC_FMT_1(Cosh, arg) {
 
 // @RCalcOperator
 // Description: Computes the hyperbolic tangent of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Tanh, Real, arg) {
@@ -143,6 +154,7 @@ RCALC_FMT_1(Tanh, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse hyperbolic sine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Asinh, Real, arg) {
@@ -156,6 +168,7 @@ RCALC_FMT_1(Asinh, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse hyperbolic cosine of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Acosh, Real, arg) {
@@ -169,6 +182,7 @@ RCALC_FMT_1(Acosh, arg) {
 
 // @RCalcOperator
 // Description: Computes the inverse hyperbolic tangent of arg0 (in radians).
+// Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(Atanh, Real, arg) {

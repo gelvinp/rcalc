@@ -21,10 +21,8 @@ public:
     typedef std::function<void(const std::string&)> SubmitOperatorCallback;
     typedef std::function<void(const char*, const char*, const std::vector<const char*>&)> AppCommandCallback;
     typedef std::function<void(AppCommandCallback)> RequestAppCommandsCallback;
-    typedef std::function<void(const char*, const char*, const std::vector<std::vector<Value::Type>>&)> OperatorCallback;
-    typedef std::function<void(OperatorCallback)> RequestOperatorsCallback;
 
-    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds, RequestOperatorsCallback cb_request_ops);
+    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds);
     static std::vector<const char*> get_enabled_renderers();
 
     virtual void render(const std::vector<RenderItem>& items) = 0;

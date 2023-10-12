@@ -57,12 +57,10 @@ enum ColorNames : int {
 ImGuiRenderer::ImGuiRenderer(
     SubmitTextCallback cb_submit_text,
     SubmitOperatorCallback cb_submit_op,
-    RequestAppCommandsCallback cb_request_app_cmds,
-    RequestOperatorsCallback cb_request_ops) :
+    RequestAppCommandsCallback cb_request_app_cmds) :
         cb_submit_text(cb_submit_text),
         cb_submit_op(cb_submit_op),
-        cb_request_app_cmds(cb_request_app_cmds),
-        cb_request_ops(cb_request_ops)
+        cb_request_app_cmds(cb_request_app_cmds)
 {
     command_map = get_command_map<ImGuiRenderer>();
 
@@ -78,9 +76,12 @@ ImGuiRenderer::ImGuiRenderer(
 
     float screen_dpi = Platform::get_singleton().get_screen_dpi();
     float font_size_standard = std::floor(14 * screen_dpi);
+    float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
-    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_standard, &font_cfg, &glyph_ranges[0]);    
-    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);    
+
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_standard, &font_cfg, &glyph_ranges[0]);
+    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_medium, &font_cfg, &glyph_ranges[0]);
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);
 
     io.FontGlobalScale = 1.0f / screen_dpi;
 }
@@ -591,7 +592,7 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Commands");
     ImGui::PopFont();
 
-    cb_request_app_cmds(&ImGuiRenderer::render_help_command);
+    cb_request_app_cmds(std::bind(&ImGuiRenderer::render_help_command, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
     // Some commands have multiple aliases
     std::set<std::string> displayed_commands;
@@ -608,7 +609,11 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Operators");
     ImGui::PopFont();
 
-    cb_request_ops(&ImGuiRenderer::render_help_operator);
+    for (auto category : OperatorMap::get_operator_map().get_alphabetical()) {
+        for (auto op : category->category_ops) {
+            render_help_operator(category->category_name, op);
+        }
+    }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
     ImGui::Separator();
@@ -668,27 +673,39 @@ void ImGuiRenderer::render_help_command(const char* name, const char* descriptio
 }
 
 
-void ImGuiRenderer::render_help_operator(const char* name, const char* description, const std::vector<std::vector<Value::Type>>& types) {
+void ImGuiRenderer::render_help_operator(std::optional<const char*> category, const Operator* op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
+    if (help_last_category_seen != category) {
+        help_last_category_seen = category;
+
+        if (category) {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+            ImGui::PushFont(p_font_medium);
+            ImGui::Text("%s Operators", category.value());
+            ImGui::PopFont();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+        }
+    }
+
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
-    ImGui::TextUnformatted(name);
+    ImGui::TextUnformatted(op->name);
     ImGui::PopStyleColor();
 
-    ImGui::TextUnformatted(description);
+    ImGui::TextUnformatted(op->description);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
     
-    if (!types.empty()) {
-        if (types.front().size() == 1) {
+    if (!op->allowed_types.empty()) {
+        if (op->allowed_types.front().size() == 1) {
             ImGui::Text("Accepts 1 argument:");
         }
         else {
-            ImGui::Text("Accepts %ld arguments: ", types.front().size());
+            ImGui::Text("Accepts %ld arguments: ", op->allowed_types.front().size());
         }
 
         bool first_set = true;
-        for (const std::vector<Value::Type>& call_types : types) {
+        for (const std::vector<Value::Type>& call_types : op->allowed_types) {
             ImGui::SetCursorPosX(20.0);
             bool first = true;
 

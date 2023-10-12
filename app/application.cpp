@@ -19,8 +19,7 @@ Result<Application*> Application::create(AppConfig config) {
         config.renderer_name.data(),
         std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
         std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1),
-        std::bind(&Application::on_renderer_requested_app_commands, p_application, std::placeholders::_1),
-        std::bind(&Application::on_renderer_requested_operators, p_application, std::placeholders::_1)
+        std::bind(&Application::on_renderer_requested_app_commands, p_application, std::placeholders::_1)
     );
 
     if (renderer_res) {
@@ -99,14 +98,6 @@ void Application::on_renderer_requested_app_commands(Renderer::AppCommandCallbac
         if (displayed_commands.contains(command->name)) { continue; }
         displayed_commands.insert(command->name);
         cb_app_cmd(command->name, command->description, command->signatures);
-    }
-}
-
-
-void Application::on_renderer_requested_operators(Renderer::OperatorCallback cb_ops_cmd) {
-    std::set<std::string> displayed_ops;
-    for (const auto op : op_map.get_alphabetical()) {
-        cb_ops_cmd(op->name, op->description, op->allowed_types);
     }
 }
 

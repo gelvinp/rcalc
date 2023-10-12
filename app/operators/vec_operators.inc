@@ -132,6 +132,7 @@ RCALC_OP_2(Div, Vec4, Real, arg0, arg1) {
 
 // @RCalcOperator
 // Description: Calculates the dot product between vectors arg0 and arg1.
+// Category: Vector
 // Requires: <glm/geometric.hpp>
 RCALC_OP_2(Dot, Vec2, Vec2, arg0, arg1) {
     return Ok(Value(glm::dot(arg0, arg1)));
@@ -156,6 +157,7 @@ RCALC_FMT_2(Dot, arg0, arg1) {
 
 // @RCalcOperator
 // Description: Calculates the cross product between Vec3s arg0 and arg1.
+// Category: Vector
 // Requires: <glm/geometric.hpp>
 RCALC_OP_2(Cross, Vec3, Vec3, arg0, arg1) {
     return Ok(Value(glm::cross(arg0, arg1)));
@@ -168,19 +170,23 @@ RCALC_FMT_2(Cross, arg0, arg1) {
 
 // @RCalcOperator
 // Description: Calculates the length of a vector.
+// Category: Vector
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Len, Vec2, arg0) {
     return Ok(Value(glm::length(arg0)));
 }
 
 // @RCalcOperator
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Len, Vec3, arg0) {
     return Ok(Value(glm::length(arg0)));
 }
 
 // @RCalcOperator
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Len, Vec4, arg0) {
     return Ok(Value(glm::length(arg0)));
 }
@@ -192,16 +198,20 @@ RCALC_FMT_1(Len, arg0) {
 
 // @RCalcOperator
 // Description: Calculates the length squared of a vector.
+// Category: Vector
+// Tags: [no_expr]
 RCALC_OP_1(Lensqr, Vec2, arg0) {
     return Ok(Value(arg0.x * arg0.x + arg0.y * arg0.y));
 }
 
 // @RCalcOperator
+// Tags: [no_expr]
 RCALC_OP_1(Lensqr, Vec3, arg0) {
     return Ok(Value(arg0.x * arg0.x + arg0.y * arg0.y + arg0.z * arg0.z));
 }
 
 // @RCalcOperator
+// Tags: [no_expr]
 RCALC_OP_1(Lensqr, Vec4, arg0) {
     return Ok(Value(arg0.x * arg0.x + arg0.y * arg0.y + arg0.z * arg0.z + arg0.w * arg0.w));
 }
@@ -213,19 +223,23 @@ RCALC_FMT_1(Lensqr, arg0) {
 
 // @RCalcOperator
 // Description: Normalizes a vector.
+// Category: Vector
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Norm, Vec2, arg0) {
     return Ok(Value(glm::normalize(arg0)));
 }
 
 // @RCalcOperator
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Norm, Vec3, arg0) {
     return Ok(Value(glm::normalize(arg0)));
 }
 
 // @RCalcOperator
 // Requires: <glm/geometric.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Norm, Vec4, arg0) {
     return Ok(Value(glm::normalize(arg0)));
 }
@@ -238,7 +252,7 @@ RCALC_FMT_1(Norm, arg0) {
 // @RCalcOperator
 // Description: Joins two values together.
 // Requires: <glm/vec2.hpp>
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Real, Real, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g | %g]", arg0, arg1));
     return Ok(Value(Vec2(arg0, arg1)));
@@ -247,7 +261,7 @@ RCALC_OP_2_S(Concat, Real, Real, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec3.hpp>
 // Requires: "core/format.h"
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Vec2, Real, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g, %g | %g]", arg0.x, arg0.y, arg1));
     return Ok(Value(Vec3(arg0.x, arg0.y, arg1)));
@@ -256,7 +270,7 @@ RCALC_OP_2_S(Concat, Vec2, Real, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec3.hpp>
 // Requires: "core/format.h"
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Real, Vec2, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g | %g, %g]", arg0, arg1.x, arg1.y));
     return Ok(Value(Vec3(arg0, arg1.x, arg1.y)));
@@ -265,7 +279,7 @@ RCALC_OP_2_S(Concat, Real, Vec2, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec4.hpp>
 // Requires: "core/format.h"
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Vec3, Real, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g, %g, %g | %g]", arg0.x, arg0.y, arg0.z, arg1));
     return Ok(Value(Vec4(arg0.x, arg0.y, arg0.z, arg1)));
@@ -274,7 +288,7 @@ RCALC_OP_2_S(Concat, Vec3, Real, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec4.hpp>
 // Requires: "core/format.h"
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Real, Vec3, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g | %g, %g, %g]", arg0, arg1.x, arg1.y, arg1.z));
     return Ok(Value(Vec4(arg0, arg1.x, arg1.y, arg1.z)));
@@ -283,7 +297,7 @@ RCALC_OP_2_S(Concat, Real, Vec3, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec4.hpp>
 // Requires: "core/format.h"
-// Tags: [real_cast]
+// Tags: [real_cast, no_expr]
 RCALC_OP_2_S(Concat, Vec2, Vec2, arg0, arg1) {
     stack.set_message<std::string>(fmt("[%g, %g | %g, %g]", arg0.x, arg0.y, arg1.x, arg1.y));
     return Ok(Value(Vec4(arg0.x, arg0.y, arg1.x, arg1.y)));
@@ -301,7 +315,9 @@ RCALC_FMT_2_S(Concat, arg0, arg1) {
 
 // @RCalcOperator
 // Description: Reverses a vector.
+// Category: Vector
 // Requires: <glm/vec2.hpp>
+// Tags: [no_expr]
 RCALC_OP_1(Rev, Vec2, arg0) {
     return Ok(Value(Vec2(arg0.y, arg0.x)));
 }

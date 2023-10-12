@@ -306,38 +306,13 @@ RCALC_FMT_2(Mod, arg0, arg1) {
 
 // @RCalcOperator
 // Description: The mathematical constant e.
+// Category: Constant
 // Requires: <numbers>
 // Tags: [no_expr]
-RCALC_OP_0(E) {
+RCALC_OP_0(e) {
     return Ok(Value(std::numbers::e_v<Real>));
 }
 
-RCALC_FMT_0(E) {
+RCALC_FMT_0(e) {
     return "e";
-}
-
-
-// @RCalcOperator
-// Description: Generates a range of numbers from 0 to arg0.
-// Tags: [no_expr]
-RCALC_OP_1_S(Range, Int, arg0) {
-    for (Int index = 0; index < (arg0 - 1); index++) {
-        Value value = Value(index);
-        stack.push_item(StackItem{
-            value.to_string(),
-            value.to_string(),
-            std::move(value),
-            false
-        });
-    }
-    Value last = Value(arg0 - 1);
-    stack.set_message<std::string>(last.to_string());
-    return Ok(std::move(last));
-}
-
-RCALC_FMT_1_S(Range, arg0) {
-    UNUSED(arg0);
-    std::string str = stack.get_message<std::string>();
-    stack.clear_message();
-    return str;
 }
