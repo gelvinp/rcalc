@@ -39,6 +39,8 @@ private:
     bool built = false;
     void build();
 
+    std::string filter_name(const char* p_str) const;
+
     static OperatorMap singleton;
 };
 
