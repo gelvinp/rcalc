@@ -30,7 +30,6 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 
 ## Technical debt
- - [ ] Use perfect hash generator for ~~operator and~~ command maps
  - [ ] Rewrite help page (Collapsable param types, examples, how to enter values, how does rpn work, group ops by category)
 
 
@@ -68,7 +67,7 @@ To build with clang instead of GCC, use `scons use_llvm=yes`.
 
 To build with asan, use `scons use_asan=yes`.
 
-To use gperf to generate the operator map, instead of std::map, use `scons gperf_path=/path/to/gperf`.
+To use gperf to generate the operator and command maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
 
 
 ### Building for MacOS
@@ -97,3 +96,5 @@ To build with GCC instead of clang, use `scons use_gcc=yes`, and make sure your 
 You must set these yourself as MacOS aliases `gcc` and `g++` to use Apple Clang instead.
 
 To build with asan, use `scons use_asan=yes`.
+
+To use gperf to generate the operator and command maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
