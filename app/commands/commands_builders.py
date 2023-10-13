@@ -1,5 +1,8 @@
 from enum import Enum
 from string import ascii_lowercase, digits
+import subprocess
+import tempfile
+import os
 
 
 def _filter_name(name):
@@ -229,20 +232,19 @@ class CommandMapBuilder:
             ''
         ])
 
-        lines.extend(self._build_std_map(scopes))
-        # if env["gperf_path"] == '':
-        #     lines.extend(self._build_std_map(scopes))
-        # else:
-        #     lines.extend(self._build_gperf_map(operators, env["gperf_path"]))
+        if env["gperf_path"] == '':
+            lines.extend(self._build_std_map(scopes))
+        else:
+            lines.extend(self._build_gperf_map(scopes, env["gperf_path"]))
         
         return lines
-
-        return lines
+    
     
     def _set_error(self, error):
         self.state = self.State.ERROR
         self.error = f"Error at {self.filename}:{self.line_no}\n\t{error}"
     
+
     def _process_line(self, line):
         match self.state:
             case self.State.WAITING:
@@ -253,6 +255,7 @@ class CommandMapBuilder:
                 pass
         
         self.line_no += 1
+    
     
     def _process_line_waiting(self, line):
         # Look for the start of a command
@@ -387,6 +390,124 @@ class CommandMapBuilder:
                 f'\tstatic CommandMap<{scope_name}> singleton;',
                 '\treturn singleton;',
                 '}',
+                ''
+            ])
+        
+        lines.append('}')
+
+        return lines
+    
+
+    def _build_gperf_map(self, scopes: list[str], gperf_path: str):
+        lines = [
+            '// Using gperf',
+            '',
+            '#include <cstring>',
+            '#ifndef NDEBUG',
+            '#include <cassert>',
+            '#include <algorithm>',
+            '#endif',
+            '',
+            'namespace RCalc {',
+            '',
+        ]
+
+        scopes.sort(key=lambda e: e.lower())
+        for scope_name in scopes:
+            lines.extend([
+                f'/* Scope {scope_name} */',
+                '',
+                'namespace GPerf {',
+                ''
+            ])
+
+            usages = self.scopes[scope_name].get_usages()
+            usage_names = list(usages.keys())
+            usage_names.sort()
+
+            # Write commands list to temporary file and run gperf
+            with tempfile.NamedTemporaryFile("w") as cmd_file:
+                for usage in usage_names:
+                    cmd_file.write(f'\\{_filter_name(usage)}\n')
+                cmd_file.flush()
+                cmd_file.flush()
+                proc = subprocess.run(
+                    [
+                        gperf_path,
+                        "--language=ANSI-C",
+                        "--compare-lengths",
+                        "--compare-strncmp",
+                        "--readonly-tables",
+                        "--switch=4",
+                        "--multiple-iterations=10",
+                        f"--hash-function-name=SCOPEHASH_{scope_name}",
+                        f"--lookup-function-name=SCOPELOOKUP_{scope_name}",
+                        os.path.realpath(cmd_file.name)
+                    ],
+                    capture_output=True,
+                    encoding="utf-8"
+                )
+                proc.check_returncode()
+                gperf = str(proc.stdout).replace("register ", "")
+                lines.append(gperf)
+
+            lines.extend([
+                '}',
+                '',
+                f'Command<{scope_name}> CMDMAP_{scope_name}[MAX_HASH_VALUE-MIN_HASH_VALUE+1] = {{}};',
+                '',
+                'template<>',
+                f'void CommandMap<{scope_name}>::build() {{',
+                '\tif (built) { return; }',
+                '#ifndef NDEBUG',
+                '\tstd::vector<bool> dbg_vec;',
+                '\tdbg_vec.resize(MAX_HASH_VALUE-MIN_HASH_VALUE+1, false);',
+                '#endif',
+            ])
+
+            for usage_name in usage_names:
+                lines.extend([
+                    f'\tCMDMAP_{scope_name}[GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = {usages[usage_name]};'
+                ])
+            
+            lines.append('#ifndef NDEBUG')
+
+            for usage_name in usage_names:
+                lines.extend([
+                    f'\tdbg_vec[GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = true;'
+                ])
+
+            lines.extend([
+                '\tif (std::count(dbg_vec.begin(), dbg_vec.end(), true) != TOTAL_KEYWORDS) {',
+                '\t\tthrow std::logic_error("OperatorMap Assert Failed: GPerf hash did not reach every keyword.");',
+                '\t}',
+                '#endif',
+                '\tbuilt = true;',
+                '}',
+                '',
+                'template<>',
+                f'bool CommandMap<{scope_name}>::has_command(const std::string& str) {{',
+                '\tif (!built) { build(); }',
+                f'\treturn GPerf::SCOPELOOKUP_{scope_name}(str.c_str(), str.size()) != nullptr;',
+                '}',
+                '',
+                'template<>',
+                f'void CommandMap<{scope_name}>::execute(const std::string& str, {scope_name}& scope) {{',
+                '\tif (!built) { build(); }',
+                f'\tCMDMAP_{scope_name}[GPerf::SCOPEHASH_{scope_name}(str.c_str(), str.size()) - MIN_HASH_VALUE](scope);',
+                '}',
+                '',
+                'template<>',
+                f'CommandMap<{scope_name}>& CommandMap<{scope_name}>::get_command_map() {{',
+                f'\tstatic CommandMap<{scope_name}> singleton;',
+                '\treturn singleton;',
+                '}',
+                '',
+                '#undef TOTAL_KEYWORDS',
+                '#undef MIN_WORD_LENGTH',
+                '#undef MAX_WORD_LENGTH',
+                '#undef MIN_HASH_VALUE',
+                '#undef MAX_HASH_VALUE',
                 ''
             ])
         

@@ -817,7 +817,20 @@ class OperatorMapBuilder:
                 op_file.write(f'{self._filter_name(op_name)}\n')
             op_file.flush()
             op_file.flush()
-            proc = subprocess.run([gperf_path, "--language=ANSI-C", "--compare-lengths", "--compare-strncmp", "--readonly-tables", "--switch=4", "--multiple-iterations=10", os.path.realpath(op_file.name)], capture_output=True, encoding="utf-8")
+            proc = subprocess.run(
+                [
+                    gperf_path,
+                    "--language=ANSI-C",
+                    "--compare-lengths",
+                    "--compare-strncmp",
+                    "--readonly-tables",
+                    "--switch=4",
+                    "--multiple-iterations=10",
+                    os.path.realpath(op_file.name)
+                ],
+                capture_output=True,
+                encoding="utf-8"
+            )
             proc.check_returncode()
             gperf = str(proc.stdout).replace("register ", "")
             lines.append(gperf)

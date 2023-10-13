@@ -16,7 +16,7 @@ struct CommandMeta {
 };
 
 template<typename Scope>
-using Command = std::function<void(Scope&)>;
+using Command = void (*)(Scope&);
 
 struct ScopeMeta {
     const char* scope_name;
