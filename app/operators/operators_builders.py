@@ -435,7 +435,7 @@ class OperatorMapBuilder:
         return None
 
 
-    def build(self, gperf_path: str):
+    def build(self, env):
         if self.state == self.State.ERROR:
             return
 
@@ -523,10 +523,10 @@ class OperatorMapBuilder:
             ''
         ])
 
-        if gperf_path == '':
+        if env["gperf_path"] == '':
             lines.extend(self._build_std_map(operators))
         else:
-            lines.extend(self._build_gperf_map(operators, gperf_path))
+            lines.extend(self._build_gperf_map(operators, env["gperf_path"]))
         
         return lines
 
@@ -795,6 +795,10 @@ class OperatorMapBuilder:
             '// Using gperf',
             '',
             '#include <cstring>',
+            '#ifndef NDEBUG',
+            '#include <cassert>',
+            '#include <algorithm>',
+            '#endif',
             '',
             'namespace RCalc {',
             '',
@@ -821,12 +825,24 @@ class OperatorMapBuilder:
             'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE+1] = {};',
             '',
             'void OperatorMap::build() {',
+            '#ifndef NDEBUG',
+            '\tstd::vector<bool> dbg_vec;',
+            '\tdbg_vec.resize(MAX_HASH_VALUE-MIN_HASH_VALUE+1, false);',
+            '#endif',
             '\tfor (const OperatorCategory* category : get_alphabetical()) {',
             '\t\tfor (const Operator* op : category->category_ops) {',
             '\t\t\tstd::string op_name = filter_name(op->name);',
             '\t\t\toperator_map[GPerf::hash(op_name.c_str(), strlen(op->name)) - MIN_HASH_VALUE] = op;',
+            '#ifndef NDEBUG',
+            '\t\t\tdbg_vec[GPerf::hash(op_name.c_str(), strlen(op->name)) - MIN_HASH_VALUE] = true;',
+            '#endif',
             '\t\t}',
             '\t}',
+            '#ifndef NDEBUG',
+            '\tif (std::count(dbg_vec.begin(), dbg_vec.end(), true) != TOTAL_KEYWORDS) {',
+            '\t\tthrow std::logic_error("OperatorMap Assert Failed: GPerf hash did not reach every keyword.");',
+            '\t}',
+            '#endif',
             '\tbuilt = true;',
             '}',
             '',
@@ -852,7 +868,7 @@ def make_operators_map(target, source, env):
     for file in source:
         builder.process_file(file)
 
-    built = builder.build(env['gperf_path'])
+    built = builder.build(env)
     
     if builder.get_error() is not None:
         print(builder.get_error())
