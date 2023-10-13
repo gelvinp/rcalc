@@ -416,7 +416,7 @@ class OperatorMapBuilder:
         self.current_capture = None
 
         self.operators = {}
-        self.operator_requires = ["<algorithm>", "<iterator>", ]
+        self.operator_requires = ["<algorithm>", "<iterator>"]
 
         self.categories = {}
     
@@ -766,6 +766,7 @@ class OperatorMapBuilder:
             'std::map<std::string, Operator const * const> operator_map;',
             '',
             'void OperatorMap::build() {',
+            '\tif (built) { return; }',
         ]
 
         operators.sort(key=lambda e: e.lower())
@@ -775,11 +776,13 @@ class OperatorMapBuilder:
             '\tbuilt = true;',
             '}',
             '',
-            'bool OperatorMap::has_operator(const std::string& str) const {',
+            'bool OperatorMap::has_operator(const std::string& str) {',
+            '\tif (!built) { build(); }',
             '\treturn operator_map.contains(str);',
             '}',
             '',
-            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) const {',
+            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
+            '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map.at(str);',
             '\treturn op.evaluate(stack, op);',
             '}',
@@ -795,9 +798,9 @@ class OperatorMapBuilder:
             '// Using gperf',
             '',
             '#include <cstring>',
+            '#include "core/filter.h"',
             '#ifndef NDEBUG',
             '#include <cassert>',
-            '#include <algorithm>',
             '#endif',
             '',
             'namespace RCalc {',
@@ -825,6 +828,7 @@ class OperatorMapBuilder:
             'Operator const* operator_map[MAX_HASH_VALUE-MIN_HASH_VALUE+1] = {};',
             '',
             'void OperatorMap::build() {',
+            '\tif (built) { return; }',
             '#ifndef NDEBUG',
             '\tstd::vector<bool> dbg_vec;',
             '\tdbg_vec.resize(MAX_HASH_VALUE-MIN_HASH_VALUE+1, false);',
@@ -846,11 +850,13 @@ class OperatorMapBuilder:
             '\tbuilt = true;',
             '}',
             '',
-            'bool OperatorMap::has_operator(const std::string& str) const {',
+            'bool OperatorMap::has_operator(const std::string& str) {',
+            '\tif (!built) { build(); }',
             '\treturn GPerf::in_word_set(str.c_str(), str.size()) != nullptr;',
             '}',
             '',
-            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) const {',
+            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
+            '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map[GPerf::hash(str.c_str(), str.size()) - MIN_HASH_VALUE];',
             '\treturn op.evaluate(stack, op);',
             '}',

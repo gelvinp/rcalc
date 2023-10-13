@@ -92,7 +92,9 @@ if "TERM" in os.environ:
 
 env_base["ENV"]["PATH"] = os.environ["PATH"]
 
-env_base["enabled_command_scopes"] = []
+env_base["enabled_command_scopes"] = [
+    "Application"
+]
 env_base["enabled_modules"] = [
     "bigint",
     "glm"

@@ -1,19 +1,13 @@
 // @RCalcCommand
-// Name: Clear
-// Scope: Application
 // Description: Clears the stack.
-// Usage: clear
 // Requires: "app/application.h"
 RCALC_CMD(Application, Clear, app) {
     app.stack.clear();
 }
 
 // @RCalcCommand
-// Name: Quit
-// Scope: Application
 // Description: Quits RCalc.
-// Usage: quit
-// Usage: q
+// Alias: q
 // Requires: "app/application.h"
 // Requires: "platform/platform.h"
 RCALC_CMD(Application, Quit, _app) {
@@ -22,20 +16,14 @@ RCALC_CMD(Application, Quit, _app) {
 }
 
 // @RCalcCommand
-// Name: Pop
-// Scope: Application
 // Description: Removes the top element from the stack.
-// Usage: pop
 // Requires: "app/application.h"
 RCALC_CMD(Application, Pop, app) {
     app.stack.pop_items(1);
 }
 
 // @RCalcCommand
-// Name: Swap
-// Scope: Application
 // Description: Swaps the top two elements from the stack.
-// Usage: swap
 // Requires: "app/application.h"
 // Requires: <algorithm>
 RCALC_CMD(Application, Swap, app) {
@@ -44,10 +32,7 @@ RCALC_CMD(Application, Swap, app) {
 }
 
 // @RCalcCommand
-// Name: Copy
-// Scope: Application
 // Description: Copies the top element from the stack to the clipboard.
-// Usage: copy
 // Requires: "app/application.h"
 // Requires: "platform/platform.h"
 RCALC_CMD(Application, Copy, app) {
@@ -56,10 +41,7 @@ RCALC_CMD(Application, Copy, app) {
 }
 
 // @RCalcCommand
-// Name: Dup
-// Scope: Application
 // Description: Duplicates the top element from the stack.
-// Usage: dup
 // Requires: "app/application.h"
 RCALC_CMD(Application, Dup, app) {
     if (app.stack.size() == 0) { return; }
@@ -74,10 +56,7 @@ RCALC_CMD(Application, Dup, app) {
 }
 
 // @RCalcCommand
-// Name: Count
-// Scope: Application
 // Description: Pushes the current stack size onto the stack.
-// Usage: count
 // Requires: "app/application.h"
 // Requires: <limits>
 RCALC_CMD(Application, Count, app) {

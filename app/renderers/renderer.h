@@ -19,10 +19,8 @@ class Renderer {
 public:
     typedef std::function<void(const std::string&)> SubmitTextCallback;
     typedef std::function<void(const std::string&)> SubmitOperatorCallback;
-    typedef std::function<void(const char*, const char*, const std::vector<const char*>&)> AppCommandCallback;
-    typedef std::function<void(AppCommandCallback)> RequestAppCommandsCallback;
 
-    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds);
+    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
     static std::vector<const char*> get_enabled_renderers();
 
     virtual void render(const std::vector<RenderItem>& items) = 0;

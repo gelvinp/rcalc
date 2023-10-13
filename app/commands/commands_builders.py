@@ -1,84 +1,157 @@
-from glob import glob
 from enum import Enum
 from string import ascii_lowercase, digits
 
 
-class CommandMapBuilder:
-    State = Enum('State', ['WAITING', 'WAITING_NAME', 'WAITING_SCOPE', 'SKIP_SCOPE', 'CAPTURING', 'ERROR'])
-    included_requires = []
-    included_filenames = []
+def _filter_name(name):
+    # Only allow lowercase letters, numbers, and underscores
+    lower = name.lower()
+    allowed = list(ascii_lowercase + digits + '_')
+    return ''.join([c for c in lower if c in allowed])
+    
+
+class Capture:
+    def __init__(self, filename: str):
+        self.cmd_name = None
+        self.cmd_description = None
+        self.cmd_aliases = []
+        
+        self.scope_name = None
+
+        self.filename = filename
+
+
+class Command:
+    def __init__(self, capture: Capture):
+        self.name = capture.cmd_name
+        self.description = capture.cmd_description
+        self.aliases = capture.cmd_aliases
+    
+
+    def build(self, scope_name):
+        lines = [
+            f'CommandMeta CMDMETA_{self.name} {{',
+            f'\t"{self.name}",',
+            f'\t"{self.description}",',
+            '\t{',
+        ]
+
+        if len(self.aliases) > 0:
+            lines.append(',\n'.join([f'\t\t"{alias}"' for alias in self.aliases]))
+
+        lines.extend([
+            '\t}',
+            '};',
+            '',
+        ])
+
+        return lines
+
+
+    def get_usages(self, scope_name):
+        usages = {}
+        command = f'&{scope_name}::_CMDIMPL_{self.name}'
+        
+        usages[_filter_name(self.name)] = command
+        for alias in self.aliases:
+            usages[_filter_name(alias)] = command
+        
+        return usages
+
+
+class Scope:
     seen_usages = []
 
-    class Scope:
 
-        class Command:
-            def __init__(self):
-                self.description = ""
-                self.usages = []
-            
-            def render(self, name, scope):
-                lines = [
-                    f'Command<{scope}> CMD_{scope}_{name} {{',
-                    f'\t"{name}",',
-                    f'\t"{self.description}",',
-                    f'\t{scope}::_CMDIMPL_{name},',
-                    '\t{'
-                ]
-
-                lines.extend([f'\t\t"\\\\{usage}",' for usage in self.usages])
-
-                lines.extend([
-                    '\t}',
-                    '};', ''
-                ])
-
-                return lines
-
-        def __init__(self, filename):
-            self.commands = {}
-            self.filenames = [filename]
-            
-        def render(self, name):
-            lines = [
-                f'/* Scope {name} */', ''
-            ]
-            
-            for [cmd_name, command] in self.commands.items():
-                lines.extend(command.render(cmd_name, name))
-
-            return lines
-
-        def render_map(self, name):
-            lines = [
-                'template<>',
-                f'RCalc::CommandMap<RCalc::{name}> RCalc::get_command_map() {{',
-                f'\tCommandMap<{name}> map{{}};', '',
-            ]
-
-            for [cmd_name, command] in self.commands.items():
-                for usage in command.usages:
-                    lines.append(f'\tmap.emplace("\\\\{self._filter_name(usage)}", &Commands::CMD_{name}_{cmd_name});')
-            
-            lines.extend(['', '\treturn map;', '}', ''])
-
-            return lines
+    def __init__(self, capture: Capture):
+        self.name = capture.scope_name
+        self.commands = { capture.cmd_name: Command(capture) }
+        self.__class__.seen_usages.append(_filter_name(capture.cmd_name))
+        self.__class__.seen_usages.extend([_filter_name(alias) for alias in capture.cmd_aliases])
     
-        def _filter_name(self, name):
-            lower = name.lower()
-            allowed = list(ascii_lowercase + digits)
-            return ''.join([c for c in lower if c in allowed])
 
-    def __init__(self, enabled_scopes):
+    def try_create(capture: Capture):
+        cmd_name = _filter_name(capture.cmd_name)
+        if cmd_name in Scope.seen_usages:
+            return f"Cannot reclare command '{capture.cmd_name}'"
+        Scope.seen_usages.append(cmd_name)
+
+        for cmd_alias in capture.cmd_aliases:
+            alias = _filter_name(cmd_alias)
+            if alias in Scope.seen_usages:
+                return f"Cannot reclare command '{cmd_alias}'"
+            Scope.seen_usages.append(alias)
+        
+        return Scope(capture)
+    
+
+    def try_append(self, capture: Capture):
+        cmd_name = _filter_name(capture.cmd_name)
+        if cmd_name in self.__class__.seen_usages:
+            return f"Cannot reclare command '{capture.cmd_name}'"
+        self.__class__.seen_usages.append(cmd_name)
+
+        for cmd_alias in capture.cmd_aliases:
+            alias = _filter_name(cmd_alias)
+            if alias in self.__class__.seen_usages:
+                return f"Cannot reclare command '{cmd_alias}'"
+            self.__class__.seen_usages.append(alias)
+        
+        self.commands[capture.cmd_name] = Command(capture)
+        
+        return None
+    
+
+    def build(self):
+        lines = [f'/* Scope {self.name} */', '']
+
+        commands = list(self.commands.keys())
+        commands.sort()
+
+        for cmd_name in commands:
+            lines.extend(self.commands[cmd_name].build(self.name))
+        
+        lines.append(f'std::vector<CommandMeta const *> SCOPECMDS_{self.name} {{')
+
+        if len(commands) > 0:
+            lines.append(',\n'.join([f'\t&CMDMETA_{cmd_name}' for cmd_name in commands]))
+        
+        lines.extend([
+            '};',
+            '',
+            f'ScopeMeta SCOPEMETA_{self.name} {{',
+            f'\t"{self.name}",',
+            f'\tSCOPECMDS_{self.name}',
+            '};',
+            ''
+        ])
+
+        return lines
+
+
+    def get_usages(self):
+        usages = {}
+        
+        for _cmd_name, command in self.commands.items():
+            usages.update(command.get_usages(self.name))
+        
+        return usages
+
+
+class CommandMapBuilder:
+    State = Enum('State', ['WAITING', 'CAPTURING', 'ERROR'])
+
+    def __init__(self):
         self.state = self.State.WAITING
+
         self.error = ""
-        self.current_scope = ""
-        self.current_name = ""
-        self.current_command = None
-        self.scopes = {}
         self.line_no = 1
         self.filename = ""
-        self.requires = []
-        self.enabled_scopes = enabled_scopes
+        
+        self.current_capture = None
+
+        self.scopes = {}
+        self.scope_requires = []
+        self.scope_filenames = []
     
 
     def process_file(self, path):
@@ -93,55 +166,78 @@ class CommandMapBuilder:
 
         return None
 
-    def build(self):
+    def build(self, env):
+        if self.state == self.State.ERROR:
+            return
+
+        # Make sure all commands have a description
+        self._finalize_cmds()
+
+        if self.state == self.State.ERROR:
+            return
+
         lines = [
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"commands.h\"",
             "#include \"commands_internal.h\"", "",
         ]
 
-        included = False
-        for requires in self.requires:
-            if not requires in self.__class__.included_requires:
-                lines.append(f'#include {requires}')
-                self.__class__.included_requires.append(requires)
-                included = True
-        
-        if included:
-            lines.append('')
-        
-        lines.extend(["namespace RCalc {", ""])
-
-        included = False
-        for [_, scope] in self.scopes.items():
-            for filename in scope.filenames:
-                if not filename in self.__class__.included_filenames:
-                    lines.append(f'#include "{filename}"')
-                    self.__class__.included_filenames.append(filename)
-                    included = True
-        
-        if included:
+        self.scope_requires.sort()
+        lines.extend([f'#include {requires}' for requires in self.scope_requires])
+        if len(self.scope_requires) > 0:
             lines.append('')
         
         lines.extend([
-            '}', '',
-            'namespace RCalc::Commands {', ''
+            'namespace RCalc {',
+            ''
         ])
 
-        for [name, scope] in self.scopes.items():
-            lines.extend(scope.render(name))
+        self.scope_filenames.sort()
+        lines.extend([f'#include "{filename}"' for filename in self.scope_filenames])
+        if len(self.scope_filenames) > 0:
+            lines.append('')
         
-        lines.extend(['}', ''])
+        lines.extend([
+            '}',
+            '',
+            'namespace RCalc::Commands {',
+            ''
+        ])
 
-        for [name, scope] in self.scopes.items():
-            lines.extend(scope.render_map(name))
+        scopes = [scope for scope in list(self.scopes.keys()) if scope in env["enabled_command_scopes"]]
+        scopes.sort()
+        for scope_name in scopes:
+            lines.extend(self.scopes[scope_name].build())
+        
+        lines.append(f'std::vector<ScopeMeta const *> scopemetas {{')
+
+        if len(scopes) > 0:
+            lines.append(',\n'.join([f'\t&SCOPEMETA_{scope_name}' for scope_name in scopes]))
+        
+        lines.extend([
+            '};',
+            '',
+            '}',
+            '',
+            'namespace RCalc {',
+            '',
+            'const std::vector<ScopeMeta const *>& _GlobalCommandMap::get_alphabetical() const {',
+            '\treturn Commands::scopemetas;',
+            '}',
+            '',
+            '}',
+            ''
+        ])
+
+        lines.extend(self._build_std_map(scopes))
+        # if env["gperf_path"] == '':
+        #     lines.extend(self._build_std_map(scopes))
+        # else:
+        #     lines.extend(self._build_gperf_map(operators, env["gperf_path"]))
+        
+        return lines
 
         return lines
-    
-    def _filter_name(self, name):
-        lower = name.lower()
-        allowed = list(ascii_lowercase + digits)
-        return ''.join([c for c in lower if c in allowed])
     
     def _set_error(self, error):
         self.state = self.State.ERROR
@@ -151,12 +247,6 @@ class CommandMapBuilder:
         match self.state:
             case self.State.WAITING:
                 self._process_line_waiting(line)
-            case self.State.WAITING_NAME:
-                self._process_line_waiting_name(line)
-            case self.State.WAITING_SCOPE:
-                self._process_line_waiting_scope(line)
-            case self.State.SKIP_SCOPE:
-                self._process_line_skip_scope(line)
             case self.State.CAPTURING:
                 self._process_line_capturing(line)
             case self.State.ERROR:
@@ -165,54 +255,21 @@ class CommandMapBuilder:
         self.line_no += 1
     
     def _process_line_waiting(self, line):
+        # Look for the start of a command
         if line.startswith("// @RCalcCommand"):
-            self.state = self.State.WAITING_NAME
-    
-    def _process_line_waiting_name(self, line):
-        if line.startswith("// Name: "):
-            name = line[9:]
-            self.current_name = name
-            self.state = self.State.WAITING_SCOPE
-        else:
-            self._set_error("Name must be the first statement in an operator!")
-    
-    def _process_line_waiting_scope(self, line):
-        if line.startswith("// Scope: "):
-            scope = line[10:]
-
-            if not scope in self.enabled_scopes:
-                self.state = self.State.SKIP_SCOPE
-                return
-            
-            self.current_scope = scope
             self.state = self.State.CAPTURING
-            self.current_command = self.Scope.Command()
-
-            if scope in self.scopes:
-                if self.current_name in self.scopes[scope].commands:
-                    self._set_error(f'Cannot redeclare command {self.current_scope}::{self.current_name}!')
-                    return
-
-                self.scopes[scope].filenames.append(self.filename)
-            else:
-                self.scopes[scope] = self.Scope(self.filename)
-        else:
-            self._set_error("Name must be the first statement in an operator!")
-            
-    
-    def _process_line_skip_scope(self, line):
-        if not line.startswith("// "):
-            self.state = self.State.WAITING
-            return
+            self.current_capture = Capture(self.filename)
             
     
     def _process_line_capturing(self, line):
-        if not line.startswith("// "):
-            self.state = self.State.WAITING
-            self.scopes[self.current_scope].commands[self.current_name] = self.current_command
-            return
-        
-        self._process_statement(line[3:])
+        # Capture information from the command comments and definition
+        if line.startswith("// "):
+            self._process_statement(line[3:])
+        elif line.startswith("RCALC_CMD"):
+            self._process_declaration(line)
+        else:
+            self._finish_cmd()
+    
     
     def _process_statement(self, statement):
         split = statement.split(":")
@@ -224,45 +281,132 @@ class CommandMapBuilder:
         statement_arg = split[1].strip()
 
         match statement_type:
-            case "Name":
-                self._set_error("Name statement cannot appear multiple times in one operator!")
-            case "Scope":
-                self._set_error("Scope statement cannot appear multiple times in one operator!")
             case "Description":
-                self._process_statement_description(statement_arg)
-            case "Usage":
-                self._process_statement_usage(statement_arg)
+                self.current_capture.cmd_description = statement_arg
+            case "Alias":
+                if not statement_arg in self.current_capture.cmd_aliases:
+                    self.current_capture.cmd_aliases.append(statement_arg)
             case "Requires":
-                self._process_statement_requires(statement_arg)
+                if not statement_arg in self.scope_requires:
+                    self.scope_requires.append(statement_arg)
             case _:
                 self._set_error(f"Statement type '{statement_type}' is unknown!")
     
-    def _process_statement_description(self, description):
-        self.current_command.description = description
+
+    def _process_declaration(self, declaration):
+        args_start = declaration.find("(")
+        args_end = declaration.find(")")
+
+        if args_start == -1 or args_end == -1:
+            self._set_error(f'Operator declaration {declaration} is invalid!\n\tMissing parenthesis around function params')
+            return
+
+        args = [arg.strip() for arg in declaration[args_start+1:args_end].split(",")]
+        if len(args) != 3:
+            self._set_error(f'Operator declaration {declaration} is invalid!\n\tThree arguments are required (Scope name, command name, scope parameter name)')
+            return
+
+        self.current_capture.scope_name = args[0]
+        self.current_capture.cmd_name = args[1]
     
-    def _process_statement_usage(self, usage):
-        if usage in self.seen_usages:
-            self._set_error(f'Usage "{usage}" cannot be redefined!')
+    
+    def _finish_cmd(self):
+        if self.current_capture.scope_name in self.scopes:
+            append_err = self.scopes[self.current_capture.scope_name].try_append(self.current_capture)
+            if not append_err is None:
+                self._set_error(append_err)
+                return
         else:
-            self.seen_usages.append(usage)
-            self.current_command.usages.append(usage)
+            scope = Scope.try_create(self.current_capture)
+            if type(scope) is Scope:
+                self.scopes[self.current_capture.scope_name] = scope
+            else:
+                self._set_error(scope)
+                return
+        
+        if not self.filename in self.scope_filenames:
+            self.scope_filenames.append(self.filename)
+        
+        self.state = self.State.WAITING
     
-    def _process_statement_requires(self, requires):
-        self.requires.append(requires)
+
+    def _finalize_cmds(self):
+        for scope_name, scope in self.scopes.items():
+            for cmd_name, command in scope.commands.items():
+                if command.description is None:
+                    self._set_error(f"Command {scope_name}::{cmd_name} is missing a description!")
+                    return
+    
+
+    def _build_std_map(self, scopes: list[str]):
+        lines = [
+            '// Using std_map',
+            '',
+            '#include <map>',
+            '',
+            'namespace RCalc {',
+            '',
+        ]
+
+        scopes.sort(key=lambda e: e.lower())
+        for scope_name in scopes:
+            lines.extend([
+                f'/* Scope {scope_name} */',
+                '',
+                f'std::map<std::string, Command<{scope_name}>> CMDMAP_{scope_name};',
+                '',
+                'template<>',
+                f'void CommandMap<{scope_name}>::build() {{',
+                '\tif (built) { return; }',
+            ])
+
+            usages = self.scopes[scope_name].get_usages()
+            usage_names = list(usages.keys())
+            usage_names.sort()
+
+            lines.extend([f'\tCMDMAP_{scope_name}.emplace("\\\\{usage}", {usages[usage]});' for usage in usage_names])
+
+            lines.extend([
+                '\tbuilt = true;',
+                '}',
+                '',
+                'template<>',
+                f'bool CommandMap<{scope_name}>::has_command(const std::string& str) {{',
+                '\tif (!built) { build(); }',
+                f'\treturn CMDMAP_{scope_name}.contains(str);',
+                '}',
+                '',
+                'template<>',
+                f'void CommandMap<{scope_name}>::execute(const std::string& str, {scope_name}& scope) {{',
+                '\tif (!built) { build(); }',
+                f'\tCMDMAP_{scope_name}.at(str)(scope);',
+                '}',
+                '',
+                'template<>',
+                f'CommandMap<{scope_name}>& CommandMap<{scope_name}>::get_command_map() {{',
+                f'\tstatic CommandMap<{scope_name}> singleton;',
+                '\treturn singleton;',
+                '}',
+                ''
+            ])
+        
+        lines.append('}')
+
+        return lines
 
 
 def make_command_maps(target, source, env):
     dst = target[0]
-    builder = CommandMapBuilder(env["enabled_command_scopes"])
+    builder = CommandMapBuilder()
 
     for file in source:
         builder.process_file(file)
+
+    built = builder.build(env)
     
     if builder.get_error() is not None:
         print(builder.get_error())
         return 255
-
-    built = builder.build()
     
     with open(dst, "w") as file:
         file.write("\n".join(built))

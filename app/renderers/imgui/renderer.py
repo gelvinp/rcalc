@@ -12,3 +12,4 @@ def configure(env: "Environment"):
         "glfw",
         "freetype"
     ])
+    env["enabled_command_scopes"].append("ImGuiRenderer")

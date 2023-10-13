@@ -17,9 +17,7 @@
 
 # Track 2
  - Refactor CommandMap generator
-    - Scons flags to enable/disable scopes
     - Inherit improvements from OperatorMap
-    - Expose all the registered scopes 
  - Improve help page for imgui renderer
 
 # Track 3

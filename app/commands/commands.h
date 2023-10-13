@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <string>
-#include <map>
 #include <vector>
 
 #define REGISTER_COMMAND(scope, name) static void _CMDIMPL_##name(scope&)
@@ -10,18 +9,35 @@
 
 namespace RCalc {
 
-template<typename Scope>
-struct Command {
+struct CommandMeta {
     const char* name;
     const char* description;
-    std::function<void(Scope&)> execute;
-    std::vector<const char*> signatures;
+    std::vector<const char*> aliases;
 };
 
 template<typename Scope>
-using CommandMap = std::map<std::string, Command<Scope> const * const>;
+using Command = std::function<void(Scope&)>;
+
+struct ScopeMeta {
+    const char* scope_name;
+    const std::vector<CommandMeta const *>& scope_cmds;
+};
+
+class _GlobalCommandMap {
+public:
+    const std::vector<ScopeMeta const *>& get_alphabetical() const;
+};
 
 template<typename Scope>
-CommandMap<Scope> get_command_map();
+class CommandMap : public _GlobalCommandMap {
+public:
+    static CommandMap<Scope>& get_command_map();
+    bool has_command(const std::string& str);
+    void execute(const std::string& str, Scope& scope);
+
+private:
+    bool built = false;
+    void build();
+};
 
 }

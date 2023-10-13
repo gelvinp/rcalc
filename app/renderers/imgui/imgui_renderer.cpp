@@ -56,13 +56,11 @@ enum ColorNames : int {
 
 ImGuiRenderer::ImGuiRenderer(
     SubmitTextCallback cb_submit_text,
-    SubmitOperatorCallback cb_submit_op,
-    RequestAppCommandsCallback cb_request_app_cmds) :
+    SubmitOperatorCallback cb_submit_op) :
         cb_submit_text(cb_submit_text),
-        cb_submit_op(cb_submit_op),
-        cb_request_app_cmds(cb_request_app_cmds)
+        cb_submit_op(cb_submit_op)
 {
-    command_map = get_command_map<ImGuiRenderer>();
+    command_map = CommandMap<ImGuiRenderer>::get_command_map();
 
     // Load font
     ImGuiIO& io = ImGui::GetIO();
@@ -523,8 +521,8 @@ int ImGuiRenderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData*
 
 
 bool ImGuiRenderer::try_renderer_command(const std::string& str) {
-    if (command_map.contains(str)) {
-        command_map.at(str)->execute(*this);
+    if (command_map.has_command(str)) {
+        command_map.execute(str, *this);
         return true;
     }
 
@@ -591,14 +589,16 @@ void ImGuiRenderer::render_help() {
     ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Commands");
     ImGui::PopFont();
+    
+    for (const RCalc::ScopeMeta* scope : command_map.get_alphabetical()) {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
+        ImGui::PushFont(p_font_medium);
+        ImGui::Text("%s Commands", scope->scope_name);
+        ImGui::PopFont();
 
-    cb_request_app_cmds(std::bind(&ImGuiRenderer::render_help_command, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-    // Some commands have multiple aliases
-    std::set<std::string> displayed_commands;
-    for (const auto& [key, command] : command_map) {
-        displayed_commands.insert(key);
-        render_help_command(command->name, command->description, command->signatures);
+        for (const RCalc::CommandMeta* cmd : scope->scope_cmds) {
+            render_help_command(cmd);
+        }
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
@@ -610,8 +610,15 @@ void ImGuiRenderer::render_help() {
     ImGui::PopFont();
 
     for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
+        if (category->category_name) {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
+            ImGui::PushFont(p_font_medium);
+            ImGui::Text("%s Operators", category->category_name.value());
+            ImGui::PopFont();
+        }
+
         for (const RCalc::Operator* op : category->category_ops) {
-            render_help_operator(category->category_name, op);
+            render_help_operator(op);
         }
     }
 
@@ -641,52 +648,42 @@ void ImGuiRenderer::render_help() {
 }
 
 
-void ImGuiRenderer::render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures) {
+void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_BLUE]);
-    ImGui::TextUnformatted(name);
+    ImGui::TextUnformatted(cmd->name);
     ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
-    ImGui::SameLine();
-    ImGui::TextUnformatted("(");
+    if (!cmd->aliases.empty()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+        ImGui::SameLine();
+        ImGui::TextUnformatted("aliases: [");
 
-    bool first = true;
-    for (const char* sig : signatures) {
+        bool first = true;
+        for (const char* sig : cmd->aliases) {
+            ImGui::SameLine(0.0, 0.0);
+
+            if (first) {
+                ImGui::TextUnformatted(sig);
+                first = false;
+            }
+            else {
+                ImGui::Text(", %s", sig);
+            }
+        }
+
         ImGui::SameLine(0.0, 0.0);
-
-        if (first) {
-            ImGui::TextUnformatted(sig);
-            first = false;
-        }
-        else {
-            ImGui::Text(", %s", sig);
-        }
+        ImGui::TextUnformatted("]");
+        ImGui::PopStyleColor();
     }
 
-    ImGui::SameLine(0.0, 0.0);
-    ImGui::TextUnformatted(")");
-    ImGui::PopStyleColor();
-
-    ImGui::TextUnformatted(description);
+    ImGui::TextUnformatted(cmd->description);
 }
 
 
-void ImGuiRenderer::render_help_operator(std::optional<const char*> category, const Operator* op) {
+void ImGuiRenderer::render_help_operator(const Operator* op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
-
-    if (help_last_category_seen != category) {
-        help_last_category_seen = category;
-
-        if (category) {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
-            ImGui::PushFont(p_font_medium);
-            ImGui::Text("%s Operators", category.value());
-            ImGui::PopFont();
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
-        }
-    }
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
     ImGui::TextUnformatted(op->name);

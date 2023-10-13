@@ -18,8 +18,7 @@ Result<Application*> Application::create(AppConfig config) {
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
         std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
-        std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1),
-        std::bind(&Application::on_renderer_requested_app_commands, p_application, std::placeholders::_1)
+        std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1)
     );
 
     if (renderer_res) {
@@ -35,7 +34,7 @@ Result<Application*> Application::create(AppConfig config) {
 Application::Application() :
     op_map(OperatorMap::get_operator_map())
 {
-    command_map = get_command_map<Application>();
+    command_map = CommandMap<Application>::get_command_map();
 }
 
 void Application::step() {
@@ -91,20 +90,9 @@ bool Application::on_renderer_submit_operator(const std::string& str) {
 }
 
 
-void Application::on_renderer_requested_app_commands(Renderer::AppCommandCallback cb_app_cmd) {
-    // Some commands have multiple aliases
-    std::set<std::string> displayed_commands;
-    for (const auto& [key, command] : command_map) {
-        if (displayed_commands.contains(command->name)) { continue; }
-        displayed_commands.insert(command->name);
-        cb_app_cmd(command->name, command->description, command->signatures);
-    }
-}
-
-
 bool Application::try_application_command(const std::string& str) {
-    if (command_map.contains(str)) {
-        command_map.at(str)->execute(*this);
+    if (command_map.has_command(str)) {
+        command_map.execute(str, *this);
         return true;
     }
 

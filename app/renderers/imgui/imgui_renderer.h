@@ -25,7 +25,7 @@ struct ImGuiRenderItem {
 
 class ImGuiRenderer : public Renderer {
 public:
-    ImGuiRenderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op, RequestAppCommandsCallback cb_request_app_cmds);
+    ImGuiRenderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
 
     virtual void render(const std::vector<RenderItem>& items) override;
 
@@ -41,7 +41,6 @@ public:
 private:
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
-    RequestAppCommandsCallback cb_request_app_cmds;
     CommandMap<ImGuiRenderer> command_map;
 
     std::string message = "Welcome to RCalc! Type \\help to see what commands and operators are supported.";
@@ -59,7 +58,6 @@ private:
     bool scrollbar_visible = false;
     bool queer_active = false;
     bool enter_pressed = false;
-    std::optional<const char*> help_last_category_seen = std::nullopt;
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
@@ -79,8 +77,8 @@ private:
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
 
-    void render_help_command(const char* name, const char* description, const std::vector<const char*>& signatures);
-    void render_help_operator(std::optional<const char*> category, const Operator* op);
+    void render_help_command(const CommandMeta* cmd);
+    void render_help_operator(const Operator* op);
 };
 
 }

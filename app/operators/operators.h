@@ -31,15 +31,13 @@ struct OperatorCategory {
 class OperatorMap {
 public:
     static OperatorMap& get_operator_map();
-    bool has_operator(const std::string& str) const;
-    Result<> evaluate(const std::string& str, RPNStack& stack) const;
+    bool has_operator(const std::string& str);
+    Result<> evaluate(const std::string& str, RPNStack& stack);
     const std::vector<OperatorCategory const *>& get_alphabetical() const;
 
 private:
     bool built = false;
     void build();
-
-    std::string filter_name(const char* p_str) const;
 
     static OperatorMap singleton;
 };

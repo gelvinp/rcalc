@@ -8,8 +8,6 @@ env_app.add_source_files(env.app_sources, "value/*.cpp", True)
 
 Export("env_app")
 
-env["enabled_command_scopes"].append("Application")
-
 SConscript("renderers/SCsub")
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")
