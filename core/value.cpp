@@ -167,6 +167,9 @@ DEFINE_POOL(Real);
 DEFINE_POOL(Vec2);
 DEFINE_POOL(Vec3);
 DEFINE_POOL(Vec4);
+DEFINE_POOL(Mat2);
+DEFINE_POOL(Mat3);
+DEFINE_POOL(Mat4);
 
 #pragma endregion pool
 
@@ -236,6 +239,9 @@ POOL_CONVERT(Real, TYPE_REAL);
 POOL_CONVERT(Vec2, TYPE_VEC2);
 POOL_CONVERT(Vec3, TYPE_VEC3);
 POOL_CONVERT(Vec4, TYPE_VEC4);
+POOL_CONVERT(Mat2, TYPE_MAT2);
+POOL_CONVERT(Mat3, TYPE_MAT3);
+POOL_CONVERT(Mat4, TYPE_MAT4);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -254,6 +260,9 @@ POOL_CONSTRUCT(Real, TYPE_REAL);
 POOL_CONSTRUCT(Vec2, TYPE_VEC2);
 POOL_CONSTRUCT(Vec3, TYPE_VEC3);
 POOL_CONSTRUCT(Vec4, TYPE_VEC4);
+POOL_CONSTRUCT(Mat2, TYPE_MAT2);
+POOL_CONSTRUCT(Mat3, TYPE_MAT3);
+POOL_CONSTRUCT(Mat4, TYPE_MAT4);
 
 #undef POOL_CONSTRUCT
 
@@ -272,6 +281,9 @@ Value::~Value() {
         POOL_FREE(Vec2, TYPE_VEC2)
         POOL_FREE(Vec3, TYPE_VEC3)
         POOL_FREE(Vec4, TYPE_VEC4)
+        POOL_FREE(Mat2, TYPE_MAT2)
+        POOL_FREE(Mat3, TYPE_MAT3)
+        POOL_FREE(Mat4, TYPE_MAT4)
 
         default: {
             Logger::log_err("Value of type %s not handled during free!", get_type_name());
@@ -470,7 +482,19 @@ std::string Value::to_string() {
         case TYPE_VEC4: {
             const Vec4 value = operator Vec4();
             return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+        } /*
+        case TYPE_MAT2: {
+            const Mat2 value = operator Mat2();
+            return fmt("[%g, %g]", value.x, value.y);
         }
+        case TYPE_MAT3: {
+            const Mat3 value = operator Mat3();
+            return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+        }
+        case TYPE_MAT4: {
+            const Mat4 value = operator Mat4();
+            return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+        } */
         default: {
             return "Value to_string not implemented for type!";
         }
@@ -501,6 +525,15 @@ Value Value::make_copy() const {
         }
         case TYPE_VEC4: {
             return Value(operator Vec4());
+        }
+        case TYPE_MAT2: {
+            return Value(operator Mat2());
+        }
+        case TYPE_MAT3: {
+            return Value(operator Mat3());
+        }
+        case TYPE_MAT4: {
+            return Value(operator Mat4());
         }
         default: {
             Logger::log_err("Value make_copy not implemented for type!");

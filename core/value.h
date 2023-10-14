@@ -9,6 +9,9 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/mat2x2.hpp>
+#include <glm/mat3x3.hpp>
+#include <glm/mat4x4.hpp>
 
 namespace RCalc {
 
@@ -18,6 +21,9 @@ typedef double Real;
 typedef glm::dvec2 Vec2;
 typedef glm::dvec3 Vec3;
 typedef glm::dvec4 Vec4;
+typedef glm::dmat2 Mat2;
+typedef glm::dmat3 Mat3;
+typedef glm::dmat4 Mat4;
 
 class Value {
 public:
@@ -47,6 +53,9 @@ public:
     operator Vec2() const;
     operator Vec3() const;
     operator Vec4() const;
+    operator Mat2() const;
+    operator Mat3() const;
+    operator Mat4() const;
 
     Value(Int value);
     Value(BigInt value);
@@ -54,6 +63,9 @@ public:
     Value(Vec2 value);
     Value(Vec3 value);
     Value(Vec4 value);
+    Value(Mat2 value);
+    Value(Mat3 value);
+    Value(Mat4 value);
 
     static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt);
 
@@ -78,6 +90,7 @@ private:
 
     static Value parse_numeric(const std::string& str, Real value);
     static std::optional<Value> parse_vec(const std::string& str);
+    static std::optional<Value> parse_mat(const std::string& str);
 };
 
 }
