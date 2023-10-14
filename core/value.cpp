@@ -347,45 +347,11 @@ std::optional<Value> Value::parse(const std::string& str) {
     // Check for vec types
     if (str.starts_with('[')) { return parse_vec(str); }
 
-    std::stringstream ss;
-    std::string_view sv(str.c_str(), str.length());
-    bool negate = false;
-
-    // Check for negate
-    if (str.starts_with('n')) {
-        negate = true;
-        sv = std::string_view(str.c_str() + 1, str.length() - 1);
-    }
-
     // Try to parse as number
+    std::optional<Real> real = parse_real(str);
 
-    // Check for numeric prefixes
-    if (sv.starts_with("0x")) {
-        Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 16);
-        if (ec == std::errc()) {
-            if (negate) { i_value *= -1; }
-            return Value(i_value);
-        }
-    }
-    else if (sv.starts_with("0o")) {
-        Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 8);
-        if (ec == std::errc()) {
-            if (negate) { i_value *= -1; }
-            return Value(i_value);
-        }
-    }
-    else {
-        ss << sv;
-    }
-
-    Real d;
-    ss >> d;
-
-    if (ss && ss.eof()) {
-        if (negate) { d *= -1; }
-        return parse_numeric(str, d);
+    if (real) {
+        return parse_numeric(str, real.value());
     }
 
     return std::nullopt;
@@ -399,6 +365,51 @@ Value Value::parse_numeric(const std::string& str, Real value) {
     }
     
     return find_int(value, &str);
+}
+
+
+std::optional<Real> Value::parse_real(std::string_view sv) {
+    std::stringstream ss;
+    bool negate = false;
+
+    // Check for negate
+    if (sv.starts_with('n')) {
+        negate = true;
+        sv = std::string_view(sv.data() + 1, sv.length() - 1);
+    }
+
+    // Try to parse as number
+
+    // Check for numeric prefixes
+    if (sv.starts_with("0x")) {
+        Int i_value;
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 16);
+        if (ec == std::errc()) {
+            if (negate) { i_value *= -1; }
+            return i_value;
+        }
+    }
+    else if (sv.starts_with("0o")) {
+        Int i_value;
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 8);
+        if (ec == std::errc()) {
+            if (negate) { i_value *= -1; }
+            return i_value;
+        }
+    }
+    else {
+        ss << sv;
+    }
+
+    Real d_value;
+    ss >> d_value;
+
+    if (ss && ss.eof()) {
+        if (negate) { d_value *= -1; }
+        return d_value;
+    }
+
+    return std::nullopt;
 }
 
 
@@ -425,19 +436,16 @@ std::optional<Value> Value::parse_vec(const std::string& str) {
         }
 
         sv = std::string_view(token + begin, end - begin);
+        std::optional<Real> real = parse_real(sv);
 
-        // String to real
-        std::stringstream ss;
-        Real real;
-        ss.write(sv.data(), sv.size());
-        ss >> real;
-
-        if (ss && ss.eof()) {
+        if (real) {
             if (components.size() >= 4) { return std::nullopt; }
 
-            if (negate) { real *= -1; }
+            Real r_value = real.value();
 
-            components.push_back(real);
+            if (negate) { r_value *= -1; }
+
+            components.push_back(r_value);
             token = strtok_p(nullptr, delims, &ctx);
         }
         else { return std::nullopt; }

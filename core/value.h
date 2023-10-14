@@ -89,6 +89,7 @@ private:
     uint64_t data = 0;
 
     static Value parse_numeric(const std::string& str, Real value);
+    static std::optional<Real> parse_real(std::string_view sv);
     static std::optional<Value> parse_vec(const std::string& str);
     static std::optional<Value> parse_mat(const std::string& str);
 };
