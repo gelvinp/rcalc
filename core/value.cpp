@@ -344,8 +344,9 @@ Value Value::find_int(Real value, std::optional<const std::string*> source) {
 #pragma region parse
 
 std::optional<Value> Value::parse(const std::string& str) {
-    // Check for vec types
+    // Check for vec or mat
     if (str.starts_with('[')) { return parse_vec(str); }
+    if (str.starts_with('{')) { return parse_mat(str); }
 
     // Try to parse as number
     std::optional<Real> real = parse_real(str);
@@ -413,10 +414,10 @@ std::optional<Real> Value::parse_real(std::string_view sv) {
 }
 
 
-std::optional<Value> Value::parse_vec(const std::string& str) {
-    if (!str.starts_with('[') || !str.ends_with(']')) { return std::nullopt; }
+std::optional<Value> Value::parse_vec(std::string_view sv) {
+    if (!sv.starts_with('[') || !sv.ends_with(']')) { return std::nullopt; }
 
-    std::string source { str.c_str() + 1, str.length() - 2 };
+    std::string source { sv.data() + 1, sv.length() - 2 };
     const char* delims = ",";
     char* ctx = nullptr;
     std::vector<Real> components;
@@ -463,6 +464,86 @@ std::optional<Value> Value::parse_vec(const std::string& str) {
     }
 }
 
+
+// Parsing as row-major i.e.
+// {[a11, a12], [a21, a22]} -> |a11 a12|
+//                             |a21 a22|
+std::optional<Value> Value::parse_mat(std::string_view sv) {
+    if (!sv.starts_with('{') || !sv.ends_with('}')) { return std::nullopt; }
+
+    // Find sub-vectors
+    size_t split_loc[3] = {};
+    size_t split_count = 0;
+    bool in_vec = false;
+    for (size_t idx = 0; idx < sv.size(); ++idx) {
+        switch (sv[idx]) {
+            case '[': {
+                if (in_vec) { return std::nullopt; } // {[[1]]} <- Invalid, no nested []'s allowed
+                in_vec = true;
+                break;
+            }
+            case ']': {
+                if (!in_vec) { return std::nullopt; } // {], 1} <- Invalid, No mismatched []'s allowed
+                in_vec = false;
+                break;
+            }
+            case ',': {
+                if (in_vec) { break; } // {[1, 2], []} <- Ignore commas inside subvecs
+                if (split_count >= 3) { return std::nullopt; } // {[], [], [], [], []} <- Invalid, matrices more than 4x4 not allowed
+                split_loc[split_count++] = idx;
+            }
+        }
+    }
+    if (split_count == 0) { return std::nullopt; } // {} OR {[]} <- Invalid, must be at least 2x2
+
+    // Parse sub-vectors
+    Value sub_vecs[4] = {};
+    for (size_t idx = 0; idx <= split_count; ++idx) {
+        size_t split_from = (idx == 0)           ? /* Skip beginning { */ 1               : /* Go from after last comma */ (split_loc[idx - 1] + 1);
+        size_t split_to   = (idx == split_count) ? /* Skip ending } */    (sv.size() - 1) : /* Go until next comma */      (split_loc[idx]);
+        std::string_view subvec_sv { sv.begin() + split_from, sv.begin() + split_to };
+
+        size_t ws_begin = subvec_sv.find_first_not_of(" ");
+        size_t ws_end = subvec_sv.find_last_not_of(" ") + 1;
+        subvec_sv = { subvec_sv.begin() + ws_begin, subvec_sv.begin() + ws_end };
+        
+        std::optional<Value> value = parse_vec(subvec_sv);
+        if (!value) { return std::nullopt; }
+        switch (split_count) {
+            case 1: {
+                if (value.value().type != Value::TYPE_VEC2) { return std::nullopt; }
+                break;
+            }
+            case 2: {
+                if (value.value().type != Value::TYPE_VEC3) { return std::nullopt; }
+                break;
+            }
+            case 3: {
+                if (value.value().type != Value::TYPE_VEC4) { return std::nullopt; }
+                break;
+            }
+        }
+        sub_vecs[idx] = std::move(value.value());
+    }
+
+    switch (split_count) {
+        case 1: {
+            Mat2 mat {sub_vecs[0], sub_vecs[1]};
+            return Value(glm::transpose(mat));
+        }
+        case 2: {
+            Mat3 mat {sub_vecs[0], sub_vecs[1], sub_vecs[2]};
+            return Value(glm::transpose(mat));
+        }
+        case 3: {
+            Mat4 mat {sub_vecs[0], sub_vecs[1], sub_vecs[2], sub_vecs[3]};
+            return Value(glm::transpose(mat));
+        }
+        default:
+            return std::nullopt;
+    }
+}
+
 #pragma endregion parse
 
 
@@ -490,19 +571,19 @@ std::string Value::to_string() {
         case TYPE_VEC4: {
             const Vec4 value = operator Vec4();
             return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
-        } /*
+        }
         case TYPE_MAT2: {
             const Mat2 value = operator Mat2();
-            return fmt("[%g, %g]", value.x, value.y);
+            return fmt("{[%g, %g], [%g, %g]}", value[0].x, value[1].x, value[0].y, value[1].y);
         }
         case TYPE_MAT3: {
             const Mat3 value = operator Mat3();
-            return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+            return fmt("{[%g, %g, %g], [%g, %g, %g], [%g, %g, %g]}", value[0].x, value[1].x, value[2].x, value[0].y, value[1].y, value[2].y, value[0].z, value[1].z, value[2].z);
         }
         case TYPE_MAT4: {
             const Mat4 value = operator Mat4();
-            return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
-        } */
+            return fmt("{[%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g]}", value[0].x, value[1].x, value[2].x, value[3].x, value[0].y, value[1].y, value[2].y, value[3].y, value[0].z, value[1].z, value[2].z, value[3].z, value[0].w, value[1].w, value[2].w, value[3].w);
+        }
         default: {
             return "Value to_string not implemented for type!";
         }

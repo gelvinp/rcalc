@@ -6,6 +6,20 @@ RCALC_OP_1(DegToRad, Real, arg) {
     return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi_v<Real>));
 }
 
+// @RCalcOperator
+// Requires: <numbers>
+// Tags: [no_expr]
+RCALC_OP_1(DegToRad, Vec2, arg) {
+    return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi_v<Real>));
+}
+
+// @RCalcOperator
+// Requires: <numbers>
+// Tags: [no_expr]
+RCALC_OP_1(DegToRad, Vec3, arg) {
+    return Ok(Value((arg / 360.0) * 2.0 * std::numbers::pi_v<Real>));
+}
+
 RCALC_FMT_1(DegToRad, arg) {
     return "rad(" + arg.get_input_formatted() + "°)";
 }
@@ -16,6 +30,20 @@ RCALC_FMT_1(DegToRad, arg) {
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]
 RCALC_OP_1(RadToDeg, Real, arg) {
+    return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi_v<Real>)));
+}
+
+// @RCalcOperator
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(RadToDeg, Vec2, arg) {
+    return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi_v<Real>)));
+}
+
+// @RCalcOperator
+// Requires: <numbers>
+// Tags: [no_expr, real_cast]
+RCALC_OP_1(RadToDeg, Vec3, arg) {
     return Ok(Value((arg * 360.0) / (2.0 * std::numbers::pi_v<Real>)));
 }
 

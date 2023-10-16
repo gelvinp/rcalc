@@ -12,7 +12,7 @@ void RPNStack::push_item(StackItem&& item) {
 
 
 void RPNStack::push_items(std::vector<StackItem>&& items) {
-    for (auto it = items.rbegin(); it < items.rend(); ++it) {
+    for (auto it = items.begin(); it < items.end(); ++it) {
         stack.push_back(std::move(*it));
     }
 }

@@ -13,24 +13,26 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Standard datatypes (ints and doubles)                         | Complete          |
 | BigInt datatype                                               | Complete          |
 | Vec2 / 3 / 4 datatypes                                        | Complete          |
-| Mat2 / 3 / 4 datatypes                                        | In Progress       |
+| Mat2 / 3 / 4 datatypes                                        | Complete          |
 | Basic operators (add, sub, mul, div, neg, abs)                | Complete          |
 | Extended core operators (pow, log, ceil, sign, fact)          | Complete          |
 | Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
 | Floating point division (quot, rem, mod)                      | Complete          |
 | Range operators (min, max, avg)                               | Complete          |
 | Vector operators                                              | Complete          |
-| Matrix operators                                              | Not started       |
+| Matrix operators                                              | Complete          |
 | Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | Complete          |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
 | Renderer commands (help, options)                             | In Progress       |
 | Renderer scratchpad history                                   | Complete          |
 | Renderer scratchpad autocomplete                              | Not started       |
 | Alternate renderer (TUI)                                      | Not started       |
+| Extended Conversion Operators                                 | Not started       |
 
 
 ## Technical debt
  - [ ] Rewrite help page (Collapsable param types, examples, how to enter values, how does rpn work, group ops by category)
+ - [ ] Refactor stackitem string representations
 
 
 ## Platform support

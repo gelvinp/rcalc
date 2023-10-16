@@ -55,6 +55,27 @@ RCALC_OP_2(Add, Vec4, Vec4, arg0, arg1) {
     return Ok(Value(arg0 + arg1));
 }
 
+// @RCalcOperator
+// Requires: <glm/vec2.hpp>
+// Tags: [real_cast, reversable]
+RCALC_OP_2(Add, Vec2, Real, arg0, arg1) {
+    return Ok(Value(arg0 + Vec2(arg1)));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec3.hpp>
+// Tags: [real_cast, reversable]
+RCALC_OP_2(Add, Vec3, Real, arg0, arg1) {
+    return Ok(Value(arg0 + Vec3(arg1)));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec4.hpp>
+// Tags: [real_cast, reversable]
+RCALC_OP_2(Add, Vec4, Real, arg0, arg1) {
+    return Ok(Value(arg0 + Vec4(arg1)));
+}
+
 
 // @RCalcOperator
 // Requires: <glm/vec2.hpp>
@@ -72,6 +93,48 @@ RCALC_OP_2(Sub, Vec3, Vec3, arg0, arg1) {
 // Requires: <glm/vec4.hpp>
 RCALC_OP_2(Sub, Vec4, Vec4, arg0, arg1) {
     return Ok(Value(arg0 + arg1));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec2.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Vec2, Real, arg0, arg1) {
+    return Ok(Value(arg0 - Vec2(arg1)));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec3.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Vec3, Real, arg0, arg1) {
+    return Ok(Value(arg0 - Vec3(arg1)));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec4.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Vec4, Real, arg0, arg1) {
+    return Ok(Value(arg0 - Vec4(arg1)));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec2.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Real, Vec2, arg0, arg1) {
+    return Ok(Value(Vec2(arg0) - arg1));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec3.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Real, Vec3, arg0, arg1) {
+    return Ok(Value(Vec3(arg0) - arg1));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec4.hpp>
+// Tags: [real_cast]
+RCALC_OP_2(Sub, Real, Vec4, arg0, arg1) {
+    return Ok(Value(Vec4(arg0) - arg1));
 }
 
 

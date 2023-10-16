@@ -1,14 +1,3 @@
-# Track 0
- - Matrix datatype
- - Matrix operators
-    - add, sub, (scalar) mul, (scalar)div, tpose, (vec)mul, (mat)mul
-    - det (determinate)
-    - transmat (Vec2 -> mat2 translation matrix, vec3 vec4 same)
-    - scalemat (Vec2 -> mat2 scale matrix, vec3 vec4 same)
-    - rotmat (scalar -> mat2 rotation matrix, vec3 -> mat3 rotation matrix)
-    - Construct from vectors
-    - Column and row accessors
-
 # Track 1
  - Add sqlite module (enabled by platforms, have a built in preferences system) (maybe?)
  - Create options controller, platform integration with data directory, save/load interface
@@ -20,8 +9,17 @@
 
 # Track 3
  - Add a "Units" datatype (base unit type (length, weight, etc...), to_base, from_base)
-   - Each base unit type has a specific backing datatype (Real, Vec3, etc...)
+    - Each base unit type has a specific backing datatype (Real, Vec3, etc...)
  - Add a UnitsMap generator, learning from Track 2
  - Add a `convert` command, takes 1 real_cast or vec and two unit types, makes sure base unit types are the same, and backing datatype matches, then convert through base.
  - Convert existing "conversion" functions to new Units method, and add new Unit types
  - Expose base unit types and all units, to help page
+
+# Track 4
+ - RefCounted Value
+ - Format function returns a StackFormatNode* (Each node contains a variant<const char*, Ref<Value>, StackFormatNode*, ColVector> and a next pointer) (linked lists babeyyyyy)
+ - Templated Vector display wrapper type (ColVector) that stores a Ref<Value>, and indicates it should be displayed as a column vector
+    - Tie into mul and div format functions, if arg0.is_mat() and arg1.is_vec() (will need to make those functions first but ez)
+ - flatten() function that returns a vector of variant<const char*, Ref<Value>, ColVector> (flattens the recursive nodes [carefully])
+ - Matrix to_string should use newlines and ensure consistent spacing
+ - ImGuiRenderer should layout lines in these chunks, keeping track of total entry height across multiple lines, it'll be a mess ~~i'm so excited~~
