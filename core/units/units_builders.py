@@ -288,7 +288,7 @@ class UnitsMapBuilder:
 
         args = [arg.strip() for arg in declaration[args_start+1:args_end].split(",")]
         if len(args) != 4:
-            self._set_error(f'Unit declaration {declaration} is invalid!\n\tThree arguments are required (Unit family name, Unit name, Unit family type, Usage arg)')
+            self._set_error(f'Unit declaration {declaration} is invalid!\n\tThree arguments are required (Unit family name, Unit name, Unit family type, Unit usage)')
             return
         
         if args[1][0] != '"' or args[1][-1] != '"':
