@@ -115,7 +115,7 @@ bool Application::try_swizzle(const std::string& str) {
 
     // Swizzles can only operate on vectors
     switch (source_value[0].result.get_type()) {
-        case Value::TYPE_VEC2: {
+        case TYPE_VEC2: {
             Vec2 value = source_value[0].result;
 
             for (char ch : pattern) {
@@ -146,7 +146,7 @@ bool Application::try_swizzle(const std::string& str) {
 
             break;
         }
-        case Value::TYPE_VEC3: {
+        case TYPE_VEC3: {
             Vec3 value = source_value[0].result;
 
             for (char ch : pattern) {
@@ -179,7 +179,7 @@ bool Application::try_swizzle(const std::string& str) {
 
             break;
         }
-        case Value::TYPE_VEC4: {
+        case TYPE_VEC4: {
             Vec4 value = source_value[0].result;
 
             for (char ch : pattern) {

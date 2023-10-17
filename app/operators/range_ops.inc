@@ -9,16 +9,16 @@ RCALC_OP_1_S(Min, Int, count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute min, not enough elements on the stack.");
     }
 
-    Value::Type smallest_scalar = Value::TYPE_INT;
-    for (Value::Type type : stack.peek_types_vec(count)) {
+    Type smallest_scalar = TYPE_INT;
+    for (Type type : stack.peek_types_vec(count)) {
         switch (type) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
             break;
-        case Value::TYPE_BIGINT:
-            smallest_scalar = std::max(smallest_scalar, Value::TYPE_BIGINT);
+        case TYPE_BIGINT:
+            smallest_scalar = std::max(smallest_scalar, TYPE_BIGINT);
             break;
-        case Value::TYPE_REAL:
-            smallest_scalar = std::max(smallest_scalar, Value::TYPE_REAL);
+        case TYPE_REAL:
+            smallest_scalar = std::max(smallest_scalar, TYPE_REAL);
             break;
         default:
             return Err(ERR_INVALID_PARAM, "Cannot compute min, all elements must be scalar types.");
@@ -30,7 +30,7 @@ RCALC_OP_1_S(Min, Int, count) {
     bool first = true;
 
     switch (smallest_scalar) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
         {
             std::vector<Int> values;
             for (StackItem& item : stack.pop_items(count)) {
@@ -42,15 +42,15 @@ RCALC_OP_1_S(Min, Int, count) {
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
-        case Value::TYPE_BIGINT:
+        case TYPE_BIGINT:
         {
             std::vector<BigInt> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
-                case Value::TYPE_INT:
+                case TYPE_INT:
                     values.push_back(BigInt((long long int)(item.result.operator Int())));
                     break;
-                case Value::TYPE_BIGINT:
+                case TYPE_BIGINT:
                     values.push_back(item.result.operator BigInt());
                     break;
                 default:
@@ -63,18 +63,18 @@ RCALC_OP_1_S(Min, Int, count) {
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
-        case Value::TYPE_REAL:
+        case TYPE_REAL:
         {
             std::vector<Real> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
-                case Value::TYPE_INT:
+                case TYPE_INT:
                     values.push_back((Real)(item.result.operator Int()));
                     break;
-                case Value::TYPE_BIGINT:
+                case TYPE_BIGINT:
                     values.push_back((item.result.operator BigInt()).get_real<Real>());
                     break;
-                case Value::TYPE_REAL:
+                case TYPE_REAL:
                     values.push_back((Real)item.result);
                     break;
                 default:
@@ -111,16 +111,16 @@ RCALC_OP_1_S(Max, Int, count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute max, not enough elements on the stack.");
     }
 
-    Value::Type smallest_scalar = Value::TYPE_INT;
-    for (Value::Type type : stack.peek_types_vec(count)) {
+    Type smallest_scalar = TYPE_INT;
+    for (Type type : stack.peek_types_vec(count)) {
         switch (type) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
             break;
-        case Value::TYPE_BIGINT:
-            smallest_scalar = std::max(smallest_scalar, Value::TYPE_BIGINT);
+        case TYPE_BIGINT:
+            smallest_scalar = std::max(smallest_scalar, TYPE_BIGINT);
             break;
-        case Value::TYPE_REAL:
-            smallest_scalar = std::max(smallest_scalar, Value::TYPE_REAL);
+        case TYPE_REAL:
+            smallest_scalar = std::max(smallest_scalar, TYPE_REAL);
             break;
         default:
             return Err(ERR_INVALID_PARAM, "Cannot compute max, all elements must be scalar types.");
@@ -132,7 +132,7 @@ RCALC_OP_1_S(Max, Int, count) {
     bool first = true;
 
     switch (smallest_scalar) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
         {
             std::vector<Int> values;
             for (StackItem& item : stack.pop_items(count)) {
@@ -144,15 +144,15 @@ RCALC_OP_1_S(Max, Int, count) {
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
-        case Value::TYPE_BIGINT:
+        case TYPE_BIGINT:
         {
             std::vector<BigInt> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
-                case Value::TYPE_INT:
+                case TYPE_INT:
                     values.push_back(BigInt((long long int)(item.result.operator Int())));
                     break;
-                case Value::TYPE_BIGINT:
+                case TYPE_BIGINT:
                     values.push_back(item.result.operator BigInt());
                     break;
                 default:
@@ -165,18 +165,18 @@ RCALC_OP_1_S(Max, Int, count) {
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
-        case Value::TYPE_REAL:
+        case TYPE_REAL:
         {
             std::vector<Real> values;
             for (StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
-                case Value::TYPE_INT:
+                case TYPE_INT:
                     values.push_back((Real)(item.result.operator Int()));
                     break;
-                case Value::TYPE_BIGINT:
+                case TYPE_BIGINT:
                     values.push_back((item.result.operator BigInt()).get_real<Real>());
                     break;
-                case Value::TYPE_REAL:
+                case TYPE_REAL:
                     values.push_back((Real)item.result);
                     break;
                 default:
@@ -213,11 +213,11 @@ RCALC_OP_1_S(Avg, Int, count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute avg, not enough elements on the stack.");
     }
 
-    for (Value::Type type : stack.peek_types_vec(count)) {
+    for (Type type : stack.peek_types_vec(count)) {
         switch (type) {
-        case Value::TYPE_INT:
-        case Value::TYPE_BIGINT:
-        case Value::TYPE_REAL:
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
             break;
         default:
             return Err(ERR_INVALID_PARAM, "Cannot compute avg, all elements must be scalar types.");
@@ -231,13 +231,13 @@ RCALC_OP_1_S(Avg, Int, count) {
     std::vector<Real> values;
     for (StackItem& item : stack.pop_items(count)) {
         switch (item.result.get_type()) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
             values.push_back((Real)(item.result.operator Int()));
             break;
-        case Value::TYPE_BIGINT:
+        case TYPE_BIGINT:
             values.push_back((item.result.operator BigInt()).get_real<Real>());
             break;
-        case Value::TYPE_REAL:
+        case TYPE_REAL:
             values.push_back((Real)item.result);
             break;
         default:
@@ -273,12 +273,12 @@ RCALC_OP_1_S(Sum, Int, count) {
 
     bool is_real = false;
 
-    for (Value::Type type : stack.peek_types_vec(count)) {
+    for (Type type : stack.peek_types_vec(count)) {
         switch (type) {
-        case Value::TYPE_INT:
-        case Value::TYPE_BIGINT:
+        case TYPE_INT:
+        case TYPE_BIGINT:
             break;
-        case Value::TYPE_REAL:
+        case TYPE_REAL:
             is_real = true;
             break;
         default:
@@ -293,13 +293,13 @@ RCALC_OP_1_S(Sum, Int, count) {
     Real sum = 0.0;
     for (StackItem& item : stack.pop_items(count)) {
         switch (item.result.get_type()) {
-        case Value::TYPE_INT:
+        case TYPE_INT:
             sum += (Real)(item.result.operator Int());
             break;
-        case Value::TYPE_BIGINT:
+        case TYPE_BIGINT:
             sum += (item.result.operator BigInt()).get_real<Real>();
             break;
-        case Value::TYPE_REAL:
+        case TYPE_REAL:
             sum += (Real)item.result;
             break;
         default:

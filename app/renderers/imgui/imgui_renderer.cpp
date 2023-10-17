@@ -702,7 +702,7 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
         }
 
         bool first_set = true;
-        for (const std::vector<Value::Type>& call_types : op->allowed_types) {
+        for (const std::vector<Type>& call_types : op->allowed_types) {
             ImGui::SetCursorPosX(20.0);
             bool first = true;
 
@@ -714,7 +714,7 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
                 ImGui::SameLine();
             }
 
-            for (Value::Type type : call_types) {
+            for (Type type : call_types) {
                 if (first) {
                     ImGui::TextUnformatted(Value::get_type_name(type));
                     first = false;

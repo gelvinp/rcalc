@@ -1,4 +1,41 @@
 // @RCalcOperator
+// Description: Converts arg0 between units arg1 and arg2 within the same family.
+// Tags: [real_cast]
+RCALC_OP_3(Convert, Real, Unit, Unit, arg0, arg1, arg2) {
+    // Make sure units are in the same family
+    if (arg1.p_family != arg2.p_family) {
+        return Err(ERR_INVALID_PARAM, fmt("Units %s and %s are not in the same family!", arg1.p_name, arg2.p_name));
+    }
+    
+    // Make sure unit family uses Real
+    if (arg1.p_family->base_type != TYPE_REAL) {
+        return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Real!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
+    }
+
+    return Ok(arg2.from_base(arg1.to_base(Value(arg0))));
+}
+
+// @RCalcOperator
+RCALC_OP_3(Convert, Vec3, Unit, Unit, arg0, arg1, arg2) {
+    // Make sure units are in the same family
+    if (arg1.p_family != arg2.p_family) {
+        return Err(ERR_INVALID_PARAM, fmt("Units %s and %s are not in the same family!", arg1.p_name, arg2.p_name));
+    }
+    
+    // Make sure unit family uses Vec3
+    if (arg1.p_family->base_type != TYPE_VEC3) {
+        return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Vec3!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
+    }
+
+    return Ok(arg2.from_base(arg1.to_base(Value(arg0))));
+}
+
+RCALC_FMT_3(Convert, arg0, arg1, arg2) {
+    return arg0.get_input_formatted() + " " + arg1.input + " to " + arg2.input;
+}
+
+
+// @RCalcOperator
 // Description: Convert arg0 degrees to radians.
 // Requires: <numbers>
 // Tags: [no_expr, real_cast]

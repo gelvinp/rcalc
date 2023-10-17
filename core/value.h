@@ -5,41 +5,15 @@
 #include <string>
 #include <vector>
 
-#include "modules/bigint/bigint.h"
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/mat2x2.hpp>
-#include <glm/mat3x3.hpp>
-#include <glm/mat4x4.hpp>
+#include "types.h"
+#include "core/units/units.h"
+
+struct Unit;
 
 namespace RCalc {
 
-typedef int64_t Int;
-typedef bigint BigInt;
-typedef double Real;
-typedef glm::dvec2 Vec2;
-typedef glm::dvec3 Vec3;
-typedef glm::dvec4 Vec4;
-typedef glm::dmat2 Mat2;
-typedef glm::dmat3 Mat3;
-typedef glm::dmat4 Mat4;
-
 class Value {
 public:
-    enum Type: uint8_t {
-        TYPE_INT,
-        TYPE_BIGINT,
-        TYPE_REAL,
-        TYPE_VEC2,
-        TYPE_VEC3,
-        TYPE_VEC4,
-        TYPE_MAT2,
-        TYPE_MAT3,
-        TYPE_MAT4,
-        MAX_TYPE
-    };
-
     static std::optional<Value> parse(const std::string& str);
 
     static const char* get_type_name(Type type);
@@ -56,6 +30,7 @@ public:
     operator Mat2() const;
     operator Mat3() const;
     operator Mat4() const;
+    operator Unit() const;
 
     Value(Int value);
     Value(BigInt value);
@@ -66,6 +41,7 @@ public:
     Value(Mat2 value);
     Value(Mat3 value);
     Value(Mat4 value);
+    Value(Unit value);
 
     static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt);
 
@@ -92,6 +68,8 @@ private:
     static std::optional<Real> parse_real(std::string_view sv);
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
+
+    static std::optional<Value> parse_unit(const std::string& str);
 };
 
 }

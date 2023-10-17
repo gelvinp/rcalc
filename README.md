@@ -27,7 +27,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Renderer scratchpad history                                   | Complete          |
 | Renderer scratchpad autocomplete                              | Not started       |
 | Alternate renderer (TUI)                                      | Not started       |
-| Extended Conversion Operators                                 | Not started       |
+| Extended Conversion Operators                                 | In Progress       |
 
 
 ## Technical debt

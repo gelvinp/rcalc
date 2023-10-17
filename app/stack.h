@@ -29,7 +29,7 @@ public:
     void clear();
 
     std::string peek_types(uint64_t count) const;
-    std::vector<Value::Type> peek_types_vec(uint64_t count) const;
+    std::vector<Type> peek_types_vec(uint64_t count) const;
     std::string display_types(uint64_t count) const;
 
     std::vector<StackItem> pop_items(uint64_t count);

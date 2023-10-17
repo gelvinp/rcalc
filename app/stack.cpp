@@ -34,10 +34,10 @@ std::string RPNStack::peek_types(uint64_t count) const {
 }
 
 
-std::vector<Value::Type> RPNStack::peek_types_vec(uint64_t count) const {
+std::vector<Type> RPNStack::peek_types_vec(uint64_t count) const {
     uint64_t safe_count = std::min((size_t)count, stack.size());
 
-    std::vector<Value::Type> types;
+    std::vector<Type> types;
     for (uint64_t idx = safe_count; idx > 0; --idx) {
         types.push_back(stack[stack.size() - idx].result.get_type());
     }

@@ -16,7 +16,7 @@ struct Operator {
     const char* name;
     const char* description;
     uint64_t param_count;
-    std::vector<std::vector<Value::Type>> allowed_types;
+    std::vector<std::vector<Type>> allowed_types;
     std::vector<std::vector<const char*>> examples;
     std::function<Result<>(RPNStack&, const Operator&)> evaluate;
 

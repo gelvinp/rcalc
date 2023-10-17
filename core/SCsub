@@ -1,7 +1,11 @@
 Import("env")
 
 env.core_sources = []
-env.add_source_files(env.core_sources, "*.cpp", True)
+env_core = env.Clone()
 
-lib = env.add_library("core", env.core_sources)
+env_core.add_source_files(env.core_sources, "*.cpp", True)
+
+SConscript("units/SCsub")
+
+lib = env_core.add_library("core", env.core_sources)
 env.Prepend(LIBS=[lib])

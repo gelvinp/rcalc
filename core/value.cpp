@@ -170,13 +170,14 @@ DEFINE_POOL(Vec4);
 DEFINE_POOL(Mat2);
 DEFINE_POOL(Mat3);
 DEFINE_POOL(Mat4);
+DEFINE_POOL(Unit);
 
 #pragma endregion pool
 
 
 #pragma region type_name
 
-const char* type_names[Value::MAX_TYPE] = {
+const char* type_names[MAX_TYPE] = {
     "Int",
     "BigInt",
     "Real",
@@ -185,7 +186,8 @@ const char* type_names[Value::MAX_TYPE] = {
     "Vec4",
     "Mat2",
     "Mat3",
-    "Mat4"
+    "Mat4",
+    "Unit"
 };
 
 const char* Value::get_type_name(Type type) {
@@ -242,6 +244,7 @@ POOL_CONVERT(Vec4, TYPE_VEC4);
 POOL_CONVERT(Mat2, TYPE_MAT2);
 POOL_CONVERT(Mat3, TYPE_MAT3);
 POOL_CONVERT(Mat4, TYPE_MAT4);
+POOL_CONVERT(Unit, TYPE_UNIT);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -263,6 +266,7 @@ POOL_CONSTRUCT(Vec4, TYPE_VEC4);
 POOL_CONSTRUCT(Mat2, TYPE_MAT2);
 POOL_CONSTRUCT(Mat3, TYPE_MAT3);
 POOL_CONSTRUCT(Mat4, TYPE_MAT4);
+POOL_CONSTRUCT(Unit, TYPE_UNIT);
 
 #undef POOL_CONSTRUCT
 
@@ -284,6 +288,7 @@ Value::~Value() {
         POOL_FREE(Mat2, TYPE_MAT2)
         POOL_FREE(Mat3, TYPE_MAT3)
         POOL_FREE(Mat4, TYPE_MAT4)
+        POOL_FREE(Unit, TYPE_UNIT)
 
         default: {
             Logger::log_err("Value of type %s not handled during free!", get_type_name());
@@ -347,6 +352,7 @@ std::optional<Value> Value::parse(const std::string& str) {
     // Check for vec or mat
     if (str.starts_with('[')) { return parse_vec(str); }
     if (str.starts_with('{')) { return parse_mat(str); }
+    if (str.starts_with('_')) { return parse_unit(str); }
 
     // Try to parse as number
     std::optional<Real> real = parse_real(str);
@@ -511,15 +517,15 @@ std::optional<Value> Value::parse_mat(std::string_view sv) {
         if (!value) { return std::nullopt; }
         switch (split_count) {
             case 1: {
-                if (value.value().type != Value::TYPE_VEC2) { return std::nullopt; }
+                if (value.value().type != TYPE_VEC2) { return std::nullopt; }
                 break;
             }
             case 2: {
-                if (value.value().type != Value::TYPE_VEC3) { return std::nullopt; }
+                if (value.value().type != TYPE_VEC3) { return std::nullopt; }
                 break;
             }
             case 3: {
-                if (value.value().type != Value::TYPE_VEC4) { return std::nullopt; }
+                if (value.value().type != TYPE_VEC4) { return std::nullopt; }
                 break;
             }
         }
@@ -542,6 +548,12 @@ std::optional<Value> Value::parse_mat(std::string_view sv) {
         default:
             return std::nullopt;
     }
+}
+
+std::optional<Value> Value::parse_unit(const std::string& str) {
+    std::optional<Unit const*> unit = UnitsMap::get_units_map().find_unit(str);
+    if (unit) { return Value(*unit.value()); }
+    return std::nullopt;
 }
 
 #pragma endregion parse
@@ -584,6 +596,10 @@ std::string Value::to_string() {
             const Mat4 value = operator Mat4();
             return fmt("{[%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g]}", value[0].x, value[1].x, value[2].x, value[3].x, value[0].y, value[1].y, value[2].y, value[3].y, value[0].z, value[1].z, value[2].z, value[3].z, value[0].w, value[1].w, value[2].w, value[3].w);
         }
+        case TYPE_UNIT: {
+            const Unit value = operator Unit();
+            return fmt("%s", value.p_name);
+        }
         default: {
             return "Value to_string not implemented for type!";
         }
@@ -623,6 +639,9 @@ Value Value::make_copy() const {
         }
         case TYPE_MAT4: {
             return Value(operator Mat4());
+        }
+        case TYPE_UNIT: {
+            return Value(operator Unit());
         }
         default: {
             Logger::log_err("Value make_copy not implemented for type!");

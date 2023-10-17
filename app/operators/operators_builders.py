@@ -9,7 +9,7 @@ import os
 
 
 Tags = ['reversable', 'bigint_cast', 'real_cast', 'no_expr'] # Need a string in set check, not ordered
-Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8 } # Need a string in set check, ordered
+Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8, 'Unit': 9 } # Need a string in set check, ordered
 
 
 class Capture:
@@ -311,7 +311,7 @@ class Operator:
             lines.append("")
         else:
             lines.extend([
-                f"\tstd::vector<Value::Type> types = stack.peek_types_vec({self.param_count});",
+                f"\tstd::vector<Type> types = stack.peek_types_vec({self.param_count});",
                 "\tbool expression = true;",
                 "\tResult<Value> res = Ok(Value());",
                 "",
@@ -378,7 +378,7 @@ class Operator:
 
         if self.param_count > 0:
             for typeset in perm_types:
-                typestrings = [f'Value::TYPE_{type.upper()}' for type in typeset]
+                typestrings = [f'TYPE_{type.upper()}' for type in typeset]
                 lines.append(f"\t\t{{ {', '.join(typestrings)} }},")
         
         lines.extend([
