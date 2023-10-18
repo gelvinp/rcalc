@@ -66,7 +66,7 @@ class Permutation:
         rev_types[1].stack_number = 0
 
         rev = Permutation(rev_types, self.function_types, [1, 0], self.stack_ref)
-        rev.source = self.source
+        rev.source = self.source.copy()
         rev.source.append("reversed")
         return rev
 

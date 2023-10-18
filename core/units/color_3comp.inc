@@ -16,7 +16,7 @@ UNIT_FROM_BASE(Color3Comp, Vec3, sRGB, rgb) {
 }
 
 // @RCalcUnit
-// Requires: <cmath>
+// Requires: "modules/colorm/colorm.h"
 UNIT_TO_BASE(Color3Comp, Vec3, sRGB, rgb) {
     if (value.r < 0.0 || value.r > 255.0 || value.g < 0.0 || value.g > 255.0 || value.b < 0.0 || value.b > 255.0) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 255])");
@@ -29,7 +29,8 @@ UNIT_TO_BASE(Color3Comp, Vec3, sRGB, rgb) {
     return Ok(Vec3(cie.x(), cie.y(), cie.z()));
 }
 
-
+// @RCalcUnit
+// Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color3Comp, Vec3, HSL, hsl) {
     if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
@@ -42,6 +43,8 @@ UNIT_FROM_BASE(Color3Comp, Vec3, HSL, hsl) {
     return Ok(Vec3(hsl.hue(), hsl.saturation(), hsl.lightness()));
 }
 
+// @RCalcUnit
+// Requires: "modules/colorm/colorm.h"
 UNIT_TO_BASE(Color3Comp, Vec3, HSL, hsl) {
     if (value.r < 0.0 || value.r > 360.0 || value.g < 0.0 || value.g > 100.0 || value.b < 0.0 || value.b > 100.0) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [[0, 360], [0, 100], [0, 100]])");
@@ -54,7 +57,8 @@ UNIT_TO_BASE(Color3Comp, Vec3, HSL, hsl) {
     return Ok(Vec3(cie.x(), cie.y(), cie.z()));
 }
 
-
+// @RCalcUnit
+// Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color3Comp, Vec3, OKLab, oklab) {
     if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
@@ -67,6 +71,8 @@ UNIT_FROM_BASE(Color3Comp, Vec3, OKLab, oklab) {
     return Ok(Vec3(lab.lightness(), lab.a(), lab.b()));
 }
 
+// @RCalcUnit
+// Requires: "modules/colorm/colorm.h"
 UNIT_TO_BASE(Color3Comp, Vec3, OKLab, oklab) {
     if (value.r < 0.0 || value.r > 1.0 || value.g < -0.4 || value.g > 0.4 || value.b < -0.4 || value.b > 0.4) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [[0, 1], [-0.4, 0.4], [-0.4, 0.4]])");
@@ -79,9 +85,8 @@ UNIT_TO_BASE(Color3Comp, Vec3, OKLab, oklab) {
     return Ok(Vec3(cie.x(), cie.y(), cie.z()));
 }
 
-
 // @RCalcUnit
-// Requires: <cmath>
+// Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color3Comp, Vec3, OKLCh, oklch) {
     if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
@@ -95,7 +100,7 @@ UNIT_FROM_BASE(Color3Comp, Vec3, OKLCh, oklch) {
 }
 
 // @RCalcUnit
-// Requires: <cmath>
+// Requires: "modules/colorm/colorm.h"
 UNIT_TO_BASE(Color3Comp, Vec3, OKLCh, oklch) {
     if (value.r < 0.0 || value.r > 1.0 || value.g < -0.4 || value.g > 0.4 || value.b < -0.4 || value.b > 0.4) {
         return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [[0, 1], [-0.4, 0.4], [-0.4, 0.4]])");

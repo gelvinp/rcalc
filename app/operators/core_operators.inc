@@ -2,7 +2,7 @@
 // Description: Adds two values together.
 // Example: [1, 2]
 RCALC_OP_2(Add, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int(arg0 + arg1));
+    return Ok(Value::find_int((Real)arg0 + arg1));
 }
 
 // @RCalcOperator
@@ -19,7 +19,7 @@ RCALC_FMT_2(Add, arg0, arg1) {
 // @RCalcOperator
 // Description: Subtracts two values.
 RCALC_OP_2(Sub, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int(arg0 - arg1));
+    return Ok(Value::find_int((Real)arg0 - arg1));
 }
 
 // @RCalcOperator
@@ -36,7 +36,7 @@ RCALC_FMT_2(Sub, arg0, arg1) {
 // @RCalcOperator
 // Description: Multiplies two values together.
 RCALC_OP_2(Mul, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int(arg0 * arg1));
+    return Ok(Value::find_int((Real)arg0 * arg1));
 }
 
 // @RCalcOperator
@@ -67,7 +67,7 @@ RCALC_FMT_2(Div, arg0, arg1) {
 // Requires: <cmath>
 // Tags: [no_expr]
 RCALC_OP_1(Abs, Int, arg0) {
-    return Ok(Value::find_int(std::abs(arg0)));
+    return Ok(Value::find_int(std::abs((Real)arg0)));
 }
 
 // @RCalcOperator
@@ -87,7 +87,7 @@ RCALC_FMT_1(Abs, arg0) {
 // Requires: <cmath>
 // Tags: [no_expr]
 RCALC_OP_1(Neg, Int, arg0) {
-    return Ok(Value::find_int(-arg0));
+    return Ok(Value::find_int(-(Real)arg0));
 }
 
 // @RCalcOperator

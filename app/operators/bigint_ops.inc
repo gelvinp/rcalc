@@ -41,18 +41,21 @@ RCALC_OP_2(Mod, BigInt, BigInt, arg0, arg1) {
 
 
 // @RCalcOperator
+// Tags: [no_expr]
 RCALC_OP_1(Abs, BigInt, arg) {
     return Ok(Value(big_abs(arg)));
 }
 
 
 // @RCalcOperator
+// Tags: [no_expr]
 RCALC_OP_1(Fact, BigInt, arg) {
     return Ok(Value(big_fact(arg)));
 }
 
 
 // @RCalcOperator
+// Tags: [no_expr]
 RCALC_OP_1(Neg, BigInt, arg) {
     return Ok(Value(arg * BigInt("-1")));
 }
