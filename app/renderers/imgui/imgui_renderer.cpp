@@ -755,7 +755,7 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
                 Result<> err = op_map.evaluate(op_name, example_stack);
 
                 if (!err) {
-                    Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message());
+                    Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());
                     continue;
                 }
 
