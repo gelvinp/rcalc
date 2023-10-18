@@ -245,7 +245,10 @@ class UnitsMapBuilder:
             ''
         ])
 
-        lines.extend(self._build_std_map())
+        if env["gperf_path"] == '':
+            lines.extend(self._build_std_map())
+        else:
+            lines.extend(self._build_gperf_map(env["gperf_path"]))
 
         return lines
     
@@ -417,6 +420,94 @@ class UnitsMapBuilder:
             '',
             '}',
             ''
+        ])
+
+        return lines
+    
+
+    def _build_gperf_map(self, gperf_path: str):
+        lines = [
+            '// Using gperf',
+            '',
+            '#include <cstring>',
+            '#include "core/filter.h"',
+            '#ifndef NDEBUG',
+            '#include <cassert>',
+            '#endif',
+            '',
+            'namespace RCalc {',
+            '',
+            'namespace Units::GPerf {',
+            ''
+        ]
+
+        units = []
+        for family_name in self.family_units:
+            units.extend([self.family_units[family_name].units[unit_name].usage for unit_name in self.family_units[family_name].units])
+            units.append(self.family_units[family_name].family_unit_usage)
+
+        units.sort()
+
+        # Write units list to temporary file and run gperf
+        with tempfile.NamedTemporaryFile("w") as unit_file:
+            for unit in units:
+                unit_file.write(f'_{unit}\n')
+            unit_file.flush()
+            unit_file.flush()
+            proc = subprocess.run(
+                [
+                    gperf_path,
+                    "--language=ANSI-C",
+                    "--compare-lengths",
+                    "--compare-strncmp",
+                    "--readonly-tables",
+                    "--switch=4",
+                    "--multiple-iterations=10",
+                    os.path.realpath(unit_file.name)
+                ],
+                capture_output=True,
+                encoding="utf-8"
+            )
+            proc.check_returncode()
+            gperf = str(proc.stdout).replace("register ", "")
+            lines.append(gperf)
+        
+        lines.extend([
+            '}',
+            '',
+            'Unit const* units_map[MAX_HASH_VALUE-MIN_HASH_VALUE+1] = {};',
+            '',
+            'void UnitsMap::build() {',
+            '\tif (built) { return; }',
+            '#ifndef NDEBUG',
+            '\tstd::vector<bool> dbg_vec;',
+            '\tdbg_vec.resize(MAX_HASH_VALUE-MIN_HASH_VALUE+1, false);',
+            '#endif',
+            '\tfor (const UnitFamily* family : get_alphabetical()) {',
+            '\t\tfor (const Unit* unit : family->units) {',
+            '\t\t\tunits_map[Units::GPerf::hash(unit->p_usage, strlen(unit->p_usage)) - MIN_HASH_VALUE] = unit;',
+            '#ifndef NDEBUG',
+            '\t\t\tdbg_vec[Units::GPerf::hash(unit->p_usage, strlen(unit->p_usage)) - MIN_HASH_VALUE] = true;',
+            '#endif',
+            '\t\t}',
+            '\t}',
+            '#ifndef NDEBUG',
+            '\tif (std::count(dbg_vec.begin(), dbg_vec.end(), true) != TOTAL_KEYWORDS) {',
+            '\t\tthrow std::logic_error("UnitsMap Assert Failed: GPerf hash did not reach every keyword.");',
+            '\t}',
+            '#endif',
+            '\tbuilt = true;',
+            '}',
+            '',
+            'std::optional<const Unit*> UnitsMap::find_unit(const std::string& str) {',
+            '\tif (!built) { build(); }',
+            '\tif (Units::GPerf::in_word_set(str.c_str(), str.size()) != nullptr) {',
+            '\t\treturn units_map[Units::GPerf::hash(str.c_str(), str.size()) - MIN_HASH_VALUE];',
+            '\t}',
+            '\telse { return std::nullopt; }',
+            '}',
+            '',
+            '}'
         ])
 
         return lines

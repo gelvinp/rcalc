@@ -418,7 +418,7 @@ class CommandMapBuilder:
             lines.extend([
                 f'/* Scope {scope_name} */',
                 '',
-                'namespace GPerf {',
+                'namespace Commands::GPerf {',
                 ''
             ])
 
@@ -468,14 +468,14 @@ class CommandMapBuilder:
 
             for usage_name in usage_names:
                 lines.extend([
-                    f'\tCMDMAP_{scope_name}[GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = {usages[usage_name]};'
+                    f'\tCMDMAP_{scope_name}[Commands::GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = {usages[usage_name]};'
                 ])
             
             lines.append('#ifndef NDEBUG')
 
             for usage_name in usage_names:
                 lines.extend([
-                    f'\tdbg_vec[GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = true;'
+                    f'\tdbg_vec[Commands::GPerf::SCOPEHASH_{scope_name}("\\\\{usage_name}", {len(usage_name) + 1}) - MIN_HASH_VALUE] = true;'
                 ])
 
             lines.extend([
@@ -489,13 +489,13 @@ class CommandMapBuilder:
                 'template<>',
                 f'bool CommandMap<{scope_name}>::has_command(const std::string& str) {{',
                 '\tif (!built) { build(); }',
-                f'\treturn GPerf::SCOPELOOKUP_{scope_name}(str.c_str(), str.size()) != nullptr;',
+                f'\treturn Commands::GPerf::SCOPELOOKUP_{scope_name}(str.c_str(), str.size()) != nullptr;',
                 '}',
                 '',
                 'template<>',
                 f'void CommandMap<{scope_name}>::execute(const std::string& str, {scope_name}& scope) {{',
                 '\tif (!built) { build(); }',
-                f'\tCMDMAP_{scope_name}[GPerf::SCOPEHASH_{scope_name}(str.c_str(), str.size()) - MIN_HASH_VALUE](scope);',
+                f'\tCMDMAP_{scope_name}[Commands::GPerf::SCOPEHASH_{scope_name}(str.c_str(), str.size()) - MIN_HASH_VALUE](scope);',
                 '}',
                 '',
                 'template<>',
