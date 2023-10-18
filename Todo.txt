@@ -8,9 +8,6 @@
  - Improve help page for imgui renderer
 
 # Track 3
- - Expose base unit types and all units, to help page
-
-# Track 4
  - RefCounted Value
  - Format function returns a StackFormatNode* (Each node contains a variant<const char*, Ref<Value>, StackFormatNode*, ColVector> and a next pointer) (linked lists babeyyyyy)
  - Templated Vector display wrapper type (ColVector) that stores a Ref<Value>, and indicates it should be displayed as a column vector

@@ -629,6 +629,18 @@ void ImGuiRenderer::render_help() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushFont(p_font_large);
+    ImGui::TextUnformatted("Unit Families");
+    ImGui::PopFont();
+
+    for (const RCalc::UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
+        render_help_unit_family(family);
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Licenses");
     ImGui::PopFont();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
@@ -783,6 +795,31 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
     }
 
     ImGui::PopStyleColor();
+}
+
+
+void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_YELLOW]);
+    ImGui::TextUnformatted(family->p_name);
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+    ImGui::Text("Base type: %s", Value::get_type_name(family->base_type));
+    ImGui::PopStyleColor();
+
+    if (ImGui::TreeNode((void*)family, "Units")) {
+        for (const Unit* unit : family->units) {
+                ImGui::BulletText("%s", unit->p_name);
+
+                ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+                ImGui::SameLine();
+                ImGui::Text("(Usage: %s)", unit->p_usage);
+                ImGui::PopStyleColor();
+        }
+        ImGui::TreePop();
+    }
 }
 
 }

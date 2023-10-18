@@ -31,7 +31,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 
 ## Technical debt
- - [ ] Rewrite help page (~~Collapsable param types, examples,~~ how to enter values, how does rpn work, ~~group ops by category~~, Units)
+ - [ ] Rewrite help page (how to enter values, how does rpn work)
  - [ ] Refactor stackitem string representations
 
 

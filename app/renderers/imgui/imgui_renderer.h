@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "app/commands/commands.h"
 #include "app/operators/operators.h"
+#include "core/units/units.h"
 
 namespace RCalc {
 
@@ -79,6 +80,7 @@ private:
 
     void render_help_command(const CommandMeta* cmd);
     void render_help_operator(const Operator* op);
+    void render_help_unit_family(const UnitFamily* family);
 };
 
 }
