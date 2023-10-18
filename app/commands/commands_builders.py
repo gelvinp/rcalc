@@ -159,6 +159,7 @@ class CommandMapBuilder:
 
     def process_file(self, path):
         self.filename = str(path)
+        self.line_no = 1
         with open(path, 'r') as file:
             for line in file:
                 self._process_line(line.rstrip())
@@ -256,7 +257,7 @@ class CommandMapBuilder:
         
         self.line_no += 1
     
-    
+
     def _process_line_waiting(self, line):
         # Look for the start of a command
         if line.startswith("// @RCalcCommand"):

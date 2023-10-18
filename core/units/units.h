@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/types.h"
-
+#include "core/error.h"
 
 #include <functional>
 #include <optional>
@@ -27,8 +27,8 @@ struct Unit {
     const char* p_usage;
     const UnitFamily* p_family;
 
-    Value(*from_base)(Value);
-    Value(*to_base)(Value);
+    Result<Value>(*from_base)(Value);
+    Result<Value>(*to_base)(Value);
 };
 
 

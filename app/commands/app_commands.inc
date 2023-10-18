@@ -28,6 +28,7 @@ RCALC_CMD(Application, Pop, app) {
 // Requires: <algorithm>
 RCALC_CMD(Application, Swap, app) {
     std::vector<StackItem> items = app.stack.pop_items(2);
+    std::swap(items[0], items[1]);
     app.stack.push_items(std::move(items));
 }
 

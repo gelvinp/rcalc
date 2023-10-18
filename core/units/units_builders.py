@@ -3,6 +3,7 @@ from string import ascii_lowercase, digits
 import subprocess
 import tempfile
 import os
+import csv
 
 
 Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8 }
@@ -41,9 +42,16 @@ class Unit:
         self.found_to = capture.type == Capture.Type.To
     
 
-    def update(self, capture: Capture):
+    def try_update(self, capture: Capture):
+        if self.family != capture.family_name:
+            return f"Unit '{self.name}' belongs to family '{self.family}', not '{capture.family_name}'!"
+        if self.usage != capture.unit_usage:
+            return f"Unit '{self.name}' is defined with usage '{self.usage}', not '{capture.unit_usage}'!"
+        
         self.found_from |= capture.type == Capture.Type.From
         self.found_to |= capture.type == Capture.Type.To
+
+        return None
     
 
     def build(self, family_name, family_type):
@@ -52,8 +60,8 @@ class Unit:
             f'\t"{self.name}",',
             f'\t"_{self.usage}",',
             '\tnullptr,',
-            f'\t[](Value value) {{ return Value(UNIT_BASE_{family_name}_FROM_{self.usage}(value.operator {family_type}())); }},',
-            f'\t[](Value value) {{ return Value(UNIT_BASE_{family_name}_TO_{self.usage}(value.operator {family_type}())); }}',
+            f'\t[](Value value) {{ auto res = UNIT_BASE_{family_name}_FROM_{self.usage}(value.operator {family_type}()); if (!res) {{ return Result<Value>(Err(res.unwrap_err())); }} return Result<Value>(Ok(Value(res.unwrap()))); }},',
+            f'\t[](Value value) {{ auto res = UNIT_BASE_{family_name}_TO_{self.usage}(value.operator {family_type}()); if (!res) {{ return Result<Value>(Err(res.unwrap_err())); }} return Result<Value>(Ok(Value(res.unwrap()))); }}',
             '};',
             ''
         ]
@@ -78,19 +86,28 @@ class Family:
             self.units = { capture.unit_name: Unit(capture) }
     
 
-    def update(self, capture: Capture):
+    def try_update(self, capture: Capture):
         if self.family_unit_name is None:
             self.family_unit_name = capture.family_unit_name
+        elif (not capture.family_unit_name is None) and self.family_unit_name != capture.family_unit_name:
+            return f"Unit family '{self.name}' is defined with base name '{self.family_unit_name}', not '{capture.family_unit_name}'!"
+        
         if self.family_type is None:
             self.family_type = capture.family_type
+        elif (not capture.family_type is None) and self.family_type != capture.family_type:
+            return f"Unit family '{self.name}' is defined with base type '{self.family_type}', not '{capture.family_type}'!"
         
         if capture.unit_name in self.units:
-            self.units[capture.unit_name].update(capture)
+            error = self.units[capture.unit_name].try_update(capture)
+            if not error is None:
+                return error
         else:
             self.units[capture.unit_name] = Unit(capture)
         
         if not capture.filename in self.filenames:
             self.filenames.append(capture.filename)
+        
+        return None
     
 
     def build(self):
@@ -162,6 +179,7 @@ class UnitsMapBuilder:
 
     def process_file(self, path):
         self.filename = str(path)
+        self.line_no = 1
         with open(path, 'r') as file:
             for line in file:
                 self._process_line(line.rstrip())
@@ -245,7 +263,7 @@ class UnitsMapBuilder:
     
     def _process_line_waiting(self, line):
         # Look for the start of a command
-        if line.startswith("// @Unit"):
+        if line.startswith("// @RCalcUnit"):
             self.state = self.State.CAPTURING
             self.current_capture = Capture(self.filename)
         elif line.startswith("UNIT_"):
@@ -285,35 +303,34 @@ class UnitsMapBuilder:
         if args_start == -1 or args_end == -1:
             self._set_error(f'Unit declaration {declaration} is invalid!\n\tMissing parenthesis around function params')
             return
-
-        args = [arg.strip() for arg in declaration[args_start+1:args_end].split(",")]
+        
+        # Unit names can have commas, so we have to use a complicated split
+        splitter = csv.reader([declaration[args_start+1:args_end]], skipinitialspace=True)
+        unsplit = [line for line in splitter][0]
+        args = [arg.strip() for arg in unsplit]
         if len(args) != 4:
             self._set_error(f'Unit declaration {declaration} is invalid!\n\tThree arguments are required (Unit family name, Unit name, Unit family type, Unit usage)')
             return
-        
-        if args[1][0] != '"' or args[1][-1] != '"':
-            self._set_error(f'Unit declaration {declaration} is invalid!\n\tUnit name must be in double quotes!')
-            return
 
-        if not args[2] in Types:
+        if not args[1] in Types:
             self._set_error(f'Unit declaration {declaration} is invalid!\n\tType {args[2]} is invalid!')
             return
 
         self.current_capture.family_name = args[0]
-        self.current_capture.family_type = args[2]
+        self.current_capture.family_type = args[1]
 
         if declaration.startswith("UNIT_FAMILY"):
-            self.current_capture.family_unit_name = args[1][1:-1]
+            self.current_capture.family_unit_name = args[2]
             self.current_capture.family_unit_usage = args[3]
             self.current_capture.type = Capture.Type.Family
             self._finish_unit()
         elif declaration.startswith("UNIT_FROM_BASE"):
-            self.current_capture.unit_name = args[1][1:-1]
+            self.current_capture.unit_name = args[2]
             self.current_capture.unit_usage = args[3]
             self.current_capture.type = Capture.Type.From
             self._finish_unit()
         elif declaration.startswith("UNIT_TO_BASE"):
-            self.current_capture.unit_name = args[1][1:-1]
+            self.current_capture.unit_name = args[2]
             self.current_capture.unit_usage = args[3]
             self.current_capture.type = Capture.Type.To
             self._finish_unit()
@@ -321,9 +338,18 @@ class UnitsMapBuilder:
 
     def _finish_unit(self):
         if self.current_capture.family_name in self.family_units:
-            self.family_units[self.current_capture.family_name].update(self.current_capture)
+            if self.current_capture.type == Capture.Type.Family:
+                self._set_error(f"Cannot redefine unit family {self.current_capture.family_name}!")
+                return
+            
+            error = self.family_units[self.current_capture.family_name].try_update(self.current_capture)
+            if not error is None:
+                self._set_error(error)
+                return
         else:
             self.family_units[self.current_capture.family_name] = Family(self.current_capture)
+        
+        self.state = self.State.WAITING
     
 
     def _finalize_units(self):
@@ -338,10 +364,10 @@ class UnitsMapBuilder:
             
             for unit_name, unit in family.units.items():
                 if not unit.found_from:
-                    self._set_error(f'Unit {unit_name} is invalid!\n\tFamily is missing from_family function!')
+                    self._set_error(f'Unit {unit_name} is invalid!\n\tUnit is missing from_base function!')
                     return
                 if not unit.found_to:
-                    self._set_error(f'Unit {unit_name} is invalid!\n\tFamily is missing to_family function!')
+                    self._set_error(f'Unit {unit_name} is invalid!\n\tUnit is missing to_base function!')
                     return
     
 

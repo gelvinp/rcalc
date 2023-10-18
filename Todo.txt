@@ -8,7 +8,7 @@
  - Improve help page for imgui renderer
 
 # Track 3
- - Convert existing "conversion" functions to new Units method, and add new Unit types
+ - Add GPerf to units map
  - Expose base unit types and all units, to help page
 
 # Track 4

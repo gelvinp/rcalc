@@ -423,6 +423,7 @@ class OperatorMapBuilder:
 
     def process_file(self, path):
         self.filename = str(path)
+        self.line_no = 1
         with open(path, 'r') as file:
             for line in file:
                 self._process_line(line.rstrip())
@@ -560,6 +561,10 @@ class OperatorMapBuilder:
         if line.startswith("// @RCalcOperator"):
             self.state = self.State.CAPTURING
             self.current_capture = Capture(self.filename)
+        elif line.startswith("RCALC_OP_"):
+            self.state = self.State.CAPTURING
+            self.current_capture = Capture(self.filename)
+            self._process_declaration(line)
         elif line.startswith("RCALC_FMT_"):
             self._process_format_declaration(line)
     
