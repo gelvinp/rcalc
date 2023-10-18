@@ -12,6 +12,7 @@ UnitsMap& UnitsMap::get_units_map() {
 void UnitFamily::setup() {
 	for (Unit* unit : units) {
 		unit->p_family = this;
+		unit->p_impl = unit;
 	}
 }
 

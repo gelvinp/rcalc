@@ -11,6 +11,10 @@
 
 namespace RCalc {
 
-Result<Value> UNIT_ECHO(Value value) { return Ok(std::move(value)); }
+template<typename T>
+Result<T> UNIT_ECHO(T value) { return Ok(value); }
+
+template<>
+Result<Value> UNIT_ECHO<Value>(Value value) { return Ok(std::move(value)); }
 
 }

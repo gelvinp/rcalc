@@ -56,12 +56,15 @@ class Unit:
 
     def build(self, family_name, family_type):
         lines = [
-            f'Unit UNITDEF_{self.usage} {{',
-            f'\t"{self.name}",',
-            f'\t"_{self.usage}",',
-            '\tnullptr,',
-            f'\t[](Value value) {{ auto res = UNIT_BASE_{family_name}_FROM_{self.usage}(value.operator {family_type}()); if (!res) {{ return Result<Value>(Err(res.unwrap_err())); }} return Result<Value>(Ok(Value(res.unwrap()))); }},',
-            f'\t[](Value value) {{ auto res = UNIT_BASE_{family_name}_TO_{self.usage}(value.operator {family_type}()); if (!res) {{ return Result<Value>(Err(res.unwrap_err())); }} return Result<Value>(Ok(Value(res.unwrap()))); }}',
+            f'UnitImpl<{family_type}> UNITDEF_{self.usage} {{',
+            '\t{',
+            f'\t\t"{self.name}",',
+            f'\t\t"_{self.usage}",',
+            '\t\tnullptr,',
+            '\t\tnullptr',
+            '\t},',
+            f'\t&UNIT_BASE_{family_name}_FROM_{self.usage},',
+            f'\t&UNIT_BASE_{family_name}_TO_{self.usage}',
             '};',
             ''
         ]
@@ -131,12 +134,15 @@ class Family:
             lines.extend(self.units[unit].build(self.name, self.family_type))
         
         lines.extend([
-            f'Unit UNITDEF_{self.family_unit_usage} {{',
-            f'\t"{self.family_unit_name}",',
-            f'\t"_{self.family_unit_usage}",',
-            '\tnullptr,',
-            '\t&UNIT_ECHO,',
-            '\t&UNIT_ECHO',
+            f'UnitImpl<{self.family_type}> UNITDEF_{self.family_unit_usage} {{',
+            '\t{',
+            f'\t\t"{self.family_unit_name}",',
+            f'\t\t"_{self.family_unit_usage}",',
+            '\t\tnullptr,',
+            '\t\tnullptr',
+            '\t},',
+            f'\t&UNIT_ECHO<{self.family_type}>,',
+            f'\t&UNIT_ECHO<{self.family_type}>',
             '};',
             '',
             f'std::vector<Unit*> UNITVEC_BASE_{self.name} {{'

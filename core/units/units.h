@@ -12,6 +12,9 @@ namespace RCalc {
 struct Unit;
 class Value;
 
+template<typename T>
+struct UnitImpl;
+
 
 struct UnitFamily {
     const char* p_name;
@@ -26,9 +29,19 @@ struct Unit {
     const char* p_name;
     const char* p_usage;
     const UnitFamily* p_family;
+    const Unit* p_impl;
 
-    Result<Value>(*from_base)(Value);
-    Result<Value>(*to_base)(Value);
+    template<typename T>
+    const UnitImpl<T>& get_impl() const {
+        return *reinterpret_cast<const UnitImpl<T>*>(p_impl);
+    }
+};
+
+
+template<typename T>
+struct UnitImpl : public Unit {
+    Result<T>(*from_base)(T);
+    Result<T>(*to_base)(T);
 };
 
 

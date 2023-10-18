@@ -12,10 +12,9 @@ RCALC_OP_3(Convert, Real, Unit, Unit, arg0, arg1, arg2) {
         return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Real!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
     }
 
-    Result<Value> base = arg1.to_base(Value(arg0));
-    if (!base) { return base.unwrap_err(); }
-
-    return arg2.from_base(base.unwrap_move(std::move(base)));
+    return arg1.get_impl<Real>().to_base(arg0)
+        .and_then<Real>(arg2.get_impl<Real>().from_base)
+        .and_then<Value>([](Real r) { return Ok(Value(r)); });
 }
 
 RCALC_OP_3(Convert, Vec2, Unit, Unit, arg0, arg1, arg2) {
@@ -29,10 +28,9 @@ RCALC_OP_3(Convert, Vec2, Unit, Unit, arg0, arg1, arg2) {
         return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Vec2!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
     }
 
-    Result<Value> base = arg1.to_base(Value(arg0));
-    if (!base) { return base.unwrap_err(); }
-
-    return arg2.from_base(base.unwrap_move(std::move(base)));
+    return arg1.get_impl<Vec2>().to_base(arg0)
+        .and_then<Vec2>(arg2.get_impl<Vec2>().from_base)
+        .and_then<Value>([](Vec2 r) { return Ok(Value(r)); });
 }
 
 RCALC_OP_3(Convert, Vec3, Unit, Unit, arg0, arg1, arg2) {
@@ -46,10 +44,9 @@ RCALC_OP_3(Convert, Vec3, Unit, Unit, arg0, arg1, arg2) {
         return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Vec3!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
     }
 
-    Result<Value> base = arg1.to_base(Value(arg0));
-    if (!base) { return base.unwrap_err(); }
-
-    return arg2.from_base(base.unwrap_move(std::move(base)));
+    return arg1.get_impl<Vec3>().to_base(arg0)
+        .and_then<Vec3>(arg2.get_impl<Vec3>().from_base)
+        .and_then<Value>([](Vec3 r) { return Ok(Value(r)); });
 }
 
 RCALC_OP_3(Convert, Vec4, Unit, Unit, arg0, arg1, arg2) {
@@ -63,10 +60,9 @@ RCALC_OP_3(Convert, Vec4, Unit, Unit, arg0, arg1, arg2) {
         return Err(ERR_INVALID_PARAM, fmt("Unit family %s operates on type %s, not Vec4!", arg1.p_family->p_name, Value::get_type_name(arg1.p_family->base_type)));
     }
 
-    Result<Value> base = arg1.to_base(Value(arg0));
-    if (!base) { return base.unwrap_err(); }
-
-    return arg2.from_base(base.unwrap_move(std::move(base)));
+    return arg1.get_impl<Vec4>().to_base(arg0)
+        .and_then<Vec4>(arg2.get_impl<Vec4>().from_base)
+        .and_then<Value>([](Vec4 r) { return Ok(Value(r)); });
 }
 
 RCALC_FMT_3(Convert, arg0, arg1, arg2) {

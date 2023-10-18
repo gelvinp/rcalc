@@ -2,8 +2,10 @@
 
 #include "core/logger.h"
 
+#include <concepts>
 #include <cstdio>
 #include <exception>
+#include <functional>
 #include <string>
 #include <variant>
 
@@ -177,6 +179,25 @@ public:
 
         Logger::log_err("CRITICAL ERROR: Attempted to call unwrap_err() on an Ok Result!");
         throw ResultTypeMismatchException(true);
+    }
+
+    template<typename U, typename F>
+    typename std::enable_if<std::is_same<T, void>::value, Result<U>>::type and_then(F next)
+    {
+        if (data.index() == 0) {
+            return next();
+        }
+
+        return unwrap_err();
+    }
+
+    template<typename U, typename F>
+    typename std::enable_if<!std::is_same<T, void>::value, Result<U>>::type and_then(F next) {
+        if (data.index() == 0) {
+            return next(std::get<OkTypes::Ok<T>>(data).get());
+        }
+
+        return unwrap_err();
     }
 
 private:
