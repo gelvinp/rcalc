@@ -403,7 +403,6 @@ class Operator:
 
 class OperatorMapBuilder:
     State = Enum('State', ['WAITING', 'CAPTURING', 'ERROR'])
-    ExampleArgRegex = re.compile("[^\]]+\]|[^,]+")
 
 
     def __init__(self):
@@ -623,11 +622,49 @@ class OperatorMapBuilder:
         if not example.startswith("[") or not example.endswith("]"):
             self._set_error(f"Example statement '{example}' is invalid!\n\tExpected form is [arg0, arg1, ...]")
             return
+        
+        brackets = False
+        braces = False
+        params = []
+        param = []
 
-        # Example form looks like a Vector, so we need to be careful
-        self.current_capture.call_examples.append(
-            [arg.strip() for arg in self.ExampleArgRegex.findall(example[1:-1])]
-        )
+        for ch in example[1:-1]:
+            if ch == '[':
+                if brackets:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tMust close vector before starting new vector")
+                    return
+                brackets = True
+            elif ch == ']':
+                if not brackets:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tClose bracket found with no matching open bracket")
+                    return
+                brackets = False
+            elif ch == '{':
+                if brackets:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tCannot start matrix inside vector")
+                    return
+                if braces:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tMust close matrix before starting new matrix")
+                    return
+                braces = True
+            elif ch == '}':
+                if brackets:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tCannot close matrix inside vector")
+                    return
+                if not braces:
+                    self._set_error(f"Example statement '{example}' is invalid!\n\tClose brace found with no matching open brace")
+                    return
+                braces = False
+            elif ch == ',':
+                if not (brackets or braces):
+                    params.append(''.join(param).strip())
+                    param = []
+                    continue
+            
+            param.append(ch)
+        
+        params.append(''.join(param).strip())
+        self.current_capture.call_examples.append(params)
     
 
     def _process_declaration(self, declaration):
@@ -743,11 +780,6 @@ class OperatorMapBuilder:
                     self._set_error(f'Operator {op_name} is invalid!\n\t\'reversable\' tag is only allowed for operators with two parameters')
                     return
             
-            for example in operator.examples:
-                if len(example) != operator.param_count:
-                    self._set_error(f'Operator {op_name} is invalid!\n\tOperator with {operator.param_count} params cannot have an example with {len(example)} params')
-                    return
-            
             operator.generate_permutations()
 
             # Track operator categories
@@ -755,6 +787,9 @@ class OperatorMapBuilder:
                 self.categories[operator.category].append(op_name)
             else:
                 self.categories[operator.category] = [op_name]
+            
+            if len(operator.examples) == 0 and operator.param_count > 0:
+                print(f"Notice: Operator '{operator.name}' does not have any examples.")
         
         for category_name in self.categories:
             self.categories[category_name].sort(key=lambda e: e.lower())

@@ -31,6 +31,7 @@ RCALC_FMT_0(Tau) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Sin, Real, arg) {
     return Ok(Value(std::sin(arg)));
 }
@@ -45,6 +46,7 @@ RCALC_FMT_1(Sin, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Cos, Real, arg) {
     return Ok(Value(std::cos(arg)));
 }
@@ -59,6 +61,7 @@ RCALC_FMT_1(Cos, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Tan, Real, arg) {
     return Ok(Value(std::tan(arg)));
 }
@@ -73,6 +76,7 @@ RCALC_FMT_1(Tan, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.707107]
 RCALC_OP_1(Asin, Real, arg) {
     return Ok(Value(std::asin(arg)));
 }
@@ -87,6 +91,7 @@ RCALC_FMT_1(Asin, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.707107]
 RCALC_OP_1(Acos, Real, arg) {
     return Ok(Value(std::acos(arg)));
 }
@@ -101,6 +106,7 @@ RCALC_FMT_1(Acos, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [1]
 RCALC_OP_1(Atan, Real, arg) {
     return Ok(Value(std::atan(arg)));
 }
@@ -115,6 +121,7 @@ RCALC_FMT_1(Atan, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Sinh, Real, arg) {
     return Ok(Value(std::sinh(arg)));
 }
@@ -129,6 +136,7 @@ RCALC_FMT_1(Sinh, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Cosh, Real, arg) {
     return Ok(Value(std::cosh(arg)));
 }
@@ -143,6 +151,7 @@ RCALC_FMT_1(Cosh, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.785398]
 RCALC_OP_1(Tanh, Real, arg) {
     return Ok(Value(std::tanh(arg)));
 }
@@ -157,6 +166,7 @@ RCALC_FMT_1(Tanh, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.868671]
 RCALC_OP_1(Asinh, Real, arg) {
     return Ok(Value(std::asinh(arg)));
 }
@@ -171,6 +181,7 @@ RCALC_FMT_1(Asinh, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [1.32461]
 RCALC_OP_1(Acosh, Real, arg) {
     return Ok(Value(std::acosh(arg)));
 }
@@ -185,6 +196,7 @@ RCALC_FMT_1(Acosh, arg) {
 // Category: Trig
 // Requires: <cmath>
 // Tags: [no_expr, real_cast]
+// Example: [0.655794]
 RCALC_OP_1(Atanh, Real, arg) {
     return Ok(Value(std::atanh(arg)));
 }

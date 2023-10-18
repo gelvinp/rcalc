@@ -4,6 +4,7 @@
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
+// Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Min, Int, count) {
     if (stack.size() < (size_t)count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute min, not enough elements on the stack.");
@@ -106,6 +107,7 @@ RCALC_FMT_1_S(Min, _arg) {
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
+// Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Max, Int, count) {
     if (stack.size() < (size_t)count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute max, not enough elements on the stack.");
@@ -208,6 +210,7 @@ RCALC_FMT_1_S(Max, _arg) {
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
+// Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Avg, Int, count) {
     if (stack.size() < (size_t)count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute avg, not enough elements on the stack.");
@@ -266,6 +269,7 @@ RCALC_FMT_1_S(Avg, _arg) {
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
+// Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Sum, Int, count) {
     if (stack.size() < (size_t)count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute sum, not enough elements on the stack.");
@@ -331,8 +335,10 @@ RCALC_FMT_1_S(Sum, _arg) {
 // Description: Generates a range of numbers from 0 to arg0.
 // Category: Range
 // Tags: [no_expr]
+// Example: [3]
+// Example: [5]
 RCALC_OP_1_S(Range, Int, arg0) {
-    for (Int index = 0; index < (arg0 - 1); index++) {
+    for (Int index = 0; index < arg0; index++) {
         Value value = Value(index);
         stack.push_item(StackItem{
             value.to_string(),
@@ -341,7 +347,7 @@ RCALC_OP_1_S(Range, Int, arg0) {
             false
         });
     }
-    Value last = Value(arg0 - 1);
+    Value last = Value(arg0);
     stack.set_message<std::string>(last.to_string());
     return Ok(std::move(last));
 }

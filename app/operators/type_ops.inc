@@ -1,6 +1,7 @@
 // @RCalcOperator
 // Description: Returns a unique value identifying the type.
 // Tags: [no_expr]
+// Example: [1]
 RCALC_OP_1(Type, Int, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_INT));
@@ -8,6 +9,7 @@ RCALC_OP_1(Type, Int, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [100000000000000000000000000000]
 RCALC_OP_1(Type, BigInt, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_BIGINT));
@@ -15,6 +17,7 @@ RCALC_OP_1(Type, BigInt, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [1.0]
 RCALC_OP_1(Type, Real, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_REAL));
@@ -22,6 +25,7 @@ RCALC_OP_1(Type, Real, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [[1, 2]]
 RCALC_OP_1(Type, Vec2, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_VEC2));
@@ -29,6 +33,7 @@ RCALC_OP_1(Type, Vec2, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [[1, 2, 3]]
 RCALC_OP_1(Type, Vec3, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_VEC3));
@@ -36,6 +41,7 @@ RCALC_OP_1(Type, Vec3, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [[1, 2, 3, 4]]
 RCALC_OP_1(Type, Vec4, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_VEC4));
@@ -43,6 +49,7 @@ RCALC_OP_1(Type, Vec4, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [{[1, 2], [3, 4]}]
 RCALC_OP_1(Type, Mat2, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_MAT2));
@@ -50,6 +57,7 @@ RCALC_OP_1(Type, Mat2, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [{[1, 2, 3], [4, 5, 6], [7, 8, 9]}]
 RCALC_OP_1(Type, Mat3, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_MAT3));
@@ -57,6 +65,7 @@ RCALC_OP_1(Type, Mat3, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [{[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]}]
 RCALC_OP_1(Type, Mat4, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_MAT4));
@@ -64,6 +73,7 @@ RCALC_OP_1(Type, Mat4, _arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
+// Example: [_ft]
 RCALC_OP_1(Type, Unit, _arg) {
     UNUSED(_arg);
     return Ok(Value((Int)TYPE_UNIT));

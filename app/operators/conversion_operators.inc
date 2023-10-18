@@ -1,6 +1,10 @@
 // @RCalcOperator
 // Description: Converts arg0 between units arg1 and arg2 within the same family.
 // Tags: [real_cast]
+// Example: [78, _f, _c]
+// Example: [68, _mi, _km]
+// Example: [8, _tbsp, _cup]
+// Example: [[140, 217, 217], _rgb, _oklch]
 RCALC_OP_3(Convert, Real, Unit, Unit, arg0, arg1, arg2) {
     // Make sure units are in the same family
     if (arg1.p_family != arg2.p_family) {

@@ -495,7 +495,14 @@ class UnitsMapBuilder:
             '\tif (std::count(dbg_vec.begin(), dbg_vec.end(), true) != TOTAL_KEYWORDS) {',
             '\t\tthrow std::logic_error("UnitsMap Assert Failed: GPerf hash did not reach every keyword.");',
             '\t}',
-            '#endif',
+            '#endif'
+        ])
+
+        lines.append('')
+        lines.extend([f'\tUnits::UNIT_FAMILY_{family}.setup();' for family in self.family_units])
+        lines.append('')
+
+        lines.extend([
             '\tbuilt = true;',
             '}',
             '',

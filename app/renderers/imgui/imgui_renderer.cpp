@@ -6,6 +6,8 @@
 #include "core/help_text.h"
 #include "assets/B612Mono-Regular.ttf.gen.h"
 #include "assets/license.gen.h"
+#include "core/filter.h"
+#include "core/format.h"
 
 #include "imgui_ext.h"
 
@@ -692,38 +694,91 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
     ImGui::TextUnformatted(op->description);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+
+    bool types_open = false;
     
     if (!op->allowed_types.empty()) {
+        std::string type_list_id = fmt("#op_types_%s", op->name);
+
         if (op->allowed_types.front().size() == 1) {
-            ImGui::Text("Accepts 1 argument:");
+            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts 1 argument");
         }
         else {
-            ImGui::Text("Accepts %ld arguments: ", op->allowed_types.front().size());
+            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %ld arguments", op->allowed_types.front().size());
         }
 
-        bool first_set = true;
-        for (const std::vector<Type>& call_types : op->allowed_types) {
-            ImGui::SetCursorPosX(20.0);
-            bool first = true;
+        if (types_open) {
+            bool first_set = true;
+            for (const std::vector<Type>& call_types : op->allowed_types) {
+                ImGui::SetCursorPosX(20.0);
+                bool first = true;
 
-            if (first_set) {
-                first_set = false;
-            }
-            else {
-                ImGui::TextUnformatted("or");
-                ImGui::SameLine();
-            }
-
-            for (Type type : call_types) {
-                if (first) {
-                    ImGui::TextUnformatted(Value::get_type_name(type));
-                    first = false;
+                if (first_set) {
+                    first_set = false;
                 }
                 else {
-                    ImGui::SameLine(0.0, 0.0);
-                    ImGui::Text(", %s", Value::get_type_name(type));
+                    ImGui::TextUnformatted("or");
+                    ImGui::SameLine();
+                }
+
+                for (Type type : call_types) {
+                    if (first) {
+                        ImGui::TextUnformatted(Value::get_type_name(type));
+                        first = false;
+                    }
+                    else {
+                        ImGui::SameLine(0.0, 0.0);
+                        ImGui::Text(", %s", Value::get_type_name(type));
+                    }
                 }
             }
+
+            ImGui::TreePop();
+        }
+    }
+    
+    if (!op->examples.empty()) {
+        std::string example_list_id = fmt("#op_examples_%s", op->name);
+        RPNStack example_stack;
+        OperatorMap& op_map = OperatorMap::get_operator_map();
+
+        if (ImGui::TreeNode(example_list_id.c_str(), "Examples")) {
+            for (const std::vector<const char*>& example_params : op->examples) {
+                example_stack.clear();
+
+                for (const char* param : example_params) {
+                    Value value = Value::parse(param).value();
+                    example_stack.push_item(StackItem { value.to_string(), value.to_string(), std::move(value), false });
+                }
+
+                std::string op_name = filter_name(op->name);
+                Result<> err = op_map.evaluate(op_name, example_stack);
+
+                if (!err) {
+                    Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message());
+                    continue;
+                }
+
+                bool first = true;
+                std::stringstream ss;
+
+                for (const StackItem& item : example_stack.get_items()) {
+                    if (first) {
+                        first = false;
+                    }
+                    else {
+                        ss << ", ";
+                    }
+
+                    ss << item.output;
+                }
+
+                StackItem res = std::move(example_stack.pop_items(1).at(0));
+
+                ImGui::BulletText("%s -> %s", res.input.c_str(), ss.str().c_str());
+            }
+
+            ImGui::TreePop();
         }
     }
 
