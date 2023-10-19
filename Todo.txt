@@ -5,9 +5,6 @@
  - Create TUI renderer
 
 # Track 2
- - Cache help page contents
-
-# Track 3
  - RefCounted Value
  - Format function returns a StackFormatNode* (Each node contains a variant<const char*, Ref<Value>, StackFormatNode*, ColVector> and a next pointer) (linked lists babeyyyyy)
  - Templated Vector display wrapper type (ColVector) that stores a Ref<Value>, and indicates it should be displayed as a column vector

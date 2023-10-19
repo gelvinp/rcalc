@@ -32,7 +32,6 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 
 ## Technical debt
- - [ ] Cache help page contents
  - [ ] Refactor stackitem string representations
 
 

@@ -7,6 +7,7 @@
 #include "app/commands/commands.h"
 #include "app/operators/operators.h"
 #include "core/units/units.h"
+#include "help_cache.h"
 
 namespace RCalc {
 
@@ -63,6 +64,8 @@ private:
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
+    std::vector<CachedOperatorCategory> help_op_cache;
+
     ImVector<ImWchar> glyph_ranges;
     ImFontGlyphRangesBuilder glyphs;
     ImFont* p_font_standard;
@@ -79,8 +82,10 @@ private:
     static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
 
     void render_help_command(const CommandMeta* cmd);
-    void render_help_operator(const Operator* op);
+    void render_help_operator(const CachedOperator& op);
     void render_help_unit_family(const UnitFamily* family);
+
+    void build_help_cache();
 };
 
 }

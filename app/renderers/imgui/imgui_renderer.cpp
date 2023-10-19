@@ -622,15 +622,19 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Operators");
     ImGui::PopFont();
 
-    for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
-        if (category->category_name) {
+    if (help_op_cache.empty()) {
+        build_help_cache();
+    }
+
+    for (const CachedOperatorCategory& category : help_op_cache) {
+        if (category.category_name) {
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
             ImGui::PushFont(p_font_medium);
-            ImGui::Text("%s Operators", category->category_name.value());
+            ImGui::Text("%s Operators", category.category_name.value());
             ImGui::PopFont();
         }
 
-        for (const RCalc::Operator* op : category->category_ops) {
+        for (const CachedOperator& op : category.category_ops) {
             render_help_operator(op);
         }
     }
@@ -707,32 +711,32 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 }
 
 
-void ImGuiRenderer::render_help_operator(const Operator* op) {
+void ImGuiRenderer::render_help_operator(const CachedOperator& op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
-    ImGui::TextUnformatted(op->name);
+    ImGui::TextUnformatted(op.op.name);
     ImGui::PopStyleColor();
 
-    ImGui::TextUnformatted(op->description);
+    ImGui::TextUnformatted(op.op.description);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
 
     bool types_open = false;
     
-    if (!op->allowed_types.empty()) {
-        std::string type_list_id = fmt("#op_types_%s", op->name);
+    if (!op.op.allowed_types.empty()) {
+        std::string type_list_id = fmt("#op_types_%s", op.op.name);
 
-        if (op->allowed_types.front().size() == 1) {
+        if (op.op.allowed_types.front().size() == 1) {
             types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts 1 argument");
         }
         else {
-            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %ld arguments", op->allowed_types.front().size());
+            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %ld arguments", op.op.allowed_types.front().size());
         }
 
         if (types_open) {
             bool first_set = true;
-            for (const std::vector<Type>& call_types : op->allowed_types) {
+            for (const std::vector<Type>& call_types : op.op.allowed_types) {
                 ImGui::SetCursorPosX(20.0);
                 bool first = true;
 
@@ -760,45 +764,12 @@ void ImGuiRenderer::render_help_operator(const Operator* op) {
         }
     }
     
-    if (!op->examples.empty()) {
-        std::string example_list_id = fmt("#op_examples_%s", op->name);
-        RPNStack example_stack;
-        OperatorMap& op_map = OperatorMap::get_operator_map();
+    if (!op.op.examples.empty()) {
+        std::string example_list_id = fmt("#op_examples_%s", op.op.name);
 
         if (ImGui::TreeNode(example_list_id.c_str(), "Examples")) {
-            for (const std::vector<const char*>& example_params : op->examples) {
-                example_stack.clear();
-
-                for (const char* param : example_params) {
-                    Value value = Value::parse(param).value();
-                    example_stack.push_item(StackItem { value.to_string(), value.to_string(), std::move(value), false });
-                }
-
-                std::string op_name = filter_name(op->name);
-                Result<> err = op_map.evaluate(op_name, example_stack);
-
-                if (!err) {
-                    Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());
-                    continue;
-                }
-
-                bool first = true;
-                std::stringstream ss;
-
-                for (const StackItem& item : example_stack.get_items()) {
-                    if (first) {
-                        first = false;
-                    }
-                    else {
-                        ss << ", ";
-                    }
-
-                    ss << item.output;
-                }
-
-                StackItem res = std::move(example_stack.pop_items(1).at(0));
-
-                ImGui::BulletText("%s -> %s", res.input.c_str(), ss.str().c_str());
+            for (const std::string& example : op.examples) {
+                ImGui::BulletText("%s", example.c_str());
             }
 
             ImGui::TreePop();
@@ -830,6 +801,16 @@ void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
                 ImGui::PopStyleColor();
         }
         ImGui::TreePop();
+    }
+}
+
+
+void ImGuiRenderer::build_help_cache() {
+    help_op_cache.clear();
+    RPNStack example_stack;
+
+    for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
+        help_op_cache.emplace_back(*category, example_stack);
     }
 }
 
