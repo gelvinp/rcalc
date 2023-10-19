@@ -31,51 +31,6 @@ def get_mingw_bin_prefix(prefix, arch):
 
 
 def detect_build_env_arch():
-    # msvc_target_aliases = {
-    #     "amd64": "x86_64",
-    #     "i386": "x86_32",
-    #     "i486": "x86_32",
-    #     "i586": "x86_32",
-    #     "i686": "x86_32",
-    #     "x86": "x86_32",
-    #     "x64": "x86_64",
-    #     "x86_64": "x86_64"
-    # }
-
-    # if os.getenv("VCINSTALLDIR") or os.getenv("VCTOOLSINSTALLDIR"):
-    #     if os.getenv("Platform"):
-    #         msvc_arch = os.getenv("Platform").lower()
-    #         if msvc_arch in msvc_target_aliases.keys():
-    #             return msvc_target_aliases[msvc_arch]
-
-    #     if os.getenv("VSCMD_ARG_TGT_ARCH"):
-    #         msvc_arch = os.getenv("VSCMD_ARG_TGT_ARCH").lower()
-    #         if msvc_arch in msvc_target_aliases.keys():
-    #             return msvc_target_aliases[msvc_arch]
-
-    #     # Pre VS 2017 checks.
-    #     if os.getenv("VCINSTALLDIR"):
-    #         PATH = os.getenv("PATH").upper()
-    #         VCINSTALLDIR = os.getenv("VCINSTALLDIR").upper()
-    #         path_arch = {
-    #             "BIN\\x86_amd64;": "a86_64",
-    #             "BIN\\amd64;": "x86_64",
-    #             "BIN\\amd64_x86;": "x86_32",
-    #             "BIN;": "x86_32",
-    #         }
-
-    #         for path, arch in path_arch.items():
-    #             final_path = VCINSTALLDIR + path
-    #             if final_path in PATH:
-    #                 return arch
-
-    #     # VS 2017 and newer.
-    #     if os.getenv("VCTOOLSINSTALLDIR"):
-    #         host_path_index = os.getenv("PATH").upper().find(os.getenv("VCTOOLSINSTALLDIR").upper() + "BIN\\HOST")
-    #         if host_path_index > -1:
-    #             first_path_arch = os.getenv("PATH").split(";")[0].rsplit("\\", 1)[-1].lower()
-    #             return msvc_target_aliases[first_path_arch]
-
     msys_target_aliases = {
         "mingw32": "x86_32",
         "mingw64": "x86_64",
@@ -130,7 +85,14 @@ def is_available():
             print("MSVC is not yet supported, please use MinGW")
             return False
 
-        return True
+        prefix = os.getenv("MINGW_PREFIX", "")
+
+        if not os.system(f"{prefix}/bin/pkg-config --version > /dev/null"):
+            print("Error: pkg-config not found. Windows platform is unavailable.")
+            return False
+
+        if try_cmd("gcc --version", prefix, "") or try_cmd("clang --version", prefix, ""):
+            return True
 
     if os.name == "posix":
         prefix = os.getenv("MINGW_PREFIX", "")
@@ -148,9 +110,7 @@ def get_opts():
 
     return [
         ("mingw_prefix", "MinGW prefix", mingw),
-        #BoolVariable("use_mingw", "Use the Mingw compiler, even if MSVC is installed.", False),
-        BoolVariable("use_llvm", "Use the LLVM compiler", False),
-        BoolVariable("use_asan", "Compile with -fsanitize=address", False)
+        BoolVariable("use_llvm", "Use the LLVM compiler", False)
     ]
 
 
@@ -303,11 +263,6 @@ def configure_mingw(env):
     env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 
-    if env["use_asan"]:
-        env.extra_suffix = ".asan" + env.extra_suffix
-        env.Append(CCFLAGS=["-fsanitize=address"])
-        env.Append(LINKFLAGS=["-fsanitize=address"])
-
     env.Append(LINKFLAGS=["-Wl,--stack," + str(STACK_SIZE)])
 
     ## Compile flags
@@ -330,24 +285,8 @@ def configure(env: "Environment"):
         )
         sys.exit()
 
-    # First figure out which compiler, version, and target arch we're using
-    # if os.getenv("VCINSTALLDIR") and detect_build_env_arch() and not env["use_mingw"]:
-    #     setup_msvc_manual(env)
-    #     env.msvc = True
-    #     vcvars_msvc_config = True
-    # elif env.get("MSVC_VERSION", "") and not env["use_mingw"]:
-    #     setup_msvc_auto(env)
-    #     env.msvc = True
-    #     vcvars_msvc_config = False
-    # else:
     setup_mingw(env)
-    env.msvc = False
 
-    # # Now set compiler/linker flags
-    # if env.msvc:
-    #     configure_msvc(env, vcvars_msvc_config)
-
-    # else:  # MinGW
     configure_mingw(env)
     
     env["enabled_modules"].extend([

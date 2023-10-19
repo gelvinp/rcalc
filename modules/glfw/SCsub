@@ -17,7 +17,6 @@ if env["builtin_glfw"]:
     if "-Werror" in env_glfw["CCFLAGS"]:
         env_glfw["CCFLAGS"].remove("-Werror")
     
-    # TODO: handle this differently for msvc
     env_glfw.Append(CCFLAGS=["-std=c99"])
 
     env_glfw.add_source_files(env.modules_sources, common_sources)

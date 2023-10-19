@@ -65,9 +65,14 @@ def configure(env: "Environment"):
             
             env.ParseConfig("pkg-config --cflags --libs glfw3")
     elif env["platform"] == "win":
+        env.Append(LIBS=["opengl32", "gdi32"])
+        
         if env["builtin_glfw"]:
-            # TODO: Handle this differently for msvc
-            env.Append(LIBS=["opengl32", "gdi32"])
+            pass
         else:
-            print("Error: builtin_glfw is required to build on windows!")
-            sys.exit(255)
+            if os.system(f"{env['mingw_prefix']}/bin/pkg-config --exists glfw3"):
+                print("Error: Required libraries not found. Aborting.")
+                sys.exit(255)
+            
+            env.Append(LINKFLAGS=["-static"])
+            env.ParseConfig(f"{env['mingw_prefix']}/bin/pkg-config --static --cflags --libs glfw3")
