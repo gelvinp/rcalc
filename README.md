@@ -41,15 +41,15 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | --------  | ------                            |
 | Linux     | [Supported](#building-for-linux)  |
 | Mac OS    | [Supported](#building-for-macos)  |
-| Windows   | Not started                       |
+| Windows   | [Supported](#building-for-windows)|
 
 
 ### Building for Linux
 
 The following dependencies are required to build RCalc:
 
- - Python
- - SCons
+ - Python 3.10 or later
+ - SCons 4.4 or later
  - pkg-config
  - glfw3 + development headers*
  - OpenGL + development headers
@@ -69,14 +69,14 @@ To build with clang instead of GCC, use `scons use_llvm=yes`.
 
 To build with asan, use `scons use_asan=yes`.
 
-To use gperf to generate the operator and command maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
+To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
 
 
 ### Building for MacOS
 
 The following dependencies are required to build RCalc:
 
- - Python
+ - Python 3.10 or later
  - SCons
  - pkg-config
  - glfw3 + development headers*
@@ -99,4 +99,50 @@ You must set these yourself as MacOS aliases `gcc` and `g++` to use Apple Clang 
 
 To build with asan, use `scons use_asan=yes`.
 
-To use gperf to generate the operator and command maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
+To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
+
+
+### Building for Windows
+
+CL.exe / MSVC is *not* a supported build method at this time. Instead, please install a MinGW distribution.
+The following package lists assume you are using MSYS2:
+
+#### Building with MSYS2 using GCC
+
+The following dependencies, or suitable alternatives, are required to build RCalc:
+
+- python 3.10 or later
+- mingw-w64-ucrt-x86_64-scons 4.4 or later
+- mingw-w64-ucrt-x86_64-pkg-config
+- mingw-w64-ucrt-x86_64-glfw*
+- mingw-w64-ucrt-x86_64-freetype*
+- mingw-w64-ucrt-x86_64-gcc (A version that supports c++20)
+
+#### Building with MSYS2 using clang
+
+The following dependencies, or suitable alternatives, are required to build RCalc:
+
+- python 3.10 or later
+- mingw-w64-clang-x86_64-scons 4.4 or later
+- mingw-w64-clang-x86_64-pkg-config
+- mingw-w64-clang-x86_64-glfw*
+- mingw-w64-clang-x86_64-freetype*
+- mingw-w64-clang-x86_64-clang (A version that supports c++20)
+
+
+\* GLFW and FreeType can be linked using the vendored modules.
+To do this, first make sure to initialize the git submodules, and then
+run `scons builtin_glfw=yes builtin_freetype=yes`.
+(You can also choose to only use one builtin or the other.)
+
+When compiling with MinGW, both GLFW and Freetype will be statically linked, regardless
+if using the builtin modules or not. Additionally, libgcc and libstdc++ will also be
+statically linked.
+
+For a debug build, run `scons` from the project root.
+
+For a release build, run `scons target=release` from the project root.
+
+To build with clang instead of GCC, use `scons use_llvm=yes`.
+
+To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.

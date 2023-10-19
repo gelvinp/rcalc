@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import os
 import csv
+from platform_methods import subprocess_main
 
 
 Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8 }
@@ -449,7 +450,7 @@ class UnitsMapBuilder:
         units.sort()
 
         # Write units list to temporary file and run gperf
-        with tempfile.NamedTemporaryFile("w") as unit_file:
+        with tempfile.NamedTemporaryFile("w", newline='\n') as unit_file:
             for unit in units:
                 unit_file.write(f'_{unit}\n')
             unit_file.flush()
@@ -537,3 +538,7 @@ def make_units_maps(target, source, env):
         file.write("\n".join(built))
     
     return 0
+
+
+if __name__ == "__main__":
+    subprocess_main(globals())

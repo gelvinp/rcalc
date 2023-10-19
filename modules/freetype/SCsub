@@ -71,7 +71,7 @@ if env["builtin_freetype"]:
             "upstream/builds/unix/ftsystem.c",
             "upstream/src/base/ftdebug.c"
         ])
-    if env["platform"] == "macos":
+    elif env["platform"] == "macos":
         env_freetype.Append(CPPDEFINES=[
             "HAVE_UNISTD_H",
             "HAVE_FCNTL_H"
@@ -81,3 +81,10 @@ if env["builtin_freetype"]:
             "upstream/builds/unix/ftsystem.c",
             "upstream/src/base/ftdebug.c"
         ])
+    elif env["platform"] == "win":
+        env_freetype.add_source_files(env.modules_sources, [
+            "upstream/builds/windows/ftsystem.c",
+            "upstream/builds/windows/ftdebug.c"
+        ])
+
+        env.modules_sources.append(env.RES("upstream/src/base/ftver.rc"))

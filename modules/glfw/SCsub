@@ -56,3 +56,17 @@ if env["builtin_glfw"]:
         ])
 
         env_glfw.Append(CPPDEFINES=["_GLFW_COCOA"])
+    elif env["platform"] == "win":
+        env_glfw.add_source_files(env.modules_sources, [
+            "upstream/src/win32_init.c",
+            "upstream/src/win32_joystick.c",
+            "upstream/src/win32_monitor.c",
+            "upstream/src/win32_time.c",
+            "upstream/src/win32_thread.c",
+            "upstream/src/win32_window.c",
+            "upstream/src/wgl_context.c",
+            "upstream/src/egl_context.c",
+            "upstream/src/osmesa_context.c"
+        ])
+
+        env_glfw.Append(CPPDEFINES=["_GLFW_WIN32"])

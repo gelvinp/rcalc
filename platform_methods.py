@@ -9,6 +9,7 @@ import subprocess
 # NOTE: The multiprocessing module is not compatible with SCons due to conflict on cPickle
 
 JSON_SERIALIZABLE_TYPES = (bool, int, float, str)
+JSON_SERIALIZE_OVERRIDE = ["enabled_renderers", "enabled_command_scopes"]
 
 
 def run_in_subprocess(builder_function):
@@ -36,6 +37,9 @@ def run_in_subprocess(builder_function):
         # Keep only JSON serializable environment items
         filtered_env = dict((key, value) for key, value in env.items() if isinstance(value, JSON_SERIALIZABLE_TYPES))
 
+        for override in JSON_SERIALIZE_OVERRIDE:
+            filtered_env[override] = env[override]
+
         # Save parameters
         args = (target, source, filtered_env)
         data = dict(fn=function_name, args=args)
@@ -44,12 +48,6 @@ def run_in_subprocess(builder_function):
             json.dump(data, json_file, indent=2)
         json_file_size = os.stat(json_path).st_size
 
-        if env["verbose"]:
-            print(
-                "Executing builder function in subprocess: "
-                "module_path=%r, parameter_file=%r, parameter_file_size=%r, target=%r, source=%r"
-                % (module_path, json_path, json_file_size, target, source)
-            )
         try:
             exit_code = subprocess.call([sys.executable, module_path, json_path], env=subprocess_env)
         finally:

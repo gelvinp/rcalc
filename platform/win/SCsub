@@ -1,0 +1,9 @@
+Import("env")
+
+env.add_source_files(env.platform_sources, "*.cpp")
+
+res_file = "rcalc_res.rc"
+res_target = "rcalc_res" + env["OBJSUFFIX"]
+res_obj = env.RES(res_target, res_file)
+
+env["extra_sources"].append(res_obj)

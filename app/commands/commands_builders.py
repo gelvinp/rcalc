@@ -3,6 +3,7 @@ from string import ascii_lowercase, digits
 import subprocess
 import tempfile
 import os
+from platform_methods import subprocess_main
 
 
 def _filter_name(name):
@@ -427,7 +428,7 @@ class CommandMapBuilder:
             usage_names.sort()
 
             # Write commands list to temporary file and run gperf
-            with tempfile.NamedTemporaryFile("w") as cmd_file:
+            with tempfile.NamedTemporaryFile("w", newline='\n') as cmd_file:
                 for usage in usage_names:
                     cmd_file.write(f'\\{_filter_name(usage)}\n')
                 cmd_file.flush()
@@ -520,7 +521,6 @@ class CommandMapBuilder:
 def make_command_maps(target, source, env):
     dst = target[0]
     builder = CommandMapBuilder()
-
     for file in source:
         builder.process_file(file)
 
@@ -534,3 +534,7 @@ def make_command_maps(target, source, env):
         file.write("\n".join(built))
     
     return 0
+
+
+if __name__ == "__main__":
+    subprocess_main(globals())
