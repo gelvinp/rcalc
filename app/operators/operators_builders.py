@@ -6,6 +6,7 @@ from copy import deepcopy
 import subprocess
 import tempfile
 import os
+from platform_methods import subprocess_main
 
 
 Tags = ['reversable', 'bigint_cast', 'real_cast', 'no_expr'] # Need a string in set check, not ordered
@@ -976,3 +977,7 @@ def make_internal_header(target, src, env):
 
     with open(dst, 'w') as file:
         file.write('\n'.join(lines))
+
+
+if __name__ == "__main__":
+    subprocess_main(globals())

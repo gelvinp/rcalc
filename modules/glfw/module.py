@@ -64,3 +64,10 @@ def configure(env: "Environment"):
                 sys.exit(255)
             
             env.ParseConfig("pkg-config --cflags --libs glfw3")
+    elif env["platform"] == "win":
+        if env["builtin_glfw"]:
+            # TODO: Handle this differently for msvc
+            env.Append(LIBS=["opengl32", "gdi32"])
+        else:
+            print("Error: builtin_glfw is required to build on windows!")
+            sys.exit(255)

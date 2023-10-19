@@ -37,3 +37,7 @@ def configure(env: "Environment"):
                 sys.exit(255)
             
             env.ParseConfig("pkg-config --cflags --libs freetype2")
+    elif env["platform"] == "win":
+        if not env["builtin_freetype"]:
+            print("Error: builtin_freetype is required to build on windows!")
+            sys.exit(255)
