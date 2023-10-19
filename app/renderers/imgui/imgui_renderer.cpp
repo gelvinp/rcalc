@@ -119,7 +119,7 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
-                ImGui::MenuItem("Show Help", "Ctrl+H", &help_requested);
+                ImGui::MenuItem("Show Help", "F1", &help_requested);
                 ImGui::Separator();
                 ImGui::MenuItem("Quit", "Ctrl+Q", &platform.close_requested);
                 ImGui::EndMenu();
@@ -348,7 +348,7 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
             cb_submit_text("\\dup");
             dup_requested = false;
         }
-        if ((ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_H))) {
+        if ((ImGui::IsKeyDown(ImGuiKey_F1))) {
             help_requested = true;
         }
     }

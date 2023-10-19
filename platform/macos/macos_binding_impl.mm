@@ -75,8 +75,11 @@ static void glfw_error_callback(int error, const char* description) {
     // App menu
     id appMenu = [NSMenu new];
 
+    id hideMenuItem = [[NSMenuItem alloc] initWithTitle: @"Hide RCalc" action:@selector(hide:) keyEquivalent:@"h"];
     id quitMenuItem = [[NSMenuItem alloc] initWithTitle: @"Quit RCalc" action:@selector(terminate:) keyEquivalent:@"q"];
 
+    [appMenu addItem:hideMenuItem];
+    [appMenu addItem:[NSMenuItem separatorItem]];
     [appMenu addItem:quitMenuItem];
 
     id appMenuItem = [NSMenuItem new];
@@ -97,10 +100,23 @@ static void glfw_error_callback(int error, const char* description) {
     id fileMenuItem = [NSMenuItem new];
     [fileMenuItem setSubmenu:fileMenu];
 
+    // Window menu
+    id windowMenu = [[NSMenu alloc] initWithTitle: @"Window"];
+
+    id minimizeMenuItem = [[NSMenuItem alloc] initWithTitle: @"Minimize RCalc" action:@selector(miniaturize:) keyEquivalent:@"m"];
+
+    [windowMenu addItem:minimizeMenuItem];
+
+    id windowMenuItem = [NSMenuItem new];
+    [windowMenuItem setSubmenu:windowMenu];
+
     // Help menu
     id helpMenu = [[NSMenu alloc] initWithTitle: @"Help"];
 
-    id rcalcHelpMenuItem = [[NSMenuItem alloc] initWithTitle: @"RCalc Help" action:@selector(menuCallbackHelp) keyEquivalent: @"h"];
+    unichar f1 = NSF1FunctionKey;
+    NSString* f1key = [NSString stringWithCharacters:&f1 length:1];
+    id rcalcHelpMenuItem = [[NSMenuItem alloc] initWithTitle: @"RCalc Help" action:@selector(menuCallbackHelp) keyEquivalent:f1key];
+    [rcalcHelpMenuItem setKeyEquivalentModifierMask:0];
 
     [rcalcHelpMenuItem setTarget:self];
 
@@ -111,6 +127,7 @@ static void glfw_error_callback(int error, const char* description) {
 
     [menuBar addItem:appMenuItem];
     [menuBar addItem:fileMenuItem];
+    [menuBar addItem:windowMenuItem];
     [menuBar addItem:helpMenuItem];
 
     [NSApp setMainMenu:menuBar];
