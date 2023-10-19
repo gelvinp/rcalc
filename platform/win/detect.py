@@ -149,7 +149,7 @@ def get_opts():
     return [
         ("mingw_prefix", "MinGW prefix", mingw),
         #BoolVariable("use_mingw", "Use the Mingw compiler, even if MSVC is installed.", False),
-        # TODO: Also support LLVM?
+        BoolVariable("use_llvm", "Use the LLVM compiler", False),
         BoolVariable("use_asan", "Compile with -fsanitize=address", False)
     ]
 
@@ -238,11 +238,21 @@ def configure_mingw(env):
 
     ## Build type
 
-    # if not env["use_llvm"] and not try_cmd("gcc --version", env["mingw_prefix"], env["arch"]):
-    #     env["use_llvm"] = True
+    gcc_found = True
 
-    # if env["use_llvm"] and not try_cmd("clang --version", env["mingw_prefix"], env["arch"]):
-    #     env["use_llvm"] = False
+    if not env["use_llvm"] and not try_cmd("gcc --version", env["mingw_prefix"], env["arch"]):
+        print("gcc not found, checking for clang...")
+        gcc_found = False
+        env["use_llvm"] = True
+
+    if env["use_llvm"] and not try_cmd("clang --version", env["mingw_prefix"], env["arch"]):
+        if gcc_found:
+            print("clang not found, falling back to gcc...")
+        else:
+            print("Neither gcc or clang were found, aborting...")
+            sys.exit(255)
+        
+        env["use_llvm"] = False
 
     env.Append(LINKFLAGS=["-Wl,--subsystem,windows"])
 
@@ -253,40 +263,37 @@ def configure_mingw(env):
 
     mingw_bin_prefix = get_mingw_bin_prefix(env["mingw_prefix"], env["arch"])
 
-    # if env["use_llvm"]:
-    #     env["CC"] = mingw_bin_prefix + "clang"
-    #     env["CXX"] = mingw_bin_prefix + "clang++"
-    #     if try_cmd("as --version", env["mingw_prefix"], env["arch"]):
-    #         env["AS"] = mingw_bin_prefix + "as"
-    #     if try_cmd("ar --version", env["mingw_prefix"], env["arch"]):
-    #         env["AR"] = mingw_bin_prefix + "ar"
-    #     if try_cmd("ranlib --version", env["mingw_prefix"], env["arch"]):
-    #         env["RANLIB"] = mingw_bin_prefix + "ranlib"
-    #     env.extra_suffix = ".llvm" + env.extra_suffix
-    # else:
-    env["CC"] = mingw_bin_prefix + "gcc"
-    env["CXX"] = mingw_bin_prefix + "g++"
-    if try_cmd("as --version", env["mingw_prefix"], env["arch"]):
-        env["AS"] = mingw_bin_prefix + "as"
-    if try_cmd("gcc-ar --version", env["mingw_prefix"], env["arch"]):
-        env["AR"] = mingw_bin_prefix + "gcc-ar"
-    if try_cmd("gcc-ranlib --version", env["mingw_prefix"], env["arch"]):
-        env["RANLIB"] = mingw_bin_prefix + "gcc-ranlib"
+    if env["use_llvm"]:
+        env["CC"] = mingw_bin_prefix + "clang"
+        env["CXX"] = mingw_bin_prefix + "clang++"
+        if try_cmd("as --version", env["mingw_prefix"], env["arch"]):
+            env["AS"] = mingw_bin_prefix + "as"
+        if try_cmd("ar --version", env["mingw_prefix"], env["arch"]):
+            env["AR"] = mingw_bin_prefix + "ar"
+        if try_cmd("ranlib --version", env["mingw_prefix"], env["arch"]):
+            env["RANLIB"] = mingw_bin_prefix + "ranlib"
+        env.extra_suffix = ".llvm" + env.extra_suffix
+    else:
+        env["CC"] = mingw_bin_prefix + "gcc"
+        env["CXX"] = mingw_bin_prefix + "g++"
+        if try_cmd("as --version", env["mingw_prefix"], env["arch"]):
+            env["AS"] = mingw_bin_prefix + "as"
+        if try_cmd("gcc-ar --version", env["mingw_prefix"], env["arch"]):
+            env["AR"] = mingw_bin_prefix + "gcc-ar"
+        if try_cmd("gcc-ranlib --version", env["mingw_prefix"], env["arch"]):
+            env["RANLIB"] = mingw_bin_prefix + "gcc-ranlib"
 
     ## LTO
     if env["target"] == "release":
-        # if env["use_llvm"]:
-        #     env.Append(CCFLAGS=["-flto=thin"])
-        #     env.Append(LINKFLAGS=["-flto=thin"])
-        #     env["lto"] = "thin"
-        # else:
-        env.Append(CCFLAGS=["-flto"])
-        env["lto"] = "full"
-
-        if env.GetOption("num_jobs") > 1:
-            env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
+        if env["use_llvm"]:
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
+            env["lto"] = "thin"
         else:
-            env.Append(LINKFLAGS=["-flto"])
+            env.Append(CCFLAGS=["-flto"])
+            env["lto"] = "full"
+
+        env.Append(LINKFLAGS=["-flto"])
     else:
         env["lto"] = "none"
     
@@ -305,8 +312,8 @@ def configure_mingw(env):
 
     ## Compile flags
 
-    # if not env["use_llvm"]:
-    #     env.Append(CCFLAGS=["-mwindows"])
+    if not env["use_llvm"]:
+        env.Append(CCFLAGS=["-mwindows"])
 
     env.Append(LIBS=["mingw32"])
     env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])
