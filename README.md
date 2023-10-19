@@ -130,10 +130,14 @@ The following dependencies, or suitable alternatives, are required to build RCal
 - mingw-w64-clang-x86_64-clang (A version that supports c++20)
 
 
-\* GLFW and FreeType can be statically linked using the vendored modules.
+\* GLFW and FreeType can be linked using the vendored modules.
 To do this, first make sure to initialize the git submodules, and then
 run `scons builtin_glfw=yes builtin_freetype=yes`.
-(You can also choose to only statically link one or the other.)
+(You can also choose to only use one builtin or the other.)
+
+When compiling with MinGW, both GLFW and Freetype will be statically linked, regardless
+if using the builtin modules or not. Additionally, libgcc and libstdc++ will also be
+statically linked.
 
 For a debug build, run `scons` from the project root.
 
