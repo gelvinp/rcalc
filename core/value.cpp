@@ -366,7 +366,7 @@ std::optional<Value> Value::parse(const std::string& str) {
 
 Value Value::parse_numeric(const std::string& str, Real value) {
     // Check for floating point
-    if (std::find(str.begin(), str.end(), '.') != str.end()) {
+    if (std::find(str.begin(), str.end(), '.') != str.end() || std::find(str.begin(), str.end(), 'e') != str.end()) {
         // Contains a decimal separator, treat as float
         return Value(value);
     }
@@ -379,13 +379,24 @@ std::optional<Real> Value::parse_real(std::string_view sv) {
     std::stringstream ss;
     bool negate = false;
 
+    // Support 1en6
+    auto exp_it = std::find(sv.begin(), sv.end(), 'e');
+    if (exp_it != sv.end()) {
+        size_t exp_idx = std::distance(sv.begin(), exp_it);
+        std::string str { sv };
+
+        if ((exp_idx + 1) < str.size() && str[exp_idx + 1] == 'n') {
+            str[exp_idx + 1] = '-';
+        }
+
+        sv = std::string_view(str);
+    }
+
     // Check for negate
     if (sv.starts_with('n')) {
         negate = true;
         sv = std::string_view(sv.data() + 1, sv.length() - 1);
     }
-
-    // Try to parse as number
 
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {

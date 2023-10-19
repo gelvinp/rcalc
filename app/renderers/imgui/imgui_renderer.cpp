@@ -584,6 +584,17 @@ void ImGuiRenderer::render_help() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
     ImGui::TextUnformatted(HelpText::program_info);
 
+    for (const HelpText::HelpSection& section : HelpText::sections) {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 24.0);
+
+        ImGui::PushFont(p_font_medium);
+        ImGui::TextUnformatted(section.header);
+        ImGui::PopFont();
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+        ImGui::TextUnformatted(section.text);
+    }
+
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
     ImGui::Separator();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);

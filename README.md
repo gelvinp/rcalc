@@ -32,7 +32,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 
 ## Technical debt
- - [ ] Rewrite help page (how to enter values, how does rpn work)
+ - [ ] Cache help page contents
  - [ ] Refactor stackitem string representations
 
 

@@ -5,7 +5,6 @@
  - Create TUI renderer
 
 # Track 2
- - Improve help page for imgui renderer
  - Cache help page contents
 
 # Track 3
