@@ -363,6 +363,8 @@ if selected_platform in available_platforms:
     env.Alias("compiledb", env.CompilationDatabase())
     env.NoClean("compile_commands.json")
 
+    env["extra_sources"] = []
+
     Export("env")
     
     SConscript("assets/SCsub")
@@ -374,7 +376,7 @@ if selected_platform in available_platforms:
 
     # Prevent from using C compiler (can't infer without sources)
     env["CC"] = env["CXX"]
-    exe = env.add_program("#bin/rcalc", [])
+    exe = env.add_program("#bin/rcalc", env["extra_sources"])
 
     if hasattr(detect, "post_build"):
         post_build = env.CommandNoCache('post_build', exe, detect.post_build)

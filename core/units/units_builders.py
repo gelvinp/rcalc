@@ -450,7 +450,7 @@ class UnitsMapBuilder:
         units.sort()
 
         # Write units list to temporary file and run gperf
-        with tempfile.NamedTemporaryFile("w") as unit_file:
+        with tempfile.NamedTemporaryFile("w", newline='\n') as unit_file:
             for unit in units:
                 unit_file.write(f'_{unit}\n')
             unit_file.flush()

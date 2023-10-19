@@ -853,7 +853,7 @@ class OperatorMapBuilder:
         operators.sort(key=lambda e: e.lower())
 
         # Write operators list to temporary file and run gperf
-        with tempfile.NamedTemporaryFile("w") as op_file:
+        with tempfile.NamedTemporaryFile("w", newline='\n') as op_file:
             for op_name in operators:
                 op_file.write(f'{self._filter_name(op_name)}\n')
             op_file.flush()

@@ -428,7 +428,7 @@ class CommandMapBuilder:
             usage_names.sort()
 
             # Write commands list to temporary file and run gperf
-            with tempfile.NamedTemporaryFile("w") as cmd_file:
+            with tempfile.NamedTemporaryFile("w", newline='\n') as cmd_file:
                 for usage in usage_names:
                     cmd_file.write(f'\\{_filter_name(usage)}\n')
                 cmd_file.flush()
