@@ -731,7 +731,7 @@ void ImGuiRenderer::render_help_operator(const CachedOperator& op) {
             types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts 1 argument");
         }
         else {
-            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %ld arguments", op.op.allowed_types.front().size());
+            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %llu arguments", (unsigned long long)op.op.allowed_types.front().size()); // Windows compat
         }
 
         if (types_open) {

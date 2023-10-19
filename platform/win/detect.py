@@ -275,17 +275,18 @@ def configure_mingw(env):
 
     ## LTO
     if env["target"] == "release":
-        if env["use_llvm"]:
-            env.Append(CCFLAGS=["-flto=thin"])
-            env.Append(LINKFLAGS=["-flto=thin"])
-            env["lto"] = "thin"
-        else:
-            env.Append(CCFLAGS=["-flto"])
+        # if env["use_llvm"]:
+        #     env.Append(CCFLAGS=["-flto=thin"])
+        #     env.Append(LINKFLAGS=["-flto=thin"])
+        #     env["lto"] = "thin"
+        # else:
+        env.Append(CCFLAGS=["-flto"])
+        env["lto"] = "full"
 
-            if env.GetOption("num_jobs") > 1:
-                env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
-            else:
-                env.Append(LINKFLAGS=["-flto"])
+        if env.GetOption("num_jobs") > 1:
+            env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
+        else:
+            env.Append(LINKFLAGS=["-flto"])
     else:
         env["lto"] = "none"
     
