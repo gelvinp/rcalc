@@ -41,7 +41,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | --------  | ------                            |
 | Linux     | [Supported](#building-for-linux)  |
 | Mac OS    | [Supported](#building-for-macos)  |
-| Windows   | In Progress                       |
+| Windows   | [Supported](#building-for-windows)|
 
 
 ### Building for Linux
