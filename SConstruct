@@ -340,7 +340,7 @@ if selected_platform in available_platforms:
 
     env.Append(CCFLAGS=["-Wall", "-Wextra"])
     if env["target"] == "release":
-        env.Append(CCFLAGS=["-Werror"])
+        env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
         env.Append(CPPDEFINES=["NDEBUG"])
 
     if hasattr(detect, "get_program_suffix"):
