@@ -13,7 +13,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <ranges>
 #include <sstream>
 #include <set>

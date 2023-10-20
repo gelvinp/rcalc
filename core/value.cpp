@@ -415,6 +415,14 @@ std::optional<Real> Value::parse_real(std::string_view sv) {
             return i_value;
         }
     }
+    else if (sv.starts_with("0b")) {
+        Int i_value;
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 2);
+        if (ec == std::errc()) {
+            if (negate) { i_value *= -1; }
+            return i_value;
+        }
+    }
     else {
         ss << sv;
     }
