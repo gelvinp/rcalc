@@ -10,6 +10,14 @@
 
 struct Unit;
 
+enum Representation: uint8_t {
+    REPR_NONE,
+    REPR_BINARY,
+    REPR_OCT,
+    REPR_DECIMAL,
+    REPR_HEX
+};
+
 namespace RCalc {
 
 class Value {
@@ -32,18 +40,18 @@ public:
     operator Mat4() const;
     operator Unit() const;
 
-    Value(Int value);
-    Value(BigInt value);
-    Value(Real value);
-    Value(Vec2 value);
-    Value(Vec3 value);
-    Value(Vec4 value);
-    Value(Mat2 value);
-    Value(Mat3 value);
-    Value(Mat4 value);
-    Value(Unit value);
+    Value(Int value, Representation repr = REPR_NONE);
+    Value(BigInt value, Representation repr = REPR_NONE);
+    Value(Real value, Representation repr = REPR_NONE);
+    Value(Vec2 value, Representation repr = REPR_NONE);
+    Value(Vec3 value, Representation repr = REPR_NONE);
+    Value(Vec4 value, Representation repr = REPR_NONE);
+    Value(Mat2 value, Representation repr = REPR_NONE);
+    Value(Mat3 value, Representation repr = REPR_NONE);
+    Value(Mat4 value, Representation repr = REPR_NONE);
+    Value(Unit value, Representation repr = REPR_NONE);
 
-    static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt);
+    static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt, Representation repr = REPR_NONE);
 
     std::string to_string();
 
@@ -60,12 +68,14 @@ public:
     // Explicit copy
     Value make_copy() const;
 
+    Representation repr : 4 = REPR_NONE;
+
 private:
-    Type type = TYPE_INT;
+    Type type : 4 = TYPE_INT;
     uint64_t data = 0;
 
-    static Value parse_numeric(const std::string& str, Real value);
-    static std::optional<Real> parse_real(std::string_view sv);
+    static Value parse_numeric(const std::string& str, Real value, Representation repr = REPR_NONE);
+    static std::optional<Value> parse_real(std::string_view sv);
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
 

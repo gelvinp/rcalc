@@ -4,6 +4,7 @@
 #include "core/format.h"
 
 #include <algorithm>
+#include <bitset>
 #include <charconv>
 #include <cstring>
 #include <limits>
@@ -254,9 +255,9 @@ POOL_CONVERT(Unit, TYPE_UNIT);
 
 #pragma region constructors
 
-#define POOL_CONSTRUCT(pool_type, enum_type) Value::Value(pool_type value) : type(enum_type), data(Pool_##pool_type::allocate(value)) {}
+#define POOL_CONSTRUCT(pool_type, enum_type) Value::Value(pool_type value, Representation repr) : repr(repr), type(enum_type), data(Pool_##pool_type::allocate(value)) {}
 
-Value::Value(Int value) : type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
+Value::Value(Int value, Representation repr) : repr(repr), type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
 
 POOL_CONSTRUCT(BigInt, TYPE_BIGINT);
 POOL_CONSTRUCT(Real, TYPE_REAL);
@@ -301,6 +302,7 @@ Value::~Value() {
 Value::Value(Value&& value) {
     type = value.type;
     data = value.data;
+    repr = value.repr;
 
     value.type = TYPE_INT;
     value.data = 0;
@@ -309,6 +311,7 @@ Value::Value(Value&& value) {
 Value& Value::operator=(Value&& value) {
     type = value.type;
     data = value.data;
+    repr = value.repr;
 
     value.type = TYPE_INT;
     value.data = 0;
@@ -317,31 +320,23 @@ Value& Value::operator=(Value&& value) {
 }
 
 
-Value Value::find_int(Real value, std::optional<const std::string*> source) {
+Value Value::find_int(Real value, std::optional<const std::string*> source, Representation repr) {
     // No floating point, check for int64_t
     if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
-        return Value(static_cast<Int>(value));
+        return Value(static_cast<Int>(value), repr);
     }
     if (source) {
         const std::string* str = source.value();
         if (str->starts_with("n")) {
             std::string new_str(*str);
             new_str.data()[0] = '-';
-            return Value(new_str);
+            return Value(new_str, repr);
         }
-        return Value(BigInt(*source.value()));
+        return Value(BigInt(*source.value()), repr);
     }
 
     // BigInt, have to convert through string first
-    const char* display_format = "%.0f";
-    int size = snprintf(nullptr, 0, display_format, value) + 1;
-    char* buf = (char*)malloc(sizeof(char) * size);
-    memset(&buf[0], 0, size);
-    snprintf(&buf[0], size, display_format, value);
-    std::string str(&buf[0]);
-    free(buf);
-
-    return Value(BigInt(str));
+    return Value(BigInt(fmt("%.0f", value)), repr);
 }
 
 #pragma endregion constructors
@@ -355,27 +350,27 @@ std::optional<Value> Value::parse(const std::string& str) {
     if (str.starts_with('_')) { return parse_unit(str); }
 
     // Try to parse as number
-    std::optional<Real> real = parse_real(str);
+    std::optional<Value> real = parse_real(str);
 
     if (real) {
-        return parse_numeric(str, real.value());
+        return parse_numeric(str, real.value().operator Real(), real.value().repr);
     }
 
     return std::nullopt;
 }
 
-Value Value::parse_numeric(const std::string& str, Real value) {
+Value Value::parse_numeric(const std::string& str, Real value, Representation repr) {
     // Check for floating point
     if (std::find(str.begin(), str.end(), '.') != str.end() || std::find(str.begin(), str.end(), 'e') != str.end()) {
         // Contains a decimal separator, treat as float
-        return Value(value);
+        return Value(value, repr);
     }
     
-    return find_int(value, &str);
+    return find_int(value, &str, repr);
 }
 
 
-std::optional<Real> Value::parse_real(std::string_view sv) {
+std::optional<Value> Value::parse_real(std::string_view sv) {
     std::stringstream ss;
     bool negate = false;
 
@@ -401,26 +396,26 @@ std::optional<Real> Value::parse_real(std::string_view sv) {
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 16);
-        if (ec == std::errc()) {
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 16);
+        if (ec == std::errc() && ptr == sv.end()) {
             if (negate) { i_value *= -1; }
-            return i_value;
+            return Value((Real)i_value, REPR_HEX);
         }
     }
     else if (sv.starts_with("0o")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 8);
-        if (ec == std::errc()) {
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 8);
+        if (ec == std::errc() && ptr == sv.end()) {
             if (negate) { i_value *= -1; }
-            return i_value;
+            return Value((Real)i_value, REPR_OCT);
         }
     }
     else if (sv.starts_with("0b")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.data() + sv.size(), i_value, 2);
-        if (ec == std::errc()) {
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 2);
+        if (ec == std::errc() && ptr == sv.end()) {
             if (negate) { i_value *= -1; }
-            return i_value;
+            return Value((Real)i_value, REPR_BINARY);
         }
     }
     else {
@@ -432,7 +427,7 @@ std::optional<Real> Value::parse_real(std::string_view sv) {
 
     if (ss && ss.eof()) {
         if (negate) { d_value *= -1; }
-        return d_value;
+            return Value(d_value, REPR_DECIMAL);
     }
 
     return std::nullopt;
@@ -583,7 +578,22 @@ std::optional<Value> Value::parse_unit(const std::string& str) {
 std::string Value::to_string() {
     switch (type) {
         case TYPE_INT: {
-            return std::to_string(operator Int());
+            switch (repr) {
+                case REPR_NONE:
+                // fallthrough
+                case REPR_DECIMAL:
+                    return std::to_string(operator Int());
+                case REPR_BINARY: {
+                    std::string str = std::bitset<64>(std::bit_cast<uint64_t>(operator Int())).to_string();
+                    int offset = 64 - std::bit_width(std::bit_cast<uint64_t>(operator Int()));
+                    return fmt("0b%s", str.c_str() + offset);
+                }
+                case REPR_OCT:
+                    return fmt("0o%o", operator Int());
+                case REPR_HEX:
+                    return fmt("0x%x", operator Int());
+            }
+            UNREACHABLE();
         }
         case TYPE_BIGINT: {
             return (operator BigInt()).get_str();

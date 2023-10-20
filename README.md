@@ -28,7 +28,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 | Renderer scratchpad autocomplete                              | Not started       |
 | Alternate renderer (TUI)                                      | Not started       |
 | Extended Conversion Operators                                 | Complete          |
-| Binary/Bitwise operators + Alternate display modes (hex, etc) | Not started       |
+| Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
 
 
 ## Technical debt
