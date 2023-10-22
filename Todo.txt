@@ -12,3 +12,4 @@
  - flatten() function that returns a vector of variant<const char*, Ref<Value>, ColVector> (flattens the recursive nodes [carefully])
  - Matrix to_string should use newlines and ensure consistent spacing
  - ImGuiRenderer should layout lines in these chunks, keeping track of total entry height across multiple lines, it'll be a mess ~~i'm so excited~~
+ - Do something better with displaying binary, octal, and hex values

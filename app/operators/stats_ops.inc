@@ -1,6 +1,6 @@
 // @RCalcOperator
 // Description: Calculate the minimum of the top arg0 values on the stack.
-// Category: Range
+// Category: Statistics
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
@@ -103,7 +103,7 @@ RCALC_FMT_1_S(Min, _arg) {
 
 // @RCalcOperator
 // Description: Calculate the maximum of the top arg0 values on the stack.
-// Category: Range
+// Category: Statistics
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
@@ -206,7 +206,7 @@ RCALC_FMT_1_S(Max, _arg) {
 
 // @RCalcOperator
 // Description: Calculate the average of the top arg0 values on the stack.
-// Category: Range
+// Category: Statistics
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
@@ -227,32 +227,12 @@ RCALC_OP_1_S(Avg, Int, count) {
         }
     }
 
-    // For input formatting
     std::stringstream ss;
-    bool first = true;
-
-    std::vector<Real> values;
-    for (StackItem& item : stack.pop_items(count)) {
-        switch (item.result.get_type()) {
-        case TYPE_INT:
-            values.push_back((Real)(item.result.operator Int()));
-            break;
-        case TYPE_BIGINT:
-            values.push_back((item.result.operator BigInt()).get_real<Real>());
-            break;
-        case TYPE_REAL:
-            values.push_back((Real)item.result);
-            break;
-        default:
-            UNREACHABLE();
-        }
-        if (first) { first = false; } else { ss << ", "; }
-        ss << item.result.to_string();
-    }
+    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
     
-    Real sum = std::accumulate(values.begin(), values.end(), 0.0);
+    Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
     stack.set_message<std::string>(ss.str());
-    return Ok(Value(sum / count));
+    return Ok(Value(avg));
 }
 
 RCALC_FMT_1_S(Avg, _arg) {
@@ -264,8 +244,110 @@ RCALC_FMT_1_S(Avg, _arg) {
 
 
 // @RCalcOperator
+// Description: Calculate the standard deviation of the top arg0 values on the stack.
+// Category: Statistics
+// Tags: [no_expr]
+// Requires: <numeric>
+// Requires: <sstream>
+// Requires: <cmath>
+// Requires: "app/operators/stats.h"
+// Example: [1, 2, 3, 3]
+RCALC_OP_1_S(StdDev, Int, count) {
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute stddev, not enough elements on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute stddev, all elements must be scalar types.");
+        }
+    }
+
+    std::stringstream ss;
+    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    
+    Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
+    stack.set_message<std::string>(ss.str());
+
+    std::vector<Real> sqr_dev;
+    sqr_dev.reserve(count);
+
+    for (Real real : values) {
+        Real dev = real - avg;
+        sqr_dev.push_back(dev * dev);
+    }
+
+    Real variance = std::accumulate(sqr_dev.begin(), sqr_dev.end(), 0.0) / count;
+    return Ok(Value(std::sqrt(variance)));
+}
+
+RCALC_FMT_1_S(StdDev, _arg) {
+    UNUSED(_arg);
+    std::string str = "stddev(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
+    return str;
+}
+
+
+// @RCalcOperator
+// Description: Calculate the [average, standard deviation] of the top arg0 values on the stack.
+// Category: Statistics
+// Tags: [no_expr]
+// Requires: <numeric>
+// Requires: <sstream>
+// Requires: <cmath>
+// Requires: "app/operators/stats.h"
+// Example: [1, 2, 3, 3]
+RCALC_OP_1_S(NormDist, Int, count) {
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute stddev, not enough elements on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute stddev, all elements must be scalar types.");
+        }
+    }
+
+    std::stringstream ss;
+    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    
+    Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
+    stack.set_message<std::string>(ss.str());
+
+    std::vector<Real> sqr_dev;
+    sqr_dev.reserve(count);
+
+    for (Real real : values) {
+        Real dev = real - avg;
+        sqr_dev.push_back(dev * dev);
+    }
+
+    Real variance = std::accumulate(sqr_dev.begin(), sqr_dev.end(), 0.0) / count;
+    return Ok(Value(Vec2(avg, std::sqrt(variance))));
+}
+
+RCALC_FMT_1_S(NormDist, _arg) {
+    UNUSED(_arg);
+    std::string str = "normdist(" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
+    return str;
+}
+
+
+// @RCalcOperator
 // Description: Calculate the sum of the top arg0 values on the stack.
-// Category: Range
+// Category: Statistics
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
@@ -326,35 +408,6 @@ RCALC_OP_1_S(Sum, Int, count) {
 RCALC_FMT_1_S(Sum, _arg) {
     UNUSED(_arg);
     std::string str = "sum(" + stack.get_message<std::string>() + ")";
-    stack.clear_message();
-    return str;
-}
-
-
-// @RCalcOperator
-// Description: Generates a range of numbers from 0 to arg0.
-// Category: Range
-// Tags: [no_expr]
-// Example: [3]
-// Example: [5]
-RCALC_OP_1_S(Range, Int, arg0) {
-    for (Int index = 0; index < arg0; index++) {
-        Value value = Value(index);
-        stack.push_item(StackItem{
-            value.to_string(),
-            value.to_string(),
-            std::move(value),
-            false
-        });
-    }
-    Value last = Value(arg0);
-    stack.set_message<std::string>(last.to_string());
-    return Ok(std::move(last));
-}
-
-RCALC_FMT_1_S(Range, arg0) {
-    UNUSED(arg0);
-    std::string str = stack.get_message<std::string>();
     stack.clear_message();
     return str;
 }

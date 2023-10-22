@@ -53,7 +53,7 @@ public:
 
     static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt, Representation repr = REPR_NONE);
 
-    std::string to_string();
+    std::string to_string() const;
 
     Value() = default;
     ~Value();

@@ -575,7 +575,7 @@ std::optional<Value> Value::parse_unit(const std::string& str) {
 
 #pragma region to_string
 
-std::string Value::to_string() {
+std::string Value::to_string() const {
     switch (type) {
         case TYPE_INT: {
             switch (repr) {
