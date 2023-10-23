@@ -3,7 +3,7 @@
 RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)) calculator written in C++.
 It aims to be quick to open and use, and easy to extend with new types, operators, and commands.
 
-**RCalc is currently unfinished and in active development. Please see the [feature table](#feature-table) below for more information.**
+**RCalc is currently in active development. Please see the [feature table](#feature-table) below for more information.**
 
 
 ## Feature Table
