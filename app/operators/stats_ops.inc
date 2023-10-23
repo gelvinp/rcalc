@@ -411,3 +411,51 @@ RCALC_FMT_1_S(Sum, _arg) {
     stack.clear_message();
     return str;
 }
+
+
+// @RCalcOperator
+// Description: Given the discount rate arg0, calculates the net present value of the top arg1 values on the stack.
+// Category: Statistics
+// Tags: [no_expr, real_cast]
+// Requires: <algorithm>
+// Requires: <sstream>
+// Requires: <cmath>
+// Requires: "app/operators/stats.h"
+// Example: [-20000, 12000, 14000, 16000, 0.1, 4]
+RCALC_OP_2_S(NPV, Real, Int, discount_rate, count) {
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute net present value, not enough net cash flows on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute net present value, all net cash flows must be scalar types.");
+        }
+    }
+
+    std::stringstream ss;
+    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    stack.set_message<std::string>(ss.str());
+
+    size_t index = 0;
+    std::transform(values.begin(), values.end(), values.begin(),
+        [&index, discount_rate](Real net_cash_flow) {
+            return net_cash_flow / std::pow(1 + discount_rate, index++);
+        }
+    );
+
+    Real npv = std::accumulate(values.begin(), values.end(), 0.0);
+    return Ok(Value(npv));
+}
+
+RCALC_FMT_2_S(NPV, discount_rate, _arg) {
+    UNUSED(_arg);
+    std::string str = "npv[" + discount_rate.get_input_formatted() + "](" + stack.get_message<std::string>() + ")";
+    stack.clear_message();
+    return str;
+}
