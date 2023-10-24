@@ -61,7 +61,7 @@ ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
     command_map = CommandMap<ImGuiRenderer>::get_command_map();
 
     // Init backend
-    p_backend = RenderBackend::create();
+    p_backend = RenderBackend::create<ImGuiRenderer>();
 }
 
 

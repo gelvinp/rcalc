@@ -1,7 +1,9 @@
 #include "imgui_macos_backend.h"
+#include "app/renderers/imgui/imgui_renderer.h"
 
 
-RenderBackend* RenderBackend::create() {
+template<>
+RenderBackend* RenderBackend::create<RCalc::ImGuiRenderer>() {
     return reinterpret_cast<RenderBackend*>(new ImGuiMacOSBackend());
 }
 

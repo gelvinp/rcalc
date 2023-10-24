@@ -10,6 +10,14 @@
 #include "assets/app_icon.png.gen.h"
 #include "stb_image.h"
 
+#include "app/renderers/imgui/imgui_renderer.h"
+
+
+template<>
+RenderBackend* RenderBackend::create<RCalc::ImGuiRenderer>() {
+    return reinterpret_cast<RenderBackend*>(new ImGuiStandardBackend());
+}
+
 
 static void glfw_error_callback(int error, const char* description) {
     Logger::log_err("[GLFW] Error %d: %s\n", error, description);

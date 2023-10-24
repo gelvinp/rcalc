@@ -8,6 +8,7 @@ namespace RCalc {
 
 class RenderBackend {
 public:
+    template<typename Renderer>
     static RenderBackend* create();
     
     virtual Result<> init(RCalc::Application* p_application) = 0;
