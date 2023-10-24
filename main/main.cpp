@@ -19,10 +19,6 @@ int main(int argc, char** pp_argv)
     initialize_modules();
 
     Result<RCalc::Application*> res = RCalc::Application::create(config);
-
-    res.and_then<void>([](RCalc::Application* p_application) {
-        return p_application->init();
-    });
     
     if (!res) {
         std::stringstream ss;

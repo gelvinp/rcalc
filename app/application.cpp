@@ -41,11 +41,6 @@ Application::Application() :
 }
 
 
-Result<> Application::init() {
-    return Ok();
-}
-
-
 void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {

@@ -19,7 +19,6 @@ struct AppConfig {
 
 class Application {
 public:
-    Result<> init();
     void step();
     void cleanup();
 
