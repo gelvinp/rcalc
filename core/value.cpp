@@ -26,18 +26,18 @@ namespace RCalc {
 class Pool_##type { \
 public: \
     static uint64_t allocate(type value) { \
-        if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
-            throw std::logic_error("Pool size mismatch, check log output for more information."); \
+        if (_pool.size() != _refs.size()) { \
+            Logger::log_err("[Allocate] Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _refs.size()); \
+            throw std::logic_error("[Allocate] Pool size mismatch, check log output for more information."); \
         } \
 \
-        std::vector<bool>::iterator it = std::find(_free.begin(), _free.end(), false); \
-        if (it != _free.end()) { \
+        std::vector<uint8_t>::iterator it = std::find(_refs.begin(), _refs.end(), 0); \
+        if (it != _refs.end()) { \
             /* Reuse slot */ \
-            *it = true; \
-            uint64_t index = static_cast<uint64_t>(it - _free.begin()); \
+            *it = 1; \
+            uint64_t index = static_cast<uint64_t>(it - _refs.begin()); \
             _pool[index] = value; \
-            return static_cast<uint64_t>(it - _free.begin()); \
+            return static_cast<uint64_t>(it - _refs.begin()); \
         } \
 \
         if (_pool.size() > std::numeric_limits<uint64_t>::max()) { \
@@ -47,66 +47,83 @@ public: \
 \
         /* New slot */ \
         _pool.push_back(value); \
-        _free.push_back(true); \
+        _refs.push_back(1); \
 \
         return static_cast<uint64_t>(_pool.size() - 1); \
     } \
 \
     static type get(uint64_t index) { \
-        if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
-            throw std::logic_error("Pool size mismatch, check log output for more information."); \
+        if (_pool.size() != _refs.size()) { \
+            Logger::log_err("[Get] Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _refs.size()); \
+            throw std::logic_error("[Get] Pool size mismatch, check log output for more information."); \
         } \
         if (index >= _pool.size()) { \
-            Logger::log_err("Pool access out of bounds for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
-            throw std::logic_error("Pool free out of bounds, check log output for more information."); \
+            Logger::log_err("[Get] Pool access out of bounds for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Get] Pool free out of bounds, check log output for more information."); \
         } \
-        if (_free[index] == false) { \
-            Logger::log_err("Pool use after free for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
-            throw std::logic_error("Pool use after free, check log output for more information."); \
+        if (_refs[index] == 0) { \
+            Logger::log_err("[Get] Pool use after free for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Get] Pool use after free, check log output for more information."); \
         } \
 \
         return _pool[index]; \
     } \
 \
-    static void free(uint64_t index) { \
-        if (_pool.size() != _free.size()) { \
-            Logger::log_err("Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _free.size()); \
-            throw std::logic_error("Pool size mismatch, check log output for more information."); \
+    static void ref(uint64_t index) { \
+        if (_pool.size() != _refs.size()) { \
+            Logger::log_err("[Ref] Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _refs.size()); \
+            throw std::logic_error("[Ref] Pool size mismatch, check log output for more information."); \
         } \
         if (index >= _pool.size()) { \
-            Logger::log_err("Pool free out of bounds for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), index); \
-            throw std::logic_error("Pool free out of bounds, check log output for more information."); \
+            Logger::log_err("[Ref] Pool access out of bounds for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Ref] Pool free out of bounds, check log output for more information."); \
         } \
-        if (_free[index] == false) { \
-            Logger::log_err("Pool double free for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), index); \
-            throw std::logic_error("Pool double free, check log output for more information."); \
+        if (_refs[index] == 0) { \
+            Logger::log_err("[Ref] Pool use after free for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Ref] Pool use after free, check log output for more information."); \
         } \
 \
-        _free[index] = false; \
+        _refs[index]++; \
+    } \
+\
+    static void unref(uint64_t index) { \
+        if (_pool.size() != _refs.size()) { \
+            Logger::log_err("[Unref] Pool size mismatch for type '" #type "'!\n\tPool size: %d\tMarshall size: %d", _pool.size(), _refs.size()); \
+            throw std::logic_error("[Unref] Pool size mismatch, check log output for more information."); \
+        } \
+        if (index >= _pool.size()) { \
+            Logger::log_err("[Unref] Pool access out of bounds for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Unref] Pool free out of bounds, check log output for more information."); \
+        } \
+        if (_refs[index] == 0) { \
+            Logger::log_err("[Unref] Pool use after free for type '" #type "'!\n\tPool size: %d\tAccessed index: %d", _pool.size(), index); \
+            throw std::logic_error("[Unref] Pool use after free, check log output for more information."); \
+        } \
+\
+        if (--_refs[index] > 0) { return; } \
 \
         /* Attempt to shrink */ \
-        std::vector<bool>::const_iterator it = std::find(_free.rbegin(), _free.rend(), true).base(); \
-        if (it == _free.end()) { return; } \
-        size_t new_size = it - _free.begin(); \
+        std::vector<uint8_t>::const_iterator it = std::find(_refs.rbegin(), _refs.rend(), true).base(); \
+        if (it == _refs.end()) { return; } \
+        size_t new_size = it - _refs.begin(); \
 \
-        for (auto itd = it; itd < _free.end(); ++itd) { \
+        for (auto itd = it; itd < _refs.end(); ++itd) { \
             if (*itd) { \
-                Logger::log_err("Pool shrink non-free value for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), itd - _free.begin()); \
+                Logger::log_err("Pool shrink non-free value for type '" #type "'!\n\tPool size: %d\tFreed index: %d", _pool.size(), itd - _refs.begin()); \
             } \
         } \
 \
         _pool.resize(new_size); \
-        _free.resize(new_size); \
+        _refs.resize(new_size); \
     } \
 \
 private: \
     static std::vector<type> _pool; \
-    static std::vector<bool> _free; \
+    static std::vector<uint8_t> _refs; \
 }; \
 \
 std::vector<type> Pool_##type::_pool; \
-std::vector<bool> Pool_##type::_free;
+std::vector<uint8_t> Pool_##type::_refs;
 
 #else
 
@@ -114,13 +131,13 @@ std::vector<bool> Pool_##type::_free;
 class Pool_##type { \
 public: \
     static uint64_t allocate(type value) { \
-        std::vector<bool>::iterator it = std::find(_free.begin(), _free.end(), false); \
-        if (it != _free.end()) { \
+        std::vector<uint8_t>::iterator it = std::find(_refs.begin(), _refs.end(), 0); \
+        if (it != _refs.end()) { \
             /* Reuse slot */ \
-            *it = true; \
-            uint64_t index = static_cast<uint64_t>(it - _free.begin()); \
+            *it = 1; \
+            uint64_t index = static_cast<uint64_t>(it - _refs.begin()); \
             _pool[index] = value; \
-            return static_cast<uint64_t>(it - _free.begin()); \
+            return static_cast<uint64_t>(it - _refs.begin()); \
         } \
 \
         if (_pool.size() > std::numeric_limits<uint64_t>::max()) { \
@@ -130,7 +147,7 @@ public: \
 \
         /* New slot */ \
         _pool.push_back(value); \
-        _free.push_back(true); \
+        _refs.push_back(1); \
 \
         return static_cast<uint64_t>(_pool.size() - 1); \
     } \
@@ -139,25 +156,29 @@ public: \
         return _pool[index]; \
     } \
 \
-    static void free(uint64_t index) { \
-        _free[index] = false; \
+    static void ref(uint64_t index) { \
+        _refs[index]++; \
+    } \
+\
+    static void unref(uint64_t index) { \
+        if (--_refs[index] > 0) { return; } \
 \
         /* Attempt to shrink */ \
-        std::vector<bool>::const_iterator it = std::find(_free.rbegin(), _free.rend(), true).base(); \
-        if (it == _free.end()) { return; } \
-        size_t new_size = it - _free.begin(); \
+        std::vector<uint8_t>::const_iterator it = std::find(_refs.rbegin(), _refs.rend(), true).base(); \
+        if (it == _refs.end()) { return; } \
+        size_t new_size = it - _refs.begin(); \
 \
         _pool.resize(new_size); \
-        _free.resize(new_size); \
+        _refs.resize(new_size); \
     } \
 \
 private: \
     static std::vector<type> _pool; \
-    static std::vector<bool> _free; \
+    static std::vector<uint8_t> _refs; \
 }; \
 \
 std::vector<type> Pool_##type::_pool; \
-std::vector<bool> Pool_##type::_free;
+std::vector<uint8_t> Pool_##type::_refs;
 
 #endif
 
@@ -273,7 +294,7 @@ POOL_CONSTRUCT(Unit, TYPE_UNIT);
 
 #define POOL_FREE(pool_type, enum_type) \
 case enum_type: { \
-    Pool_##pool_type::free(data); \
+    Pool_##pool_type::unref(data); \
     break; \
 }
 
@@ -298,6 +319,24 @@ Value::~Value() {
 }
 
 #undef POOL_FREE
+
+Value::Value(const Value& value) {
+    type = value.type;
+    data = value.data;
+    repr = value.repr;
+    ref();
+}
+
+Value& Value::operator=(const Value& value) {
+    unref();
+
+    type = value.type;
+    data = value.data;
+    repr = value.repr;
+    ref();
+
+    return *this;
+}
 
 Value::Value(Value&& value) {
     type = value.type;
@@ -353,17 +392,17 @@ std::optional<Value> Value::parse(const std::string& str) {
     std::optional<Value> real = parse_real(str);
 
     if (real) {
-        return parse_numeric(str, real.value().operator Real(), real.value().repr);
+        return parse_numeric(str, std::move(real).value(), real.value().repr);
     }
 
     return std::nullopt;
 }
 
-Value Value::parse_numeric(const std::string& str, Real value, Representation repr) {
+Value Value::parse_numeric(const std::string& str, Value&& value, Representation repr) {
     // Check for floating point
     if (std::find(str.begin(), str.end(), '.') != str.end() || std::find(str.begin(), str.end(), 'e') != str.end()) {
         // Contains a decimal separator, treat as float
-        return Value(value, repr);
+        return value;
     }
     
     return find_int(value, &str, repr);
@@ -457,7 +496,7 @@ std::optional<Value> Value::parse_vec(std::string_view sv) {
         }
 
         sv = std::string_view(token + begin, end - begin);
-        std::optional<Real> real = parse_real(sv);
+        std::optional<Value> real = parse_real(sv);
 
         if (real) {
             if (components.size() >= 4) { return std::nullopt; }
@@ -629,8 +668,10 @@ std::string Value::to_string() const {
             const Unit value = operator Unit();
             return fmt("%s", value.p_name);
         }
+
         default: {
-            return "Value to_string not implemented for type!";
+            Logger::log_err("Value of type %s not handled during to_string!", get_type_name());
+            return fmt("Value of type %s not handled during to_string!", get_type_name());
         }
     }
 }
@@ -638,46 +679,65 @@ std::string Value::to_string() const {
 #pragma endregion to_string
 
 
-#pragma region copies
+#pragma region refcounted
 
-Value Value::make_copy() const {
+#define POOL_REF(pool_type, enum_type) \
+case enum_type: { \
+    Pool_##pool_type::ref(data); \
+    return; \
+}
+
+void Value::ref() {
     switch (type) {
-        case TYPE_INT: {
-            return Value(operator Int());
-        }
-        case TYPE_BIGINT: {
-            return Value(operator BigInt());
-        }
-        case TYPE_REAL: {
-            return Value(operator Real());
-        }
-        case TYPE_VEC2: {
-            return Value(operator Vec2());
-        }
-        case TYPE_VEC3: {
-            return Value(operator Vec3());
-        }
-        case TYPE_VEC4: {
-            return Value(operator Vec4());
-        }
-        case TYPE_MAT2: {
-            return Value(operator Mat2());
-        }
-        case TYPE_MAT3: {
-            return Value(operator Mat3());
-        }
-        case TYPE_MAT4: {
-            return Value(operator Mat4());
-        }
-        case TYPE_UNIT: {
-            return Value(operator Unit());
-        }
+        case TYPE_INT:
+            return;
+
+        POOL_REF(BigInt, TYPE_BIGINT)
+        POOL_REF(Real, TYPE_REAL)
+        POOL_REF(Vec2, TYPE_VEC2)
+        POOL_REF(Vec3, TYPE_VEC3)
+        POOL_REF(Vec4, TYPE_VEC4)
+        POOL_REF(Mat2, TYPE_MAT2)
+        POOL_REF(Mat3, TYPE_MAT3)
+        POOL_REF(Mat4, TYPE_MAT4)
+        POOL_REF(Unit, TYPE_UNIT)
+
         default: {
-            Logger::log_err("Value make_copy not implemented for type!");
-            return Value((Int)0);
+            Logger::log_err("Value of type %s not handled during ref!", get_type_name());
         }
     }
 }
 
-#pragma endregion copies
+#undef POOL_REF
+
+#define POOL_UNREF(pool_type, enum_type) \
+case enum_type: { \
+    Pool_##pool_type::unref(data); \
+    return; \
+}
+
+void Value::unref() {
+    switch (type) {
+        case TYPE_INT:
+            return;
+
+        POOL_UNREF(BigInt, TYPE_BIGINT)
+        POOL_UNREF(Real, TYPE_REAL)
+        POOL_UNREF(Vec2, TYPE_VEC2)
+        POOL_UNREF(Vec3, TYPE_VEC3)
+        POOL_UNREF(Vec4, TYPE_VEC4)
+        POOL_UNREF(Mat2, TYPE_MAT2)
+        POOL_UNREF(Mat3, TYPE_MAT3)
+        POOL_UNREF(Mat4, TYPE_MAT4)
+        POOL_UNREF(Unit, TYPE_UNIT)
+
+        default: {
+            Logger::log_err("Value of type %s not handled during unref!", get_type_name());
+        }
+    }
+}
+
+#undef POOL_UNREF
+
+#pragma endregion refcounted
 }

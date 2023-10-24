@@ -58,15 +58,11 @@ public:
     Value() = default;
     ~Value();
 
-    // Delete copy constructors, specify move
-    Value(const Value&) = delete;
-    Value& operator=(const Value&) = delete;
+    Value(const Value&);
+    Value& operator=(const Value&);
 
     Value(Value&& value);
     Value& operator=(Value&& value);
-
-    // Explicit copy
-    Value make_copy() const;
 
     Representation repr : 4 = REPR_NONE;
 
@@ -74,12 +70,14 @@ private:
     Type type : 4 = TYPE_INT;
     uint64_t data = 0;
 
-    static Value parse_numeric(const std::string& str, Real value, Representation repr = REPR_NONE);
+    static Value parse_numeric(const std::string& str, Value&& value, Representation repr = REPR_NONE);
     static std::optional<Value> parse_real(std::string_view sv);
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
-
     static std::optional<Value> parse_unit(const std::string& str);
+
+    void ref();
+    void unref();
 };
 
 }
