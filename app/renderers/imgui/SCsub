@@ -2,3 +2,9 @@ Import("env")
 Import("env_app")
 
 env_app.add_source_files(env.app_sources, "*.cpp", True)
+
+if env["platform"] == "macos":
+    env_app.add_source_files(env.app_sources, "backends/imgui_macos/*.cpp")
+    env_app.add_source_files(env.app_sources, "backends/imgui_macos/*.mm")
+else:
+    env_app.add_source_files(env.app_sources, "backends/imgui_standard/*.cpp")

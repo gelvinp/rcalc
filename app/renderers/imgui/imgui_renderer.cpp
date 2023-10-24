@@ -1,7 +1,6 @@
 #include "imgui_renderer.h"
 
 #include "core/logger.h"
-#include "platform/platform.h"
 #include "core/version.h"
 #include "core/help_text.h"
 #include "assets/B612Mono-Regular.ttf.gen.h"
@@ -55,13 +54,19 @@ enum ColorNames : int {
     COLOR_GRAY
 };
 
-ImGuiRenderer::ImGuiRenderer(
-    SubmitTextCallback cb_submit_text,
-    SubmitOperatorCallback cb_submit_op) :
-        cb_submit_text(cb_submit_text),
-        cb_submit_op(cb_submit_op)
+ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
+        cb_submit_text(info.cb_submit_text),
+        cb_submit_op(info.cb_submit_op)
 {
     command_map = CommandMap<ImGuiRenderer>::get_command_map();
+
+    // Init backend
+    p_backend = RenderBackend::create();
+}
+
+
+Result<> ImGuiRenderer::init(Application* p_application) {
+    Result<> res = p_backend->init(p_application);
 
     // Load font
     ImGuiIO& io = ImGui::GetIO();
@@ -73,7 +78,7 @@ ImGuiRenderer::ImGuiRenderer(
     glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
     glyphs.BuildRanges(&glyph_ranges);
 
-    float screen_dpi = Platform::get_singleton().get_screen_dpi();
+    float screen_dpi = p_backend->get_screen_dpi();
     float font_size_standard = std::floor(14 * screen_dpi);
     float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
@@ -83,10 +88,13 @@ ImGuiRenderer::ImGuiRenderer(
     p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);
 
     io.FontGlobalScale = 1.0f / screen_dpi;
+
+    return Ok();
 }
 
+
 void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
-    Platform& platform = Platform::get_singleton();
+    p_backend->start_frame();
 
     std::vector<ImGuiRenderItem> im_items;
     im_items.reserve(items.size());
@@ -113,14 +121,14 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     }
 
     
-    if (platform.app_menu_bar()) {
+    if (p_backend->app_menu_bar()) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
                 ImGui::MenuItem("Show Help", "F1", &help_requested);
                 ImGui::Separator();
-                ImGui::MenuItem("Quit", "Ctrl+Q", &platform.close_requested);
+                ImGui::MenuItem("Quit", "Ctrl+Q", &p_backend->close_requested);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -242,7 +250,7 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
 
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
-                        platform.copy_to_clipboard(item.output);
+                        p_backend->copy_to_clipboard(item.output);
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -333,13 +341,13 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     render_help();
 
     // Handle shortcuts
-    if (platform.app_menu_bar()) {
+    if (p_backend->app_menu_bar()) {
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
-            platform.close_requested = true;
+            p_backend->close_requested = true;
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
             if (!items.empty()) {
-                platform.copy_to_clipboard(items.back().output);
+                p_backend->copy_to_clipboard(items.back().output);
             }
             copy_requested = false;
         }
@@ -360,6 +368,13 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     if (help_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         help_open = false;
     }
+
+    p_backend->render_frame();
+}
+
+
+void ImGuiRenderer::cleanup() {
+    p_backend->cleanup();
 }
 
 
@@ -577,7 +592,7 @@ void ImGuiRenderer::render_help() {
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
-        Platform::get_singleton().copy_to_clipboard(VERSION_HASH);
+        p_backend->copy_to_clipboard(VERSION_HASH);
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
