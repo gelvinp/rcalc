@@ -364,7 +364,6 @@ class Operator:
             lines.append(f"\t\tOP_FormatInput_{self.name}({', '.join([f'values[{idx}]' for idx in range(self.param_count)])}),")
         
         lines.extend([
-            "\t\tvalue.to_string(),",
             "\t\tstd::move(value),",
             "\t\texpression",
             "\t});", '',

@@ -15,7 +15,7 @@ class Application;
 
 struct RenderItem {
     std::string_view input;
-    std::string_view output;
+    Value value;
 };
 
 class Renderer {

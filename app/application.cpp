@@ -49,7 +49,7 @@ Result<> Application::init() {
 void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {
-        RenderItem render_item { item.input, item.output };
+        RenderItem render_item { item.input, item.result };
         render_items.push_back(render_item);
     }
     p_renderer->render(render_items);
@@ -80,7 +80,7 @@ void Application::on_renderer_submit_text(const std::string& str) {
     // Try to parse as Value first
     std::optional<Value> value = Value::parse(str);
     if (value) {
-        stack.push_item(StackItem{value.value().to_string(), value.value().to_string(), std::move(value).value(), false});
+        stack.push_item(StackItem{value.value().to_string(), std::move(value).value(), false});
         return;
     }
 
@@ -237,7 +237,6 @@ bool Application::try_swizzle(const std::string& str) {
             Value result(values[0]);
             stack.push_item(StackItem {
                 ss.str(),
-                result.to_string(),
                 std::move(result),
                 true
             });
@@ -247,7 +246,6 @@ bool Application::try_swizzle(const std::string& str) {
             Value result(Vec2(values[0], values[1]));
             stack.push_item(StackItem {
                 ss.str(),
-                result.to_string(),
                 std::move(result),
                 true
             });
@@ -257,7 +255,6 @@ bool Application::try_swizzle(const std::string& str) {
             Value result(Vec3(values[0], values[1], values[2]));
             stack.push_item(StackItem {
                 ss.str(),
-                result.to_string(),
                 std::move(result),
                 true
             });
@@ -267,7 +264,6 @@ bool Application::try_swizzle(const std::string& str) {
             Value result(Vec4(values[0], values[1], values[2], values[3]));
             stack.push_item(StackItem {
                 ss.str(),
-                result.to_string(),
                 std::move(result),
                 true
             });

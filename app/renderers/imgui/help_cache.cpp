@@ -16,7 +16,7 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 
         for (const char* param : example_params) {
             Value value = Value::parse(param).value();
-            stack.push_item(StackItem { value.to_string(), value.to_string(), std::move(value), false });
+            stack.push_item(StackItem { value.to_string(), std::move(value), false });
         }
 
         std::string op_name = filter_name(op.name);
@@ -38,7 +38,7 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
                 ss << ", ";
             }
 
-            ss << item.output;
+            ss << item.result.to_string();
         }
 
         StackItem res = std::move(stack.pop_items(1).at(0));

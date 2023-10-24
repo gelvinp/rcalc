@@ -13,7 +13,6 @@ namespace RCalc {
 
 struct StackItem {
     std::string input;
-    std::string output;
     Value result;
     bool input_is_expression; // When composing inputs, expressions should be wrapped in ()'s
 

@@ -354,7 +354,6 @@ RCALC_OP_1_S(Range, Int, arg0) {
         Value value = Value(index);
         stack.push_item(StackItem{
             value.to_string(),
-            value.to_string(),
             std::move(value),
             false
         });

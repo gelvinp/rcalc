@@ -346,8 +346,8 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
             p_backend->close_requested = true;
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
-            if (!items.empty()) {
-                p_backend->copy_to_clipboard(items.back().output);
+            if (!im_items.empty()) {
+                p_backend->copy_to_clipboard(im_items.back().output);
             }
             copy_requested = false;
         }

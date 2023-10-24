@@ -13,14 +13,14 @@ namespace RCalc {
 
 struct ImGuiRenderItem {
     std::string_view input;
-    std::string_view output;
+    std::string output;
 
     float input_display_width = 0.0;
     float output_display_width = 0.0;
     float display_height = 0.0;
 
     ImGuiRenderItem(const RenderItem& item)
-        : input(item.input), output(item.output) {}
+        : input(item.input), output(item.value.to_string()) {}
 
     void recalculate_size(bool scrollbar_visible = false);
 };

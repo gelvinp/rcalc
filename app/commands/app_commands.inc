@@ -35,7 +35,7 @@ RCALC_CMD(Application, Swap, app) {
 // Requires: "app/application.h"
 RCALC_CMD(Application, Copy, app) {
     if (app.stack.size() == 0) { return; }
-    app.p_renderer->p_backend->copy_to_clipboard(app.stack.get_items().back().output);
+    app.p_renderer->p_backend->copy_to_clipboard(app.stack.get_items().back().result.to_string());
 }
 
 // @RCalcCommand
@@ -45,12 +45,7 @@ RCALC_CMD(Application, Dup, app) {
     if (app.stack.size() == 0) { return; }
     
     const StackItem& back = app.stack.get_items().back();
-    app.stack.push_item(StackItem {
-        back.input,
-        back.output,
-        back.result.make_copy(),
-        back.input_is_expression
-    });
+    app.stack.push_item(StackItem(back));
 }
 
 // @RCalcCommand
@@ -65,7 +60,6 @@ RCALC_CMD(Application, Count, app) {
         Value value { BigInt((long long int)count) };
         app.stack.push_item(StackItem {
             "count",
-            value.to_string(),
             std::move(value),
             false
         });
@@ -75,7 +69,6 @@ RCALC_CMD(Application, Count, app) {
     Value value { (int64_t)count };
     app.stack.push_item(StackItem {
         "count",
-        value.to_string(),
         std::move(value),
         false
     });
