@@ -24,7 +24,7 @@ static void glfw_error_callback(int error, const char* description) {
 }
 
 Result<> ImGuiStandardBackend::init(RCalc::Application* p_application) {
-    UNUSED(p_application);
+    IM_UNUSED(p_application);
 
     glfwSetErrorCallback(glfw_error_callback);
 
@@ -65,6 +65,8 @@ Result<> ImGuiStandardBackend::init(RCalc::Application* p_application) {
 
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+
+    return Ok();
 }
 
 
