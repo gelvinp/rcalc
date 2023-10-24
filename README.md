@@ -6,6 +6,11 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 **RCalc is currently in active development. Please see the [feature table](#feature-table) below for more information.**
 
 
+## Install RCalc Now
+
+If you use Arch Linux, RCalc is in the AUR. Simply `paru -S rcalc` (or equivalent AUR helper).
+
+
 ## Feature Table
 
 | Feature                                                       | Status            |
