@@ -1,19 +1,24 @@
-#include "platform/platform.h"
+#if defined(ENABLE_PLATFORM_LINUX) || defined(ENABLE_PLATFORM_WIN)
+
+#pragma once
+
+#include "app/renderers/render_backend.h"
 
 #include <GLFW/glfw3.h>
-#include "imgui.h"
 
-class PlatformWindows : public Platform {
+
+class ImGuiStandardBackend : RenderBackend {
 public:
-    virtual Result<> init(RCalc::AppConfig config) override;
-    virtual void runloop() override;
+    virtual Result<> init(RCalc::Application* p_application) override;
     virtual void cleanup() override;
 
     virtual void start_frame() override;
     virtual void render_frame() override;
-
+    
     virtual void copy_to_clipboard(const std::string_view& string) override;
 
 private:
     GLFWwindow* p_window;
 };
+
+#endif

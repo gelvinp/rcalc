@@ -2,7 +2,7 @@
 
 #include "core/error.h"
 
-class PlatformMacOS;
+class ImGuiMacOSBackend;
 
 
 namespace RCalc
@@ -13,7 +13,7 @@ struct MacOSBinding;
 
 class MacOS {
 public:
-    MacOS(::PlatformMacOS* p_platform);
+    MacOS(::ImGuiMacOSBackend* p_backend);
     ~MacOS();
 
     Result<> init();
@@ -37,7 +37,7 @@ public:
 
 private:
     MacOSBinding* p_binding;
-    PlatformMacOS* p_platform;
+    ImGuiMacOSBackend* p_backend;
 };
 
 }

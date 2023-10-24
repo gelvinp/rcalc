@@ -27,9 +27,12 @@ struct ImGuiRenderItem {
 
 class ImGuiRenderer : public Renderer {
 public:
-    ImGuiRenderer(SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op);
+    ImGuiRenderer(RendererCreateInfo info);
+    ~ImGuiRenderer();
 
+    virtual Result<> init(Application* p_application) override;
     virtual void render(const std::vector<RenderItem>& items) override;
+    virtual void cleanup() override;
 
     virtual void display_info(const std::string& str) override;
     virtual void display_error(const std::string& str) override;

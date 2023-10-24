@@ -17,8 +17,11 @@ Result<Application*> Application::create(AppConfig config) {
 
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
-        std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
-        std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1)
+        {
+            std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
+            std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1),
+            p_application
+        }
     );
 
     if (renderer_res) {
@@ -37,6 +40,12 @@ Application::Application() :
     command_map = CommandMap<Application>::get_command_map();
 }
 
+
+Result<> Application::init() {
+    return Ok();
+}
+
+
 void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {
@@ -45,6 +54,13 @@ void Application::step() {
     }
     p_renderer->render(render_items);
 }
+
+
+void Application::cleanup() {
+    stack.clear();
+    p_renderer->cleanup();
+}
+
 
 void Application::on_renderer_submit_text(const std::string& str) {
     // If it starts with '\', it's a command
@@ -260,11 +276,6 @@ bool Application::try_swizzle(const std::string& str) {
         default:
             UNREACHABLE();
     }
-}
-
-
-void Application::cleanup() {
-    stack.clear();
 }
 
 

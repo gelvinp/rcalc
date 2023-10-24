@@ -1,9 +1,9 @@
 #include "core/logger.h"
 #include "core/version.h"
 #include "main/main.h"
-#include "platform/platform.h"
 #include "modules/register_modules.h"
 #include "app/renderers/renderer.h"
+#include "app/application.h"
 
 #include <iostream>
 #include <string_view>
@@ -14,21 +14,30 @@
 int main(int argc, char** pp_argv)
 {
     Main m;
-    Platform& platform = Platform::get_singleton();
 
     RCalc::AppConfig config = m.parse_args(argc, pp_argv);
     initialize_modules();
-    Result<> res = platform.init(config);
+
+    Result<RCalc::Application*> res = RCalc::Application::create(config);
+
+    res.and_then<void>([](RCalc::Application* p_application) {
+        return p_application->init();
+    });
     
     if (!res) {
         std::stringstream ss;
         ss << res.unwrap_err();
         Logger::log_err("%s", ss.str().c_str());
     } else {
-        platform.runloop();
+        RCalc::Application* p_application = res.unwrap();
+
+        while (!p_application->close_requested()) {
+            p_application->step();
+        }
+
+        p_application->cleanup();
     }
 
-    platform.cleanup();
     cleanup_modules();
 
     return res ? 0 : 255;

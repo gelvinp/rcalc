@@ -288,8 +288,3 @@ def configure(env: "Environment"):
     setup_mingw(env)
 
     configure_mingw(env)
-    
-    env["enabled_modules"].extend([
-        "imgui_opengl3",
-        "stb_image"
-    ])

@@ -1,11 +1,6 @@
+import os.path
+
 Import("env")
 
-env.platform_sources = []
-
-SConscript(env["platform"] + "/SCsub")
-
-env.add_source_files(env.platform_sources, "*.cpp")
-
-lib = env.add_library("platform", env.platform_sources)
-
-env.Prepend(LIBS=[lib])
+if os.path.isfile(env["platform"] + "/SCsub"):
+    SConscript(env["platform"] + "/SCsub")

@@ -1,6 +1,4 @@
-#include "platform_windows.h"
-
-_RCALC_PLATFORM_IMPL(PlatformWindows);
+#include "imgui_standard_backend.h"
 
 #include "core/logger.h"
 
@@ -12,12 +10,22 @@ _RCALC_PLATFORM_IMPL(PlatformWindows);
 #include "assets/app_icon.png.gen.h"
 #include "stb_image.h"
 
+#include "app/renderers/imgui/imgui_renderer.h"
+
+
+template<>
+RenderBackend* RenderBackend::create<RCalc::ImGuiRenderer>() {
+    return reinterpret_cast<RenderBackend*>(new ImGuiStandardBackend());
+}
+
 
 static void glfw_error_callback(int error, const char* description) {
     Logger::log_err("[GLFW] Error %d: %s\n", error, description);
 }
 
-Result<> PlatformWindows::init(RCalc::AppConfig config) {
+Result<> ImGuiStandardBackend::init(RCalc::Application* p_application) {
+    IM_UNUSED(p_application);
+
     glfwSetErrorCallback(glfw_error_callback);
 
     if (!glfwInit()) {
@@ -58,22 +66,11 @@ Result<> PlatformWindows::init(RCalc::AppConfig config) {
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    return create_application(config);
+    return Ok();
 }
 
 
-void PlatformWindows::runloop() {
-    while (!close_requested) {
-        start_frame();
-        p_application->step();
-        render_frame();
-    }
-}
-
-
-void PlatformWindows::cleanup() {
-    p_application->cleanup();
-    
+void ImGuiStandardBackend::cleanup() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -83,7 +80,7 @@ void PlatformWindows::cleanup() {
 }
 
 
-void PlatformWindows::start_frame() {
+void ImGuiStandardBackend::start_frame() {
     close_requested = glfwWindowShouldClose(p_window);
 
     glfwPollEvents();
@@ -93,7 +90,7 @@ void PlatformWindows::start_frame() {
     ImGui::NewFrame();
 }
 
-void PlatformWindows::render_frame() {
+void ImGuiStandardBackend::render_frame() {
     ImGui::Render();
 
     int window_w, window_h;
@@ -108,6 +105,6 @@ void PlatformWindows::render_frame() {
 }
 
 
-void PlatformWindows::copy_to_clipboard(const std::string_view& string) {
+void ImGuiStandardBackend::copy_to_clipboard(const std::string_view& string) {
     glfwSetClipboardString(p_window, string.data());
 }

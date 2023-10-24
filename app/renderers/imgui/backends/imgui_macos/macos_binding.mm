@@ -1,7 +1,7 @@
 #include "macos_binding.h"
 #include "macos_binding_impl.h"
 
-#include "platform_macos.h"
+#include "imgui_macos_backend.h"
 
 namespace RCalc
 {
@@ -11,8 +11,8 @@ struct MacOSBinding {
 };
 
 
-MacOS::MacOS(PlatformMacOS* p_platform)
-    : p_binding(new MacOSBinding()), p_platform(p_platform)
+MacOS::MacOS(ImGuiMacOSBackend* p_backend)
+    : p_binding(new MacOSBinding()), p_backend(p_backend)
 {
     p_binding->p_impl = [[_RCALC_MacOS_BindingImpl alloc] init];
 }
@@ -46,7 +46,7 @@ void MacOS::set_application(Application* p_application) {
 
 void MacOS::start_frame() {
     if (!p_binding) { return; }
-    p_platform->close_requested = [p_binding->p_impl windowShouldClose];
+    p_backend->close_requested = [p_binding->p_impl windowShouldClose];
     [p_binding->p_impl beginFrame];
 }
 

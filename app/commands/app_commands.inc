@@ -9,10 +9,8 @@ RCALC_CMD(Application, Clear, app) {
 // Description: Quits RCalc.
 // Alias: q
 // Requires: "app/application.h"
-// Requires: "platform/platform.h"
-RCALC_CMD(Application, Quit, _app) {
-    UNUSED(_app);
-    Platform::get_singleton().close_requested = true;
+RCALC_CMD(Application, Quit, app) {
+    app.p_renderer->p_backend->close_requested = true;
 }
 
 // @RCalcCommand
@@ -35,10 +33,9 @@ RCALC_CMD(Application, Swap, app) {
 // @RCalcCommand
 // Description: Copies the top element from the stack to the clipboard.
 // Requires: "app/application.h"
-// Requires: "platform/platform.h"
 RCALC_CMD(Application, Copy, app) {
     if (app.stack.size() == 0) { return; }
-    Platform::get_singleton().copy_to_clipboard(app.stack.get_items().back().output);
+    app.p_renderer->p_backend->copy_to_clipboard(app.stack.get_items().back().output);
 }
 
 // @RCalcCommand

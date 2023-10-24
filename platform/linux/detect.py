@@ -98,11 +98,6 @@ def configure(env: "Environment"):
     elif not host_is_64bit and env["arch"] == "x86_64":
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
-    
-    env["enabled_modules"].extend([
-        "imgui_opengl3",
-        "stb_image"
-    ])
 
     # RELRO
     if env["target"] == "release":

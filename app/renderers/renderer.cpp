@@ -10,10 +10,14 @@
 
 namespace RCalc {
 
-Result<Renderer*> Renderer::create(const std::string_view& name, SubmitTextCallback cb_submit_text, SubmitOperatorCallback cb_submit_op) {
+Result<Renderer*> Renderer::create(const std::string_view& name, RendererCreateInfo info) {
 #ifdef RENDERER_IMGUI_ENABLED
     if (name == "imgui") {
-        ImGuiRenderer* p_renderer = new ImGuiRenderer(cb_submit_text, cb_submit_op);
+        ImGuiRenderer* p_renderer = new ImGuiRenderer(info);
+
+        Result<> res = p_renderer->init(info.p_application);
+        if (!res) { return res.unwrap_err(); }
+
         return Ok((Renderer*)p_renderer);
     }
 #endif
