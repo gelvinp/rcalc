@@ -33,6 +33,7 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 ## Technical debt
  - [ ] Refactor stackitem string representations
+ - [ ] Implement arena allocator
 
 
 ## Platform support

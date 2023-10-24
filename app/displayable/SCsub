@@ -1,0 +1,10 @@
+Import("env")
+from glob import glob
+
+env.displayable_sources = []
+
+env_displayable = env.Clone()
+env_displayable.add_source_files(env.displayable_sources, "*.cpp")
+
+lib = env_displayable.add_library("displayable", env.displayable_sources)
+env.Prepend(LIBS=[lib])
