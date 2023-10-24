@@ -181,15 +181,6 @@ for renderer in available_renderers:
         enabled_renderers.append(renderer)
         env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_ENABLED'])
 
-        tmp_path = "./app/renderers/" + renderer
-        sys.path.insert(0, tmp_path)
-        import renderer
-
-        renderer.configure(env_base)
-
-        sys.path.remove(tmp_path)
-        sys.modules.pop("renderer")
-
 
 
 if len(enabled_renderers) == 0:
@@ -213,6 +204,16 @@ env_base["enabled_renderers"] = enabled_renderers
 env_base["default_renderer"] = default_renderer
 
 env_base.Prepend(CPPPATH=["#"])
+
+for renderer in enabled_renderers:
+    tmp_path = "./app/renderers/" + renderer
+    sys.path.insert(0, tmp_path)
+    import renderer
+
+    renderer.configure(env_base)
+
+    sys.path.remove(tmp_path)
+    sys.modules.pop("renderer")
 
 
 # Configure build

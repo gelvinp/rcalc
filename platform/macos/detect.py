@@ -104,8 +104,6 @@ def configure(env: "Environment"):
     elif not host_is_64bit and env["arch"] == "x86_64":
         env.Append(CCFLAGS=["-m64"])
         env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
-    
-    env["enabled_modules"].append("imgui_metal")
 
 
 def post_build(target, source, env):
