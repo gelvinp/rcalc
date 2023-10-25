@@ -11,19 +11,40 @@
 
 namespace RCalc {
 
-struct ImGuiRenderItem {
-    std::string_view input;
-    std::string output;
+struct ImGuiDisplayChunk {
+    std::string str;
+    ImVec2 size;
+    ImVec2 position;
 
-    float input_display_width = 0.0;
-    float output_display_width = 0.0;
-    float display_height = 0.0;
+    void calculate_size(float max_width = -1.0f);
 
-    ImGuiRenderItem(const RenderItem& item)
-        : input(item.input), output(item.value.to_string()) {}
-
-    void recalculate_size(bool scrollbar_visible = false);
+    ImGuiDisplayChunk(std::string str)
+        : str(str), size({}), position({}) {}
 };
+
+struct ImGuiDisplayLine {
+    std::vector<ImGuiDisplayChunk> chunks;
+    ImVec2 size;
+
+    void calculate_size(float max_width);
+};
+
+struct ImGuiDisplayEntry {
+    ImGuiDisplayLine input;
+    ImGuiDisplayChunk output;
+    float height;
+    bool valid;
+
+    void calculate_size(float max_width, bool scrollbar_visible);
+};
+
+struct ImGuiDisplayStack {
+    std::vector<ImGuiDisplayEntry> entries;
+
+    void calculate_sizes(float max_width, bool scrollbar_visible);
+    void invalidate_sizes();
+};
+
 
 class ImGuiRenderer : public Renderer {
 public:
@@ -31,13 +52,17 @@ public:
     ~ImGuiRenderer();
 
     virtual Result<> init(Application* p_application) override;
-    virtual void render(const std::vector<RenderItem>& items) override;
+    virtual void render() override;
     virtual void cleanup() override;
 
     virtual void display_info(const std::string& str) override;
     virtual void display_error(const std::string& str) override;
 
     virtual bool try_renderer_command(const std::string& str) override;
+
+    virtual void add_stack_item(const StackItem& item) override;
+    virtual void remove_stack_item() override;
+    virtual void replace_stack_items(const std::vector<StackItem>& items) override;
 
     REGISTER_COMMAND(ImGuiRenderer, Help);
     REGISTER_COMMAND(ImGuiRenderer, Queer);
@@ -63,6 +88,8 @@ private:
     bool scrollbar_visible = false;
     bool queer_active = false;
     bool enter_pressed = false;
+
+    ImGuiDisplayStack display_stack;
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;

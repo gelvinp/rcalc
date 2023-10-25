@@ -3,6 +3,7 @@
 #include "core/value.h"
 #include "core/error.h"
 #include "render_backend.h"
+#include "app/stack.h"
 
 #include <functional>
 #include <string>
@@ -33,13 +34,17 @@ public:
     static std::vector<const char*> get_enabled_renderers();
 
     virtual Result<> init(Application* p_application) = 0;
-    virtual void render(const std::vector<RenderItem>& items) = 0;
+    virtual void render() = 0;
     virtual void cleanup() = 0;
 
     virtual void display_info(const std::string& str) = 0;
     virtual void display_error(const std::string& str) = 0;
 
     virtual bool try_renderer_command(const std::string& str) = 0;
+
+    virtual void add_stack_item(const StackItem& item) = 0;
+    virtual void remove_stack_item() = 0;
+    virtual void replace_stack_items(const std::vector<StackItem>& items) = 0;
 
     static const char* default_renderer;
 

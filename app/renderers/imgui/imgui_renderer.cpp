@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 #include <ranges>
 #include <sstream>
 #include <set>
@@ -93,14 +94,8 @@ Result<> ImGuiRenderer::init(Application* p_application) {
 }
 
 
-void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
+void ImGuiRenderer::render() {
     p_backend->start_frame();
-
-    std::vector<ImGuiRenderItem> im_items;
-    im_items.reserve(items.size());
-    for (const RenderItem& item : items) {
-        im_items.emplace_back(item);
-    }
 
     // Fullscreen window
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -138,13 +133,7 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     
     ImVec2 window_size = ImGui::GetWindowSize();
     if (window_size.x != last_window_size.x || window_size.y != last_window_size.y) {
-        for (ImGuiRenderItem& item : im_items) {
-            item.recalculate_size();
-        }
-    } else {
-        for (ImGuiRenderItem& item : im_items) {
-            if (item.input_display_width < 0.001) { item.recalculate_size(scrollbar_visible); }
-        }
+        display_stack.invalidate_sizes();
     }
     last_window_size = window_size;
 
@@ -164,37 +153,37 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
     const float menu_bar_height = ImGui::GetCursorPosY();
     const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height - STACK_BOTTOM_PADDING;
 
+    display_stack.calculate_sizes(window_width, scrollbar_visible);
+
     float desired_stack_height = 0.0;
-    if (!items.empty()) {
-        for (const ImGuiRenderItem& item : im_items) {
-            desired_stack_height += item.display_height;
+    if (!display_stack.entries.empty()) {
+        for (const ImGuiDisplayEntry& entry : display_stack.entries) {
+            desired_stack_height += entry.height;
         }
 
-        desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
+        desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
     }
 
     if ((desired_stack_height >= available_stack_height) && !scrollbar_visible) {
         scrollbar_visible = true;
         desired_stack_height = 0.0;
-        if (!items.empty()) {
-            for (ImGuiRenderItem& item : im_items) {
-                item.recalculate_size(true);
-                desired_stack_height += item.display_height;
+        if (!display_stack.entries.empty()) {
+            for (const ImGuiDisplayEntry& entry : display_stack.entries) {
+                desired_stack_height += entry.height;
             }
 
-            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
+            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
         }
     }
     else if ((desired_stack_height < available_stack_height) && scrollbar_visible) {
         scrollbar_visible = false;
         desired_stack_height = 0.0;
-        if (!items.empty()) {
-            for (ImGuiRenderItem& item : im_items) {
-                item.recalculate_size(false);
-                desired_stack_height += item.display_height;
+        if (!display_stack.entries.empty()) {
+            for (const ImGuiDisplayEntry& entry : display_stack.entries) {
+                desired_stack_height += entry.height;
             }
 
-            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (items.size() - 1);
+            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
         }
     }
 
@@ -202,13 +191,13 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
 
     const float stack_position = separator_position - stack_height - padding - STACK_BOTTOM_PADDING;
 
-    if (!im_items.empty()) {
+    if (!display_stack.entries.empty()) {
         ImGui::SetCursorPosY(stack_position);
 
         if (ImGui::BeginChild("##stack", ImVec2(0, stack_height + STACK_BOTTOM_PADDING))) {
             int index = 0;
 
-            for (const ImGuiRenderItem& item : im_items) {
+            for (const ImGuiDisplayEntry& entry : display_stack.entries) {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + STACK_OUTER_PADDING);
 
                 if (queer_active) {
@@ -217,15 +206,15 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
                     if (color_index >= COLOR_BROWN) {
                         const float padding = 2.0f;
                         ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-                        ImVec2 input_size = ImGui::CalcTextSize(item.input.data(), nullptr, false, item.input_display_width);
+                        ImVec2 input_size = entry.input.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
                             ImVec2(cursor_pos.x - padding, cursor_pos.y - padding),
                             ImVec2(cursor_pos.x + input_size.x + padding, cursor_pos.y + input_size.y + padding),
                             ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
                             
                         );
-                        double output_offset = item.input_display_width + STACK_HORIZ_PADDING - STACK_OUTER_PADDING;
-                        ImVec2 output_size = ImGui::CalcTextSize(item.output.data(), nullptr, false, item.output_display_width);
+                        double output_offset = entry.output.position.x;
+                        ImVec2 output_size = entry.output.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
                             ImVec2(cursor_pos.x + output_offset - padding, cursor_pos.y - padding),
                             ImVec2(cursor_pos.x + output_offset + output_size.x + padding, cursor_pos.y + output_size.y + padding),
@@ -234,27 +223,46 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
                     }
                 }
 
-                ImGui::PushTextWrapPos(item.input_display_width + STACK_OUTER_PADDING);
-                ImGui::TextUnformatted(item.input.data());
-                ImGui::PopTextWrapPos();
+                ImVec2 entry_start_pos = ImGui::GetCursorPos();
 
-                ImGui::SameLine(item.input_display_width, STACK_HORIZ_PADDING);
-                ImGui::PushTextWrapPos(item.input_display_width + STACK_HORIZ_PADDING + item.output_display_width);
-                ImGui::TextUnformatted(item.output.data());
+                // Input
+                for (const ImGuiDisplayChunk& chunk : entry.input.chunks) {
+                    ImVec2 chunk_start_pos {
+                        entry_start_pos.x + chunk.position.x,
+                        entry_start_pos.y + chunk.position.y
+                    };
+
+                    ImGui::SetCursorPos(chunk_start_pos);
+
+                    ImGui::PushTextWrapPos(chunk_start_pos.x + chunk.size.x);
+                    ImGui::TextUnformatted(chunk.str.c_str());
+                    ImGui::PopTextWrapPos();
+                }
+
+                // Output
+                ImVec2 chunk_start_pos {
+                    entry_start_pos.x + entry.output.position.x,
+                    entry_start_pos.y + entry.output.position.y
+                };
+
+                ImGui::SetCursorPos(chunk_start_pos);
+
+                ImGui::PushTextWrapPos(chunk_start_pos.x + entry.output.size.x);
+                ImGui::TextUnformatted(entry.output.str.c_str());
                 ImGui::EXT_SetIDForLastItem(index++);
                 ImGui::PopTextWrapPos();
 
-                if (queer_active) {
-                    ImGui::PopStyleColor();
-                }
-
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
-                        p_backend->copy_to_clipboard(item.output);
+                        p_backend->copy_to_clipboard(entry.output.str);
                         ImGui::CloseCurrentPopup();
                     }
 
                     ImGui::EndPopup();
+                }
+
+                if (queer_active) {
+                    ImGui::PopStyleColor();
                 }
             }
         }
@@ -346,8 +354,8 @@ void ImGuiRenderer::render(const std::vector<RenderItem>& items) {
             p_backend->close_requested = true;
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
-            if (!im_items.empty()) {
-                p_backend->copy_to_clipboard(im_items.back().output);
+            if (!display_stack.entries.empty()) {
+                p_backend->copy_to_clipboard(display_stack.entries.back().output.str);
             }
             copy_requested = false;
         }
@@ -543,23 +551,6 @@ bool ImGuiRenderer::try_renderer_command(const std::string& str) {
     }
 
     return false;
-}
-
-
-void ImGuiRenderItem::recalculate_size(bool scrollbar_visible) {
-    float available_width = ImGui::GetContentRegionMax().x - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
-    if (scrollbar_visible) {
-        available_width -= ImGui::GetStyle().ScrollbarSize;
-    }
-
-    float output_max_size = available_width / 2.0 - STACK_HORIZ_PADDING;
-    float output_desired_size = ImGui::CalcTextSize(output.data(), nullptr, false, -1).x;
-    output_display_width = std::min(output_max_size, output_desired_size);
-    ImVec2 output_actual_size = ImGui::CalcTextSize(output.data(), nullptr, false, output_display_width);
-
-    input_display_width = available_width - output_actual_size.x - STACK_HORIZ_PADDING;
-    ImVec2 input_actual_size = ImGui::CalcTextSize(input.data(), nullptr, false, input_display_width);
-    display_height = std::max(output_actual_size.y, input_actual_size.y);
 }
 
 
@@ -825,6 +816,187 @@ void ImGuiRenderer::build_help_cache() {
 
     for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
         help_op_cache.emplace_back(*category, example_stack);
+    }
+}
+
+
+void ImGuiRenderer::add_stack_item(const StackItem& item) {
+    ImGuiDisplayLine input_line;
+
+    for (Displayable& disp : *item.p_input) {
+        std::string str;
+
+        switch (disp.get_type()) {
+            case Displayable::Type::CONST_CHAR: {
+                str = reinterpret_cast<ConstCharDisplayable&>(disp).p_char;
+                break;
+            }
+            case Displayable::Type::STRING: {
+                str = reinterpret_cast<StringDisplayable&>(disp).str;
+                break;
+            }
+            case Displayable::Type::VALUE: {
+                // TODO: Column vectors and representations
+                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string();
+                break;
+            }
+            case Displayable::Type::RECURSIVE:
+                UNREACHABLE(); // Handled by the iterator
+        }
+
+        input_line.chunks.emplace_back(str);
+    }
+
+    ImGuiDisplayChunk output_chunk { item.result.to_string() };
+    
+    display_stack.entries.emplace_back(input_line, output_chunk);
+}
+
+
+void ImGuiRenderer::remove_stack_item() {
+    display_stack.entries.pop_back();
+}
+
+
+void ImGuiRenderer::replace_stack_items(const std::vector<StackItem>& items) {
+    display_stack.entries.clear();
+    std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
+}
+
+
+// ========================
+
+void ImGuiDisplayChunk::calculate_size(float max_width) {
+    size = ImGui::CalcTextSize(str.c_str(), nullptr, false, max_width);
+    position = ImVec2(0, 0);
+}
+
+void ImGuiDisplayLine::calculate_size(float max_width) {
+    size = ImVec2(0, 0);
+
+    // Step 1: Calculate sizes
+
+    float available_width = max_width;
+    float line_no = 0.1; // Avoid any potential floating point weirdness
+
+    for (ImGuiDisplayChunk& chunk : chunks) {
+        chunk.calculate_size();
+    }
+
+    for (size_t chunk_idx = 0; chunk_idx < chunks.size(); ++chunk_idx) {
+        ImGuiDisplayChunk& chunk = chunks[chunk_idx];
+
+        // Check for wrap
+        bool chunk_overflows = chunk.size.x > available_width;
+
+        bool chunk_is_short = chunk.size.x < 10;
+        bool chunk_not_last = (chunk_idx + 1) < chunks.size();
+        bool short_chunk_plus_next_overflows =
+        (
+            (chunk_is_short && chunk_not_last) &&
+            (chunk.size.x + chunks[chunk_idx + 1].size.x) > available_width
+        );
+
+        if (chunk_overflows || short_chunk_plus_next_overflows) {
+            line_no += 1;
+            available_width = max_width;
+        }
+
+        chunk.calculate_size(available_width);
+        chunk.position.y = line_no; // Encode wrapped lines in the position
+        available_width -= chunk.size.x;
+    }
+
+    // Step 2: Position chunks
+    size_t line_count = static_cast<size_t>(line_no); // Truncate
+    auto from_iter = chunks.begin();
+
+    for (size_t line_idx = 0; line_idx <= line_count; line_idx++) {
+        // Find all chunks on line
+        auto to_iter = std::partition_point(
+            from_iter,
+            chunks.end(),
+            [line_idx](ImGuiDisplayChunk& chunk){ return line_idx == static_cast<size_t>(chunk.position.y); }
+        );
+
+        // Get max height of line
+        float line_height = std::accumulate(
+            from_iter,
+            to_iter,
+            0.0f,
+            [](float acc, ImGuiDisplayChunk& chunk) { return std::max(acc, chunk.size.y); }
+        );
+
+        // Get total width of line
+        float line_width = std::accumulate(
+            from_iter,
+            to_iter,
+            0.0f,
+            [](float acc, ImGuiDisplayChunk& chunk) { return acc + chunk.size.x; }
+        );
+
+        // Position each chunk in the line
+        float chunk_start_x = 0.0f;
+        for (auto iter = from_iter; iter < to_iter; ++iter) {
+            iter->position = ImVec2(
+                chunk_start_x,                    // Left align
+                size.y + (line_height - iter->size.y)   // Bottom align
+            );
+
+            chunk_start_x += iter->size.x;
+        }
+
+        size = ImVec2(
+            std::max(size.x, line_width),
+            size.y + line_height
+        );
+
+        from_iter = to_iter;
+    }
+}
+
+void ImGuiDisplayEntry::calculate_size(float max_width, bool scrollbar_visible) {
+    float available_width = max_width - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
+    if (scrollbar_visible) {
+        available_width -= ImGui::GetStyle().ScrollbarSize;
+    }
+
+    float output_max_width = available_width / 2.0 - STACK_HORIZ_PADDING;
+    output.calculate_size(output_max_width);
+
+    float input_max_width = available_width - output.size.x - STACK_HORIZ_PADDING;
+    input.calculate_size(input_max_width);
+    
+    height = std::max(input.size.y, output.size.y);
+
+    // Final positioning
+    if (input.size.y < height) {
+        // Move input chunks down
+        float diff = height - input.size.y;
+
+        for (ImGuiDisplayChunk& chunk : input.chunks) {
+            chunk.position.y += diff;
+        }
+    }
+    else {
+        // Move output chunk down
+        float diff = height - output.size.y;
+        output.position.y += diff;
+    }
+
+    output.position.x = available_width - output.size.x;
+}
+
+void ImGuiDisplayStack::calculate_sizes(float max_width, bool scrollbar_visible) {
+    for (ImGuiDisplayEntry& entry : entries) {
+        if (entry.valid) { continue; }
+        entry.calculate_size(max_width, scrollbar_visible);
+    }
+}
+
+void ImGuiDisplayStack::invalidate_sizes() {
+    for (ImGuiDisplayEntry& entry : entries) {
+        entry.valid = false;
     }
 }
 

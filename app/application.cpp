@@ -42,12 +42,7 @@ Application::Application() :
 
 
 void Application::step() {
-    std::vector<RenderItem> render_items;
-    for (const StackItem& item : stack.get_items()) {
-        RenderItem render_item { item.p_input->dbg_display(), item.result };
-        render_items.push_back(render_item);
-    }
-    p_renderer->render(render_items);
+    p_renderer->render();
 }
 
 
@@ -60,8 +55,10 @@ void Application::cleanup() {
 void Application::on_renderer_submit_text(const std::string& str) {
     // If it starts with '\', it's a command
     if (str.starts_with('\\')) {
-        if (try_application_command(str)) { return; }
-        if (p_renderer->try_renderer_command(str)) { return; }
+        if (try_application_command(str) || p_renderer->try_renderer_command(str)) {
+            p_renderer->replace_stack_items(stack.get_items());
+            return;
+        }
 
         const char* error_format = "Unknown command: '%s'";
         int size = snprintf(nullptr, 0, error_format, str.c_str()) + 1;
@@ -72,18 +69,25 @@ void Application::on_renderer_submit_text(const std::string& str) {
         return;
     }
 
-    // Try to parse as Value first
+    // Try to parse as Value next
     std::optional<Value> value = Value::parse(str);
     if (value) {
-        stack.push_item(StackItem { create_displayables_from(value.value()), std::move(value).value(), false });
+        StackItem stack_item {
+            create_displayables_from(value.value()),
+            std::move(value).value(),
+            false
+        };
+
+        p_renderer->add_stack_item(stack_item);
+        stack.push_item(std::move(stack_item));
         return;
     }
 
-    // Try to parse as Operator second
+    // Try to parse as Operator third
 
     if (on_renderer_submit_operator(str)) { return; }
 
-    // Try to parse as swizzle
+    // Try to parse as swizzle last
     if (try_swizzle(str)) { return; }
 
     // Unknown command!
@@ -95,6 +99,7 @@ bool Application::on_renderer_submit_operator(const std::string& str) {
     if (op_map.has_operator(str)) {
         Result<> res = op_map.evaluate(str, stack);
         if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
+        p_renderer->replace_stack_items(stack.get_items());
         return true;
     }
     return false;
@@ -227,46 +232,39 @@ bool Application::try_swizzle(const std::string& str) {
             return false;
     }
 
+    p_renderer->remove_stack_item();
+    Value result;
+
     switch (values.size()) {
         case 1: {
-            Value result(values[0]);
-            stack.push_item(StackItem {
-                create_displayables_from(ss.str()),
-                std::move(result),
-                true
-            });
-            return true;
+            result = Value(values[0]);
+            break;
         }
         case 2: {
-            Value result(Vec2(values[0], values[1]));
-            stack.push_item(StackItem {
-                create_displayables_from(ss.str()),
-                std::move(result),
-                true
-            });
-            return true;
+            result = Value(Vec2(values[0], values[1]));
+            break;
         }
         case 3: {
-            Value result(Vec3(values[0], values[1], values[2]));
-            stack.push_item(StackItem {
-                create_displayables_from(ss.str()),
-                std::move(result),
-                true
-            });
-            return true;
+            result = Value(Vec3(values[0], values[1], values[2]));
+            break;
         }
         case 4: {
-            Value result(Vec4(values[0], values[1], values[2], values[3]));
-            stack.push_item(StackItem {
-                create_displayables_from(ss.str()),
-                std::move(result),
-                true
-            });
-            return true;
+            result = Value(Vec4(values[0], values[1], values[2], values[3]));
+            break;
         }
         default:
             UNREACHABLE();
     }
+
+    StackItem stack_item {
+        create_displayables_from(result),
+        std::move(result),
+        true
+    };
+
+    p_renderer->add_stack_item(stack_item);
+    stack.push_item(std::move(stack_item));
+    return true;
 }
 
 
