@@ -8,7 +8,7 @@ RCALC_OP_0(Pi) {
 }
 
 RCALC_FMT_0(Pi) {
-    return "π";
+    return create_displayables_from("π");
 }
 
 
@@ -22,7 +22,7 @@ RCALC_OP_0(Tau) {
 }
 
 RCALC_FMT_0(Tau) {
-    return "τ";
+    return create_displayables_from("τ");
 }
 
 
@@ -37,7 +37,7 @@ RCALC_OP_1(Sin, Real, arg) {
 }
 
 RCALC_FMT_1(Sin, arg) {
-    return "sin(" + arg.input + ")";
+    return create_displayables_from("sin(", arg.p_input, ")");
 }
 
 
@@ -52,7 +52,7 @@ RCALC_OP_1(Cos, Real, arg) {
 }
 
 RCALC_FMT_1(Cos, arg) {
-    return "cos(" + arg.input + ")";
+    return create_displayables_from("cos(", arg.p_input, ")");
 }
 
 
@@ -67,7 +67,7 @@ RCALC_OP_1(Tan, Real, arg) {
 }
 
 RCALC_FMT_1(Tan, arg) {
-    return "tan(" + arg.input + ")";
+    return create_displayables_from("tan(", arg.p_input, ")");
 }
 
 
@@ -82,7 +82,7 @@ RCALC_OP_1(Asin, Real, arg) {
 }
 
 RCALC_FMT_1(Asin, arg) {
-    return "asin(" + arg.input + ")";
+    return create_displayables_from("asin(", arg.p_input, ")");
 }
 
 
@@ -97,7 +97,7 @@ RCALC_OP_1(Acos, Real, arg) {
 }
 
 RCALC_FMT_1(Acos, arg) {
-    return "acos(" + arg.input + ")";
+    return create_displayables_from("acos(", arg.p_input, ")");
 }
 
 
@@ -112,7 +112,7 @@ RCALC_OP_1(Atan, Real, arg) {
 }
 
 RCALC_FMT_1(Atan, arg) {
-    return "atan(" + arg.input + ")";
+    return create_displayables_from("atan(", arg.p_input, ")");
 }
 
 
@@ -127,7 +127,7 @@ RCALC_OP_1(Sinh, Real, arg) {
 }
 
 RCALC_FMT_1(Sinh, arg) {
-    return "sinh(" + arg.input + ")";
+    return create_displayables_from("sinh(", arg.p_input, ")");
 }
 
 
@@ -142,7 +142,7 @@ RCALC_OP_1(Cosh, Real, arg) {
 }
 
 RCALC_FMT_1(Cosh, arg) {
-    return "cosh(" + arg.input + ")";
+    return create_displayables_from("cosh(", arg.p_input, ")");
 }
 
 
@@ -157,7 +157,7 @@ RCALC_OP_1(Tanh, Real, arg) {
 }
 
 RCALC_FMT_1(Tanh, arg) {
-    return "tanh(" + arg.input + ")";
+    return create_displayables_from("tanh(", arg.p_input, ")");
 }
 
 
@@ -172,7 +172,7 @@ RCALC_OP_1(Asinh, Real, arg) {
 }
 
 RCALC_FMT_1(Asinh, arg) {
-    return "asinh(" + arg.input + ")";
+    return create_displayables_from("asinh(", arg.p_input, ")");
 }
 
 
@@ -187,7 +187,7 @@ RCALC_OP_1(Acosh, Real, arg) {
 }
 
 RCALC_FMT_1(Acosh, arg) {
-    return "acosh(" + arg.input + ")";
+    return create_displayables_from("acosh(", arg.p_input, ")");
 }
 
 
@@ -202,5 +202,5 @@ RCALC_OP_1(Atanh, Real, arg) {
 }
 
 RCALC_FMT_1(Atanh, arg) {
-    return "atanh(" + arg.input + ")";
+    return create_displayables_from("atanh(", arg.p_input, ")");
 }

@@ -9,7 +9,7 @@ RCALC_OP_2(Mat2, Vec2, Vec2, arg0, arg1) {
 }
 
 RCALC_FMT_2(Mat2, arg0, arg1) {
-    return "{" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + "}";
+    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), "}");
 }
 
 
@@ -24,7 +24,7 @@ RCALC_OP_3(Mat3, Vec3, Vec3, Vec3, arg0, arg1, arg2) {
 }
 
 RCALC_FMT_3(Mat3, arg0, arg1, arg2) {
-    return "{" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + "," + arg2.get_input_formatted() + "}";
+    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ",", arg2.get_input_formatted(), "}");
 }
 
 
@@ -39,7 +39,7 @@ RCALC_OP_4(Mat4, Vec4, Vec4, Vec4, Vec4, arg0, arg1, arg2, arg3) {
 }
 
 RCALC_FMT_4(Mat4, arg0, arg1, arg2, arg3) {
-    return "{" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + "," + arg2.get_input_formatted() + "," + arg3.get_input_formatted() + "}";
+    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ",", arg2.get_input_formatted(), ",", arg3.get_input_formatted(), "}");
 }
 
 
@@ -292,7 +292,7 @@ RCALC_OP_1(Inv, Mat4, arg0) {
 }
 
 RCALC_FMT_1(Inv, arg0) {
-    return arg0.get_input_formatted() + "^-1";
+    return create_displayables_from(arg0.get_input_formatted(), "^-1");
 }
 
 
@@ -318,7 +318,7 @@ RCALC_OP_1(TPose, Mat4, arg0) {
 }
 
 RCALC_FMT_1(TPose, arg0) {
-    return arg0.get_input_formatted() + "T";
+    return create_displayables_from(arg0.get_input_formatted(), "T");
 }
 
 
@@ -344,7 +344,7 @@ RCALC_OP_1(Det, Mat4, arg0) {
 }
 
 RCALC_FMT_1(Det, arg0) {
-    return "|" + arg0.get_input_formatted() + "|";
+    return create_displayables_from("|", arg0.get_input_formatted(), "|");
 }
 
 
@@ -376,9 +376,7 @@ RCALC_OP_2(Col, Mat4, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Col, arg0, arg1) {
-    std::string str0 = arg0.get_input_formatted();
-    std::string str1 = arg1.get_input_formatted();
-    return fmt("%s[c%s]",  str0.c_str(), str1.c_str());
+    return create_displayables_from(arg0.p_input, "[c", arg1.get_input_formatted(), "]");
 }
 
 
@@ -410,9 +408,7 @@ RCALC_OP_2(Row, Mat4, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Row, arg0, arg1) {
-    std::string str0 = arg0.get_input_formatted();
-    std::string str1 = arg1.get_input_formatted();
-    return fmt("%s[r%s]",  str0.c_str(), str1.c_str());
+    return create_displayables_from(arg0.p_input, "[r", arg1.get_input_formatted(), "]");
 }
 
 
@@ -438,7 +434,7 @@ RCALC_OP_1(IMat, Int, arg0) {
 }
 
 RCALC_FMT_1(IMat, arg0) {
-    return "imat(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("imat(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -501,7 +497,7 @@ RCALC_OP_2(Resize, Mat4, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Resize, arg0, arg1) {
-    return "resize(" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + ")";
+    return create_displayables_from("resize(", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ")");
 }
 
 
@@ -532,7 +528,7 @@ RCALC_OP_1(Transmat, Vec3, arg0) {
 }
 
 RCALC_FMT_1(Transmat, arg0) {
-    return "transmat(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("transmat(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -570,7 +566,7 @@ RCALC_OP_1(Rotmat, Vec3, arg0) {
 }
 
 RCALC_FMT_1(Rotmat, arg0) {
-    return "rotmat(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("rotmat(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -614,5 +610,5 @@ RCALC_OP_1(Scalemat, Vec4, arg0) {
 }
 
 RCALC_FMT_1(Scalemat, arg0) {
-    return "scalemat(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("scalemat(", arg0.get_input_formatted(), ")");
 }

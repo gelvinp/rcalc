@@ -28,7 +28,7 @@ RCALC_OP_2(Pow, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Pow, arg0, arg1) {
-    return arg0.get_input_formatted() + " ^ " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " ^ ", arg1.get_input_formatted());
 }
 
 
@@ -60,7 +60,7 @@ RCALC_OP_1(Sqr, Real, arg0) {
 }
 
 RCALC_FMT_1(Sqr, arg0) {
-    return arg0.get_input_formatted() + " ^ 2";
+    return create_displayables_from(arg0.get_input_formatted(), " ^ 2");
 }
 
 
@@ -92,7 +92,7 @@ RCALC_OP_1(Cube, Real, arg0) {
 }
 
 RCALC_FMT_1(Cube, arg0) {
-    return arg0.get_input_formatted() + " ^ 3";
+    return create_displayables_from(arg0.get_input_formatted(), " ^ 3");
 }
 
 
@@ -112,7 +112,7 @@ RCALC_OP_1(Sqrt, Real, arg0) {
 }
 
 RCALC_FMT_1(Sqrt, arg0) {
-    return "sqrt(" + arg0.input + ")";
+    return create_displayables_from("sqrt(", arg0.p_input, ")");
 }
 
 
@@ -132,7 +132,7 @@ RCALC_OP_1(Cbrt, Real, arg0) {
 }
 
 RCALC_FMT_1(Cbrt, arg0) {
-    return "cbrt(" + arg0.input + ")";
+    return create_displayables_from("cbrt(", arg0.p_input, ")");
 }
 
 
@@ -146,7 +146,7 @@ RCALC_OP_2(Log, Real, Real, base, arg) {
 }
 
 RCALC_FMT_2(Log, base, arg) {
-    return "log_" + base.get_input_formatted() + "(" + arg.input + ")";
+    return create_displayables_from("log_", base.get_input_formatted(), "(", arg.p_input, ")");
 }
 
 
@@ -160,7 +160,7 @@ RCALC_OP_1(Ln, Real, arg) {
 }
 
 RCALC_FMT_1(Ln, arg) {
-    return "ln(" + arg.input + ")";
+    return create_displayables_from("ln(", arg.p_input, ")");
 }
 
 
@@ -174,7 +174,7 @@ RCALC_OP_1(Exp, Real, arg) {
 }
 
 RCALC_FMT_1(Exp, arg) {
-    return "e^" + arg.get_input_formatted();
+    return create_displayables_from("e^", arg.get_input_formatted());
 }
 
 
@@ -190,7 +190,7 @@ RCALC_OP_1(Ceil, Real, arg) {
 }
 
 RCALC_FMT_1(Ceil, arg) {
-    return "⌈" + arg.input + "⌉";
+    return create_displayables_from("⌈", arg.p_input, "⌉");
 }
 
 
@@ -206,7 +206,7 @@ RCALC_OP_1(Floor, Real, arg) {
 }
 
 RCALC_FMT_1(Floor, arg) {
-    return "⌊" + arg.input + "⌋";
+    return create_displayables_from("⌊", arg.p_input, "⌋");
 }
 
 
@@ -222,7 +222,7 @@ RCALC_OP_1(Trunc, Real, arg) {
 }
 
 RCALC_FMT_1(Trunc, arg) {
-    return "trunc(" + arg.input + ")";
+    return create_displayables_from("trunc(", arg.p_input, ")");
 }
 
 
@@ -238,7 +238,7 @@ RCALC_OP_1(Round, Real, arg) {
 }
 
 RCALC_FMT_1(Round, arg) {
-    return "round(" + arg.input + ")";
+    return create_displayables_from("round(", arg.p_input, ")");
 }
 
 
@@ -256,7 +256,7 @@ RCALC_OP_1(Sign, Real, arg) {
 }
 
 RCALC_FMT_1(Sign, arg) {
-    return "sign(" + arg.input + ")";
+    return create_displayables_from("sign(", arg.p_input, ")");
 }
 
 
@@ -274,7 +274,7 @@ RCALC_OP_1(Fact, Int, arg) {
 }
 
 RCALC_FMT_1(Fact, arg) {
-    return arg.get_input_formatted() + "!";
+    return create_displayables_from(arg.get_input_formatted(), "!");
 }
 
 
@@ -290,7 +290,7 @@ RCALC_OP_1(Gamma, Real, arg) {
 }
 
 RCALC_FMT_1(Gamma, arg) {
-    return "gamma(" + arg.input + ")";
+    return create_displayables_from("gamma(", arg.p_input, ")");
 }
 
 
@@ -304,7 +304,7 @@ RCALC_OP_2(Quot, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Quot, arg0, arg1) {
-    return arg0.get_input_formatted() + " //q " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " //q ", arg1.get_input_formatted());
 }
 
 
@@ -325,7 +325,7 @@ RCALC_OP_2(Mod, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Mod, arg0, arg1) {
-    return arg0.get_input_formatted() + " % " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " % ", arg1.get_input_formatted());
 }
 
 
@@ -339,7 +339,7 @@ RCALC_OP_0(e) {
 }
 
 RCALC_FMT_0(e) {
-    return "e";
+    return create_displayables_from("e");
 }
 
 
@@ -353,7 +353,7 @@ RCALC_OP_1_S(Range, Int, arg0) {
     for (Int index = 0; index < arg0; index++) {
         Value value = Value(index);
         stack.push_item(StackItem{
-            value.to_string(),
+            create_displayables_from(value),
             std::move(value),
             false
         });
@@ -367,5 +367,5 @@ RCALC_FMT_1_S(Range, arg0) {
     UNUSED(arg0);
     std::string str = stack.get_message<std::string>();
     stack.clear_message();
-    return str;
+    return create_displayables_from(str);
 }

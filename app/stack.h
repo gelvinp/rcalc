@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/value.h"
+#include "app/displayable/displayable.h"
 
 #include <any>
 #include <optional>
@@ -12,11 +13,11 @@ namespace RCalc {
 
 
 struct StackItem {
-    std::string input;
+    std::shared_ptr<Displayable> p_input; // Owned by StackItem
     Value result;
     bool input_is_expression; // When composing inputs, expressions should be wrapped in ()'s
 
-    std::string get_input_formatted() const; // Wraps with parenthesis if expression
+    std::shared_ptr<Displayable> get_input_formatted() const; // Wraps with parenthesis if expression
 };
 
 class RPNStack {

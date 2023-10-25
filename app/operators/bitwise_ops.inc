@@ -9,7 +9,7 @@ RCALC_OP_2(And, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(And, arg0, arg1) {
-    return arg0.get_input_formatted() + " & " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " & ", arg1.get_input_formatted());
 }
 
 
@@ -24,7 +24,7 @@ RCALC_OP_2(Or, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Or, arg0, arg1) {
-    return arg0.get_input_formatted() + " & " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " | ", arg1.get_input_formatted());
 }
 
 
@@ -39,7 +39,7 @@ RCALC_OP_2(Xor, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Xor, arg0, arg1) {
-    return arg0.get_input_formatted() + " & " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " ^ ", arg1.get_input_formatted());
 }
 
 
@@ -62,7 +62,7 @@ RCALC_OP_1(Not, Int, arg0) {
 }
 
 RCALC_FMT_1(Not, arg0) {
-    return "~" + arg0.get_input_formatted();
+    return create_displayables_from("~", arg0.get_input_formatted());
 }
 
 
@@ -77,7 +77,7 @@ RCALC_OP_2(Sll, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Sll, arg0, arg1) {
-    return arg0.get_input_formatted() + " << " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " << ", arg1.get_input_formatted());
 }
 
 
@@ -92,5 +92,5 @@ RCALC_OP_2(Srl, Int, Int, arg0, arg1) {
 }
 
 RCALC_FMT_2(Srl, arg0, arg1) {
-    return arg0.get_input_formatted() + " >> " + arg1.get_input_formatted();
+    return create_displayables_from(arg0.get_input_formatted(), " >> ", arg1.get_input_formatted());
 }

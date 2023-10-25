@@ -103,7 +103,7 @@ public: \
         if (--_refs[index] > 0) { return; } \
 \
         /* Attempt to shrink */ \
-        std::vector<uint8_t>::const_iterator it = std::find(_refs.rbegin(), _refs.rend(), true).base(); \
+        std::vector<uint8_t>::const_iterator it = std::find_if(_refs.rbegin(), _refs.rend(), [](uint8_t e) { return e > 0; }).base(); \
         if (it == _refs.end()) { return; } \
         size_t new_size = it - _refs.begin(); \
 \
@@ -164,7 +164,7 @@ public: \
         if (--_refs[index] > 0) { return; } \
 \
         /* Attempt to shrink */ \
-        std::vector<uint8_t>::const_iterator it = std::find(_refs.rbegin(), _refs.rend(), true).base(); \
+        std::vector<uint8_t>::const_iterator it = std::find_if(_refs.rbegin(), _refs.rend(), [](uint8_t e) { return e > 0; }).base(); \
         if (it == _refs.end()) { return; } \
         size_t new_size = it - _refs.begin(); \
 \

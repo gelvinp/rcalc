@@ -8,7 +8,7 @@ RCALC_OP_2(Vec2, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Vec2, arg0, arg1) {
-    return "[" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + "]";
+    return create_displayables_from("[", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), "]");
 }
 
 
@@ -22,7 +22,7 @@ RCALC_OP_3(Vec3, Real, Real, Real, arg0, arg1, arg2) {
 }
 
 RCALC_FMT_3(Vec3, arg0, arg1, arg2) {
-    return "[" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + ", " + arg2.get_input_formatted() + "]";
+    return create_displayables_from("[", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ", ", arg2.get_input_formatted(), "]");
 }
 
 
@@ -36,7 +36,7 @@ RCALC_OP_4(Vec4, Real, Real, Real, Real, arg0, arg1, arg2, arg3) {
 }
 
 RCALC_FMT_4(Vec4, arg0, arg1, arg2, arg3) {
-    return "[" + arg0.get_input_formatted() + ", " + arg1.get_input_formatted() + ", " + arg2.get_input_formatted() + ", " + arg3.get_input_formatted() + "]";
+    return create_displayables_from("[", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ", ", arg2.get_input_formatted(), ", ", arg3.get_input_formatted(), "]");
 }
 
 
@@ -160,7 +160,7 @@ RCALC_OP_2(Dot, Vec4, Vec4, arg0, arg1) {
 }
 
 RCALC_FMT_2(Dot, arg0, arg1) {
-    return arg0.input + " · " + arg1.input;
+    return create_displayables_from(arg0.p_input, " · ", arg1.p_input);
 }
 
 
@@ -174,7 +174,7 @@ RCALC_OP_2(Cross, Vec3, Vec3, arg0, arg1) {
 }
 
 RCALC_FMT_2(Cross, arg0, arg1) {
-    return arg0.input + " × " + arg1.input;
+    return create_displayables_from(arg0.p_input, " × ", arg1.p_input);
 }
 
 
@@ -203,7 +203,7 @@ RCALC_OP_1(Len, Vec4, arg0) {
 }
 
 RCALC_FMT_1(Len, arg0) {
-    return "len(" + arg0.input + ")";
+    return create_displayables_from("len(", arg0.p_input, ")");
 }
 
 
@@ -229,7 +229,7 @@ RCALC_OP_1(Lensqr, Vec4, arg0) {
 }
 
 RCALC_FMT_1(Lensqr, arg0) {
-    return "lensqr(" + arg0.input + ")";
+    return create_displayables_from("lensqr(", arg0.p_input, ")");
 }
 
 
@@ -258,7 +258,7 @@ RCALC_OP_1(Norm, Vec4, arg0) {
 }
 
 RCALC_FMT_1(Norm, arg0) {
-    return "norm(" + arg0.input + ")";
+    return create_displayables_from("norm(", arg0.p_input, ")");
 }
 
 
@@ -328,7 +328,7 @@ RCALC_FMT_2_S(Concat, arg0, arg1) {
 
     std::string str = stack.get_message<std::string>();
     stack.clear_message();
-    return str;
+    return create_displayables_from(str);
 }
 
 
@@ -355,5 +355,5 @@ RCALC_OP_1(Rev, Vec4, arg0) {
 }
 
 RCALC_FMT_1(Rev, arg0) {
-    return "rev(" + arg0.input + ")";
+    return create_displayables_from("rev(", arg0.p_input, ")");
 }

@@ -8,7 +8,7 @@ RCALC_OP_1(Bin, Int, arg0) {
 }
 
 RCALC_FMT_1(Bin, arg0) {
-    return "bin(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("bin(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -22,7 +22,7 @@ RCALC_OP_1(Oct, Int, arg0) {
 }
 
 RCALC_FMT_1(Oct, arg0) {
-    return "oct(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("oct(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -36,7 +36,7 @@ RCALC_OP_1(Dec, Int, arg0) {
 }
 
 RCALC_FMT_1(Dec, arg0) {
-    return "dec(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("dec(", arg0.get_input_formatted(), ")");
 }
 
 
@@ -50,5 +50,5 @@ RCALC_OP_1(Hex, Int, arg0) {
 }
 
 RCALC_FMT_1(Hex, arg0) {
-    return "hex(" + arg0.get_input_formatted() + ")";
+    return create_displayables_from("hex(", arg0.get_input_formatted(), ")");
 }

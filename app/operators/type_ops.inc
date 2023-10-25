@@ -80,5 +80,5 @@ RCALC_OP_1(Type, Unit, _arg) {
 }
 
 RCALC_FMT_1(Type, arg) {
-    return "type(" + arg.input + ")";
+    return create_displayables_from("type(", arg.result, ")");
 }

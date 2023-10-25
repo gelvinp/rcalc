@@ -2,6 +2,8 @@
 
 #include <cstddef>
 #include <iterator>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "core/value.h"
@@ -10,22 +12,23 @@ namespace RCalc {
 
 
 struct Displayable {
-    enum Type {
-        TYPE_CONST_CHAR,
-        TYPE_VALUE,
-        TYPE_RECURSIVE
+    enum class Type {
+        CONST_CHAR,
+        STRING,
+        VALUE,
+        RECURSIVE
     };
 
-    enum Tag {
-        TAG_NONE,
-        TAG_OP_ADD,
-        TAG_OP_SUB,
-        TAG_OP_MUL,
-        TAG_OP_DIV
+    enum class Tag {
+        NONE,
+        OP_ADD,
+        OP_SUB,
+        OP_MUL,
+        OP_DIV
     };
 
-    Displayable* p_next = nullptr;
-    Tag tag = TAG_NONE;
+    std::shared_ptr<Displayable> p_next = {};
+    Tag tag = Tag::NONE;
 
     virtual Type get_type() = 0;
 
@@ -51,20 +54,22 @@ struct Displayable {
         std::vector<pointer> display_stack;
 
         void increment();
+
+        Iterator(pointer p_displayable, std::vector<pointer> display_stack) : p_displayable(p_displayable), display_stack(display_stack) {}
+        friend class Displayable;
     };
 
-    Iterator begin() { return Iterator(this); }
+    Iterator begin();
     Iterator end() { return Iterator(nullptr); }
 
-    Displayable* back();
+    Displayable& back();
 
-    static Displayable* create(const char*);
-    static Displayable* create(Value);
-    static Displayable* create(Displayable*);
+    static std::shared_ptr<Displayable> create(const char*);
+    static std::shared_ptr<Displayable> create(std::string);
+    static std::shared_ptr<Displayable> create(Value);
+    static std::shared_ptr<Displayable> create(std::shared_ptr<Displayable>);
 
-    Displayable* append(Displayable*);
-
-    virtual ~Displayable();
+    std::string dbg_display();
 };
 
 struct ConstCharDisplayable : public Displayable {
@@ -72,7 +77,15 @@ struct ConstCharDisplayable : public Displayable {
 
     const char* p_char;
 
-    virtual Type get_type() override { return TYPE_CONST_CHAR; }
+    virtual Type get_type() override { return Type::CONST_CHAR; }
+};
+
+struct StringDisplayable : public Displayable {
+    StringDisplayable(std::string str) : Displayable(), str(str) {}
+
+    std::string str;
+
+    virtual Type get_type() override { return Type::STRING; }
 };
 
 struct ValueDisplayable : public Displayable {
@@ -80,17 +93,15 @@ struct ValueDisplayable : public Displayable {
 
     Value value;
 
-    virtual Type get_type() override { return TYPE_VALUE; }
+    virtual Type get_type() override { return Type::VALUE; }
 };
 
 struct RecursiveDisplayable : public Displayable {
-    RecursiveDisplayable(Displayable* p_displayable) : Displayable(), p_displayable(p_displayable) {}
+    RecursiveDisplayable(std::shared_ptr<Displayable> p_displayable) : Displayable(), p_displayable(p_displayable) {}
 
-    Displayable* p_displayable;
+    std::shared_ptr<Displayable> p_displayable;
 
-    virtual Type get_type() override { return TYPE_RECURSIVE; }
-
-    virtual ~RecursiveDisplayable();
+    virtual Type get_type() override { return Type::RECURSIVE; }
 };
 
 
@@ -101,16 +112,19 @@ concept IsDisplayable = requires(T a) {
 
 
 template<IsDisplayable Type>
-Displayable* create_displayables_from(Type value) {
-    return Displayable::create(value);
+std::shared_ptr<Displayable> create_displayables_from(Type value) {
+    // return Displayable::create(value);
+
+    std::shared_ptr<Displayable> p_disp = Displayable::create(value);
+    return p_disp;
 }
 
 
 template<IsDisplayable Type, IsDisplayable... Types>
-Displayable* create_displayables_from(Type value, Types... var_types) {
-    Displayable* p_displayable = Displayable::create(value);
-    Displayable* p_others = create_displayables_from(var_types...);
-    p_displayable->append(p_others);
+std::shared_ptr<Displayable> create_displayables_from(Type value, Types... var_types) {
+
+    std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
+    p_displayable->p_next = create_displayables_from(var_types...);
 
     return p_displayable;
 }

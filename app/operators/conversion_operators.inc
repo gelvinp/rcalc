@@ -5,6 +5,7 @@
 // Example: [68, _mi, _km]
 // Example: [8, _tbsp, _cup]
 // Example: [[140, 217, 217], _rgb, _oklch]
+// Requires: "core/format.h"
 RCALC_OP_3(Convert, Real, Unit, Unit, arg0, arg1, arg2) {
     // Make sure units are in the same family
     if (arg1.p_family != arg2.p_family) {
@@ -70,5 +71,5 @@ RCALC_OP_3(Convert, Vec4, Unit, Unit, arg0, arg1, arg2) {
 }
 
 RCALC_FMT_3(Convert, arg0, arg1, arg2) {
-    return arg0.get_input_formatted() + " " + arg1.input + " to " + arg2.input;
+    return create_displayables_from(arg0.get_input_formatted(), " ", arg1.p_input, " to ", arg2.p_input);
 }

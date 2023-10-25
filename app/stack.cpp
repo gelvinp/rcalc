@@ -90,12 +90,22 @@ void RPNStack::clear() {
 
 const std::vector<StackItem>& RPNStack::get_items() const { return stack; }
 
-std::string StackItem::get_input_formatted() const {
+std::shared_ptr<Displayable> StackItem::get_input_formatted() const {
     if (input_is_expression) {
-        return "(" + input + ")";
+        return create_displayables_from("(", p_input, ")");
     } else {
-        return input;
+        return p_input;
     }
+}
+
+
+
+void swap(StackItem& a, StackItem& b) {
+    using std::swap;
+
+    swap(a.p_input, b.p_input);
+    swap(a.result, b.result);
+    swap(a.input_is_expression, b.input_is_expression);
 }
 
 

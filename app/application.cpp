@@ -44,7 +44,7 @@ Application::Application() :
 void Application::step() {
     std::vector<RenderItem> render_items;
     for (const StackItem& item : stack.get_items()) {
-        RenderItem render_item { item.input, item.result };
+        RenderItem render_item { item.p_input->dbg_display(), item.result };
         render_items.push_back(render_item);
     }
     p_renderer->render(render_items);
@@ -75,7 +75,7 @@ void Application::on_renderer_submit_text(const std::string& str) {
     // Try to parse as Value first
     std::optional<Value> value = Value::parse(str);
     if (value) {
-        stack.push_item(StackItem{value.value().to_string(), std::move(value).value(), false});
+        stack.push_item(StackItem { create_displayables_from(value.value()), std::move(value).value(), false });
         return;
     }
 
@@ -231,7 +231,7 @@ bool Application::try_swizzle(const std::string& str) {
         case 1: {
             Value result(values[0]);
             stack.push_item(StackItem {
-                ss.str(),
+                create_displayables_from(ss.str()),
                 std::move(result),
                 true
             });
@@ -240,7 +240,7 @@ bool Application::try_swizzle(const std::string& str) {
         case 2: {
             Value result(Vec2(values[0], values[1]));
             stack.push_item(StackItem {
-                ss.str(),
+                create_displayables_from(ss.str()),
                 std::move(result),
                 true
             });
@@ -249,7 +249,7 @@ bool Application::try_swizzle(const std::string& str) {
         case 3: {
             Value result(Vec3(values[0], values[1], values[2]));
             stack.push_item(StackItem {
-                ss.str(),
+                create_displayables_from(ss.str()),
                 std::move(result),
                 true
             });
@@ -258,7 +258,7 @@ bool Application::try_swizzle(const std::string& str) {
         case 4: {
             Value result(Vec4(values[0], values[1], values[2], values[3]));
             stack.push_item(StackItem {
-                ss.str(),
+                create_displayables_from(ss.str()),
                 std::move(result),
                 true
             });

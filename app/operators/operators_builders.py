@@ -967,8 +967,8 @@ def make_internal_header(target, src, env):
             f'#define RCALC_OP_{count}(name{macro_def}) Result<Value> OP{count}_{func_name}##name({func_args})',
             f'#define RCALC_OP_{count}_S(name{macro_def}) Result<Value> OP{count}S_{func_name}##name(RPNStack& stack{", " if count > 0 else ""}{func_args})',
             '',
-            f'#define RCALC_FMT_{count}(name{fmt_def}) std::string OP_FormatInput_##name({fmt_args})',
-            f'#define RCALC_FMT_{count}_S(name{fmt_def}) std::string OPS_FormatInput_##name(RPNStack& stack{", " if count > 0 else ""}{fmt_args})',
+            f'#define RCALC_FMT_{count}(name{fmt_def}) std::shared_ptr<RCalc::Displayable> OP_FormatInput_##name({fmt_args})',
+            f'#define RCALC_FMT_{count}_S(name{fmt_def}) std::shared_ptr<RCalc::Displayable> OPS_FormatInput_##name(RPNStack& stack{", " if count > 0 else ""}{fmt_args})',
             ''
         ])
     

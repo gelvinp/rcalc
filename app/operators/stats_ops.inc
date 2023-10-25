@@ -95,9 +95,9 @@ RCALC_OP_1_S(Min, Int, count) {
 
 RCALC_FMT_1_S(Min, _arg) {
     UNUSED(_arg);
-    std::string str = "min(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("min(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -198,9 +198,9 @@ RCALC_OP_1_S(Max, Int, count) {
 
 RCALC_FMT_1_S(Max, _arg) {
     UNUSED(_arg);
-    std::string str = "max(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("max(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -237,9 +237,9 @@ RCALC_OP_1_S(Avg, Int, count) {
 
 RCALC_FMT_1_S(Avg, _arg) {
     UNUSED(_arg);
-    std::string str = "avg(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("avg(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -288,9 +288,9 @@ RCALC_OP_1_S(StdDev, Int, count) {
 
 RCALC_FMT_1_S(StdDev, _arg) {
     UNUSED(_arg);
-    std::string str = "stddev(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("stddev(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -339,9 +339,9 @@ RCALC_OP_1_S(NormDist, Int, count) {
 
 RCALC_FMT_1_S(NormDist, _arg) {
     UNUSED(_arg);
-    std::string str = "normdist(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("normdist(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -407,9 +407,9 @@ RCALC_OP_1_S(Sum, Int, count) {
 
 RCALC_FMT_1_S(Sum, _arg) {
     UNUSED(_arg);
-    std::string str = "sum(" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("sum(", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }
 
 
@@ -455,7 +455,7 @@ RCALC_OP_2_S(NPV, Real, Int, discount_rate, count) {
 
 RCALC_FMT_2_S(NPV, discount_rate, _arg) {
     UNUSED(_arg);
-    std::string str = "npv[" + discount_rate.get_input_formatted() + "](" + stack.get_message<std::string>() + ")";
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("npv[", discount_rate.get_input_formatted(), "](", stack.get_message<std::string>(), ")");
     stack.clear_message();
-    return str;
+    return p_disp;
 }

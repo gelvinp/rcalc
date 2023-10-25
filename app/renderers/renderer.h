@@ -14,7 +14,7 @@ namespace RCalc {
 class Application;
 
 struct RenderItem {
-    std::string_view input;
+    std::string input;
     Value value;
 };
 

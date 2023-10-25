@@ -59,7 +59,7 @@ RCALC_CMD(Application, Count, app) {
     if (count > std::numeric_limits<int64_t>::max()) {
         Value value { BigInt((long long int)count) };
         app.stack.push_item(StackItem {
-            "count",
+            create_displayables_from("count"),
             std::move(value),
             false
         });
@@ -68,7 +68,7 @@ RCALC_CMD(Application, Count, app) {
 
     Value value { (int64_t)count };
     app.stack.push_item(StackItem {
-        "count",
+        create_displayables_from("count"),
         std::move(value),
         false
     });

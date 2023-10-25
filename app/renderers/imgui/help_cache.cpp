@@ -1,5 +1,6 @@
 #include "help_cache.h"
 
+#include "app/displayable/displayable.h"
 #include "app/operators/operators.h"
 #include "core/filter.h"
 #include "core/format.h"
@@ -16,7 +17,7 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 
         for (const char* param : example_params) {
             Value value = Value::parse(param).value();
-            stack.push_item(StackItem { value.to_string(), std::move(value), false });
+            stack.push_item(StackItem { create_displayables_from(param), std::move(value), false });
         }
 
         std::string op_name = filter_name(op.name);
@@ -41,9 +42,11 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
             ss << item.result.to_string();
         }
 
-        StackItem res = std::move(stack.pop_items(1).at(0));
+        std::vector<StackItem> _items = stack.pop_items(1);
+        StackItem& res = _items[0];
+        std::string input = res.p_input->dbg_display();
 
-        examples.push_back(fmt("%s -> %s", res.input.c_str(), ss.str().c_str()));
+        examples.push_back(fmt("%s -> %s", input.c_str(), ss.str().c_str()));
     }
 }
 
