@@ -5,8 +5,6 @@
  - Create TUI renderer
 
 # Track 2
- - Templated Vector display wrapper type (ColVector) that stores a Ref<Value>, and indicates it should be displayed as a column vector
-    - Tie into mul and div format functions, if arg0.is_mat() and arg1.is_vec() (will need to make those functions first but ez)
  - Do something better with displaying binary, octal, and hex values
 
 # Track 3

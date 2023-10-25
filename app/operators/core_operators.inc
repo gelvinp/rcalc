@@ -12,7 +12,26 @@ RCALC_OP_2(Add, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Add, arg0, arg1) {
-    return create_displayables_from(arg0.get_input_formatted(), " + ", arg1.get_input_formatted());
+    std::shared_ptr<Displayable> p_left;
+    std::shared_ptr<Displayable> p_right;
+
+    if (
+        (arg0.p_input->get_type() == Displayable::Type::VALUE) ||
+        (arg0.p_input->tags == DisplayableTag::OP_ADD)
+    ) {
+        p_left = arg0.p_input;
+    }
+    else { p_left = arg0.get_input_formatted(); }
+
+    if (
+        (arg1.p_input->get_type() == Displayable::Type::VALUE) ||
+        (arg1.p_input->tags == DisplayableTag::OP_ADD)
+    ) {
+        p_right = arg1.p_input;
+    }
+    else { p_right = arg1.get_input_formatted(); }
+
+    return create_tagged_displayables_from(DisplayableTag::OP_ADD, p_left, " + ", p_right);
 }
 
 
@@ -48,7 +67,29 @@ RCALC_OP_2(Mul, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Mul, arg0, arg1) {
-    return create_displayables_from(arg0.get_input_formatted(), " * ", arg1.get_input_formatted());
+    std::shared_ptr<Displayable> p_left;
+    std::shared_ptr<Displayable> p_right;
+
+    if (
+        (arg0.p_input->get_type() == Displayable::Type::VALUE) ||
+        (arg0.p_input->tags == DisplayableTag::OP_MUL)
+    ) {
+        p_left = arg0.p_input;
+    }
+    else { p_left = arg0.get_input_formatted(); }
+
+    if (
+        (arg1.p_input->get_type() == Displayable::Type::VALUE) ||
+        (arg1.p_input->tags == DisplayableTag::OP_MUL)
+    ) {
+        if (arg0.result.is_mat() && arg1.result.is_vec()) {
+            p_right = create_tagged_displayables_from(DisplayableTag::COL_VEC, arg1.p_input);
+        }
+        else { p_right = arg1.p_input; }
+    }
+    else { p_right = arg1.get_input_formatted(); }
+
+    return create_tagged_displayables_from(DisplayableTag::OP_MUL, p_left, " × ", p_right);
 }
 
 
@@ -61,7 +102,14 @@ RCALC_OP_2(Div, Real, Real, arg0, arg1) {
 }
 
 RCALC_FMT_2(Div, arg0, arg1) {
-    return create_displayables_from(arg0.get_input_formatted(), " / ", arg1.get_input_formatted());
+    std::shared_ptr<Displayable> p_right;
+
+    if (arg0.result.is_mat() && arg1.result.is_vec()) {
+        p_right = create_tagged_displayables_from(DisplayableTag::COL_VEC, arg1.p_input);
+    }
+    else { p_right = arg1.get_input_formatted(); }
+
+    return create_displayables_from(arg0.get_input_formatted(), " / ", p_right);
 }
 
 

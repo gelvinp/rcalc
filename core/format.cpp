@@ -33,6 +33,58 @@ std::string fmt(const char* p_format, ...) {
 }
 
 
+std::string fmt_col_vec2(Vec2 value) {
+    int col_len = std::max(
+        snprintf(nullptr, 0, "%g", value.x),
+        snprintf(nullptr, 0, "%g", value.y)
+    );
+
+    return fmt(
+        "| %*g |\n| %*g |",
+        col_len, value.x,
+        col_len, value.y
+    );
+}
+
+std::string fmt_col_vec3(Vec3 value) {
+    int col_len = std::max(
+        snprintf(nullptr, 0, "%g", value.x),
+        std::max(
+            snprintf(nullptr, 0, "%g", value.y),
+            snprintf(nullptr, 0, "%g", value.z)
+        )
+    );
+
+    return fmt(
+        "| %*g |\n| %*g |\n| %*g |",
+        col_len, value.x,
+        col_len, value.y,
+        col_len, value.z
+    );
+}
+
+std::string fmt_col_vec4(Vec4 value) {
+    int col_len = std::max(
+        snprintf(nullptr, 0, "%g", value.x),
+        std::max(
+            snprintf(nullptr, 0, "%g", value.y),
+            std::max(
+                snprintf(nullptr, 0, "%g", value.z),
+                snprintf(nullptr, 0, "%g", value.w)
+            )
+        )
+    );
+
+    return fmt(
+        "| %*g |\n| %*g |\n| %*g |\n| %*g |",
+        col_len, value.x,
+        col_len, value.y,
+        col_len, value.z,
+        col_len, value.w
+    );
+}
+
+
 std::string fmt_mat2(Mat2 value) {
     int col0_len = std::max(
         snprintf(nullptr, 0, "%g", value[0].x),

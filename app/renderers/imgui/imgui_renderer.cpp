@@ -837,7 +837,7 @@ void ImGuiRenderer::add_stack_item(const StackItem& item) {
             }
             case Displayable::Type::VALUE: {
                 // TODO: Column vectors and representations
-                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string();
+                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
                 break;
             }
             case Displayable::Type::RECURSIVE:

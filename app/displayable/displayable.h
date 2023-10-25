@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "core/display_tags.h"
 #include "core/value.h"
 
 namespace RCalc {
@@ -19,16 +20,8 @@ struct Displayable {
         RECURSIVE
     };
 
-    enum class Tag {
-        NONE,
-        OP_ADD,
-        OP_SUB,
-        OP_MUL,
-        OP_DIV
-    };
-
     std::shared_ptr<Displayable> p_next = {};
-    Tag tag = Tag::NONE;
+    DisplayableTag tags = DisplayableTag::NONE;
 
     virtual Type get_type() = 0;
 
@@ -113,22 +106,36 @@ concept IsDisplayable = requires(T a) {
 
 template<IsDisplayable Type>
 std::shared_ptr<Displayable> create_displayables_from(Type value) {
-    // return Displayable::create(value);
+    return Displayable::create(value);
+}
 
-    std::shared_ptr<Displayable> p_disp = Displayable::create(value);
-    return p_disp;
+
+template<IsDisplayable Type>
+std::shared_ptr<Displayable> create_tagged_displayables_from(DisplayableTag tags, Type value) {
+    std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
+    p_displayable->begin()->tags = tags;
+
+    return p_displayable;
 }
 
 
 template<IsDisplayable Type, IsDisplayable... Types>
 std::shared_ptr<Displayable> create_displayables_from(Type value, Types... var_types) {
-
     std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
     p_displayable->p_next = create_displayables_from(var_types...);
 
     return p_displayable;
 }
 
+
+template<IsDisplayable Type, IsDisplayable... Types>
+std::shared_ptr<Displayable> create_tagged_displayables_from(DisplayableTag tags, Type value, Types... var_types) {
+    std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
+    p_displayable->p_next = create_displayables_from(var_types...);
+    p_displayable->begin()->tags = tags;
+
+    return p_displayable;
+}
 
 
 }

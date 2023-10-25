@@ -7,6 +7,7 @@
 
 #include "types.h"
 #include "core/units/units.h"
+#include "display_tags.h"
 
 struct Unit;
 
@@ -53,7 +54,10 @@ public:
 
     static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt, Representation repr = REPR_NONE);
 
-    std::string to_string() const;
+    std::string to_string(DisplayableTag tags = DisplayableTag::NONE) const;
+
+    bool is_vec() const;
+    bool is_mat() const;
 
     Value() = default;
     ~Value();

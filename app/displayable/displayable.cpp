@@ -7,11 +7,17 @@ namespace RCalc {
 
 Displayable::Iterator Displayable::begin() {
     if (get_type() == Type::RECURSIVE) {
-        return Iterator {
-            reinterpret_cast<RecursiveDisplayable*>(this)->p_displayable.get(),
-            { this }
-        };
+        Displayable* p_disp = this;
+        std::vector<Displayable*> stack;
+
+        while (p_disp->get_type() == Type::RECURSIVE) {
+            stack.push_back(p_disp);
+            p_disp = reinterpret_cast<RecursiveDisplayable*>(p_disp)->p_displayable.get();
+        }
+
+        return Iterator(p_disp, stack);
     }
+
     return Iterator(this);
 }
 

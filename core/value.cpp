@@ -612,9 +612,38 @@ std::optional<Value> Value::parse_unit(const std::string& str) {
 #pragma endregion parse
 
 
+#pragma region is_functions
+
+bool Value::is_vec() const {
+    switch (type) {
+        case TYPE_VEC2:
+        case TYPE_VEC3:
+        case TYPE_VEC4:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+bool Value::is_mat() const {
+    switch (type) {
+        case TYPE_MAT2:
+        case TYPE_MAT3:
+        case TYPE_MAT4:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+#pragma endregion is_functions
+
+
 #pragma region to_string
 
-std::string Value::to_string() const {
+std::string Value::to_string(DisplayableTag tags) const {
     switch (type) {
         case TYPE_INT: {
             switch (repr) {
@@ -642,14 +671,26 @@ std::string Value::to_string() const {
         }
         case TYPE_VEC2: {
             const Vec2 value = operator Vec2();
+
+            if (tags == DisplayableTag::COL_VEC) {
+                return fmt_col_vec2(value);
+            }
             return fmt("[%g, %g]", value.x, value.y);
         }
         case TYPE_VEC3: {
             const Vec3 value = operator Vec3();
+
+            if (tags == DisplayableTag::COL_VEC) {
+                return fmt_col_vec3(value);
+            }
             return fmt("[%g, %g, %g]", value.x, value.y, value.z);
         }
         case TYPE_VEC4: {
             const Vec4 value = operator Vec4();
+
+            if (tags == DisplayableTag::COL_VEC) {
+                return fmt_col_vec4(value);
+            }
             return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
         }
         case TYPE_MAT2: {
