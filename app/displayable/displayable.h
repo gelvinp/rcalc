@@ -49,7 +49,7 @@ struct Displayable {
         void increment();
 
         Iterator(pointer p_displayable, std::vector<pointer> display_stack) : p_displayable(p_displayable), display_stack(display_stack) {}
-        friend class Displayable;
+        friend struct Displayable;
     };
 
     Iterator begin();
@@ -63,6 +63,8 @@ struct Displayable {
     static std::shared_ptr<Displayable> create(std::shared_ptr<Displayable>);
 
     std::string dbg_display();
+
+    virtual ~Displayable() = default;
 };
 
 struct ConstCharDisplayable : public Displayable {

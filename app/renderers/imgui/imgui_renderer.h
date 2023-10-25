@@ -35,6 +35,9 @@ struct ImGuiDisplayEntry {
     float height;
     bool valid;
 
+    ImGuiDisplayEntry(ImGuiDisplayLine input, ImGuiDisplayChunk output)
+        : input(input), output(output), height(0.0f), valid(false) {}
+
     void calculate_size(float max_width, bool scrollbar_visible);
 };
 
