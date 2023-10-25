@@ -1,6 +1,7 @@
 // @RCalcOperator
 // Description: Creates the Mat2 from row-major Vec2s {vec0, vec1}.
 // Requires: <glm/mat2x2.hpp>
+// Requires: "core/format.h"
 // Tags: [no_expr]
 // Example: [[1, 2], [3, 4]]
 RCALC_OP_2(Mat2, Vec2, Vec2, arg0, arg1) {
@@ -9,13 +10,14 @@ RCALC_OP_2(Mat2, Vec2, Vec2, arg0, arg1) {
 }
 
 RCALC_FMT_2(Mat2, arg0, arg1) {
-    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), "}");
+    return create_displayables_from(fmt_mat2(Mat2(arg0.result.operator Vec2(), arg1.result.operator Vec2())));
 }
 
 
 // @RCalcOperator
 // Description: Creates the Mat3 from row-major Vec3s {vec0, vec1, vec2}.
 // Requires: <glm/mat3x3.hpp>
+// Requires: "core/format.h"
 // Tags: [no_expr]
 // Example: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 RCALC_OP_3(Mat3, Vec3, Vec3, Vec3, arg0, arg1, arg2) {
@@ -24,13 +26,14 @@ RCALC_OP_3(Mat3, Vec3, Vec3, Vec3, arg0, arg1, arg2) {
 }
 
 RCALC_FMT_3(Mat3, arg0, arg1, arg2) {
-    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ",", arg2.get_input_formatted(), "}");
+    return create_displayables_from(fmt_mat3(Mat3(arg0.result.operator Vec3(), arg1.result.operator Vec3(), arg2.result.operator Vec3())));
 }
 
 
 // @RCalcOperator
 // Description: Creates the Mat4 from row-major Vec4s {vec0, vec1, vec2, vec3}.
 // Requires: <glm/mat4x4.hpp>
+// Requires: "core/format.h"
 // Tags: [no_expr]
 // Example: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
 RCALC_OP_4(Mat4, Vec4, Vec4, Vec4, Vec4, arg0, arg1, arg2, arg3) {
@@ -39,7 +42,7 @@ RCALC_OP_4(Mat4, Vec4, Vec4, Vec4, Vec4, arg0, arg1, arg2, arg3) {
 }
 
 RCALC_FMT_4(Mat4, arg0, arg1, arg2, arg3) {
-    return create_displayables_from("{", arg0.get_input_formatted(), ", ", arg1.get_input_formatted(), ",", arg2.get_input_formatted(), ",", arg3.get_input_formatted(), "}");
+    return create_displayables_from(fmt_mat4(Mat4(arg0.result.operator Vec4(), arg1.result.operator Vec4(), arg2.result.operator Vec4(), arg3.result.operator Vec4())));
 }
 
 
