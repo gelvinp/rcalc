@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app/renderers/renderer.h"
-
+#include "display_stack.h"
 #include "app/stack.h"
 #include "imgui.h"
 #include "app/commands/commands.h"
@@ -10,44 +10,6 @@
 #include "help_cache.h"
 
 namespace RCalc {
-
-struct ImGuiDisplayChunk {
-    std::string str;
-    ImVec2 size;
-    ImVec2 position;
-
-    void calculate_size(float max_width = -1.0f);
-
-    ImGuiDisplayChunk(std::string str)
-        : str(str), size({}), position({}) {}
-};
-
-struct ImGuiDisplayLine {
-    std::vector<ImGuiDisplayChunk> chunks;
-    ImVec2 size;
-
-    void calculate_size(float max_width);
-};
-
-struct ImGuiDisplayEntry {
-    ImGuiDisplayLine input;
-    ImGuiDisplayChunk output;
-    float height;
-    bool valid;
-
-    ImGuiDisplayEntry(ImGuiDisplayLine input, ImGuiDisplayChunk output)
-        : input(input), output(output), height(0.0f), valid(false) {}
-
-    void calculate_size(float max_width, bool scrollbar_visible);
-};
-
-struct ImGuiDisplayStack {
-    std::vector<ImGuiDisplayEntry> entries;
-
-    void calculate_sizes(float max_width, bool scrollbar_visible);
-    void invalidate_sizes();
-};
-
 
 class ImGuiRenderer : public Renderer {
 public:
@@ -115,7 +77,7 @@ private:
     static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
 
     void render_help_command(const CommandMeta* cmd);
-    void render_help_operator(const CachedOperator& op);
+    void render_help_operator(CachedOperator& op);
     void render_help_unit_family(const UnitFamily* family);
 
     void build_help_cache();

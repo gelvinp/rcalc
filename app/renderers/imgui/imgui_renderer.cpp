@@ -7,6 +7,7 @@
 #include "assets/license.gen.h"
 #include "core/filter.h"
 #include "core/format.h"
+#include "constants.h"
 
 #include "imgui_ext.h"
 
@@ -19,41 +20,6 @@
 
 
 namespace RCalc {
-
-const float STACK_HORIZ_PADDING = 16.0;
-const float STACK_HORIZ_BIAS = 8.0;
-const float STACK_OUTER_PADDING = 4.0;
-const float STACK_BOTTOM_PADDING = 8.0;
-
-constexpr ImVec4 COLORS[] = {
-    { 1.0, 0.239, 0.239, 1.0 },     // Red
-    { 1.0, 0.619, 0.329, 1.0 },   // Orange
-    { 1.0, 0.909, 0.388, 1.0 },     // Yellow
-    { 0.439, 1.0, 0.388, 1.0 },     // Green
-    { 0.412, 0.655, 1.0, 1.0 },     // Blue
-    { 0.698, 0.451, 1.0, 1.0 },     // Purple
-    { 1.0, 1.0, 1.0, 1.0 },         // White
-    { 1.0, 0.561, 0.847, 1.0 },     // Pink
-    { 0.309, 0.898, 1.0, 1.0 },     // Light Blue
-    { 0.361, 0.196, 0.039, 1.0 },   // Brown
-    { 0.0, 0.0, 0.0, 1.0 },         // Black
-    { 0.8, 0.8, 0.8, 1.0 },         // Gray
-};
-
-enum ColorNames : int {
-    COLOR_RED,
-    COLOR_ORANGE,
-    COLOR_YELLOW,
-    COLOR_GREEN,
-    COLOR_BLUE,
-    COLOR_PURPLE,
-    COLOR_WHITE,
-    COLOR_PINK,
-    COLOR_LIGHT_BLUE,
-    COLOR_BROWN,
-    COLOR_BLACK,
-    COLOR_GRAY
-};
 
 ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
         cb_submit_text(info.cb_submit_text),
@@ -631,7 +597,7 @@ void ImGuiRenderer::render_help() {
         build_help_cache();
     }
 
-    for (const CachedOperatorCategory& category : help_op_cache) {
+    for (CachedOperatorCategory& category : help_op_cache) {
         if (category.category_name) {
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
             ImGui::PushFont(p_font_medium);
@@ -639,7 +605,7 @@ void ImGuiRenderer::render_help() {
             ImGui::PopFont();
         }
 
-        for (const CachedOperator& op : category.category_ops) {
+        for (CachedOperator& op : category.category_ops) {
             render_help_operator(op);
         }
     }
@@ -716,7 +682,7 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 }
 
 
-void ImGuiRenderer::render_help_operator(const CachedOperator& op) {
+void ImGuiRenderer::render_help_operator(CachedOperator& op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
@@ -770,11 +736,53 @@ void ImGuiRenderer::render_help_operator(const CachedOperator& op) {
     }
     
     if (!op.op.examples.empty()) {
-        std::string example_list_id = fmt("#op_examples_%s", op.op.name);
+        if (ImGui::TreeNode(op.id.c_str(), "Examples")) {
+            for (ImGuiDisplayEntry& example : op.examples) {
+                if (!example.valid) { example.calculate_size(-1, false, false); }
+                
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
-        if (ImGui::TreeNode(example_list_id.c_str(), "Examples")) {
-            for (const std::string& example : op.examples) {
-                ImGui::BulletText("%s", example.c_str());
+                ImVec2 entry_start_pos = ImGui::GetCursorPos();
+
+                // Input
+                for (const ImGuiDisplayChunk& chunk : example.input.chunks) {
+                    ImVec2 chunk_start_pos {
+                        entry_start_pos.x + chunk.position.x,
+                        entry_start_pos.y + chunk.position.y
+                    };
+
+                    ImGui::SetCursorPos(chunk_start_pos);
+
+                    ImGui::PushTextWrapPos(chunk_start_pos.x + chunk.size.x);
+                    ImGui::TextUnformatted(chunk.str.c_str());
+                    ImGui::PopTextWrapPos();
+                }
+
+                // Arrow
+                float arrow_offset = (example.height - ImGui::GetTextLineHeight()) / 2.0f;
+                ImVec2 arrow_start_pos {
+                    entry_start_pos.x + example.input.size.x + 8.0f,
+                    entry_start_pos.y + arrow_offset
+                };
+
+                ImGui::SetCursorPos(arrow_start_pos);
+
+                ImGui::TextUnformatted("->");
+
+                ImGui::SameLine(0.0f, 0.0f);
+                float arrow_width = ImGui::GetCursorPosX() - arrow_start_pos.x;
+                
+                // Output
+                ImVec2 output_start_pos {
+                    arrow_start_pos.x + arrow_width + 8.0f,
+                    entry_start_pos.y + example.output.position.y
+                };
+
+                ImGui::SetCursorPos(output_start_pos);
+
+                ImGui::TextUnformatted(example.output.str.c_str());
+                
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
             }
 
             ImGui::TreePop();
@@ -821,35 +829,7 @@ void ImGuiRenderer::build_help_cache() {
 
 
 void ImGuiRenderer::add_stack_item(const StackItem& item) {
-    ImGuiDisplayLine input_line;
-
-    for (Displayable& disp : *item.p_input) {
-        std::string str;
-
-        switch (disp.get_type()) {
-            case Displayable::Type::CONST_CHAR: {
-                str = reinterpret_cast<ConstCharDisplayable&>(disp).p_char;
-                break;
-            }
-            case Displayable::Type::STRING: {
-                str = reinterpret_cast<StringDisplayable&>(disp).str;
-                break;
-            }
-            case Displayable::Type::VALUE: {
-                // TODO: Column vectors and representations
-                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
-                break;
-            }
-            case Displayable::Type::RECURSIVE:
-                UNREACHABLE(); // Handled by the iterator
-        }
-
-        input_line.chunks.emplace_back(str);
-    }
-
-    ImGuiDisplayChunk output_chunk { item.result.to_string() };
-    
-    display_stack.entries.emplace_back(input_line, output_chunk);
+    display_stack.entries.emplace_back(item);
 }
 
 
@@ -863,141 +843,5 @@ void ImGuiRenderer::replace_stack_items(const std::vector<StackItem>& items) {
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
 }
 
-
-// ========================
-
-void ImGuiDisplayChunk::calculate_size(float max_width) {
-    size = ImGui::CalcTextSize(str.c_str(), nullptr, false, max_width);
-    position = ImVec2(0, 0);
-}
-
-void ImGuiDisplayLine::calculate_size(float max_width) {
-    size = ImVec2(0, 0);
-
-    // Step 1: Calculate sizes
-
-    float available_width = max_width;
-    float line_no = 0.1; // Avoid any potential floating point weirdness
-
-    for (ImGuiDisplayChunk& chunk : chunks) {
-        chunk.calculate_size();
-    }
-
-    for (size_t chunk_idx = 0; chunk_idx < chunks.size(); ++chunk_idx) {
-        ImGuiDisplayChunk& chunk = chunks[chunk_idx];
-
-        // Check for wrap
-        bool chunk_overflows = chunk.size.x > available_width;
-
-        bool chunk_is_short = chunk.size.x < 10;
-        bool chunk_not_last = (chunk_idx + 1) < chunks.size();
-        bool short_chunk_plus_next_overflows =
-        (
-            (chunk_is_short && chunk_not_last) &&
-            (chunk.size.x + chunks[chunk_idx + 1].size.x) > available_width
-        );
-
-        if (chunk_overflows || short_chunk_plus_next_overflows) {
-            line_no += 1;
-            available_width = max_width;
-        }
-
-        chunk.calculate_size(available_width);
-        chunk.position.y = line_no; // Encode wrapped lines in the position
-        available_width -= chunk.size.x;
-    }
-
-    // Step 2: Position chunks
-    size_t line_count = static_cast<size_t>(line_no); // Truncate
-    auto from_iter = chunks.begin();
-
-    for (size_t line_idx = 0; line_idx <= line_count; line_idx++) {
-        // Find all chunks on line
-        auto to_iter = std::partition_point(
-            from_iter,
-            chunks.end(),
-            [line_idx](ImGuiDisplayChunk& chunk){ return line_idx == static_cast<size_t>(chunk.position.y); }
-        );
-
-        // Get max height of line
-        float line_height = std::accumulate(
-            from_iter,
-            to_iter,
-            0.0f,
-            [](float acc, ImGuiDisplayChunk& chunk) { return std::max(acc, chunk.size.y); }
-        );
-
-        // Get total width of line
-        float line_width = std::accumulate(
-            from_iter,
-            to_iter,
-            0.0f,
-            [](float acc, ImGuiDisplayChunk& chunk) { return acc + chunk.size.x; }
-        );
-
-        // Position each chunk in the line
-        float chunk_start_x = 0.0f;
-        for (auto iter = from_iter; iter < to_iter; ++iter) {
-            iter->position = ImVec2(
-                chunk_start_x,                                  // Left align
-                size.y + ((line_height - iter->size.y) / 2.0)   // Center align
-            );
-
-            chunk_start_x += iter->size.x;
-        }
-
-        size = ImVec2(
-            std::max(size.x, line_width),
-            size.y + line_height
-        );
-
-        from_iter = to_iter;
-    }
-}
-
-void ImGuiDisplayEntry::calculate_size(float max_width, bool scrollbar_visible) {
-    float available_width = max_width - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
-    if (scrollbar_visible) {
-        available_width -= ImGui::GetStyle().ScrollbarSize;
-    }
-
-    float output_max_width = available_width / 2.0 - STACK_HORIZ_PADDING;
-    output.calculate_size(output_max_width);
-
-    float input_max_width = available_width - output.size.x - STACK_HORIZ_PADDING;
-    input.calculate_size(input_max_width);
-    
-    height = std::max(input.size.y, output.size.y);
-
-    // Final positioning
-    if (input.size.y < height) {
-        // Move input chunks down
-        float diff = height - input.size.y;
-
-        for (ImGuiDisplayChunk& chunk : input.chunks) {
-            chunk.position.y += diff;
-        }
-    }
-    else {
-        // Move output chunk down
-        float diff = height - output.size.y;
-        output.position.y += diff;
-    }
-
-    output.position.x = available_width - output.size.x;
-}
-
-void ImGuiDisplayStack::calculate_sizes(float max_width, bool scrollbar_visible) {
-    for (ImGuiDisplayEntry& entry : entries) {
-        if (entry.valid) { continue; }
-        entry.calculate_size(max_width, scrollbar_visible);
-    }
-}
-
-void ImGuiDisplayStack::invalidate_sizes() {
-    for (ImGuiDisplayEntry& entry : entries) {
-        entry.valid = false;
-    }
-}
 
 }

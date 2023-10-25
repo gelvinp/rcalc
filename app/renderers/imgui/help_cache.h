@@ -2,6 +2,7 @@
 
 #include "app/operators/operators.h"
 #include "app/stack.h"
+#include "display_stack.h"
 
 #include <string>
 #include <vector>
@@ -11,7 +12,8 @@ namespace RCalc {
 
 struct CachedOperator {
     const Operator& op;
-    std::vector<std::string> examples;
+    std::vector<ImGuiDisplayEntry> examples;
+    std::string id;
 
     CachedOperator(const Operator& op, RPNStack& stack);
 };

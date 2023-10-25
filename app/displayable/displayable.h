@@ -116,7 +116,8 @@ template<IsDisplayable Type>
 std::shared_ptr<Displayable> create_tagged_displayables_from(DisplayableTag tags, Type value) {
     std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
     p_displayable->begin()->tags = tags;
-
+    p_displayable->tags = tags;
+    
     return p_displayable;
 }
 
@@ -135,6 +136,7 @@ std::shared_ptr<Displayable> create_tagged_displayables_from(DisplayableTag tags
     std::shared_ptr<Displayable> p_displayable = Displayable::create(value);
     p_displayable->p_next = create_displayables_from(var_types...);
     p_displayable->begin()->tags = tags;
+    p_displayable->tags = tags;
 
     return p_displayable;
 }

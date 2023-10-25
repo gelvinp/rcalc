@@ -10,6 +10,8 @@ namespace RCalc {
 CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
     : op(op)
 {
+    id = fmt("#op_examples_%s", op.name);
+
     OperatorMap& op_map = OperatorMap::get_operator_map();
 
     for (const std::vector<const char*>& example_params : op.examples) {
@@ -17,7 +19,7 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 
         for (const char* param : example_params) {
             Value value = Value::parse(param).value();
-            stack.push_item(StackItem { create_displayables_from(param), std::move(value), false });
+            stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
         }
 
         std::string op_name = filter_name(op.name);
@@ -44,9 +46,8 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 
         std::vector<StackItem> _items = stack.pop_items(1);
         StackItem& res = _items[0];
-        std::string input = res.p_input->dbg_display();
 
-        examples.push_back(fmt("%s -> %s", input.c_str(), ss.str().c_str()));
+        examples.emplace_back(res);
     }
 }
 
