@@ -14,11 +14,6 @@ namespace RCalc {
 
 class Application;
 
-struct RenderItem {
-    std::string input;
-    Value value;
-};
-
 class Renderer {
 public:
     typedef std::function<void(const std::string&)> SubmitTextCallback;

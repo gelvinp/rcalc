@@ -5,11 +5,8 @@
  - Create TUI renderer
 
 # Track 2
- - Format function returns a StackFormatNode* (Each node contains a variant<const char*, Ref<Value>, StackFormatNode*, ColVector> and a next pointer) (linked lists babeyyyyy)
  - Templated Vector display wrapper type (ColVector) that stores a Ref<Value>, and indicates it should be displayed as a column vector
     - Tie into mul and div format functions, if arg0.is_mat() and arg1.is_vec() (will need to make those functions first but ez)
- - Matrix to_string should use newlines and ensure consistent spacing
- - ImGuiRenderer should layout lines in these chunks, keeping track of total entry height across multiple lines, it'll be a mess ~~i'm so excited~~
  - Do something better with displaying binary, octal, and hex values
 
 # Track 3

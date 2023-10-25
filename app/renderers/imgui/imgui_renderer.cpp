@@ -939,8 +939,8 @@ void ImGuiDisplayLine::calculate_size(float max_width) {
         float chunk_start_x = 0.0f;
         for (auto iter = from_iter; iter < to_iter; ++iter) {
             iter->position = ImVec2(
-                chunk_start_x,                    // Left align
-                size.y + (line_height - iter->size.y)   // Bottom align
+                chunk_start_x,                                  // Left align
+                size.y + ((line_height - iter->size.y) / 2.0)   // Center align
             );
 
             chunk_start_x += iter->size.x;
