@@ -8,7 +8,7 @@
 
 namespace RCalc {
 
-void AutocompleteManager::init_suggestions(const std::string_view& str) {
+void AutocompleteManager::init_suggestions(const std::string_view& str, const std::vector<Type>& stack_types) {
     if (active_auto) {
         active_auto.value()->cancel_suggestion();
     }
@@ -29,11 +29,11 @@ void AutocompleteManager::init_suggestions(const std::string_view& str) {
             return;
         }
         
-        unit_auto.init_suggestions(str);
+        unit_auto.init_suggestions(str, stack_types);
         active_auto = &unit_auto;
     }
     else {
-        op_auto.init_suggestions(str);
+        op_auto.init_suggestions(str, stack_types);
         active_auto = &op_auto;
     }
 }
@@ -52,6 +52,24 @@ void AutocompleteManager::cancel_suggestion() {
         active_auto.value()->cancel_suggestion();
         active_auto = std::nullopt;
     }
+}
+
+
+std::optional<std::string> AutocompleteManager::Autocomplete::get_next_suggestion() {
+    if (!suggestion_index) { return std::nullopt; }
+
+    std::string str { suggestions[suggestion_index.value()].data() };
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+
+    suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
+
+    return str;
+}
+
+
+void AutocompleteManager::Autocomplete::cancel_suggestion() {
+    suggestions.clear();
+    suggestion_index = std::nullopt;
 }
 
 
@@ -102,15 +120,10 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_next_su
     return str;
 }
 
-void AutocompleteManager::CommandAutocomplete::cancel_suggestion() {
-    suggestions.clear();
-    suggestion_index = std::nullopt;
-}
-
 
 // Operator Autocomplete
 
-void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str) {
+void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
@@ -135,30 +148,25 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
     }
 }
 
-std::optional<std::string> AutocompleteManager::OperatorAutocomplete::get_next_suggestion() {
-    if (!suggestion_index) { return std::nullopt; }
-
-    std::string str { suggestions[suggestion_index.value()].data() };
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
-
-    suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
-
-    return str;
-}
-
-void AutocompleteManager::OperatorAutocomplete::cancel_suggestion() {
-    suggestions.clear();
-    suggestion_index = std::nullopt;
-}
-
 
 // Unit Autocomplete
 
-void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view str) {
+void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
+    std::optional<Type> type = std::nullopt;
+
+    if (!stack_types.empty() && stack_types.back() != TYPE_UNIT) {
+        type = stack_types.back();
+    }
+    else if (stack_types.size() >= 2 && stack_types[stack_types.size() - 2] != TYPE_UNIT) {
+        type = stack_types[stack_types.size() - 2];
+    }
+
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
     for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
+        if (type && !is_type_castable(type.value(), family->base_type)) { continue; }
+        
         for (const Unit* unit : family->units) {
             anycase_stringview usage(unit->p_usage);
             if (usage.starts_with(input)) {
@@ -177,22 +185,6 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
     else {
         suggestion_index = 0;
     }
-}
-
-std::optional<std::string> AutocompleteManager::UnitAutocomplete::get_next_suggestion() {
-    if (!suggestion_index) { return std::nullopt; }
-
-    std::string str { suggestions[suggestion_index.value()].data() };
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
-
-    suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
-
-    return str;
-}
-
-void AutocompleteManager::UnitAutocomplete::cancel_suggestion() {
-    suggestions.clear();
-    suggestion_index = std::nullopt;
 }
 
 }

@@ -60,6 +60,7 @@ private:
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
+    std::vector<Type> autocomp_types;
     AutocompleteManager autocomp;
 
     std::vector<CachedOperatorCategory> help_op_cache;

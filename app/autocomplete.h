@@ -2,6 +2,7 @@
 
 #include "app/stack.h"
 #include "core/anycase_str.h"
+#include "core/types.h"
 
 #include <optional>
 #include <ranges>
@@ -14,7 +15,7 @@ namespace RCalc {
 
 class AutocompleteManager {
 public:
-    void init_suggestions(const std::string_view& str);
+    void init_suggestions(const std::string_view& str, const std::vector<Type>& stack_types);
     std::optional<std::string> get_next_suggestion();
     void cancel_suggestion();
 
@@ -23,9 +24,8 @@ public:
 private:
     class Autocomplete {
     public:
-        virtual void init_suggestions(std::string_view str) = 0;
-        virtual std::optional<std::string> get_next_suggestion() = 0;
-        virtual void cancel_suggestion() = 0;
+        virtual std::optional<std::string> get_next_suggestion();
+        void cancel_suggestion();
 
     protected:
         std::vector<anycase_stringview> suggestions = {};
@@ -34,23 +34,18 @@ private:
 
     class CommandAutocomplete : public Autocomplete {
     public:
-        virtual void init_suggestions(std::string_view str) override;
+        void init_suggestions(std::string_view str);
         virtual std::optional<std::string> get_next_suggestion() override;
-        virtual void cancel_suggestion() override;
     };
 
     class OperatorAutocomplete : public Autocomplete {
     public:
-        virtual void init_suggestions(std::string_view str) override;
-        virtual std::optional<std::string> get_next_suggestion() override;
-        virtual void cancel_suggestion() override;
+        void init_suggestions(std::string_view str, const std::vector<Type>& stack_types);
     };
 
     class UnitAutocomplete : public Autocomplete {
     public:
-        virtual void init_suggestions(std::string_view str) override;
-        virtual std::optional<std::string> get_next_suggestion() override;
-        virtual void cancel_suggestion() override;
+        void init_suggestions(std::string_view str, const std::vector<Type>& stack_types);
     };
 
     CommandAutocomplete cmd_auto = {};

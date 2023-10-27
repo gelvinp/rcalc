@@ -518,7 +518,7 @@ int ImGuiRenderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData*
 int ImGuiRenderer::scratchpad_input_completion_callback(ImGuiInputTextCallbackData* p_cb_data) {
     ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
     if (!self->autocomp.suggestions_active()) {
-        self->autocomp.init_suggestions(p_cb_data->Buf);
+        self->autocomp.init_suggestions(p_cb_data->Buf, self->autocomp_types);
     }
 
     std::optional<std::string> next = self->autocomp.get_next_suggestion();
@@ -851,16 +851,19 @@ void ImGuiRenderer::build_help_cache() {
 
 void ImGuiRenderer::add_stack_item(const StackItem& item) {
     display_stack.entries.emplace_back(item);
+    autocomp_types.push_back(item.result.get_type());
 }
 
 
 void ImGuiRenderer::remove_stack_item() {
     display_stack.entries.pop_back();
+    autocomp_types.pop_back();
 }
 
 
 void ImGuiRenderer::replace_stack_items(const std::vector<StackItem>& items) {
     display_stack.entries.clear();
+    autocomp_types.clear();
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
 }
 

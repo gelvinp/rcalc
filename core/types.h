@@ -32,3 +32,6 @@ enum Type: uint8_t {
     TYPE_UNIT,
     MAX_TYPE
 };
+
+
+bool is_type_castable(Type from, Type to);
