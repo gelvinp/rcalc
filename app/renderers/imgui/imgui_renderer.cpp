@@ -282,7 +282,8 @@ void ImGuiRenderer::render() {
         | ImGuiInputTextFlags_CallbackCharFilter
         | ImGuiInputTextFlags_CallbackResize
         | ImGuiInputTextFlags_CallbackAlways
-        | ImGuiInputTextFlags_CallbackHistory,
+        | ImGuiInputTextFlags_CallbackHistory
+        | ImGuiInputTextFlags_CallbackCompletion,
         &scratchpad_input_callback,
         (void*)this)
     ) {
@@ -395,6 +396,8 @@ int ImGuiRenderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_da
             return scratchpad_input_always_callback(p_cb_data);
         case ImGuiInputTextFlags_CallbackHistory:
             return scratchpad_input_history_callback(p_cb_data);
+        case ImGuiInputTextFlags_CallbackCompletion:
+            return scratchpad_input_completion_callback(p_cb_data);
         default:
             return 0;
     }
@@ -403,6 +406,8 @@ int ImGuiRenderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_da
 
 int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data) {
     ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
+
+    self->autocomp.cancel_suggestion();
 
     // Check for basic arithmetic operators
     switch ((char)p_cb_data->EventChar) {
@@ -507,6 +512,22 @@ int ImGuiRenderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData*
         default:
             return 0;
     }
+}
+
+
+int ImGuiRenderer::scratchpad_input_completion_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
+    if (!self->autocomp.suggestions_active()) {
+        self->autocomp.init_suggestions(p_cb_data->Buf);
+    }
+
+    std::optional<std::string> next = self->autocomp.get_next_suggestion();
+    if (!next) { return 0; }
+
+    p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+    p_cb_data->InsertChars(0, next->data(), next->data() + next->length());
+
+    return 0;
 }
 
 

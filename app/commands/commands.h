@@ -25,7 +25,7 @@ struct ScopeMeta {
 
 class _GlobalCommandMap {
 public:
-    const std::vector<ScopeMeta const *>& get_alphabetical() const;
+    static const std::vector<ScopeMeta const *>& get_alphabetical();
 };
 
 template<typename Scope>

@@ -8,6 +8,7 @@
 #include "app/operators/operators.h"
 #include "core/units/units.h"
 #include "help_cache.h"
+#include "app/autocomplete.h"
 
 namespace RCalc {
 
@@ -59,6 +60,8 @@ private:
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
+    AutocompleteManager autocomp;
+
     std::vector<CachedOperatorCategory> help_op_cache;
 
     ImVector<ImWchar> glyph_ranges;
@@ -75,6 +78,7 @@ private:
     static int scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_history_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_completion_callback(ImGuiInputTextCallbackData* p_cb_data);
 
     void render_help_command(const CommandMeta* cmd);
     void render_help_operator(CachedOperator& op);

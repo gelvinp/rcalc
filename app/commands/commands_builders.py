@@ -226,7 +226,7 @@ class CommandMapBuilder:
             '',
             'namespace RCalc {',
             '',
-            'const std::vector<ScopeMeta const *>& _GlobalCommandMap::get_alphabetical() const {',
+            'const std::vector<ScopeMeta const *>& _GlobalCommandMap::get_alphabetical() {',
             '\treturn Commands::scopemetas;',
             '}',
             '',

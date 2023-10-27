@@ -366,6 +366,8 @@ if selected_platform in available_platforms:
 
     env["extra_sources"] = []
 
+    env.Append(CPPDEFINES=["\"UNUSED(arg)=(void)(arg)\""])
+
     Export("env")
     
     SConscript("assets/SCsub")

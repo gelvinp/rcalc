@@ -971,8 +971,6 @@ def make_internal_header(target, src, env):
             f'#define RCALC_FMT_{count}_S(name{fmt_def}) std::shared_ptr<RCalc::Displayable> OPS_FormatInput_##name(RPNStack& stack{", " if count > 0 else ""}{fmt_args})',
             ''
         ])
-    
-    lines.append('#define UNUSED(arg) (void)(arg)')
 
     with open(dst, 'w') as file:
         file.write('\n'.join(lines))

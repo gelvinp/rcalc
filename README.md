@@ -37,7 +37,6 @@ If you use Arch Linux, RCalc is in the AUR. Simply `paru -S rcalc` (or equivalen
 
 
 ## Technical debt
- - [ ] Refactor stackitem string representations
  - [ ] Implement arena allocator
 
 
