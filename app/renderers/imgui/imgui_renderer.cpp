@@ -279,6 +279,7 @@ void ImGuiRenderer::render() {
         scratchpad.capacity() + 1,
         ImGuiInputTextFlags_EnterReturnsTrue
         | ImGuiInputTextFlags_EscapeClearsAll
+        | ImGuiInputTextFlags_CallbackEdit
         | ImGuiInputTextFlags_CallbackCharFilter
         | ImGuiInputTextFlags_CallbackResize
         | ImGuiInputTextFlags_CallbackAlways
@@ -388,6 +389,8 @@ void ImGuiRenderer::submit_scratchpad() {
 
 int ImGuiRenderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data) {
     switch (p_cb_data->EventFlag) {
+        case ImGuiInputTextFlags_CallbackEdit:
+            return scratchpad_input_edit_callback(p_cb_data);
         case ImGuiInputTextFlags_CallbackCharFilter:
             return scratchpad_input_filter_callback(p_cb_data);
         case ImGuiInputTextFlags_CallbackResize:
@@ -401,6 +404,14 @@ int ImGuiRenderer::scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_da
         default:
             return 0;
     }
+}
+
+
+int ImGuiRenderer::scratchpad_input_edit_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
+
+    self->autocomp.cancel_suggestion();
+    return 0;
 }
 
 

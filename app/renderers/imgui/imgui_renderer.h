@@ -75,6 +75,7 @@ private:
     void render_help();
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
+    static int scratchpad_input_edit_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_filter_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_resize_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data);

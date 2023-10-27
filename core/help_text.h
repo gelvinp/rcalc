@@ -49,12 +49,16 @@ Please note that pressing the '-' key will be treated as immedately calling for 
 therefore to enter negative numbers, please use the `n` prefix instead:
 n45 (Parsed as -45)
 6en24 (Parsed as 6e-24)
+
+You can additionally press the up and down arrows in the scratchpad to scroll through its history.
 )foo"
     },
     {
         "Entering Operators",
 R"foo(RCalc supports many different operators which are invoked using their name. For example, to calculate the cosine of pi radians, type
 pi <enter> cos <enter>
+
+You can also press tab in the scratchpad to autocomplete operators that are available based on the types of values currently in the stack.
 
 Further down on this help screen is: a list of all operators, a brief description for each operator, the number of types, and which types, each operator requires, and example(s) of inputs and outputs for each operator.
 )foo"
@@ -63,6 +67,8 @@ Further down on this help screen is: a list of all operators, a brief descriptio
         "Entering Commands",
 R"foo(RCalc supports commands at different scopes. Some commands will be available regardless of the renderer, while other commands are renderer specific.
 You can see a list of all commands and a brief description for each command, separated by scope, further down on this help screen.
+
+You can also press tab in the scratchpad to autocomplete commands that are available.
 
 To use a command, enter a backslash ('\') followed by the name of the command. Some commands have alias(es) listed, for example you can enter `\quit` to quit RCalc, but you can also enter `\q` to accomplish the same task.
 )foo"
@@ -104,6 +110,8 @@ _lbs (Pounds)
 _c (Celsius)
 _polar (Polar r and theta)
 _oklch (OKLCh color space)
+
+You can also press tab in the scratchpad to autocomplete units that are available based on the types of values currently in the stack.
 
 You can see a list of all unit families, the base type used by each family, and the unit name and usage for each unit that belongs to the family further down on this help screen.
 

@@ -15,20 +15,10 @@ void AutocompleteManager::init_suggestions(const std::string_view& str, const st
 
 
     if (str[0] == '\\') {
-        if (str.size() < 2) {
-            active_auto = std::nullopt;
-            return;
-        }
-
         cmd_auto.init_suggestions(str);
         active_auto = &cmd_auto;
     }
     else if (str[0] == '_') {
-        if (str.size() < 2) {
-            active_auto = std::nullopt;
-            return;
-        }
-        
         unit_auto.init_suggestions(str, stack_types);
         active_auto = &unit_auto;
     }
@@ -127,8 +117,25 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
+    if (stack_types.empty()) { return; }
+
     for (const OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
         for (const Operator* op : category->category_ops) {
+            if (op->param_count > stack_types.size()) { continue; }
+
+            if (!stack_types.empty()) {
+                auto stack_range = std::ranges::subrange(stack_types.end() - op->param_count, stack_types.end());
+
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_range](const std::vector<Type>& op_types) {
+                    auto op_range = std::ranges::subrange(op_types.begin(), op_types.end());
+                    return std::ranges::equal(stack_range, op_range);
+                });
+
+                if (it == op->allowed_types.end()) {
+                    continue;
+                }
+            }
+
             anycase_stringview name(op->name);
             if (name.starts_with(input)) {
                 suggestions.push_back(name);
@@ -152,6 +159,11 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
 // Unit Autocomplete
 
 void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
+    anycase_stringview input(str.begin(), str.end());
+    suggestions.clear();
+
+    if (stack_types.empty()) { return; }
+
     std::optional<Type> type = std::nullopt;
 
     if (!stack_types.empty() && stack_types.back() != TYPE_UNIT) {
@@ -161,8 +173,6 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
         type = stack_types[stack_types.size() - 2];
     }
 
-    anycase_stringview input(str.begin(), str.end());
-    suggestions.clear();
 
     for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
         if (type && !is_type_castable(type.value(), family->base_type)) { continue; }
