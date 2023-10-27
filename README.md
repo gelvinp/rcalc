@@ -30,7 +30,7 @@ If you use Arch Linux, RCalc is in the AUR. Simply `paru -S rcalc` (or equivalen
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
 | Renderer commands (help, options)                             | In Progress       |
 | Renderer scratchpad history                                   | Complete          |
-| Renderer scratchpad autocomplete                              | Not started       |
+| Renderer scratchpad autocomplete                              | Complete          |
 | Alternate renderer (TUI)                                      | Not started       |
 | Extended Conversion Operators                                 | Complete          |
 | Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
