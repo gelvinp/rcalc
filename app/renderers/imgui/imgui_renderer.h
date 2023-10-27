@@ -51,6 +51,7 @@ private:
     bool dup_requested = false;
     bool help_requested = false;
     bool help_open = false;
+    bool help_version_copied = false;
     bool scrollbar_visible = false;
     bool queer_active = false;
     bool enter_pressed = false;

@@ -139,6 +139,9 @@ def get_version_info(silent=False):
 
     version_info["git_hash"] = githash
 
+    if not os.path.isfile(".git") and os.getenv("OVERRIDE_GIT_HASH") != None:
+        version_info["git_hash"] = str(os.getenv("OVERRIDE_GIT_HASH"))
+
     return version_info
 
 

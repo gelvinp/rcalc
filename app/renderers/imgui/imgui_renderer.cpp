@@ -311,6 +311,7 @@ void ImGuiRenderer::render() {
 
     if (help_requested) {
         help_open = true;
+        help_version_copied = false;
         ImGui::OpenPopup("Help");
         help_requested = false;
     }
@@ -575,13 +576,22 @@ void ImGuiRenderer::render_help() {
     ImGui::Text("(%.6s)", VERSION_HASH);
 
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("Click to copy: %s", VERSION_HASH);
+        if (help_version_copied) {
+            ImGui::SetTooltip("Copied!");
+        }
+        else {
+            ImGui::SetTooltip("Click to copy: %s", VERSION_HASH);
+        }
+    }
+    else {
+        help_version_copied = false;
     }
 
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
         p_backend->copy_to_clipboard(VERSION_HASH);
+        help_version_copied = true;
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
