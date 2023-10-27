@@ -38,7 +38,7 @@ def get_flags():
 
 def configure(env: "Environment"):
     # Validate architecture
-    supported_arches = ["x86_32", "x86_64", "arm64"]
+    supported_arches = ["x86_64", "arm64"]
     if env["arch"] not in supported_arches:
         print(
             "Unsupported CPU architecture %s for platform Linux. Supported architectures are: [%s]"
@@ -55,6 +55,16 @@ def configure(env: "Environment"):
             print("To compile with GCC on MacOS, please set the 'CC', 'CXX', 'RANLIB', and 'AR' environment variables manually!\n\t(i.e. CC=gcc-13 CXX=g++-13, RANLIB=gcc-ranlib-13 AR=gcc-ar-13)")
             sys.exit(255)
         env.extra_suffix = ".gcc" + env.extra_suffix
+    
+
+    if env["arch"] == "arm64":
+        env.Append(ASFLAGS=["-arch", "arm64", "-mmacosx-version-min=11.0"])
+        env.Append(CCFLAGS=["-arch", "arm64", "-mmacosx-version-min=11.0"])
+        env.Append(LINKFLAGS=["-arch", "arm64", "-mmacosx-version-min=11.0"])
+    elif env["arch"] == "x86_64":
+        env.Append(ASFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
 
     
     # LTO
@@ -90,27 +100,9 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    # deps = []
-    # if os.system(f"pkg-config --exists {' '.join(deps)}"):
-    #     print("Error: Required libraries not found. Aborting.")
-    #     sys.exit(255)
-    # env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
-
-    # Cross compilation
-    host_is_64bit = sys.maxsize > 2**32
-    if host_is_64bit and env["arch"] == "x86_32":
-        env.Append(CCFLAGS=["-m32"])
-        env.Append(LINKFLAGS=["-m32", "-L/usr/lib/i386-linux-gnu"])
-    elif not host_is_64bit and env["arch"] == "x86_64":
-        env.Append(CCFLAGS=["-m64"])
-        env.Append(LINKFLAGS=["-m64", "-L/usr/lib/i686-linux-gnu"])
-
 
 def post_build(target, source, env):
-    bundle_name = "bin/RCalc"
-
-    if env["target"] == "debug":
-        bundle_name += "_debug"
+    bundle_name = "bin/RCalc" + env["PROGSUFFIX"]
     
     bundle_name += ".app"
     
