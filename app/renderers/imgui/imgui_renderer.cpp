@@ -133,6 +133,10 @@ void ImGuiRenderer::render() {
     if ((desired_stack_height >= available_stack_height) && !scrollbar_visible) {
         scrollbar_visible = true;
         desired_stack_height = 0.0;
+
+        display_stack.invalidate_sizes();
+        display_stack.calculate_sizes(window_width, scrollbar_visible);
+
         if (!display_stack.entries.empty()) {
             for (const ImGuiDisplayEntry& entry : display_stack.entries) {
                 desired_stack_height += entry.height;
@@ -144,6 +148,10 @@ void ImGuiRenderer::render() {
     else if ((desired_stack_height < available_stack_height) && scrollbar_visible) {
         scrollbar_visible = false;
         desired_stack_height = 0.0;
+
+        display_stack.invalidate_sizes();
+        display_stack.calculate_sizes(window_width, scrollbar_visible);
+        
         if (!display_stack.entries.empty()) {
             for (const ImGuiDisplayEntry& entry : display_stack.entries) {
                 desired_stack_height += entry.height;
