@@ -10,6 +10,8 @@ It aims to be quick to open and use, and easy to extend with new types, operator
 
 If you use Arch Linux, RCalc is in the AUR. Simply `paru -S rcalc` (or equivalent AUR helper).
 
+If you use Debian, MacOS, or Windows, you can download the appropriate file from the [latest release](https://github.com/gelvinp/rcalc/releases/latest).
+
 
 ## Feature Table
 
