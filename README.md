@@ -30,7 +30,7 @@ If you use Debian, MacOS, or Windows, you can download the appropriate file from
 | Matrix operators                                              | Complete          |
 | Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | Complete          |
 | Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
-| Renderer commands (help, options)                             | In Progress       |
+| Renderer commands (help)                                      | Complete          |
 | Renderer scratchpad history                                   | Complete          |
 | Renderer scratchpad autocomplete                              | Complete          |
 | Alternate renderer (TUI)                                      | Not started       |
