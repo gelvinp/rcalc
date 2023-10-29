@@ -6,6 +6,13 @@ def is_available():
     return True
 
 
+def meta():
+    return {
+        'header': 'app/renderers/imgui/imgui_renderer.h',
+        'class': 'ImGuiRenderer'
+    }
+
+
 def configure(env: "Environment"):
     env["enabled_modules"].extend([
         "imgui_core",

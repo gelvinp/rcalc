@@ -26,7 +26,7 @@ public:
     };
 
     static Result<Renderer*> create(const std::string_view& name, RendererCreateInfo info);
-    static std::vector<const char*> get_enabled_renderers();
+    static const std::vector<const char*>& get_enabled_renderers();
 
     virtual Result<> init(Application* p_application) = 0;
     virtual void render() = 0;

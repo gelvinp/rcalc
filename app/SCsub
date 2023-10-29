@@ -16,7 +16,7 @@ SConscript("displayable/SCsub")
 lib = env_app.add_library("app", env.app_sources)
 
 # Dependency stuff
-env_app.Depends("#app/commands/commands.gen.cpp", "#app/renderers/default_renderer.gen.cpp")
-env_app.Depends(lib, "#app/renderers/default_renderer.gen.cpp")
+env_app.Depends("#app/commands/commands.gen.cpp", "#app/renderers/renderers.gen.cpp")
+env_app.Depends(lib, "#app/renderers/renderers.gen.cpp")
 
 env.Prepend(LIBS=[lib])

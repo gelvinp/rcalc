@@ -8,10 +8,10 @@ for renderer in env["enabled_renderers"]:
 
 
 env_app.CommandNoCache(
-    "#app/renderers/default_renderer.gen.cpp",
+    "#app/renderers/renderers.gen.cpp",
     None,
-    env.Run(renderer_builders.set_default_renderer, "Defining default renderer.")
+    env.Run(renderer_builders.gen_renderers, "Generating renderer definitions.")
 )
 
-env_app.add_source_files(env.app_sources, "#app/renderers/default_renderer.gen.cpp")
+env_app.add_source_files(env.app_sources, "#app/renderers/renderers.gen.cpp")
 env_app.add_source_files(env.app_sources, "*.cpp")

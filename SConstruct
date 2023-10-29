@@ -205,12 +205,15 @@ env_base["default_renderer"] = default_renderer
 
 env_base.Prepend(CPPPATH=["#"])
 
-for renderer in enabled_renderers:
-    tmp_path = "./app/renderers/" + renderer
+env_base["renderer_meta"] = {}
+
+for renderer_name in enabled_renderers:
+    tmp_path = "./app/renderers/" + renderer_name
     sys.path.insert(0, tmp_path)
     import renderer
 
     renderer.configure(env_base)
+    env_base["renderer_meta"][renderer_name] = renderer.meta()
 
     sys.path.remove(tmp_path)
     sys.modules.pop("renderer")
