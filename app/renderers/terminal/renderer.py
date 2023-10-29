@@ -14,4 +14,5 @@ def meta():
 
 
 def configure(env: "Environment"):
+    env["enabled_modules"].append("ftxui")
     env["enabled_command_scopes"].append("TerminalRenderer")

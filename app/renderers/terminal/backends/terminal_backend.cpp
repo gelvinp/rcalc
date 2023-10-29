@@ -12,12 +12,12 @@ RenderBackend* RenderBackend::create<TerminalRenderer>() {
 }
 
 
-Result<> TerminalBackend::init(Application* p_application) { return Ok(); }
+Result<> TerminalBackend::init(Application* p_application) { UNUSED(p_application); return Ok(); }
 void TerminalBackend::cleanup() {}
 
 void TerminalBackend::start_frame() {}
 void TerminalBackend::render_frame() {}
 
-void TerminalBackend::copy_to_clipboard(const std::string_view& string) {}
+void TerminalBackend::copy_to_clipboard(const std::string_view& string) { UNUSED(string); }
 
 }

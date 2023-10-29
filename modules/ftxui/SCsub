@@ -1,0 +1,88 @@
+import sys
+
+Import("env")
+
+sources = [
+    "upstream/src/ftxui/screen/box.cpp",
+    "upstream/src/ftxui/screen/color.cpp",
+    "upstream/src/ftxui/screen/color_info.cpp",
+    "upstream/src/ftxui/screen/screen.cpp",
+    "upstream/src/ftxui/screen/string.cpp",
+    "upstream/src/ftxui/screen/terminal.cpp",
+    "upstream/src/ftxui/dom/automerge.cpp",
+    "upstream/src/ftxui/dom/blink.cpp",
+    "upstream/src/ftxui/dom/bold.cpp",
+    "upstream/src/ftxui/dom/hyperlink.cpp",
+    "upstream/src/ftxui/dom/border.cpp",
+    "upstream/src/ftxui/dom/box_helper.cpp",
+    "upstream/src/ftxui/dom/canvas.cpp",
+    "upstream/src/ftxui/dom/clear_under.cpp",
+    "upstream/src/ftxui/dom/color.cpp",
+    "upstream/src/ftxui/dom/composite_decorator.cpp",
+    "upstream/src/ftxui/dom/dbox.cpp",
+    "upstream/src/ftxui/dom/dim.cpp",
+    "upstream/src/ftxui/dom/flex.cpp",
+    "upstream/src/ftxui/dom/flexbox.cpp",
+    "upstream/src/ftxui/dom/flexbox_config.cpp",
+    "upstream/src/ftxui/dom/flexbox_helper.cpp",
+    "upstream/src/ftxui/dom/focus.cpp",
+    "upstream/src/ftxui/dom/frame.cpp",
+    "upstream/src/ftxui/dom/gauge.cpp",
+    "upstream/src/ftxui/dom/graph.cpp",
+    "upstream/src/ftxui/dom/gridbox.cpp",
+    "upstream/src/ftxui/dom/hbox.cpp",
+    "upstream/src/ftxui/dom/inverted.cpp",
+    "upstream/src/ftxui/dom/linear_gradient.cpp",
+    "upstream/src/ftxui/dom/node.cpp",
+    "upstream/src/ftxui/dom/node_decorator.cpp",
+    "upstream/src/ftxui/dom/paragraph.cpp",
+    "upstream/src/ftxui/dom/reflect.cpp",
+    "upstream/src/ftxui/dom/scroll_indicator.cpp",
+    "upstream/src/ftxui/dom/separator.cpp",
+    "upstream/src/ftxui/dom/size.cpp",
+    "upstream/src/ftxui/dom/spinner.cpp",
+    "upstream/src/ftxui/dom/strikethrough.cpp",
+    "upstream/src/ftxui/dom/table.cpp",
+    "upstream/src/ftxui/dom/text.cpp",
+    "upstream/src/ftxui/dom/underlined.cpp",
+    "upstream/src/ftxui/dom/underlined_double.cpp",
+    "upstream/src/ftxui/dom/util.cpp",
+    "upstream/src/ftxui/dom/vbox.cpp",
+    "upstream/src/ftxui/component/animation.cpp",
+    "upstream/src/ftxui/component/button.cpp",
+    "upstream/src/ftxui/component/catch_event.cpp",
+    "upstream/src/ftxui/component/checkbox.cpp",
+    "upstream/src/ftxui/component/collapsible.cpp",
+    "upstream/src/ftxui/component/component.cpp",
+    "upstream/src/ftxui/component/component_options.cpp",
+    "upstream/src/ftxui/component/container.cpp",
+    "upstream/src/ftxui/component/dropdown.cpp",
+    "upstream/src/ftxui/component/event.cpp",
+    "upstream/src/ftxui/component/hoverable.cpp",
+    "upstream/src/ftxui/component/input.cpp",
+    "upstream/src/ftxui/component/loop.cpp",
+    "upstream/src/ftxui/component/maybe.cpp",
+    "upstream/src/ftxui/component/menu.cpp",
+    "upstream/src/ftxui/component/modal.cpp",
+    "upstream/src/ftxui/component/radiobox.cpp",
+    "upstream/src/ftxui/component/radiobox.cpp",
+    "upstream/src/ftxui/component/renderer.cpp",
+    "upstream/src/ftxui/component/resizable_split.cpp",
+    "upstream/src/ftxui/component/screen_interactive.cpp",
+    "upstream/src/ftxui/component/slider.cpp",
+    "upstream/src/ftxui/component/terminal_input_parser.cpp",
+    "upstream/src/ftxui/component/util.cpp",
+    "upstream/src/ftxui/component/window.cpp"
+]
+
+env_ftxui = env.Clone()
+if "-Werror" in env_ftxui["CCFLAGS"]:
+    env_ftxui["CCFLAGS"].remove("-Werror")
+
+env_ftxui.Append(CCFLAGS=["-std=c++17"])
+env_ftxui.Append(CPPPATH=["#/modules/ftxui/upstream/src"])
+
+env_ftxui.add_source_files(env.modules_sources, sources)
+
+if env["platform"] == "win":
+    env_ftxui.Append(CPPDEFINES=["FTXUI_MICROSOFT_TERMINAL_FALLBACK"])
