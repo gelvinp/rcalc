@@ -33,13 +33,15 @@ If you use Debian, MacOS, or Windows, you can download the appropriate file from
 | Renderer commands (help)                                      | Complete          |
 | Renderer scratchpad history                                   | Complete          |
 | Renderer scratchpad autocomplete                              | Complete          |
-| Alternate renderer (TUI)                                      | Not started       |
 | Extended Conversion Operators                                 | Complete          |
 | Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
+| Alternate renderer (TUI)                                      | In Progress       |
+| Lib target (for SwiftUI port)                                 | Not Started       |
 
 
 ## Technical debt
- - [ ] Implement arena allocator
+ - [ ] Implement arena allocator (At least for the displayables? Just generally audit for unneeded allocations)
+ - [ ] Go poke at wayland? Find a machine that can *actually* run it?
 
 
 ## Platform support

@@ -1,9 +1,0 @@
-# Track 1
- - Create lib target
- - Create TUI renderer
-
-# Track 2
- - Do something better with displaying binary, octal, and hex values
-
-# Track 3
- - Implement arena allocator (PMR?) for Value vectors and Displayable
