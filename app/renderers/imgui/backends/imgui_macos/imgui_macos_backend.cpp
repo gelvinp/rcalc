@@ -1,9 +1,11 @@
 #include "imgui_macos_backend.h"
 #include "app/renderers/imgui/imgui_renderer.h"
 
+namespace RCalc {
+
 
 template<>
-RenderBackend* RenderBackend::create<RCalc::ImGuiRenderer>() {
+RenderBackend* RenderBackend::create<ImGuiRenderer>() {
     return reinterpret_cast<RenderBackend*>(new ImGuiMacOSBackend());
 }
 
@@ -13,7 +15,7 @@ ImGuiMacOSBackend::ImGuiMacOSBackend()
 {}
 
 
-Result<> ImGuiMacOSBackend::init(RCalc::Application* p_application) {
+Result<> ImGuiMacOSBackend::init(Application* p_application) {
     binding.set_application(p_application);
     return binding.init();
 }
@@ -41,4 +43,6 @@ void ImGuiMacOSBackend::copy_to_clipboard(const std::string_view& string) {
 
 float ImGuiMacOSBackend::get_screen_dpi() {
     return binding.get_screen_dpi();
+}
+
 }

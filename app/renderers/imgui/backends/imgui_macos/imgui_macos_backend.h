@@ -5,12 +5,14 @@
 #include "app/renderers/render_backend.h"
 #include "macos_binding.h"
 
+namespace RCalc {
+
 
 class ImGuiMacOSBackend : public RenderBackend {
 public:
     ImGuiMacOSBackend();
 
-    virtual Result<> init(RCalc::Application* p_application) override;
+    virtual Result<> init(Application* p_application) override;
     virtual void cleanup() override;
 
     virtual void start_frame() override;
@@ -23,5 +25,7 @@ public:
 private:
     RCalc::MacOS binding;
 };
+
+}
 
 #endif

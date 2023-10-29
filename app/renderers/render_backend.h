@@ -3,8 +3,8 @@
 #include "core/error.h"
 
 namespace RCalc {
-    class Application;
-}
+
+class Application;
 
 class RenderBackend {
 public:
@@ -23,3 +23,5 @@ public:
 
     bool close_requested = false;
 };
+
+}

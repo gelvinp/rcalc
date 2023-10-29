@@ -22,6 +22,7 @@ class Capture:
         self.scope_name = None
 
         self.filename = filename
+        self.requires = []
 
 
 class Command:
@@ -31,7 +32,7 @@ class Command:
         self.aliases = capture.cmd_aliases
     
 
-    def build(self, scope_name):
+    def build(self):
         lines = [
             f'CommandMeta CMDMETA_{self.name} {{',
             f'\t"{self.name}",',
@@ -112,7 +113,7 @@ class Scope:
         commands.sort()
 
         for cmd_name in commands:
-            lines.extend(self.commands[cmd_name].build(self.name))
+            lines.extend(self.commands[cmd_name].build())
         
         lines.append(f'std::vector<CommandMeta const *> SCOPECMDS_{self.name} {{')
 
@@ -158,12 +159,12 @@ class CommandMapBuilder:
         self.scope_filenames = []
     
 
-    def process_file(self, path):
+    def process_file(self, path, env):
         self.filename = str(path)
         self.line_no = 1
         with open(path, 'r') as file:
             for line in file:
-                self._process_line(line.rstrip())
+                self._process_line(line.rstrip(), env)
     
     def get_error(self):
         if self.state == self.State.ERROR:
@@ -247,12 +248,12 @@ class CommandMapBuilder:
         self.error = f"Error at {self.filename}:{self.line_no}\n\t{error}"
     
 
-    def _process_line(self, line):
+    def _process_line(self, line, env):
         match self.state:
             case self.State.WAITING:
                 self._process_line_waiting(line)
             case self.State.CAPTURING:
-                self._process_line_capturing(line)
+                self._process_line_capturing(line, env)
             case self.State.ERROR:
                 pass
         
@@ -266,14 +267,14 @@ class CommandMapBuilder:
             self.current_capture = Capture(self.filename)
             
     
-    def _process_line_capturing(self, line):
+    def _process_line_capturing(self, line, env):
         # Capture information from the command comments and definition
         if line.startswith("// "):
             self._process_statement(line[3:])
         elif line.startswith("RCALC_CMD"):
             self._process_declaration(line)
         else:
-            self._finish_cmd()
+            self._finish_cmd(env)
     
     
     def _process_statement(self, statement):
@@ -292,8 +293,8 @@ class CommandMapBuilder:
                 if not statement_arg in self.current_capture.cmd_aliases:
                     self.current_capture.cmd_aliases.append(statement_arg)
             case "Requires":
-                if not statement_arg in self.scope_requires:
-                    self.scope_requires.append(statement_arg)
+                if not statement_arg in self.current_capture.requires:
+                    self.current_capture.requires.append(statement_arg)
             case _:
                 self._set_error(f"Statement type '{statement_type}' is unknown!")
     
@@ -315,7 +316,12 @@ class CommandMapBuilder:
         self.current_capture.cmd_name = args[1]
     
     
-    def _finish_cmd(self):
+    def _finish_cmd(self, env):
+        if not self.current_capture.scope_name in env["enabled_command_scopes"]:
+            self.current_capture = None
+            self.state = self.State.WAITING
+            return
+        
         if self.current_capture.scope_name in self.scopes:
             append_err = self.scopes[self.current_capture.scope_name].try_append(self.current_capture)
             if not append_err is None:
@@ -331,6 +337,10 @@ class CommandMapBuilder:
         
         if not self.filename in self.scope_filenames:
             self.scope_filenames.append(self.filename)
+        
+        for require in self.current_capture.requires:
+            if not require in self.scope_requires:
+                self.scope_requires.append(require)
         
         self.state = self.State.WAITING
     
@@ -522,7 +532,7 @@ def make_command_maps(target, source, env):
     dst = target[0]
     builder = CommandMapBuilder()
     for file in source:
-        builder.process_file(file)
+        builder.process_file(file, env)
 
     built = builder.build(env)
     

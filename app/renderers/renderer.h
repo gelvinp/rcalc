@@ -43,7 +43,7 @@ public:
 
     static const char* default_renderer;
 
-    RenderBackend* p_backend;
+    RenderBackend* p_backend = nullptr;
 };
 
 }

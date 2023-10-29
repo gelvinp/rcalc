@@ -15,7 +15,6 @@ namespace RCalc {
 class ImGuiRenderer : public Renderer {
 public:
     ImGuiRenderer(RendererCreateInfo info);
-    ~ImGuiRenderer();
 
     virtual Result<> init(Application* p_application) override;
     virtual void render() override;

@@ -12,9 +12,11 @@
 
 #include "app/renderers/imgui/imgui_renderer.h"
 
+namespace RCalc {
+
 
 template<>
-RenderBackend* RenderBackend::create<RCalc::ImGuiRenderer>() {
+RenderBackend* RenderBackend::create<ImGuiRenderer>() {
     return reinterpret_cast<RenderBackend*>(new ImGuiStandardBackend());
 }
 
@@ -23,7 +25,7 @@ static void glfw_error_callback(int error, const char* description) {
     Logger::log_err("[GLFW] Error %d: %s\n", error, description);
 }
 
-Result<> ImGuiStandardBackend::init(RCalc::Application* p_application) {
+Result<> ImGuiStandardBackend::init(Application* p_application) {
     IM_UNUSED(p_application);
 
     glfwSetErrorCallback(glfw_error_callback);
@@ -44,7 +46,7 @@ Result<> ImGuiStandardBackend::init(RCalc::Application* p_application) {
 
     // Set app icon
     int x, y, n;
-    unsigned char* icon = stbi_load_from_memory(RCalc::Assets::app_icon_png, RCalc::Assets::app_icon_png_size, &x, &y, &n, 4);
+    unsigned char* icon = stbi_load_from_memory(Assets::app_icon_png, Assets::app_icon_png_size, &x, &y, &n, 4);
     GLFWimage glfw_icon { 256, 256, icon };
     glfwSetWindowIcon(p_window, 1, &glfw_icon);
     stbi_image_free(icon);
@@ -107,4 +109,6 @@ void ImGuiStandardBackend::render_frame() {
 
 void ImGuiStandardBackend::copy_to_clipboard(const std::string_view& string) {
     glfwSetClipboardString(p_window, string.data());
+}
+
 }
