@@ -14,7 +14,7 @@ def get_opts(env: "Environment"):
                 "windowing",
                 help="windowing system to use",
                 default="x11",
-                allowed_values=("x11", "wayland"),
+                allowed_values=("x11"),
                 ignorecase=2
             )
         ])
