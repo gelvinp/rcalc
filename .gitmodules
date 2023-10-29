@@ -4,3 +4,6 @@
 [submodule "modules/freetype/upstream"]
 	path = modules/freetype/upstream
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "modules/ftxui/upstream"]
+	path = modules/ftxui/upstream
+	url = https://github.com/ArthurSonzogni/FTXUI.git
