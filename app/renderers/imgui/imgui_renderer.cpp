@@ -3,7 +3,7 @@
 #include "app/commands/commands.h"
 #include "core/logger.h"
 #include "core/version.h"
-#include "core/help_text.h"
+#include "app/help_text.h"
 #include "assets/B612Mono-Regular.ttf.gen.h"
 #include "assets/license.gen.h"
 #include "core/filter.h"
@@ -666,6 +666,8 @@ void ImGuiRenderer::render_help() {
     ImGui::PopFont();
     
     for (const RCalc::ScopeMeta* scope : command_map.get_alphabetical()) {
+        if (strcmp(scope->scope_name, "Application") != 0 && strcmp(scope->scope_name, "ImGuiRenderer") != 0) { continue; }
+
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
         ImGui::PushFont(p_font_medium);
         ImGui::Text("%s Commands", scope->scope_name);

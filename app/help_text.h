@@ -45,7 +45,7 @@ To enter numbers, you can type them like you normally would. Below are some exam
 0o24 (Parsed as 20)
 4e6 (Parsed as 4000000)
 
-Please note that pressing the '-' key will be treated as immedately calling for the subtract operator (See more in the Entering Operators section below),
+Please note that pressing the '-' key may be treated as immedately calling for the subtract operator (See more in the Entering Operators section below),
 therefore to enter negative numbers, please use the `n` prefix instead:
 n45 (Parsed as -45)
 6en24 (Parsed as 6e-24)
@@ -59,6 +59,11 @@ R"foo(RCalc supports many different operators which are invoked using their name
 pi <enter> cos <enter>
 
 You can also press tab in the scratchpad to autocomplete operators that are available based on the types of values currently in the stack.
+
+The ImGui and Terminal renderers will also treat the keys '+', '-', '*', and '/' as entering their respective operators. When this happens,
+anything in the scratchpad will automatically be pushed to the stack. Therefore, to quickly perform simple arithmetic,
+such as (1 + 2) * 3, you can quickly type
+1 <enter> 2 + 3 *
 
 Further down on this help screen is: a list of all operators, a brief description for each operator, the number of types, and which types, each operator requires, and example(s) of inputs and outputs for each operator.
 )foo"
