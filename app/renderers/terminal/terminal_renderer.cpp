@@ -3,6 +3,7 @@
 #include "core/format.h"
 #include "colors.h"
 #include "entry_component.h"
+#include "scroll_component.h"
 
 #include <cstring>
 
@@ -29,10 +30,15 @@ Result<> TerminalRenderer::init(Application* p_application) {
 
 
 void TerminalRenderer::render_loop() {
-    auto comp_filler = ftxui::Renderer([]{ return ftxui::filler(); });
+    comp_filler = ftxui::Renderer([]{ return ftxui::filler(); });
 
     std::function<ftxui::Element()> render_stack_func = std::bind(&TerminalRenderer::render_stack, this);
     comp_stack = ftxui::Container::Vertical({});
+    comp_stack_renderer = ftxui::Renderer(comp_stack, render_stack_func);
+
+    std::function<ftxui::Element()> render_stack_scroll_func = std::bind(&TerminalRenderer::render_stack_scroll, this);
+    comp_stack_scroll = ScrollComponent::make(comp_stack_renderer, true, true);
+    comp_stack_scroll_renderer = ftxui::Renderer(comp_stack_scroll, render_stack_scroll_func);
 
     ftxui::InputOption scratchpad_options = ftxui::InputOption::Default();
     scratchpad_options.multiline = false;
@@ -51,13 +57,8 @@ void TerminalRenderer::render_loop() {
 
     comp_scratchpad = ftxui::Input(&scratchpad, scratchpad_options);
 
-    comp_container = ftxui::Container::Vertical({
-        comp_filler,
-        ftxui::Renderer(comp_stack, render_stack_func),
-        comp_scratchpad
-    });
-    
-    comp_scratchpad->TakeFocus();
+    comp_container = ftxui::Container::Vertical({});
+    activate_main_page();
 
     std::function<bool(ftxui::Event)> event_func = std::bind(&TerminalRenderer::handle_event, this, std::placeholders::_1);
     comp_container |= ftxui::CatchEvent(event_func);
@@ -67,9 +68,52 @@ void TerminalRenderer::render_loop() {
 }
 
 
+void TerminalRenderer::activate_main_page() {
+    comp_container->DetachAllChildren();
+    
+    comp_container->Add(comp_filler);
+    comp_container->Add(comp_stack_scroll);
+    comp_container->Add(comp_scratchpad);
+    
+    comp_scratchpad->TakeFocus();
+
+    help_open = false;
+    help_close_requested = false;
+}
+
+
+void TerminalRenderer::activate_help_page() {
+    comp_container->DetachAllChildren();
+
+    if (!help_cache) {
+        help_cache = TerminalHelpCache::build_help_cache();
+    }
+    
+    comp_container->Add(help_cache);
+
+    help_open = true;
+    help_requested = false;
+}
+
+
 ftxui::Element TerminalRenderer::render() {
+    if (help_requested && !help_open) {
+        activate_help_page();
+    }
+    else if (help_close_requested && help_open) {
+        activate_main_page();
+    }
+
+    if (help_open) {
+        return comp_container->Render() | ftxui::border;
+    }
+
     if (message.empty()) {
-        return comp_container->Render();
+        return ftxui::vbox({
+            comp_filler->Render(),
+            comp_stack_scroll_renderer->Render(),
+            comp_scratchpad->Render()
+        });
     }
 
     auto message_element = ftxui::text(message);
@@ -79,8 +123,8 @@ ftxui::Element TerminalRenderer::render() {
     }
 
     return ftxui::vbox({
-        ftxui::filler(),
-        render_stack(),
+        comp_filler->Render(),
+        comp_stack_scroll_renderer->Render(),
         ftxui::separator(),
         message_element,
         comp_scratchpad->Render()
@@ -131,10 +175,6 @@ ftxui::Element TerminalRenderer::render_stack() {
 
         auto entry = reinterpret_cast<StackEntryComponent*>(comp_stack->ChildAt(idx).get())->RenderEntry(bg_color);
 
-        if ((comp_stack->ChildCount() - 1 - scroll_offset) == idx) {
-            entry |= ftxui::focus;
-        }
-
         if (fg_color) {
             entry |= ftxui::color(fg_color.value());
         }
@@ -142,7 +182,12 @@ ftxui::Element TerminalRenderer::render_stack() {
         entries.push_back(entry);
     }
 
-    return ftxui::vbox(entries) | ftxui::vscroll_indicator | ftxui::yframe | ftxui::yflex_shrink;
+    return ftxui::vbox(entries);
+}
+
+
+ftxui::Element TerminalRenderer::render_stack_scroll() {
+    return comp_stack_scroll->Render() | ftxui::yflex_shrink;
 }
 
 
@@ -169,6 +214,15 @@ void TerminalRenderer::scratchpad_changed() {
 
 
 bool TerminalRenderer::handle_event(ftxui::Event event) {
+    if (help_open) {
+        if (event == ftxui::Event::Escape) {
+            help_close_requested = help_open;
+            return true;
+        }
+
+        return help_cache->OnEvent(event);
+    }
+
     if (event.is_character()) {
         switch (event.input()[0]) {
             case '+':
@@ -209,48 +263,17 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         return true;
     }
 
-    if (event == ftxui::Event::ArrowUpCtrl) {
-        scroll_offset = std::min(
-            comp_stack->ChildCount() - 1,
-            scroll_offset + 1
-        );
-        return true;
-    }
-    if (event == ftxui::Event::ArrowDownCtrl) {
-        if (scroll_offset > 0) { scroll_offset--; }
-        return true;
-    }
-    if (event == ftxui::Event::Home) {
-        scroll_offset = comp_stack->ChildCount() - 1;
-        return true;
-    }
-    if (event == ftxui::Event::End) {
-        scroll_offset = 0;
-        return true;
-    }
-    if (event == ftxui::Event::PageUp) {
-        scroll_offset = std::min(
-            comp_stack->ChildCount() - 1,
-            scroll_offset + 10
-        );
-        return true;
-    }
-    if (event == ftxui::Event::PageDown) {
-        if (scroll_offset > 10) { scroll_offset -= 10; } else { scroll_offset = 0; }
-        return true;
-    }
-
     if (event == ftxui::Event::ArrowUp) {
         size_t next_state;
 
         if (history_state) {
             next_state = history_state.value() + 1;
-            if (next_state > history.size()) { return 0; }
+            if (next_state > history.size()) { return true; }
         }
         else if (!history.empty()) {
             next_state = 1;
         }
-        else { return 0; }
+        else { return true; }
 
         scratchpad = *(history.end() - next_state);
 
@@ -265,7 +288,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
             if (next_state == 0) { next_state = std::nullopt; }
             if (next_state > history.size()) /* Shouldn't happen but who knows */ { next_state = std::nullopt; }
         }
-        else { return 0; }
+        else { return true; }
         
         if (next_state) {
             scratchpad = *(history.end() - next_state.value());
@@ -301,7 +324,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         return true;
     }
 
-    return false;
+    return comp_stack_scroll->OnEvent(event);
 }
 
 
@@ -383,14 +406,14 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
 
     comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_element)));
 
-    scroll_offset = 0;
+    comp_stack_scroll->OnEvent(ftxui::Event::End);
     autocomp_types.push_back(item.result.get_type());
 }
 
 
 void TerminalRenderer::remove_stack_item() {
     comp_stack->ChildAt(comp_stack->ChildCount() - 1)->Detach();
-    scroll_offset = 0;
+    comp_stack_scroll->OnEvent(ftxui::Event::End);
     autocomp_types.pop_back();
 }
 
@@ -412,6 +435,31 @@ ftxui::Elements TerminalRenderer::split_lines(std::string str) {
         lines.push_back(ftxui::text(std::string(token)));
         token = strtok_p(nullptr, delims, &ctx);
     }
+
+    return lines;
+}
+
+
+ftxui::Elements TerminalRenderer::split_paragraphs(std::string str) {
+    ftxui::Elements lines;
+
+    // Handle newlines differently
+    std::string::size_type loc = 0;
+    std::string::size_type prev = 0;
+
+    while ((loc = str.find('\n', prev)) != std::string::npos) {
+        std::string line = str.substr(prev, loc - prev);
+
+        if (line.empty()) {
+            lines.push_back(ftxui::separatorEmpty());
+        }
+        else {
+            lines.push_back(ftxui::paragraph(line));
+        }
+
+        prev = loc + 1;
+    }
+    lines.push_back(ftxui::paragraph(str.substr(prev, str.size() - prev)));
 
     return lines;
 }

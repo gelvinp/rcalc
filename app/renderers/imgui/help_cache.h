@@ -8,7 +8,7 @@
 #include <vector>
 
 
-namespace RCalc {
+namespace RCalc::ImGuiHelpCache {
 
 struct CachedOperator {
     const Operator& op;

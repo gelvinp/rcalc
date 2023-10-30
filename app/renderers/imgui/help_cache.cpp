@@ -5,7 +5,7 @@
 #include "core/filter.h"
 #include "core/format.h"
 
-namespace RCalc {
+namespace RCalc::ImGuiHelpCache {
 
 CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
     : op(op)
@@ -47,7 +47,10 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
         std::vector<StackItem> _items = stack.pop_items(1);
         StackItem& res = _items[0];
 
-        examples.emplace_back(res);
+        ImGuiDisplayEntry entry { res };
+        entry.output.str = ss.str();
+
+        examples.push_back(entry);
     }
 }
 

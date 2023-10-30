@@ -5,6 +5,7 @@
 #include "app/stack.h"
 #include "app/autocomplete.h"
 #include "app/commands/commands.h"
+#include "help_cache.h"
 
 namespace RCalc {
 
@@ -25,6 +26,9 @@ public:
     virtual void remove_stack_item() override;
     virtual void replace_stack_items(const std::vector<StackItem>& items) override;
 
+    static ftxui::Elements split_lines(std::string str);
+    static ftxui::Elements split_paragraphs(std::string str);
+
     REGISTER_COMMAND(TerminalRenderer, Help);
     REGISTER_COMMAND(TerminalRenderer, Queer);
     REGISTER_COMMAND(TerminalRenderer, ClearHist);
@@ -34,7 +38,7 @@ private:
 
     ftxui::Element render();
     ftxui::Element render_stack();
-    ftxui::Element render_scratchpad();
+    ftxui::Element render_stack_scroll();
 
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
@@ -44,23 +48,31 @@ private:
     bool message_is_error = false;
 
     std::string scratchpad;
+
+    ftxui::Component comp_filler;
     ftxui::Component comp_scratchpad;
     ftxui::Component comp_stack;
+    ftxui::Component comp_stack_renderer;
+    ftxui::Component comp_stack_scroll;
+    ftxui::Component comp_stack_scroll_renderer;
     ftxui::Component comp_container;
 
     bool help_requested = false;
+    bool help_close_requested = false;
+    bool help_open = false;
+    ftxui::Component help_cache;
+
     bool queer_active = false;
 
     void submit_scratchpad();
     void scratchpad_changed();
     bool handle_event(ftxui::Event event);
 
-    ftxui::Elements split_lines(std::string str);
+    void activate_main_page();
+    void activate_help_page();
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
-
-    size_t scroll_offset = 0;
 
     std::vector<Type> autocomp_types;
     AutocompleteManager autocomp;

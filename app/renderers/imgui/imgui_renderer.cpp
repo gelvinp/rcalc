@@ -3,7 +3,6 @@
 #include "app/commands/commands.h"
 #include "core/logger.h"
 #include "core/version.h"
-#include "app/help_text.h"
 #include "assets/B612Mono-Regular.ttf.gen.h"
 #include "assets/license.gen.h"
 #include "core/filter.h"
@@ -353,7 +352,7 @@ void ImGuiRenderer::render() {
             cb_submit_text("\\dup");
             dup_requested = false;
         }
-        if ((ImGui::IsKeyDown(ImGuiKey_F1))) {
+        if (!help_open && ImGui::IsKeyDown(ImGuiKey_F1)) {
             help_requested = true;
         }
     }
@@ -494,11 +493,6 @@ int ImGuiRenderer::scratchpad_input_resize_callback(ImGuiInputTextCallbackData* 
 
 
 int ImGuiRenderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data) {
-    // ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
-    // if (!self->scratchpad_needs_clear) { return 0; }
-    // p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
-    // self->scratchpad_needs_clear = false;
-    // return 0;
     ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
 
     if (self->scratchpad_needs_clear) {
@@ -647,14 +641,7 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted(HelpText::program_info);
 
     for (const HelpText::HelpSection& section : HelpText::sections) {
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 24.0);
-
-        ImGui::PushFont(p_font_medium);
-        ImGui::TextUnformatted(section.header);
-        ImGui::PopFont();
-
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
-        ImGui::TextUnformatted(section.text);
+        render_help_section(section);
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
@@ -690,7 +677,7 @@ void ImGuiRenderer::render_help() {
         build_help_cache();
     }
 
-    for (CachedOperatorCategory& category : help_op_cache) {
+    for (ImGuiHelpCache::CachedOperatorCategory& category : help_op_cache) {
         if (category.category_name) {
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
             ImGui::PushFont(p_font_medium);
@@ -698,7 +685,7 @@ void ImGuiRenderer::render_help() {
             ImGui::PopFont();
         }
 
-        for (CachedOperator& op : category.category_ops) {
+        for (ImGuiHelpCache::CachedOperator& op : category.category_ops) {
             render_help_operator(op);
         }
     }
@@ -741,6 +728,18 @@ void ImGuiRenderer::render_help() {
 }
 
 
+void ImGuiRenderer::render_help_section(const HelpText::HelpSection& section) {
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 24.0);
+
+    ImGui::PushFont(p_font_medium);
+    ImGui::TextUnformatted(section.header);
+    ImGui::PopFont();
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::TextUnformatted(section.text);
+}
+
+
 void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
@@ -775,7 +774,7 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 }
 
 
-void ImGuiRenderer::render_help_operator(CachedOperator& op) {
+void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
@@ -791,11 +790,11 @@ void ImGuiRenderer::render_help_operator(CachedOperator& op) {
     if (!op.op.allowed_types.empty()) {
         std::string type_list_id = fmt("#op_types_%s", op.op.name);
 
-        if (op.op.allowed_types.front().size() == 1) {
+        if (op.op.param_count == 1) {
             types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts 1 argument");
         }
         else {
-            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %llu arguments", (unsigned long long)op.op.allowed_types.front().size()); // Windows compat
+            types_open = ImGui::TreeNode(type_list_id.c_str(), "Accepts %llu arguments", (unsigned long long)op.op.param_count); // Windows compat
         }
 
         if (types_open) {
