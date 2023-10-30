@@ -17,6 +17,7 @@ private:
 
     void print_help(bool print_description = true);
     void print_version();
+    void print_licenses();
 
     void list_renderers();
     const char* validate_renderer(const std::vector<std::string_view>::const_iterator& name);

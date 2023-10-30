@@ -4,6 +4,7 @@
 #include "modules/register_modules.h"
 #include "app/renderers/renderer.h"
 #include "app/application.h"
+#include "assets/license.gen.h"
 
 #include <iostream>
 #include <string_view>
@@ -83,6 +84,7 @@ void Main::print_help(bool print_description)
     std::cout << "  --verbose                   Enable verbose logging.\n";
     std::cout << "  --quiet                     Silence all logging, except for errors.\n";
     std::cout << "  --list-renderers            List the available renderers.\n";
+    std::cout << "  --print-licenses            Print the open source license information.\n";
     std::cout << "\n";
 
     std::cout << "Run Options:\n";
@@ -94,6 +96,12 @@ void Main::print_help(bool print_description)
 void Main::print_version()
 {
     std::cout << get_full_version_string() << "\n";
+}
+
+
+void Main::print_licenses()
+{
+    std::cout << RCalc::Assets::license_md << "\n";
 }
 
 
@@ -170,6 +178,13 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
         {
             config.renderer_name = validate_renderer(++arg);
             continue;
+        }
+
+        if (
+            arg->compare("--print-licenses") == 0
+        ) {
+            print_licenses();
+            exit(0);
         }
 
         
