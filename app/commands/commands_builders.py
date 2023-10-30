@@ -32,9 +32,9 @@ class Command:
         self.aliases = capture.cmd_aliases
     
 
-    def build(self):
+    def build(self, scope_name):
         lines = [
-            f'CommandMeta CMDMETA_{self.name} {{',
+            f'CommandMeta CMDMETA_{scope_name}_{self.name} {{',
             f'\t"{self.name}",',
             f'\t"{self.description}",',
             '\t{',
@@ -64,42 +64,24 @@ class Command:
 
 
 class Scope:
-    seen_usages = []
-
-
     def __init__(self, capture: Capture):
         self.name = capture.scope_name
         self.commands = { capture.cmd_name: Command(capture) }
-        self.__class__.seen_usages.append(_filter_name(capture.cmd_name))
-        self.__class__.seen_usages.extend([_filter_name(alias) for alias in capture.cmd_aliases])
-    
-
-    def try_create(capture: Capture):
-        cmd_name = _filter_name(capture.cmd_name)
-        if cmd_name in Scope.seen_usages:
-            return f"Cannot reclare command '{capture.cmd_name}'"
-        Scope.seen_usages.append(cmd_name)
-
-        for cmd_alias in capture.cmd_aliases:
-            alias = _filter_name(cmd_alias)
-            if alias in Scope.seen_usages:
-                return f"Cannot reclare command '{cmd_alias}'"
-            Scope.seen_usages.append(alias)
-        
-        return Scope(capture)
+        self.seen_usages = [_filter_name(capture.cmd_name)]
+        self.seen_usages.extend([_filter_name(alias) for alias in capture.cmd_aliases])
     
 
     def try_append(self, capture: Capture):
         cmd_name = _filter_name(capture.cmd_name)
-        if cmd_name in self.__class__.seen_usages:
+        if cmd_name in self.seen_usages:
             return f"Cannot reclare command '{capture.cmd_name}'"
-        self.__class__.seen_usages.append(cmd_name)
+        self.seen_usages.append(cmd_name)
 
         for cmd_alias in capture.cmd_aliases:
             alias = _filter_name(cmd_alias)
-            if alias in self.__class__.seen_usages:
+            if alias in self.seen_usages:
                 return f"Cannot reclare command '{cmd_alias}'"
-            self.__class__.seen_usages.append(alias)
+            self.seen_usages.append(alias)
         
         self.commands[capture.cmd_name] = Command(capture)
         
@@ -113,12 +95,12 @@ class Scope:
         commands.sort()
 
         for cmd_name in commands:
-            lines.extend(self.commands[cmd_name].build())
+            lines.extend(self.commands[cmd_name].build(self.name))
         
         lines.append(f'std::vector<CommandMeta const *> SCOPECMDS_{self.name} {{')
 
         if len(commands) > 0:
-            lines.append(',\n'.join([f'\t&CMDMETA_{cmd_name}' for cmd_name in commands]))
+            lines.append(',\n'.join([f'\t&CMDMETA_{self.name}_{cmd_name}' for cmd_name in commands]))
         
         lines.extend([
             '};',
@@ -328,7 +310,7 @@ class CommandMapBuilder:
                 self._set_error(append_err)
                 return
         else:
-            scope = Scope.try_create(self.current_capture)
+            scope = Scope(self.current_capture)
             if type(scope) is Scope:
                 self.scopes[self.current_capture.scope_name] = scope
             else:

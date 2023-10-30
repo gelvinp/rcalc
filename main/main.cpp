@@ -26,11 +26,7 @@ int main(int argc, char** pp_argv)
         Logger::log_err("%s", ss.str().c_str());
     } else {
         RCalc::Application* p_application = res.unwrap();
-
-        while (!p_application->close_requested()) {
-            p_application->step();
-        }
-
+        p_application->run();
         p_application->cleanup();
     }
 

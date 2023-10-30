@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/renderers/renderer.h"
+#include "app/renderers/imgui/backends/imgui_backend.h"
 #include "display_stack.h"
 #include "app/stack.h"
 #include "imgui.h"
@@ -17,7 +18,7 @@ public:
     ImGuiRenderer(RendererCreateInfo info);
 
     virtual Result<> init(Application* p_application) override;
-    virtual void render() override;
+    virtual void render_loop() override;
     virtual void cleanup() override;
 
     virtual void display_info(const std::string& str) override;
@@ -34,9 +35,13 @@ public:
     REGISTER_COMMAND(ImGuiRenderer, ClearHist);
 
 private:
+    ImGuiBackend& get_backend() const { return *reinterpret_cast<ImGuiBackend*>(p_backend); }
+
+    void render();
+
     SubmitTextCallback cb_submit_text;
     SubmitOperatorCallback cb_submit_op;
-    CommandMap<ImGuiRenderer> command_map;
+    CommandMap<ImGuiRenderer>& command_map;
 
     std::string message = "Welcome to RCalc! Type \\help to see what commands and operators are supported.";
     bool message_is_error = false;
@@ -54,6 +59,7 @@ private:
     bool scrollbar_visible = false;
     bool queer_active = false;
     bool enter_pressed = false;
+    bool should_suggest_previous = false;
 
     ImGuiDisplayStack display_stack;
 

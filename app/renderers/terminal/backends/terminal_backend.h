@@ -2,17 +2,20 @@
 
 #include "app/renderers/render_backend.h"
 
+#include "ftxui/screen/screen.hpp"
+#include "ftxui/component/component.hpp"
+
 namespace RCalc {
 
-class TerminalBackend : RenderBackend {
+class TerminalBackend : public RenderBackend {
 public:
-    virtual Result<> init(RCalc::Application* p_application) override;
-    virtual void cleanup() override;
+    Result<> init();
+    void cleanup();
 
-    virtual void start_frame() override;
-    virtual void render_frame() override;
+    void render_loop(ftxui::Component component);
     
-    virtual void copy_to_clipboard(const std::string_view& string) override;
+    // TODO: Replace w/ platform specific
+    virtual void copy_to_clipboard(const std::string_view& string) override { UNUSED(string); }
 };
 
 }

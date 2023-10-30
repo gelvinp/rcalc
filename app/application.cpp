@@ -45,8 +45,8 @@ Application::Application() :
 }
 
 
-void Application::step() {
-    p_renderer->render();
+void Application::run() {
+    p_renderer->render_loop();
 }
 
 
@@ -129,9 +129,6 @@ bool Application::try_swizzle(const std::string& str) {
     std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return std::tolower(c); });
     std::vector<Real> values;
     std::vector<StackItem> source_value = stack.pop_items(1);
-    std::stringstream ss;
-    ss << source_value[0].get_input_formatted();
-    ss << '.';
 
     // Swizzles can only operate on vectors
     switch (source_value[0].result.get_type()) {
@@ -160,8 +157,6 @@ bool Application::try_swizzle(const std::string& str) {
                         stack.push_items(std::move(source_value));
                         return true;
                 }
-
-                ss << ch;
             }
 
             break;
@@ -193,8 +188,6 @@ bool Application::try_swizzle(const std::string& str) {
                         stack.push_items(std::move(source_value));
                         return true;
                 }
-
-                ss << ch;
             }
 
             break;
@@ -225,8 +218,6 @@ bool Application::try_swizzle(const std::string& str) {
                         stack.push_items(std::move(source_value));
                         return true;
                 }
-
-                ss << ch;
             }
 
             break;
@@ -261,7 +252,7 @@ bool Application::try_swizzle(const std::string& str) {
     }
 
     StackItem stack_item {
-        create_displayables_from(result),
+        create_displayables_from(source_value[0].p_input, ".", pattern),
         std::move(result),
         true
     };

@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "app/renderers/render_backend.h"
+#include "app/renderers/imgui/backends/imgui_backend.h"
 
 #include <GLFW/glfw3.h>
 
 namespace RCalc {
 
 
-class ImGuiStandardBackend : RenderBackend {
+class ImGuiStandardBackend : ImGuiBackend {
 public:
     virtual Result<> init(Application* p_application) override;
     virtual void cleanup() override;

@@ -29,7 +29,7 @@ public:
     static const std::vector<const char*>& get_enabled_renderers();
 
     virtual Result<> init(Application* p_application) = 0;
-    virtual void render() = 0;
+    virtual void render_loop() = 0;
     virtual void cleanup() = 0;
 
     virtual void display_info(const std::string& str) = 0;

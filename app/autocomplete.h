@@ -17,6 +17,7 @@ class AutocompleteManager {
 public:
     void init_suggestions(const std::string_view& str, const std::vector<Type>& stack_types);
     std::optional<std::string> get_next_suggestion();
+    std::optional<std::string> get_previous_suggestion();
     void cancel_suggestion();
 
     bool suggestions_active() const { return active_auto.has_value(); }
@@ -25,6 +26,7 @@ private:
     class Autocomplete {
     public:
         virtual std::optional<std::string> get_next_suggestion();
+        virtual std::optional<std::string> get_previous_suggestion();
         void cancel_suggestion();
 
     protected:
@@ -36,6 +38,7 @@ private:
     public:
         void init_suggestions(std::string_view str);
         virtual std::optional<std::string> get_next_suggestion() override;
+        virtual std::optional<std::string> get_previous_suggestion() override;
     };
 
     class OperatorAutocomplete : public Autocomplete {

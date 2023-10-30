@@ -19,7 +19,7 @@ struct AppConfig {
 
 class Application {
 public:
-    void step();
+    void run();
     void cleanup();
 
 
@@ -35,8 +35,6 @@ public:
 
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);
-
-    bool close_requested() const { return p_renderer->p_backend->close_requested; }
 
 private:
     Application();

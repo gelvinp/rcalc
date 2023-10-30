@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "app/renderers/render_backend.h"
+#include "app/renderers/imgui/backends/imgui_backend.h"
 #include "macos_binding.h"
 
 namespace RCalc {
 
 
-class ImGuiMacOSBackend : public RenderBackend {
+class ImGuiMacOSBackend : public ImGuiBackend {
 public:
     ImGuiMacOSBackend();
 

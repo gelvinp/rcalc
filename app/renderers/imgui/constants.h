@@ -8,10 +8,11 @@ const float STACK_HORIZ_PADDING = 16.0;
 const float STACK_HORIZ_BIAS = 8.0;
 const float STACK_OUTER_PADDING = 4.0;
 const float STACK_BOTTOM_PADDING = 8.0;
+const float STACK_BETWEEN_PADDING = 6.0;
 
 constexpr ImVec4 COLORS[] = {
     { 1.0, 0.239, 0.239, 1.0 },     // Red
-    { 1.0, 0.619, 0.329, 1.0 },   // Orange
+    { 1.0, 0.619, 0.329, 1.0 },     // Orange
     { 1.0, 0.909, 0.388, 1.0 },     // Yellow
     { 0.439, 1.0, 0.388, 1.0 },     // Green
     { 0.412, 0.655, 1.0, 1.0 },     // Blue

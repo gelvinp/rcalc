@@ -1,5 +1,6 @@
 #include "imgui_renderer.h"
 
+#include "app/commands/commands.h"
 #include "core/logger.h"
 #include "core/version.h"
 #include "core/help_text.h"
@@ -23,17 +24,16 @@ namespace RCalc {
 
 ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
         cb_submit_text(info.cb_submit_text),
-        cb_submit_op(info.cb_submit_op)
+        cb_submit_op(info.cb_submit_op),
+        command_map(CommandMap<ImGuiRenderer>::get_command_map())
 {
-    command_map = CommandMap<ImGuiRenderer>::get_command_map();
-
-    // Init backend
     p_backend = RenderBackend::create<ImGuiRenderer>();
 }
 
 
 Result<> ImGuiRenderer::init(Application* p_application) {
-    Result<> res = p_backend->init(p_application);
+    Result<> res = get_backend().init(p_application);
+    if (!res) { return res; }
 
     // Load font
     ImGuiIO& io = ImGui::GetIO();
@@ -45,7 +45,7 @@ Result<> ImGuiRenderer::init(Application* p_application) {
     glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
     glyphs.BuildRanges(&glyph_ranges);
 
-    float screen_dpi = p_backend->get_screen_dpi();
+    float screen_dpi = get_backend().get_screen_dpi();
     float font_size_standard = std::floor(14 * screen_dpi);
     float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
@@ -60,8 +60,18 @@ Result<> ImGuiRenderer::init(Application* p_application) {
 }
 
 
+void ImGuiRenderer::render_loop() {
+    while (!get_backend().close_requested) {
+        render();
+    }
+}
+
+
 void ImGuiRenderer::render() {
-    p_backend->start_frame();
+    get_backend().start_frame();
+
+    // Avoid weirdness with delete key
+    bool scratchpad_empty = scratchpad.empty();
 
     // Fullscreen window
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -82,14 +92,14 @@ void ImGuiRenderer::render() {
     }
 
     
-    if (p_backend->app_menu_bar()) {
+    if (get_backend().app_menu_bar()) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
                 ImGui::MenuItem("Show Help", "F1", &help_requested);
                 ImGui::Separator();
-                ImGui::MenuItem("Quit", "Ctrl+Q", &p_backend->close_requested);
+                ImGui::MenuItem("Quit", "Ctrl+Q", &get_backend().close_requested);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -117,7 +127,7 @@ void ImGuiRenderer::render() {
     const float separator_position = message_position - message_padding;
 
     const float menu_bar_height = ImGui::GetCursorPosY();
-    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height - STACK_BOTTOM_PADDING;
+    const float available_stack_height = window_height - input_height - message_height - (padding * 3.0f) - message_padding - menu_bar_height - STACK_BOTTOM_PADDING - STACK_BETWEEN_PADDING;
 
     display_stack.calculate_sizes(window_width, scrollbar_visible);
 
@@ -127,7 +137,7 @@ void ImGuiRenderer::render() {
             desired_stack_height += entry.height;
         }
 
-        desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
+        desired_stack_height += (ImGui::GetStyle().ItemSpacing.y + STACK_BETWEEN_PADDING) * (display_stack.entries.size() - 1);
     }
 
     if ((desired_stack_height >= available_stack_height) && !scrollbar_visible) {
@@ -142,7 +152,7 @@ void ImGuiRenderer::render() {
                 desired_stack_height += entry.height;
             }
 
-            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
+            desired_stack_height += (ImGui::GetStyle().ItemSpacing.y + STACK_BETWEEN_PADDING) * (display_stack.entries.size() - 1);
         }
     }
     else if ((desired_stack_height < available_stack_height) && scrollbar_visible) {
@@ -157,22 +167,25 @@ void ImGuiRenderer::render() {
                 desired_stack_height += entry.height;
             }
 
-            desired_stack_height += ImGui::GetStyle().ItemSpacing.y * (display_stack.entries.size() - 1);
+            desired_stack_height += (ImGui::GetStyle().ItemSpacing.y + STACK_BETWEEN_PADDING) * (display_stack.entries.size() - 1);
         }
     }
 
     const float stack_height = std::min(available_stack_height, desired_stack_height);
 
-    const float stack_position = separator_position - stack_height - padding - STACK_BOTTOM_PADDING;
+    const float stack_position = separator_position - stack_height - padding - STACK_BOTTOM_PADDING - STACK_BETWEEN_PADDING;
 
     if (!display_stack.entries.empty()) {
         ImGui::SetCursorPosY(stack_position);
 
         if (ImGui::BeginChild("##stack", ImVec2(0, stack_height + STACK_BOTTOM_PADDING))) {
             int index = 0;
+            bool first = true;
 
             for (const ImGuiDisplayEntry& entry : display_stack.entries) {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + STACK_OUTER_PADDING);
+
+                if (first) { first = false; } else { ImGui::SetCursorPosY(ImGui::GetCursorPosY() + STACK_BETWEEN_PADDING); } 
 
                 if (queer_active) {
                     int color_index = index % COLOR_GRAY;
@@ -228,7 +241,7 @@ void ImGuiRenderer::render() {
 
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
-                        p_backend->copy_to_clipboard(entry.output.str);
+                        get_backend().copy_to_clipboard(entry.output.str);
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -326,13 +339,13 @@ void ImGuiRenderer::render() {
     render_help();
 
     // Handle shortcuts
-    if (p_backend->app_menu_bar()) {
+    if (get_backend().app_menu_bar()) {
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
-            p_backend->close_requested = true;
+            get_backend().close_requested = true;
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
             if (!display_stack.entries.empty()) {
-                p_backend->copy_to_clipboard(display_stack.entries.back().output.str);
+                get_backend().copy_to_clipboard(display_stack.entries.back().output.str);
             }
             copy_requested = false;
         }
@@ -344,22 +357,25 @@ void ImGuiRenderer::render() {
             help_requested = true;
         }
     }
-    if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete) && scratchpad_empty) {
         cb_submit_text("\\pop");
     }
-    if (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter)) {
+    if (enter_pressed && (ImGui::IsKeyReleased(ImGuiKey_Enter) || ImGui::IsKeyReleased(ImGuiKey_KeypadEnter))) {
         enter_pressed = false;
     }
     if (help_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         help_open = false;
     }
+    if (!should_suggest_previous && ImGui::IsKeyPressed(ImGuiKey_Tab) && (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift))) {
+        should_suggest_previous = true;
+    }
 
-    p_backend->render_frame();
+    get_backend().render_frame();
 }
 
 
 void ImGuiRenderer::cleanup() {
-    p_backend->cleanup();
+    get_backend().cleanup();
 }
 
 
@@ -478,10 +494,35 @@ int ImGuiRenderer::scratchpad_input_resize_callback(ImGuiInputTextCallbackData* 
 
 
 int ImGuiRenderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* p_cb_data) {
+    // ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
+    // if (!self->scratchpad_needs_clear) { return 0; }
+    // p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+    // self->scratchpad_needs_clear = false;
+    // return 0;
     ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
-    if (!self->scratchpad_needs_clear) { return 0; }
-    p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
-    self->scratchpad_needs_clear = false;
+
+    if (self->scratchpad_needs_clear) {
+        p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+        self->scratchpad_needs_clear = false;
+        return 0;
+    }
+
+    if (self->should_suggest_previous) {
+        if (!self->autocomp.suggestions_active()) {
+            self->autocomp.init_suggestions(p_cb_data->Buf, self->autocomp_types);
+        }
+
+        std::optional<std::string> next = self->autocomp.get_previous_suggestion();
+        if (!next) { return 0; }
+
+        p_cb_data->DeleteChars(0, p_cb_data->BufTextLen);
+        p_cb_data->InsertChars(0, next->data(), next->data() + next->length());
+
+        self->should_suggest_previous = false;
+
+        return 0;
+    }
+
     return 0;
 }
 
@@ -598,7 +639,7 @@ void ImGuiRenderer::render_help() {
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
-        p_backend->copy_to_clipboard(VERSION_HASH);
+        get_backend().copy_to_clipboard(VERSION_HASH);
         help_version_copied = true;
     }
 

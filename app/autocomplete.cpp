@@ -37,6 +37,14 @@ std::optional<std::string> AutocompleteManager::get_next_suggestion() {
 }
 
 
+std::optional<std::string> AutocompleteManager::get_previous_suggestion() {
+    if (active_auto) {
+        return active_auto.value()->get_previous_suggestion();
+    }
+    return std::nullopt;
+}
+
+
 void AutocompleteManager::cancel_suggestion() {
     if (active_auto) {
         active_auto.value()->cancel_suggestion();
@@ -47,6 +55,28 @@ void AutocompleteManager::cancel_suggestion() {
 
 std::optional<std::string> AutocompleteManager::Autocomplete::get_next_suggestion() {
     if (!suggestion_index) { return std::nullopt; }
+
+    std::string str { suggestions[suggestion_index.value()].data() };
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+
+    suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
+
+    return str;
+}
+
+
+std::optional<std::string> AutocompleteManager::Autocomplete::get_previous_suggestion() {
+    if (!suggestion_index) { return std::nullopt; }
+
+    if (suggestion_index == 0) {
+        suggestion_index = suggestions.size() - 2;
+    }
+    else if (suggestion_index == 1) {
+        suggestion_index = suggestions.size() - 1;
+    }
+    else {
+        suggestion_index = suggestion_index.value() - 2;
+    }
 
     std::string str { suggestions[suggestion_index.value()].data() };
     std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
@@ -100,6 +130,28 @@ void AutocompleteManager::CommandAutocomplete::init_suggestions(std::string_view
 
 std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_next_suggestion() {
     if (!suggestion_index) { return std::nullopt; }
+
+    std::string str = "\\";
+    str.append(suggestions[suggestion_index.value()].data());
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+
+    suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
+
+    return str;
+}
+
+std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_previous_suggestion() {
+    if (!suggestion_index) { return std::nullopt; }
+
+    if (suggestion_index == 0) {
+        suggestion_index = suggestions.size() - 2;
+    }
+    else if (suggestion_index == 1) {
+        suggestion_index = suggestions.size() - 1;
+    }
+    else {
+        suggestion_index = suggestion_index.value() - 2;
+    }
 
     std::string str = "\\";
     str.append(suggestions[suggestion_index.value()].data());
