@@ -14,5 +14,8 @@ def meta():
 
 
 def configure(env: "Environment"):
-    env["enabled_modules"].extend(["ftxui", "clip"])
+    env["enabled_modules"].append("ftxui")
     env["enabled_command_scopes"].append("TerminalRenderer")
+
+    if env["enable_terminal_clipboard"]:
+        env["enabled_modules"].append("clip")

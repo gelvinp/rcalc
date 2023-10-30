@@ -128,6 +128,7 @@ opts.Add(EnumVariable("arch", "CPU architecture", "auto", ["auto"] + platform_me
 opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
+opts.Add(BoolVariable("enable_terminal_clipboard", "Enable clipboard support for the terminal renderer, requiring a desktop manager on linux.", True))
 
 opts.Add("CXX", "C++ compiler")
 opts.Add("CC", "C compiler")
@@ -370,6 +371,9 @@ if selected_platform in available_platforms:
     env["extra_sources"] = []
 
     env.Append(CPPDEFINES=["\"UNUSED(arg)=(void)(arg)\""])
+    
+    if env["gperf_path"]:
+        env.Append(CPPDEFINES=["GPERF_ENABLED"]) # Not used anywhere, but will force recompilation
 
     Export("env")
     
