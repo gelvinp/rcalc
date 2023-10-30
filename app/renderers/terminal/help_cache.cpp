@@ -40,6 +40,8 @@ If your terminal supports the mouse, you can use the scroll wheel to scroll thro
 
 If your terminal does not support the mouse, you can navigate through RCalc entirely with the keyboard. You can scroll through this help page with the Up/Down arrows, and you can scroll through the stack with Control + Up/Down arrows. (Up/Down without control cycles through scratchpad history.) You can also scroll by one screen at a time using Page Up/Down, or scroll to the top or bottom using Home/End. To change which dropdown is selected, you can use 'j' or Tab to move the selection down, 'k' or Shift + Tab to move the selection up, and Space/Enter to toggle the dropdown.
 
+At the bottom of this help screen is the open source license info for this app and its components. Due to a bug with the terminal renderer, it may be cut off and not display in full. The most reliable way to view the full license info from the terminal is to run `rcalc --print-licenses`.
+
 To exit this help screen, press Escape.
 )foo"
 };
