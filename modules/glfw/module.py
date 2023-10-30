@@ -8,17 +8,6 @@ def get_opts(env: "Environment"):
         BoolVariable("builtin_glfw", "Statically link the vendored copy of GLFW", False)
     ]
 
-    if env["platform"] == "linux":
-        opts.extend([
-            EnumVariable(
-                "windowing",
-                help="windowing system to use",
-                default="x11",
-                allowed_values=("x11"),
-                ignorecase=2
-            )
-        ])
-
     return opts
 
 def configure(env: "Environment"):

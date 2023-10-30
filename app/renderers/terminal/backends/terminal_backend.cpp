@@ -4,6 +4,7 @@
 #include "app/renderers/terminal/terminal_renderer.h"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/component/loop.hpp"
+#include "modules/clip/upstream/clip.h"
 
 #include <iostream>
 #include <thread>
@@ -14,7 +15,6 @@ template<>
 RenderBackend* RenderBackend::create<TerminalRenderer>() {
     return reinterpret_cast<RenderBackend*>(new TerminalBackend());
 }
-
 
 Result<> TerminalBackend::init() { return Ok(); }
 void TerminalBackend::cleanup() {}
@@ -28,6 +28,11 @@ void TerminalBackend::render_loop(ftxui::Component component) {
         loop.RunOnceBlocking();
         close_requested |= loop.HasQuitted();
     }
+}
+
+
+void TerminalBackend::copy_to_clipboard(const std::string_view& string) {
+    clip::set_text(std::string { string });
 }
 
 }

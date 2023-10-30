@@ -42,6 +42,7 @@ If you use Debian, MacOS, or Windows, you can download the appropriate file from
 ## Technical debt
  - [ ] Implement arena allocator (At least for the displayables? Just generally audit for unneeded allocations)
  - [ ] Go poke at wayland? Find a machine that can *actually* run it?
+ - [ ] Rewrite readme / create wiki with documentation on usage and development
 
 
 ## Platform support

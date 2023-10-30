@@ -49,7 +49,7 @@ private:
     ftxui::Component comp_container;
 
     bool help_requested = false;
-    bool queer_active = true;
+    bool queer_active = false;
 
     void submit_scratchpad();
     void scratchpad_changed();

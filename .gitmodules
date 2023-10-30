@@ -7,3 +7,6 @@
 [submodule "modules/ftxui/upstream"]
 	path = modules/ftxui/upstream
 	url = https://github.com/ArthurSonzogni/FTXUI.git
+[submodule "modules/clip/upstream"]
+	path = modules/clip/upstream
+	url = https://github.com/dacap/clip

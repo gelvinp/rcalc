@@ -1,0 +1,13 @@
+Import("env")
+Import("env_modules")
+
+env_clip = env_modules.Clone()
+if "-Werror" in env_clip["CCFLAGS"]:
+    env_clip["CCFLAGS"].remove("-Werror")
+
+env_clip.add_source_files(env.modules_sources, "upstream/clip.cpp")
+env_clip.add_source_files(env.modules_sources, "upstream/image.cpp")
+
+if env["platform"] == "linux":
+    if env["windowing"] == "x11":
+        env_clip.add_source_files(env.modules_sources, "upstream/clip_x11.cpp")

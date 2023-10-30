@@ -18,11 +18,18 @@ def is_available():
 
 
 def get_opts():
-    from SCons.Variables import BoolVariable
+    from SCons.Variables import BoolVariable, EnumVariable
 
     return [
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
-        BoolVariable("use_asan", "Compile with -fsanitize=address", False)
+        BoolVariable("use_asan", "Compile with -fsanitize=address", False),
+        EnumVariable(
+            "windowing",
+            help="windowing system to use",
+            default="x11",
+            allowed_values=("x11"),
+            ignorecase=2
+        )
     ]
 
 
