@@ -2,18 +2,17 @@
 
 #include "core/error.h"
 
-class ImGuiMacOSBackend;
-
 
 namespace RCalc
 {
 
+class ImGuiMacOSBackend;
 class Application;
 struct MacOSBinding;
 
 class MacOS {
 public:
-    MacOS(::ImGuiMacOSBackend* p_backend);
+    MacOS(ImGuiMacOSBackend* p_backend);
     ~MacOS();
 
     Result<> init();

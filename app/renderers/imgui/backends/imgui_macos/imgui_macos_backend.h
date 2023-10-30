@@ -23,7 +23,7 @@ public:
     virtual float get_screen_dpi() override;
 
 private:
-    RCalc::MacOS binding;
+    MacOS binding;
 };
 
 }
