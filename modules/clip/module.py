@@ -10,7 +10,7 @@ def configure(env: "Environment"):
             deps = ["xcb"]
 
             if os.system(f"pkg-config --exists {' '.join(deps)}"):
-                print("Error: Required libraries not found. Aborting.")
+                print(f"Error: Required libraries '{', '.join(deps)}' not found. Aborting.")
                 sys.exit(255)
             
             env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")

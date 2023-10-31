@@ -30,7 +30,7 @@ def configure(env: "Environment"):
             ])
         
         if os.system(f"pkg-config --exists {' '.join(deps)}"):
-            print("Error: Required libraries not found. Aborting.")
+            print(f"Error: Required libraries '{', '.join(deps)}' not found. Aborting.")
             sys.exit(255)
         
         env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
@@ -49,7 +49,7 @@ def configure(env: "Environment"):
             pass
         else:
             if os.system("pkg-config --exists glfw3"):
-                print("Error: Required libraries not found. Aborting.")
+                print(f"Error: Required library 'glfw3' not found. Aborting.")
                 sys.exit(255)
             
             env.ParseConfig("pkg-config --cflags --libs glfw3")
@@ -60,7 +60,7 @@ def configure(env: "Environment"):
             pass
         else:
             if os.system(f"{env['mingw_prefix']}/bin/pkg-config --exists glfw3"):
-                print("Error: Required libraries not found. Aborting.")
+                print(f"Error: Required library 'glfw3' not found. Aborting.")
                 sys.exit(255)
             
             env.Append(LINKFLAGS=["-static"])
