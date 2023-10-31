@@ -19,7 +19,11 @@ RenderBackend* RenderBackend::create<TerminalRenderer>() {
     return reinterpret_cast<RenderBackend*>(new TerminalBackend());
 }
 
-Result<> TerminalBackend::init() { return Ok(); }
+Result<> TerminalBackend::init(std::function<void(const std::string&)> _cb_report_error) {
+    cb_report_error = _cb_report_error;
+    return Ok();
+}
+
 void TerminalBackend::cleanup() {}
 
 
@@ -36,9 +40,12 @@ void TerminalBackend::render_loop(ftxui::Component component) {
 
 void TerminalBackend::copy_to_clipboard(const std::string_view& string) {
 #ifdef MODULE_CLIP_ENABLED
-    clip::set_text(std::string { string });
+    if (!clip::set_text(std::string { string })) {
+        cb_report_error("Failed to copy to the clipboard!");
+    }
 #else
     UNUSED(string);
+    cb_report_error("RCalc was not compiled with terminal clipboard support!");
 #endif
 }
 

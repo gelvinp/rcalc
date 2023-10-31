@@ -22,7 +22,7 @@ TerminalRenderer::TerminalRenderer(RendererCreateInfo info) :
 Result<> TerminalRenderer::init(Application* p_application) {
     UNUSED(p_application);
 
-    Result<> res = get_backend().init();
+    Result<> res = get_backend().init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
     if (!res) { return res; }
 
     return Ok();
