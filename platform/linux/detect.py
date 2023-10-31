@@ -91,12 +91,6 @@ def configure(env: "Environment"):
         env.Append(CCFLAGS=["-fsanitize=address"])
         env.Append(LINKFLAGS=["-fsanitize=address"])
 
-    deps = ['gl']
-    if os.system(f"pkg-config --exists {' '.join(deps)}"):
-        print("Error: Required libraries not found. Aborting.")
-        sys.exit(255)
-    env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
-
     # Cross compilation
     host_is_64bit = sys.maxsize > 2**32
     if host_is_64bit and env["arch"] == "x86_32":

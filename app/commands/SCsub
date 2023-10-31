@@ -8,7 +8,7 @@ env.command_sources = []
 
 env_cmd = env.Clone()
 
-commands_gen_path = f'#app/commands/commands.{env["GENSUFFIX"]}.cpp'
+commands_gen_path = f'#app/commands/commands{env["GENSUFFIX"]}.cpp'
 env_app["commands_gen_path"] = commands_gen_path
 
 env_cmd.Depends(commands_gen_path, glob("*.inc"))

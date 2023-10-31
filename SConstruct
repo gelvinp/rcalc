@@ -181,6 +181,8 @@ for renderer in available_renderers:
     if env_base[f"enable_{renderer}_renderer"]:
         enabled_renderers.append(renderer)
         env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_ENABLED'])
+    else:
+        env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_DISABLED'])
 
 
 
@@ -362,7 +364,7 @@ if selected_platform in available_platforms:
     env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
     env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
-    env["GENSUFFIX"] = suffix + ".gen"
+    env["GENSUFFIX"] = ''.join([f'.{r}' for r in enabled_renderers]) + ".gen"
 
     # compile_commands.json
     env.Tool("compilation_db")

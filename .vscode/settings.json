@@ -101,7 +101,8 @@
         "locale": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "__memory": "cpp"
+        "__memory": "cpp",
+        "coroutine": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20",
     "python.analysis.ignore": [

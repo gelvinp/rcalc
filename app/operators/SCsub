@@ -8,7 +8,7 @@ env.operator_sources = []
 env_ops = env.Clone()
 
 operators_internal_gen_path = f'#app/operators/operators_internal.gen.h'
-operators_gen_path = f'#app/operators/operators.{env["GENSUFFIX"]}.cpp'
+operators_gen_path = f'#app/operators/operators.gen.cpp'
 
 env_ops.Depends(glob("*.inc"), operators_internal_gen_path)
 env_ops.Depends(operators_gen_path, operators_internal_gen_path)

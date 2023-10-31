@@ -6,7 +6,7 @@ import renderer_builders
 for renderer in env["enabled_renderers"]:
     SConscript(f'{renderer}/SCsub')
 
-renderers_gen_path = f'#app/renderers/renderers.{env["GENSUFFIX"]}.cpp'
+renderers_gen_path = f'#app/renderers/renderers{env["GENSUFFIX"]}.cpp'
 env_app["renderers_gen_path"] = renderers_gen_path
 
 env_app.CommandNoCache(

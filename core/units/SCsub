@@ -7,7 +7,7 @@ env.units_sources = []
 
 env_units = env.Clone()
 
-units_gen_path = f'#core/units/units.{env["GENSUFFIX"]}.cpp'
+units_gen_path = f'#core/units/units.gen.cpp'
 
 env_units.Depends(units_gen_path, glob("*.inc"))
 env_units.Depends(units_gen_path, "#core/units/units_builders.py")
