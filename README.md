@@ -35,7 +35,7 @@ If you use Debian, MacOS, or Windows, you can download the appropriate file from
 | Renderer scratchpad autocomplete                              | Complete          |
 | Extended Conversion Operators                                 | Complete          |
 | Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
-| Alternate renderer (TUI)                                      | In Progress       |
+| Alternate renderer (TUI)                                      | Complete          |
 | Lib target (for SwiftUI port)                                 | Not Started       |
 
 
