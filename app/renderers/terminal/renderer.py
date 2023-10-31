@@ -1,3 +1,5 @@
+import sys
+
 def get_priority():
     return 1
 
@@ -14,6 +16,13 @@ def meta():
 
 
 def configure(env: "Environment"):
+    if env["platform"] == "win" and env["windows_subsystem"] == "gui":
+        print("The terminal renderer does NOT work on windows with the GUI subsystem!")
+        print("Either...")
+        print("\tDisable the terminal renderer (enable_terminal_renderer=no)")
+        print("\tOR Switch to the console renderer (windows_subsystem=console)")
+        sys.exit(255)
+    
     env["enabled_modules"].append("ftxui")
     env["enabled_command_scopes"].append("TerminalRenderer")
 

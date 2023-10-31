@@ -7,19 +7,23 @@ env.operator_sources = []
 
 env_ops = env.Clone()
 
-env_ops.Depends(glob("*.inc"), "#app/operators/operators_internal.gen.h")
-env_ops.Depends("#app/operators/operators.gen.cpp", "#app/operators/operators_internal.gen.h")
-env_ops.Depends("#app/operators/operators_internal.gen.h", "#app/operators/operators_builders.py")
+operators_internal_gen_path = f'#app/operators/operators_internal.gen.h'
+operators_gen_path = f'#app/operators/operators.{env["GENSUFFIX"]}.cpp'
+
+env_ops.Depends(glob("*.inc"), operators_internal_gen_path)
+env_ops.Depends(operators_gen_path, operators_internal_gen_path)
+env_ops.Depends(operators_internal_gen_path, "#app/operators/operators_builders.py")
 env_ops.CommandNoCache(
-    "#app/operators/operators_internal.gen.h",
+    operators_internal_gen_path,
     None,
     env.Run(operators_builders.make_internal_header, "Building operators internal header.")
 )
 
-env_ops.Depends("#app/operators/operators.gen.cpp", glob("*.inc"))
-env_ops.Depends("#app/operators/operators.gen.cpp", "#app/operators/operators_builders.py")
+
+env_ops.Depends(operators_gen_path, glob("*.inc"))
+env_ops.Depends(operators_gen_path, "#app/operators/operators_builders.py")
 env_ops.CommandNoCache(
-    "#app/operators/operators.gen.cpp",
+    operators_gen_path,
     glob("*.inc"),
     env.Run(operators_builders.make_operators_map, "Building operators map.")
 )
@@ -29,7 +33,7 @@ env_ops.add_source_files(env.operator_sources, "*.cpp")
 env_ops_gen = env_ops.Clone()
 if "-Werror" in env_ops_gen["CCFLAGS"]:
     env_ops_gen["CCFLAGS"].remove("-Werror")
-env_ops_gen.add_source_files(env.operator_sources, "#app/operators/operators.gen.cpp")
+env_ops_gen.add_source_files(env.operator_sources, operators_gen_path)
 
 lib = env_ops.add_library("operators", env.operator_sources)
 env.Prepend(LIBS=[lib])

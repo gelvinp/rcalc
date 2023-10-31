@@ -3,7 +3,3 @@ Import("env_app")
 
 env_app.add_source_files(env.app_sources, "*.cpp")
 env_app.add_source_files(env.app_sources, "backends/*.cpp")
-
-if env["platform"] == "linux":
-    if env["windowing"] == "x11":
-        env_app.add_source_files(env.app_sources, "backends/linux_x11/*.cpp")

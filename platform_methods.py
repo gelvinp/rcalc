@@ -9,7 +9,7 @@ import subprocess
 # NOTE: The multiprocessing module is not compatible with SCons due to conflict on cPickle
 
 JSON_SERIALIZABLE_TYPES = (bool, int, float, str)
-JSON_SERIALIZE_OVERRIDE = ["enabled_renderers", "enabled_command_scopes"]
+JSON_SERIALIZE_OVERRIDE = ["enabled_renderers", "enabled_command_scopes", "renderer_meta"]
 
 
 def run_in_subprocess(builder_function):

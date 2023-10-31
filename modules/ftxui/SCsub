@@ -65,7 +65,6 @@ sources = [
     "upstream/src/ftxui/component/menu.cpp",
     "upstream/src/ftxui/component/modal.cpp",
     "upstream/src/ftxui/component/radiobox.cpp",
-    "upstream/src/ftxui/component/radiobox.cpp",
     "upstream/src/ftxui/component/renderer.cpp",
     "upstream/src/ftxui/component/resizable_split.cpp",
     "upstream/src/ftxui/component/screen_interactive.cpp",
@@ -81,6 +80,7 @@ if "-Werror" in env_ftxui["CCFLAGS"]:
 
 env_ftxui.Append(CCFLAGS=["-std=c++17"])
 env_ftxui.Append(CPPPATH=["#/modules/ftxui/upstream/src"])
+env_ftxui.Append(CPPDEFINES=["UNICODE", "_UNICODE"])
 
 env_ftxui.add_source_files(env.modules_sources, sources)
 

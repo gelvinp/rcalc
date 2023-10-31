@@ -13,3 +13,5 @@ if env["platform"] == "linux":
         env_clip.add_source_files(env.modules_sources, "upstream/clip_x11.cpp")
 elif env["platform"] == "macos":
     env_clip.add_source_files(env.modules_sources, "upstream/clip_osx.mm")
+elif env["platform"] == "win":
+    env_clip.add_source_files(env.modules_sources, "upstream/clip_win.cpp")

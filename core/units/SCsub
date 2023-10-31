@@ -7,10 +7,12 @@ env.units_sources = []
 
 env_units = env.Clone()
 
-env_units.Depends("#core/units/units.gen.cpp", glob("*.inc"))
-env_units.Depends("#core/units/units.gen.cpp", "#core/units/units_builders.py")
+units_gen_path = f'#core/units/units.{env["GENSUFFIX"]}.cpp'
+
+env_units.Depends(units_gen_path, glob("*.inc"))
+env_units.Depends(units_gen_path, "#core/units/units_builders.py")
 env_units.CommandNoCache(
-    "#core/units/units.gen.cpp",
+    units_gen_path,
     glob("*.inc"),
     env.Run(units_builders.make_units_maps, "Building units map.")
 )
@@ -20,7 +22,7 @@ env_units.add_source_files(env.units_sources, "*.cpp")
 env_units_gen = env_units.Clone()
 if "-Werror" in env_units_gen["CCFLAGS"]:
     env_units_gen["CCFLAGS"].remove("-Werror")
-env_units_gen.add_source_files(env.units_sources, "#core/units/units.gen.cpp")
+env_units_gen.add_source_files(env.units_sources, units_gen_path)
 
 lib = env_units.add_library("units", env.units_sources)
 env.Prepend(LIBS=[lib])

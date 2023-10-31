@@ -104,13 +104,14 @@ def is_available():
 
 
 def get_opts():
-    from SCons.Variables import BoolVariable
+    from SCons.Variables import BoolVariable, EnumVariable
 
     mingw = os.getenv("MINGW_PREFIX", "")
 
     return [
         ("mingw_prefix", "MinGW prefix", mingw),
-        BoolVariable("use_llvm", "Use the LLVM compiler", False)
+        BoolVariable("use_llvm", "Use the LLVM compiler", False),
+        EnumVariable("windows_subsystem", "Windows subsystem", "gui", ("gui", "console"))
     ]
 
 
@@ -214,7 +215,11 @@ def configure_mingw(env):
         
         env["use_llvm"] = False
 
-    env.Append(LINKFLAGS=["-Wl,--subsystem,windows"])
+    if env["windows_subsystem"] == "gui":
+        env.Append(LINKFLAGS=["-Wl,--subsystem,windows"])
+    else:
+        env.Append(LINKFLAGS=["-Wl,--subsystem,console"])
+        env.extra_suffix += ".terminal"
 
     ## Compiler configuration
 
@@ -259,7 +264,7 @@ def configure_mingw(env):
     
     env.Append(CCFLAGS=["-pipe"])
 
-    env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
+    env.Append(CPPDEFINES=["ENABLE_PLATFORM_WINDOWS"])
     env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 

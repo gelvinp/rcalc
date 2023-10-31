@@ -14,3 +14,5 @@ def configure(env: "Environment"):
                 sys.exit(255)
             
             env.ParseConfig(f"pkg-config {' '.join(deps)} --cflags --libs")
+    elif env["platform"] == "win":
+        env.Append(LIBS=["ole32", "shlwapi", "windowscodecs"])

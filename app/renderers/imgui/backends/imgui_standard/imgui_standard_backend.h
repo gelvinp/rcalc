@@ -1,4 +1,4 @@
-#if defined(ENABLE_PLATFORM_LINUX) || defined(ENABLE_PLATFORM_WIN)
+#if defined(ENABLE_PLATFORM_LINUX) || defined(ENABLE_PLATFORM_WINDOWS)
 
 #pragma once
 

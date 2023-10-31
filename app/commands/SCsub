@@ -1,16 +1,20 @@
 Import("env")
-from glob import glob
+Import("env_app")
 
+from glob import glob
 import commands_builders
 
 env.command_sources = []
 
 env_cmd = env.Clone()
 
-env_cmd.Depends("#app/commands/commands.gen.cpp", glob("*.inc"))
-env_cmd.Depends("#app/commands/commands.gen.cpp", "#app/commands/commands_builders.py")
+commands_gen_path = f'#app/commands/commands.{env["GENSUFFIX"]}.cpp'
+env_app["commands_gen_path"] = commands_gen_path
+
+env_cmd.Depends(commands_gen_path, glob("*.inc"))
+env_cmd.Depends(commands_gen_path, "#app/commands/commands_builders.py")
 env_cmd.CommandNoCache(
-    "#app/commands/commands.gen.cpp",
+    commands_gen_path,
     glob("*.inc"),
     env.Run(commands_builders.make_command_maps, "Building command maps.")
 )
@@ -20,7 +24,7 @@ env_cmd.add_source_files(env.command_sources, "*.cpp")
 env_cmd_gen = env_cmd.Clone()
 if "-Werror" in env_cmd_gen["CCFLAGS"]:
     env_cmd_gen["CCFLAGS"].remove("-Werror")
-env_cmd_gen.add_source_files(env.command_sources, "#app/commands/commands.gen.cpp")
+env_cmd_gen.add_source_files(env.command_sources, commands_gen_path)
 
 lib = env_cmd.add_library("commands", env.command_sources)
 env.Prepend(LIBS=[lib])

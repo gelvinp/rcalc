@@ -1,3 +1,5 @@
+import sys
+
 def get_priority():
     return 10
 
@@ -14,6 +16,13 @@ def meta():
 
 
 def configure(env: "Environment"):
+    if env["platform"] == "win" and env["windows_subsystem"] == "console":
+        print("The ImGui renderer does NOT work on windows with the console subsystem!")
+        print("Either...")
+        print("\tDisable the ImGui renderer (enable_imgui_renderer=no)")
+        print("\tOR Switch to the GUI renderer (windows_subsystem=gui)")
+        sys.exit(255)
+    
     env["enabled_modules"].extend([
         "imgui_core",
         "glfw",
