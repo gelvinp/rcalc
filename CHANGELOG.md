@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2023-10-31
 
 ### Added
 
@@ -20,24 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Buildsystem changes to allow builds capable of running with no display server by only linking against neccesary libraries.
 - Add additional padding between entries in the ImGui renderer stack.
 
-### Deprecated
-
--
-
-### Removed
-
--
-
 ### Fixed
 
 - Fixed a bug that caused results to be cut off when the scrollbar appeared in the ImGui renderer.
 - Correctly display the swizzle operation
 - Only pop entries from the ImGui renderer stack when pressing the delete key and **when the scratchpad is empty**.
 - Avoid re-opening the help menu when pressing F1 when the help menu is already open.
-
-## Security
-
--
 
 ## [1.1.0] - 2023-10-27
 
