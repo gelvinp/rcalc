@@ -102,9 +102,7 @@ def configure(env: "Environment"):
 
 
 def post_build(target, source, env):
-    bundle_name = "bin/RCalc" + env["PROGSUFFIX"]
-    
-    bundle_name += ".app"
+    bundle_name = "bin/RCalc" + env["PROGSUFFIX"] + ".app"
     
     if os.path.isdir(bundle_name):
         shutil.rmtree(bundle_name)
@@ -142,12 +140,7 @@ def post_build(target, source, env):
 
 
 def platform_clean(env):
-    bundle_name = "bin/RCalc"
-
-    if env["target"] == "debug":
-        bundle_name += "_debug"
-    
-    bundle_name += ".app"
+    bundle_name = "bin/RCalc" + env["PROGSUFFIX"] + ".app"
     
     if os.path.isdir(bundle_name):
         shutil.rmtree(bundle_name)
