@@ -3,6 +3,8 @@
 #include <cstdarg>
 #include <string>
 
+namespace RCalc {
+
 
 class Logger
 {
@@ -34,3 +36,5 @@ class StdLogger : public Logger
 {
     virtual void logv(std::string message) override;
 };
+
+}

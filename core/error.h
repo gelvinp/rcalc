@@ -9,6 +9,8 @@
 #include <string>
 #include <variant>
 
+namespace RCalc {
+
 
 #pragma region Ok
 namespace OkTypes
@@ -204,6 +206,9 @@ private:
     std::variant<OkTypes::Ok<T>, Err> data;
 };
 #pragma endregion Result
+
+
+}
 
 
 // Utility for short-circuiting any errors

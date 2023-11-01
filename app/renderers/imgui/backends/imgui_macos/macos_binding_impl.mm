@@ -13,7 +13,7 @@
 
 
 static void glfw_error_callback(int error, const char* description) {
-    Logger::log_err("[GLFW] Error %d: %s\n", error, description);
+    RCalc::Logger::log_err("[GLFW] Error %d: %s\n", error, description);
 }
 
 
@@ -24,14 +24,14 @@ static void glfw_error_callback(int error, const char* description) {
     return self;
 }
 
-- (Result<>) start {
+- (RCalc::Result<>) start {
     glfwSetErrorCallback(glfw_error_callback);
 
     glfwInitHint(GLFW_COCOA_MENUBAR, GLFW_FALSE); // We'll make our own
 
     if (!glfwInit()) {
-        Logger::log_err("Unable to initialize GLFW!");
-        return Err(ERR_INIT_FAILURE);
+        RCalc::Logger::log_err("Unable to initialize GLFW!");
+        return RCalc::Err(RCalc::ERR_INIT_FAILURE);
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -39,8 +39,8 @@ static void glfw_error_callback(int error, const char* description) {
 
     p_window = glfwCreateWindow(640, 480, "RCalc", nullptr, nullptr);
     if (p_window == nullptr) {
-        Logger::log_err("Unable to create window!");
-        return Err(ERR_INIT_FAILURE);
+        RCalc::Logger::log_err("Unable to create window!");
+        return RCalc::Err(RCalc::ERR_INIT_FAILURE);
     }
 
     device = MTLCreateSystemDefaultDevice();
@@ -132,7 +132,7 @@ static void glfw_error_callback(int error, const char* description) {
 
     [NSApp setMainMenu:menuBar];
 
-    return Ok();
+    return RCalc::Ok();
 }
 
 - (void) stop {

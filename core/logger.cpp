@@ -5,6 +5,8 @@
 #include <sstream>
 #include <vector>
 
+namespace RCalc {
+
 
 StdLogger logger_instance;
 Logger* Logger::global_logger = &logger_instance;
@@ -77,4 +79,6 @@ void Logger::logf(Mode msg_mode, const char* p_format, va_list args)
 void StdLogger::logv(std::string message)
 {
     std::cout << message << "\n";
+}
+
 }

@@ -3,6 +3,8 @@ import os
 import subprocess
 from collections import OrderedDict
 import sys
+import tempfile
+import shutil
 
 
 def using_gcc(env):
@@ -253,6 +255,8 @@ def write_modules(modules):
 
 %s
 
+namespace RCalc {
+
 void initialize_modules()
 {
 %s
@@ -261,6 +265,8 @@ void initialize_modules()
 void cleanup_modules()
 {
 %s
+}
+
 }
 """ % (
         includes_cpp,
@@ -342,3 +348,72 @@ def use_windows_spawn_fix(self, platform=None):
         return rv
 
     self["SPAWN"] = mySpawn
+
+
+def build_static_lib(target, source, env):
+    working_dir = tempfile.mkdtemp()
+    env["staticlib_working_dir"] = working_dir
+
+    object_dir = os.path.join(working_dir, "objects")
+    os.mkdir(object_dir)
+
+    for lib in source:
+        subprocess.run(["ar", "-x", lib], capture_output=True, cwd=object_dir, check=True)
+    
+    objects = glob.glob(os.path.join(object_dir, "*.o"))
+
+    lib = env.add_library(target[0], objects)
+
+    env.CommandNoCache(
+        "#bin/lib_rcalc",
+        lib,
+        env.Run(package_static_lib, "Packing static library.")
+    )
+
+
+def package_static_lib(target, source, env):
+    working_dir = tempfile.mkdtemp()
+
+    lib_dir = os.path.join(working_dir, "lib")
+    os.mkdir(lib_dir)
+    shutil.move(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
+
+    include_dir = os.path.join(working_dir, "include")
+    os.mkdir(include_dir)
+
+    headers = [
+        "core/error.h",
+        "core/version.h",
+        "core/types.h",
+        "core/version_generated.gen.h",
+        "core/value.h",
+        "core/units/units.h",
+        "core/display_tags.h",
+        "core/logger.h",
+        "core/format.h",
+        "core/filter.h",
+        "core/anycase_str.h",
+        "app/renderers/renderer.h",
+        "app/renderers/render_backend.h",
+        "app/operators/operators.h",
+        "app/operators/stats.h",
+        "app/application.h",
+        "app/stack.h",
+        "app/commands/commands.h",
+        "app/displayable/displayable.h",
+        "app/help_text.h",
+        "app/autocomplete.h",
+        "modules/register_modules.h",
+        "assets/license.gen.h"
+    ]
+
+    for header in headers:
+        header_dir = os.path.dirname(header)
+        header_dir = os.path.join(include_dir, header_dir)
+        os.makedirs(header_dir, exist_ok=True)
+        shutil.copy(header, os.path.join(include_dir, header))
+    
+    shutil.make_archive(target[0], "zip", working_dir, ".")
+
+    shutil.rmtree(working_dir)
+    shutil.rmtree(env["staticlib_working_dir"])

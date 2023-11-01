@@ -8,7 +8,9 @@ env_app.add_source_files(env.app_sources, "value/*.cpp", True)
 
 Export("env_app")
 
-SConscript("renderers/SCsub")
+if env["build_type"] == "application":
+    SConscript("renderers/SCsub")
+
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")
 SConscript("displayable/SCsub")
@@ -16,7 +18,8 @@ SConscript("displayable/SCsub")
 lib = env_app.add_library("app", env.app_sources)
 
 # Dependency stuff
-env_app.Depends(env_app["commands_gen_path"], env_app["renderers_gen_path"])
-env_app.Depends(lib, env_app["renderers_gen_path"])
+if env["build_type"] == "application":
+    env_app.Depends(env_app["commands_gen_path"], env_app["renderers_gen_path"])
+    env_app.Depends(lib, env_app["renderers_gen_path"])
 
 env.Prepend(LIBS=[lib])

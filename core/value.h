@@ -9,6 +9,8 @@
 #include "core/units/units.h"
 #include "display_tags.h"
 
+namespace RCalc {
+
 struct Unit;
 
 enum Representation: uint8_t {
@@ -18,8 +20,6 @@ enum Representation: uint8_t {
     REPR_DECIMAL,
     REPR_HEX
 };
-
-namespace RCalc {
 
 class Value {
 public:

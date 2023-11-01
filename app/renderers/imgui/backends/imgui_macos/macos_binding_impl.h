@@ -40,7 +40,7 @@ class Application;
 
 - (instancetype) init;
 
-- (Result<>) start;
+- (RCalc::Result<>) start;
 - (void) stop;
 
 - (void) beginFrame;

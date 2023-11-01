@@ -125,6 +125,7 @@ opts = Variables(opt_files, ARGUMENTS)
 opts.Add("platform", "Target platform (%s)" % ("|".join(available_platforms)), "")
 opts.Add(EnumVariable("target", "Compilation target", "debug", ("debug", "release")))
 opts.Add(EnumVariable("arch", "CPU architecture", "auto", ["auto"] + platform_methods.architectures))
+opts.Add(EnumVariable("build_type", "Build Type", "application", ("application", "staticlib")))
 opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
@@ -177,28 +178,29 @@ if selected_platform in platform_opts:
 enabled_renderers = []
 default_renderer = ""
 
-for renderer in available_renderers:
-    if env_base[f"enable_{renderer}_renderer"]:
-        enabled_renderers.append(renderer)
-        env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_ENABLED'])
-    else:
-        env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_DISABLED'])
+if env_base["build_type"] == "application":
+    for renderer in available_renderers:
+        if env_base[f"enable_{renderer}_renderer"]:
+            enabled_renderers.append(renderer)
+            env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_ENABLED'])
+        else:
+            env_base.Append(CPPDEFINES=[f'RENDERER_{renderer.upper()}_DISABLED'])
 
 
 
-if len(enabled_renderers) == 0:
-    print("Cannot compile executable target without any renderers!")
-    sys.exit(255)
-
-if env_base["default_renderer"]:
-    if env_base["default_renderer"] in enabled_renderers:
-        default_renderer = env_base["default_renderer"]
-    else:
-        print(f'Default renderer {env_base["default_renderer"]} is not enabled')
+    if len(enabled_renderers) == 0:
+        print("Cannot compile executable target without any renderers!")
         sys.exit(255)
-else:
-    enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
-    default_renderer = enabled_renderers[0]
+
+    if env_base["default_renderer"]:
+        if env_base["default_renderer"] in enabled_renderers:
+            default_renderer = env_base["default_renderer"]
+        else:
+            print(f'Default renderer {env_base["default_renderer"]} is not enabled')
+            sys.exit(255)
+    else:
+        enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
+        default_renderer = enabled_renderers[0]
 
 opts.Update(env_base)
 env_base["platform"] = selected_platform
@@ -389,14 +391,26 @@ if selected_platform in available_platforms:
 
     # Prevent from using C compiler (can't infer without sources)
     env["CC"] = env["CXX"]
-    exe = env.add_program("#bin/rcalc", env["extra_sources"])
 
-    if hasattr(detect, "post_build"):
-        post_build = env.CommandNoCache('post_build', exe, detect.post_build)
-    
-    if env.GetOption('clean'):
-        if hasattr(detect, "platform_clean"):
-            detect.platform_clean(env)
+    if env["build_type"] == "application":
+        exe = env.add_program("#bin/rcalc", env["extra_sources"])
+
+        if hasattr(detect, "post_build"):
+            post_build = env.CommandNoCache('post_build', exe, detect.post_build)
+        
+        if env.GetOption('clean'):
+            if hasattr(detect, "platform_clean"):
+                detect.platform_clean(env)
+    elif env["build_type"] == "staticlib":
+        env.CommandNoCache(
+            "#bin/rcalc",
+            env["LIBS"],
+            env.Run(methods.build_static_lib, "Building static library.")
+        )
+
+        if env.GetOption('clean'):
+            if os.path.isfile("bin/lib_rcalc.zip"):
+                os.remove("bin/lib_rcalc.zip")
 
 elif selected_platform != "":
     if selected_platform == "list":

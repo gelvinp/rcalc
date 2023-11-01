@@ -1,7 +1,8 @@
 Import("env")
 
-res_file = "rcalc_res.rc"
-res_target = "rcalc_res" + env["OBJSUFFIX"]
-res_obj = env.RES(res_target, res_file)
+if env["build_type"] == "application":
+    res_file = "rcalc_res.rc"
+    res_target = "rcalc_res" + env["OBJSUFFIX"]
+    res_obj = env.RES(res_target, res_file)
 
-env["extra_sources"].append(res_obj)
+    env["extra_sources"].append(res_obj)

@@ -8,6 +8,8 @@
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 
+namespace RCalc {
+
 
 typedef int64_t Int;
 typedef bigint BigInt;
@@ -35,3 +37,5 @@ enum Type: uint8_t {
 
 
 bool is_type_castable(Type from, Type to);
+
+}

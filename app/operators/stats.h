@@ -7,6 +7,8 @@
 #include "app/stack.h"
 #include "core/value.h"
 
+namespace RCalc {
+
 
 std::vector<Real> get_reals(std::vector<RCalc::StackItem>&& items, std::stringstream& ss) {
     std::vector<Real> values;
@@ -30,4 +32,6 @@ std::vector<Real> get_reals(std::vector<RCalc::StackItem>&& items, std::stringst
         ss << item.result.to_string();
     }
     return values;
+}
+
 }

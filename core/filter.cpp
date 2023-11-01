@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+namespace RCalc {
+
 
 std::string filter_name(const char* p_str) {
 	std::string str(p_str);
@@ -13,4 +15,6 @@ std::string filter_name(const char* p_str) {
 	});
 
 	return str;
+}
+
 }

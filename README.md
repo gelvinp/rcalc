@@ -3,8 +3,6 @@
 RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)) calculator written in C++.
 It aims to be quick to open and use, and easy to extend with new types, operators, and commands.
 
-**RCalc is currently in active development. Please see the [feature table](#feature-table) below for more information.**
-
 
 ## Install RCalc Now
 
@@ -36,7 +34,7 @@ If you use Debian, MacOS, or Windows, you can download the appropriate file from
 | Extended Conversion Operators                                 | Complete          |
 | Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
 | Alternate renderer (TUI)                                      | Complete          |
-| Lib target (for SwiftUI port)                                 | Not Started       |
+| Lib target (for SwiftUI port)                                 | Complete          |
 
 
 ## Technical debt

@@ -2,9 +2,10 @@ Import("env")
 
 env.main_sources = []
 
-env_main = env.Clone()
+if env["build_type"] == "application":
+    env_main = env.Clone()
 
-env_main.add_source_files(env.main_sources, "*.cpp")
+    env_main.add_source_files(env.main_sources, "*.cpp")
 
-lib = env_main.add_library("main", env.main_sources)
-env.Prepend(LIBS=[lib])
+    lib = env_main.add_library("main", env.main_sources)
+    env.Prepend(LIBS=[lib])

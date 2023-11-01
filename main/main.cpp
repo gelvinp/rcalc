@@ -17,21 +17,21 @@ int main(int argc, char** pp_argv)
     Main m;
 
     RCalc::AppConfig config = m.parse_args(argc, pp_argv);
-    initialize_modules();
+    RCalc::initialize_modules();
 
-    Result<RCalc::Application*> res = RCalc::Application::create(config);
+    RCalc::Result<RCalc::Application*> res = RCalc::Application::create(config);
     
     if (!res) {
         std::stringstream ss;
         ss << res.unwrap_err();
-        Logger::log_err("%s", ss.str().c_str());
+        RCalc::Logger::log_err("%s", ss.str().c_str());
     } else {
         RCalc::Application* p_application = res.unwrap();
         p_application->run();
         p_application->cleanup();
     }
 
-    cleanup_modules();
+    RCalc::cleanup_modules();
 
     return res ? 0 : 255;
 }
@@ -51,9 +51,9 @@ RCalc::AppConfig Main::parse_args(int argc, char** pp_argv)
     RCalc::AppConfig config = parse_args_internal(args);
 
     if (config.quiet) {
-        Logger::configure(Logger::LOG_ERROR);
+        RCalc::Logger::configure(RCalc::Logger::LOG_ERROR);
     } else if (config.verbose) {
-        Logger::configure(Logger::LOG_VERBOSE);
+        RCalc::Logger::configure(RCalc::Logger::LOG_VERBOSE);
     }
 
     return config;

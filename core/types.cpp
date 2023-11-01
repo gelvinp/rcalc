@@ -1,5 +1,8 @@
 #include "types.h"
 
+
+namespace RCalc {
+
 bool is_type_castable(Type from, Type to) {
     if (from == to) {
         return true;
@@ -21,4 +24,6 @@ bool is_type_castable(Type from, Type to) {
     }
 
     return false;
+}
+
 }
