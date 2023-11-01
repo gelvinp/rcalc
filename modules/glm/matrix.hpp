@@ -19,13 +19,7 @@
 #include "vec3.hpp"
 #include "vec4.hpp"
 #include "mat2x2.hpp"
-#include "mat2x3.hpp"
-#include "mat2x4.hpp"
-#include "mat3x2.hpp"
 #include "mat3x3.hpp"
-#include "mat3x4.hpp"
-#include "mat4x2.hpp"
-#include "mat4x3.hpp"
 #include "mat4x4.hpp"
 
 namespace glm {
@@ -41,45 +35,9 @@ namespace detail
 	};
 
 	template<typename T, qualifier Q>
-	struct outerProduct_trait<2, 3, T, Q>
-	{
-		typedef mat<3, 2, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
-	struct outerProduct_trait<2, 4, T, Q>
-	{
-		typedef mat<4, 2, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
-	struct outerProduct_trait<3, 2, T, Q>
-	{
-		typedef mat<2, 3, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
 	struct outerProduct_trait<3, 3, T, Q>
 	{
 		typedef mat<3, 3, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
-	struct outerProduct_trait<3, 4, T, Q>
-	{
-		typedef mat<4, 3, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
-	struct outerProduct_trait<4, 2, T, Q>
-	{
-		typedef mat<2, 4, T, Q> type;
-	};
-
-	template<typename T, qualifier Q>
-	struct outerProduct_trait<4, 3, T, Q>
-	{
-		typedef mat<3, 4, T, Q> type;
 	};
 
 	template<typename T, qualifier Q>

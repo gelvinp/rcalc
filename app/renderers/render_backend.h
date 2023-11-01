@@ -14,6 +14,8 @@ public:
     virtual void copy_to_clipboard(const std::string_view& string) = 0;
 
     bool close_requested = false;
+
+    virtual ~RenderBackend() = default;
 };
 
 }

@@ -29,6 +29,7 @@ int main(int argc, char** pp_argv)
         RCalc::Application* p_application = res.unwrap();
         p_application->run();
         p_application->cleanup();
+        delete p_application;
     }
 
     RCalc::cleanup_modules();

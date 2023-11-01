@@ -375,6 +375,7 @@ void ImGuiRenderer::render() {
 
 void ImGuiRenderer::cleanup() {
     get_backend().cleanup();
+    delete p_backend;
 }
 
 

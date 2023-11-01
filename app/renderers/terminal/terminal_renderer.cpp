@@ -330,6 +330,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
 
 void TerminalRenderer::cleanup() {
     get_backend().cleanup();
+    delete p_backend;
 }
 
 

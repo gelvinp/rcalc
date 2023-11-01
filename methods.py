@@ -376,7 +376,7 @@ def package_static_lib(target, source, env):
 
     lib_dir = os.path.join(working_dir, "lib")
     os.mkdir(lib_dir)
-    shutil.move(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
+    shutil.copy(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
 
     include_dir = os.path.join(working_dir, "include")
     os.mkdir(include_dir)
@@ -404,16 +404,60 @@ def package_static_lib(target, source, env):
         "app/help_text.h",
         "app/autocomplete.h",
         "modules/register_modules.h",
+        "modules/bigint/bigint.h",
         "assets/license.gen.h"
     ]
+
+    copy_modules = ["glm"]
+
+    modulemap = ['module RCalc {']
 
     for header in headers:
         header_dir = os.path.dirname(header)
         header_dir = os.path.join(include_dir, header_dir)
         os.makedirs(header_dir, exist_ok=True)
         shutil.copy(header, os.path.join(include_dir, header))
+
+        modulemap.append(f'\theader "{header}"')
+    
+    for copy_module in copy_modules:
+        module_path = os.path.join("modules", copy_module)
+        shutil.copytree(module_path, os.path.join(include_dir, module_path))
+    
+    modulemap.extend([
+        '',
+        '\texport *',
+        '}'
+    ])
+
+    with open(os.path.join(include_dir, "module.modulemap"), 'w') as f:
+        f.write('\n'.join(modulemap))
     
     shutil.make_archive(target[0], "zip", working_dir, ".")
 
     shutil.rmtree(working_dir)
     shutil.rmtree(env["staticlib_working_dir"])
+
+
+def detect_darwin_sdk_path(platform, env):
+    sdk_name = ""
+    if platform == "macos":
+        sdk_name = "macosx"
+        var_name = "MACOS_SDK_PATH"
+    elif platform == "ios":
+        sdk_name = "iphoneos"
+        var_name = "IOS_SDK_PATH"
+    elif platform == "iossimulator":
+        sdk_name = "iphonesimulator"
+        var_name = "IOS_SDK_PATH"
+    else:
+        raise Exception("Invalid platform argument passed to detect_darwin_sdk_path")
+
+    if not env[var_name]:
+        try:
+            sdk_path = subprocess.check_output(["xcrun", "--sdk", sdk_name, "--show-sdk-path"]).strip().decode("utf-8")
+            if sdk_path:
+                env[var_name] = sdk_path
+        except (subprocess.CalledProcessError, OSError):
+            print("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
+            raise
