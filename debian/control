@@ -1,0 +1,12 @@
+Source: rcalc
+Maintainer: Robert Garrett <robertgarrett404@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 4.6.2
+Build-Depends: debhelper-compat (= 13), scons, python3 (>= 3.10), pkg-config, libglfw3-dev, libfreetype-dev
+
+Package: rcalc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Reverse Polish Notation (RPN) calculator
+ Fast-start CLI RPN calculator.

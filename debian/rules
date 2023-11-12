@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+SCONS=scons
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	BUILD_NAME="official" VERSION_STATUS="stable" $(SCONS) target=release
+
+override_dh_auto_clean:
+	dh_auto_clean
+	$(SCONS) -c
+	git clean -fxd
+
+override_dh_auto_install:
+	# I haven't spotted any dh_ commands for installing license files, .desktop
+	# files, or misc resources yet. I'll just do this, I guess. :l
+	install -Dm755 bin/rcalc.linux.release.x86_64 debian/rcalc/usr/bin/rcalc
+	install -Dm311 LICENSE.md debian/rcalc/usr/share/licenses/rcalc/LICENSE.md
+	install -Dm311 misc/rcalc.desktop debian/rcalc/usr/share/applications/rcalc.desktop
+	install -Dm311 icon.svg debian/rcalc/usr/share/pixmaps/rcalc.svg
+
