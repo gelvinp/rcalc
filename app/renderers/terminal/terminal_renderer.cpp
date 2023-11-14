@@ -388,7 +388,7 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
         }
     }
 
-    std::string output_str = item.result.to_string();
+    std::string output_str = item.result.to_string(item.p_input->tags);
     ftxui::Element output_element;
 
     if (std::find(output_str.begin(), output_str.end(), '\n') == output_str.end()) {
