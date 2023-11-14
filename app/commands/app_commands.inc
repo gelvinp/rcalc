@@ -9,6 +9,7 @@ RCALC_CMD(Application, Clear, app) {
 // Description: Quits RCalc.
 // Alias: q
 // Requires: "app/application.h"
+// Tags: [app_only]
 RCALC_CMD(Application, Quit, app) {
     app.p_renderer->p_backend->close_requested = true;
 }
