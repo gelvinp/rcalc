@@ -202,8 +202,8 @@ void ImGuiRenderer::render() {
                         double output_offset = entry.output.position.x;
                         ImVec2 output_size = entry.output.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImVec2(cursor_pos.x + output_offset - padding, cursor_pos.y - padding),
-                            ImVec2(cursor_pos.x + output_offset + output_size.x + padding, cursor_pos.y + output_size.y + padding),
+                            ImVec2(cursor_pos.x + output_offset - padding, cursor_pos.y + entry.output.position.y - padding),
+                            ImVec2(cursor_pos.x + output_offset + output_size.x + padding, cursor_pos.y + entry.output.position.y + output_size.y + padding),
                             ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
                         );
                     }
