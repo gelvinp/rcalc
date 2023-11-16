@@ -313,6 +313,11 @@ class Operator:
         else:
             lines.extend([
                 f"\tstd::vector<Type> types = stack.peek_types_vec({self.param_count});",
+                '',
+                '\tif (types.empty()) {',
+                f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} parameters");',
+                '\t}',
+                '',
                 "\tbool expression = true;",
                 "\tResult<Value> res = Ok(Value());",
                 "",
