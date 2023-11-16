@@ -675,7 +675,13 @@ std::string Value::to_string(DisplayableTag tags) const {
             if (tags == DisplayableTag::COL_VEC) {
                 return fmt_col_vec2(value);
             }
-            return fmt("[%g, %g]", value.x, value.y);
+
+            switch (repr) {
+                case REPR_HEX:
+                    return fmt("[0x%x, 0x%x]", Int(value.x), Int(value.y));
+                default:
+                    return fmt("[%g, %g]", value.x, value.y);
+            }
         }
         case TYPE_VEC3: {
             const Vec3 value = operator Vec3();
@@ -683,7 +689,14 @@ std::string Value::to_string(DisplayableTag tags) const {
             if (tags == DisplayableTag::COL_VEC) {
                 return fmt_col_vec3(value);
             }
-            return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+
+            switch (repr) {
+                case REPR_HEX:
+                    return fmt("[0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z));
+                default:
+                    return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+            }
+            UNREACHABLE();
         }
         case TYPE_VEC4: {
             const Vec4 value = operator Vec4();
@@ -691,7 +704,14 @@ std::string Value::to_string(DisplayableTag tags) const {
             if (tags == DisplayableTag::COL_VEC) {
                 return fmt_col_vec4(value);
             }
-            return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+
+            switch (repr) {
+                case REPR_HEX:
+                    return fmt("[0x%x, 0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z), Int(value.w));
+                default:
+                    return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+            }
+            UNREACHABLE();
         }
         case TYPE_MAT2: {
             const Mat2 value = operator Mat2();

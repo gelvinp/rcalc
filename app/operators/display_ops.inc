@@ -41,11 +41,23 @@ RCALC_FMT_1(Dec, arg0) {
 
 
 // @RCalcOperator
-// Description: Displays arg0 as hexadecimal
+// Description: Displays arg0 as hexadecimal. Real vector components will be truncated.
 // Category: Display
 // Tags: [no_expr]
 // Example: [42]
 RCALC_OP_1(Hex, Int, arg0) {
+    return Ok(Value(arg0, REPR_HEX));
+}
+
+RCALC_OP_1(Hex, Vec2, arg0) {
+    return Ok(Value(arg0, REPR_HEX));
+}
+
+RCALC_OP_1(Hex, Vec3, arg0) {
+    return Ok(Value(arg0, REPR_HEX));
+}
+
+RCALC_OP_1(Hex, Vec4, arg0) {
     return Ok(Value(arg0, REPR_HEX));
 }
 
