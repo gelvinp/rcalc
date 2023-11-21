@@ -80,7 +80,6 @@ Vectors can be _swizzled_, allowing you to access and rearrange components in a 
 [1, 2, 3, 4].rrab -> [1, 1, 4, 3]
 [1, 2].rrgg -> [1, 1, 2, 2]
 [1, 2, 3, 4].rgb -> [1, 2, 3]
-
 )foo"
     },
     {
