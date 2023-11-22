@@ -13,7 +13,7 @@ namespace RCalc {
 
 
 struct Displayable {
-    enum class Type {
+    enum class Type : uint8_t {
         CONST_CHAR,
         STRING,
         VALUE,

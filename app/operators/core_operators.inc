@@ -153,5 +153,11 @@ RCALC_OP_1(Neg, Real, arg0) {
 }
 
 RCALC_FMT_1(Neg, arg0) {
-    return create_displayables_from("-(", arg0.get_input_formatted(), ")");
+    if ((uint8_t)arg0.get_input_formatted()->tags & (uint8_t)DisplayableTag::OP_NEG) {
+        return arg0.p_input->p_next;
+    }
+
+    std::shared_ptr<Displayable> disp = create_displayables_from("-", arg0.get_input_formatted());
+    disp->tags = DisplayableTag::OP_NEG;
+    return disp;
 }
