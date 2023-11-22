@@ -280,8 +280,14 @@ POOL_CONVERT(Unit, TYPE_UNIT);
 
 Value::Value(Int value, Representation repr) : repr(repr), type(TYPE_INT), data(std::bit_cast<uint64_t>(value)) {}
 
+Value::Value(Real value, Representation repr) : repr(repr), type(TYPE_REAL) {
+    if (fabs(value) < 1e-15) {
+        value = 0;
+    }
+    data = Pool_Real::allocate(value);
+}
+
 POOL_CONSTRUCT(BigInt, TYPE_BIGINT);
-POOL_CONSTRUCT(Real, TYPE_REAL);
 POOL_CONSTRUCT(Vec2, TYPE_VEC2);
 POOL_CONSTRUCT(Vec3, TYPE_VEC3);
 POOL_CONSTRUCT(Vec4, TYPE_VEC4);
@@ -667,7 +673,7 @@ std::string Value::to_string(DisplayableTag tags) const {
             return (operator BigInt()).get_str();
         }
         case TYPE_REAL: {
-            return fmt("%g", operator Real());
+            return fmt("%.15g", operator Real());
         }
         case TYPE_VEC2: {
             const Vec2 value = operator Vec2();
@@ -680,7 +686,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x]", Int(value.x), Int(value.y));
                 default:
-                    return fmt("[%g, %g]", value.x, value.y);
+                    return fmt("[%.15g, %.15g]", value.x, value.y);
             }
         }
         case TYPE_VEC3: {
@@ -694,7 +700,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z));
                 default:
-                    return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+                    return fmt("[%.15g, %.15g, %.15g]", value.x, value.y, value.z);
             }
             UNREACHABLE();
         }
@@ -709,7 +715,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z), Int(value.w));
                 default:
-                    return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+                    return fmt("[%.15g, %.15g, %.15g, %.15g]", value.x, value.y, value.z, value.w);
             }
             UNREACHABLE();
         }
