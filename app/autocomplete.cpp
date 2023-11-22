@@ -8,22 +8,23 @@
 
 namespace RCalc {
 
-void AutocompleteManager::init_suggestions(const std::string_view& str, const std::vector<Type>& stack_types) {
+void AutocompleteManager::init_suggestions(const std::string_view& str) {
     if (active_auto) {
         active_auto.value()->cancel_suggestion();
     }
 
+    const RPNStack& stack = Application::get_stack();
 
     if (str[0] == '\\') {
         cmd_auto.init_suggestions(str);
         active_auto = &cmd_auto;
     }
     else if (str[0] == '_') {
-        unit_auto.init_suggestions(str, stack_types);
+        unit_auto.init_suggestions(str, stack);
         active_auto = &unit_auto;
     }
     else {
-        op_auto.init_suggestions(str, stack_types);
+        op_auto.init_suggestions(str, stack.peek_types_vec(stack.size()));
         active_auto = &op_auto;
     }
 }
@@ -68,10 +69,10 @@ std::optional<std::string> AutocompleteManager::Autocomplete::get_next_suggestio
 std::optional<std::string> AutocompleteManager::Autocomplete::get_previous_suggestion() {
     if (!suggestion_index) { return std::nullopt; }
 
-    if (suggestion_index == 0) {
-        suggestion_index = suggestions.size() - 2;
+    if (suggestion_index.value() == 0) {
+        suggestion_index = std::max((size_t)2, suggestions.size()) - 2;
     }
-    else if (suggestion_index == 1) {
+    else if (suggestion_index.value() == 1) {
         suggestion_index = suggestions.size() - 1;
     }
     else {
@@ -210,24 +211,34 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
 
 // Unit Autocomplete
 
-void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
+void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view str, const RPNStack& stack) {
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
+
+    std::vector<Type> stack_types = stack.peek_types_vec(stack.size());
 
     if (stack_types.empty()) { return; }
 
     std::optional<Type> type = std::nullopt;
+    std::optional<const UnitFamily*> matchingFamily = std::nullopt;
 
     if (!stack_types.empty() && stack_types.back() != TYPE_UNIT) {
         type = stack_types.back();
     }
     else if (stack_types.size() >= 2 && stack_types[stack_types.size() - 2] != TYPE_UNIT) {
         type = stack_types[stack_types.size() - 2];
+
+        if (stack_types[stack_types.size() - 1] != TYPE_UNIT) {
+            return;
+        }
+
+        matchingFamily = stack.get_items()[stack.size() - 1].result.operator RCalc::Unit().p_family;
     }
 
 
     for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
         if (type && !is_type_castable(type.value(), family->base_type)) { continue; }
+        if (matchingFamily && matchingFamily.value() != family) { continue; }
         
         for (const Unit* unit : family->units) {
             anycase_stringview usage(unit->p_usage);

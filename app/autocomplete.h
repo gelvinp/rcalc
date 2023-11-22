@@ -15,7 +15,7 @@ namespace RCalc {
 
 class AutocompleteManager {
 public:
-    void init_suggestions(const std::string_view& str, const std::vector<Type>& stack_types);
+    void init_suggestions(const std::string_view& str);
     std::optional<std::string> get_next_suggestion();
     std::optional<std::string> get_previous_suggestion();
     void cancel_suggestion();
@@ -48,7 +48,7 @@ private:
 
     class UnitAutocomplete : public Autocomplete {
     public:
-        void init_suggestions(std::string_view str, const std::vector<Type>& stack_types);
+        void init_suggestions(std::string_view str, const RPNStack& stack);
     };
 
     CommandAutocomplete cmd_auto = {};

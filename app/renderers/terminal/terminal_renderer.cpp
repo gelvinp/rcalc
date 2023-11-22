@@ -303,7 +303,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
 
     if (event == ftxui::Event::Tab) {
         if (!autocomp.suggestions_active()) {
-            autocomp.init_suggestions(scratchpad, autocomp_types);
+            autocomp.init_suggestions(scratchpad);
         }
 
         std::optional<std::string> next = autocomp.get_next_suggestion();
@@ -314,7 +314,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
     }
     if (event == ftxui::Event::TabReverse) {
         if (!autocomp.suggestions_active()) {
-            autocomp.init_suggestions(scratchpad, autocomp_types);
+            autocomp.init_suggestions(scratchpad);
         }
 
         std::optional<std::string> next = autocomp.get_previous_suggestion();
@@ -408,20 +408,17 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
     comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_element)));
 
     comp_stack_scroll->OnEvent(ftxui::Event::End);
-    autocomp_types.push_back(item.result.get_type());
 }
 
 
 void TerminalRenderer::remove_stack_item() {
     comp_stack->ChildAt(comp_stack->ChildCount() - 1)->Detach();
     comp_stack_scroll->OnEvent(ftxui::Event::End);
-    autocomp_types.pop_back();
 }
 
 
 void TerminalRenderer::replace_stack_items(const std::vector<StackItem>& items) {
     comp_stack->DetachAllChildren();
-    autocomp_types.clear();
     std::for_each(items.begin(), items.end(), std::bind(&TerminalRenderer::add_stack_item, this, std::placeholders::_1));
 }
 

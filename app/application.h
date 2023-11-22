@@ -22,7 +22,6 @@ public:
     void run();
     void cleanup();
 
-
     static Result<Application*> create(AppConfig config);
 
     REGISTER_COMMAND(Application, Clear);
@@ -36,6 +35,8 @@ public:
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);
 
+    static const RPNStack& get_stack() { return singleton->stack; }
+
 private:
     Application();
 
@@ -48,6 +49,8 @@ private:
     CommandMap<Application> command_map;
 
     bool try_swizzle(const std::string& str);
+
+    static Application* singleton;
 };
 
 }

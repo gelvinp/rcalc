@@ -12,6 +12,8 @@
 
 namespace RCalc {
 
+Application* Application::singleton;
+
 Result<Application*> Application::create(AppConfig config) {
     Application* p_application = new Application();
 
@@ -28,6 +30,8 @@ Result<Application*> Application::create(AppConfig config) {
         if (renderer_res.unwrap()->p_backend == nullptr) {
             throw std::logic_error("Renderer did not initialize correctly! p_backend == nullptr");
         }
+
+        if (!singleton) { singleton = p_application; }
 
         p_application->p_renderer = renderer_res.unwrap();
         return Ok(p_application);
