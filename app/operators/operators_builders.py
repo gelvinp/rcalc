@@ -311,11 +311,12 @@ class Operator:
             
             lines.append("")
         else:
+            param_string = "paramters" if self.param_count > 1 else "parameter"
             lines.extend([
                 f"\tstd::vector<Type> types = stack.peek_types_vec({self.param_count});",
                 '',
                 '\tif (types.empty()) {',
-                f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} parameters");',
+                f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} {param_string}");',
                 '\t}',
                 '',
                 "\tbool expression = true;",
