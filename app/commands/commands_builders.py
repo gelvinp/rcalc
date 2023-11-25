@@ -113,7 +113,7 @@ class Scope:
             f'\t"{self.name}",',
             f'\tSCOPECMDS_{self.name}',
             '};',
-            ''
+            '',
         ])
 
         return lines
@@ -190,9 +190,7 @@ class CommandMapBuilder:
             lines.append('')
         
         lines.extend([
-            '}',
-            '',
-            'namespace RCalc::Commands {',
+            'namespace Commands {',
             ''
         ])
 
@@ -201,25 +199,21 @@ class CommandMapBuilder:
         for scope_name in scopes:
             lines.extend(self.scopes[scope_name].build())
         
-        lines.append(f'std::vector<ScopeMeta const *> scopemetas {{')
-
-        if len(scopes) > 0:
-            lines.append(',\n'.join([f'\t&SCOPEMETA_{scope_name}' for scope_name in scopes]))
-        
         lines.extend([
-            '};',
-            '',
-            '}',
-            '',
-            'namespace RCalc {',
-            '',
-            'const std::vector<ScopeMeta const *>& _GlobalCommandMap::get_alphabetical() {',
-            '\treturn Commands::scopemetas;',
-            '}',
-            '',
             '}',
             ''
         ])
+
+        for scope_name in scopes:
+            lines.extend([
+                'template<>',
+                f'void CommandMap<{scope_name}>::activate() {{',
+                f'\t_GlobalCommandMap::register_scope(Commands::SCOPEMETA_{scope_name});',
+                '}',
+                '',
+            ])
+        
+        lines.extend(['}', ''])
 
         if env["gperf_path"] == '':
             lines.extend(self._build_std_map(scopes))

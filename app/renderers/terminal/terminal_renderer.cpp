@@ -16,6 +16,7 @@ TerminalRenderer::TerminalRenderer(RendererCreateInfo info) :
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
     p_backend = RenderBackend::create<TerminalRenderer>();
+    command_map.activate();
 }
 
 

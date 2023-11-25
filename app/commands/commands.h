@@ -25,13 +25,21 @@ struct ScopeMeta {
 
 class _GlobalCommandMap {
 public:
-    static const std::vector<ScopeMeta const *>& get_alphabetical();
+    static const std::vector<CommandMeta const *>& get_alphabetical() { return commands; }
+
+protected:
+    static void register_scope(const ScopeMeta& scope);
+
+private:
+    static std::vector<CommandMeta const *> commands;
 };
 
 template<typename Scope>
 class CommandMap : public _GlobalCommandMap {
 public:
     static CommandMap<Scope>& get_command_map();
+
+    void activate();
     bool has_command(const std::string& str);
     void execute(const std::string& str, Scope& scope);
 

@@ -27,6 +27,7 @@ ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
         command_map(CommandMap<ImGuiRenderer>::get_command_map())
 {
     p_backend = RenderBackend::create<ImGuiRenderer>();
+    command_map.activate();
 }
 
 
@@ -49,9 +50,9 @@ Result<> ImGuiRenderer::init(Application* p_application) {
     float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
 
-    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_standard, &font_cfg, &glyph_ranges[0]);
-    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_medium, &font_cfg, &glyph_ranges[0]);
-    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)RCalc::Assets::b612mono_regular_ttf, RCalc::Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf, Assets::b612mono_regular_ttf_size, font_size_standard, &font_cfg, &glyph_ranges[0]);
+    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf, Assets::b612mono_regular_ttf_size, font_size_medium, &font_cfg, &glyph_ranges[0]);
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf, Assets::b612mono_regular_ttf_size, font_size_large, &font_cfg, &glyph_ranges[0]);
 
     io.FontGlobalScale = 1.0f / screen_dpi;
 
@@ -653,17 +654,8 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Commands");
     ImGui::PopFont();
     
-    for (const RCalc::ScopeMeta* scope : command_map.get_alphabetical()) {
-        if (strcmp(scope->scope_name, "Application") != 0 && strcmp(scope->scope_name, "ImGuiRenderer") != 0) { continue; }
-
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
-        ImGui::PushFont(p_font_medium);
-        ImGui::Text("%s Commands", scope->scope_name);
-        ImGui::PopFont();
-
-        for (const RCalc::CommandMeta* cmd : scope->scope_cmds) {
-            render_help_command(cmd);
-        }
+    for (const CommandMeta* cmd : command_map.get_alphabetical()) {
+        render_help_command(cmd);
     }
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
@@ -699,7 +691,7 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Unit Families");
     ImGui::PopFont();
 
-    for (const RCalc::UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
+    for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
         render_help_unit_family(family);
     }
 
@@ -915,7 +907,7 @@ void ImGuiRenderer::build_help_cache() {
     help_op_cache.clear();
     RPNStack example_stack;
 
-    for (const RCalc::OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
+    for (const OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
         help_op_cache.emplace_back(*category, example_stack);
     }
 }

@@ -101,18 +101,16 @@ void AutocompleteManager::CommandAutocomplete::init_suggestions(std::string_view
     anycase_stringview input(str.begin() + 1, str.end());
     suggestions.clear();
 
-    for (const ScopeMeta* scope : _GlobalCommandMap::get_alphabetical()) {
-        for (const CommandMeta* cmd : scope->scope_cmds) {
-            anycase_stringview name(cmd->name);
-            if (name.starts_with(input)) {
-                suggestions.push_back(name);
-            }
+    for (const CommandMeta* cmd : _GlobalCommandMap::get_alphabetical()) {
+        anycase_stringview name(cmd->name);
+        if (name.starts_with(input)) {
+            suggestions.push_back(name);
+        }
 
-            for (const char* p_alias : cmd->aliases) {
-                anycase_stringview alias(p_alias);
-                if (alias.starts_with(input)) {
-                    suggestions.push_back(alias);
-                }
+        for (const char* p_alias : cmd->aliases) {
+            anycase_stringview alias(p_alias);
+            if (alias.starts_with(input)) {
+                suggestions.push_back(alias);
             }
         }
     }

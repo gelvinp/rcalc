@@ -99,20 +99,8 @@ ftxui::Component build_help_cache() {
         });
     }));
     
-    for (const ScopeMeta* scope : CommandMap<TerminalRenderer>::get_alphabetical()) {
-        if (strcmp(scope->scope_name, "Application") != 0 && strcmp(scope->scope_name, "TerminalRenderer") != 0) { continue; }
-
-        v_lines->Add(ftxui::Renderer([scope]{
-            return ftxui::vbox({
-                ftxui::separatorEmpty(),
-                ftxui::paragraph(fmt("%s Commands", scope->scope_name)),
-                ftxui::separatorLight()
-            });
-        }));
-
-        for (const RCalc::CommandMeta* cmd : scope->scope_cmds) {
-            v_lines->Add(render_help_command(cmd));
-        }
+    for (const CommandMeta* cmd : CommandMap<TerminalRenderer>::get_alphabetical()) {
+        v_lines->Add(render_help_command(cmd));
     }
 
     v_lines->Add(ftxui::Renderer([]{

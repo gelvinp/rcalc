@@ -46,6 +46,7 @@ Application::Application() :
     op_map(OperatorMap::get_operator_map())
 {
     command_map = CommandMap<Application>::get_command_map();
+    command_map.activate();
 }
 
 
