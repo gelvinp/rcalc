@@ -264,6 +264,12 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         return true;
     }
 
+    if (event == ftxui::Event::Backspace && autocomp.suggestions_active()) {
+        autocomp.cancel_suggestion();
+        scratchpad.clear();
+        return true;
+    }
+
     if (event == ftxui::Event::ArrowUp) {
         size_t next_state;
 
