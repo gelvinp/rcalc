@@ -122,7 +122,7 @@ RCALC_FMT_1(Sqrt, arg0) {
 // Tags: [real_cast]
 // Example: [85]
 RCALC_OP_1(Cbrt, Real, arg0) {
-    Real value = std::sqrt(arg0);
+    Real value = std::cbrt(arg0);
 
     if (std::isnan(value)) {
         return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
