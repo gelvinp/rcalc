@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Byte unit family (Power of 2 and power of 10)
+- Undo command (reset stack to before previous action)
+
+### Changed
+
+- Allow the hex operator to operate on vectors (useful for colors)
+- Clarify the error message when given too few parameters, fix pluralization as well.
+- Unify the whitespace for help text sections
+- Reduce redundant negation (i.e. -(-(5)) becomes just 5)
+- Change floating point precision to 15 places (Likely to become adjustable soon)
+- Improve units autocomplete to only suggest the second unit from the same family as the first unit.
+- Display all commands in one list, not separated by Application / Renderer scope.
+- Clear scratchpad on backspace during autocomplete in the terminal renderer
+- Lots of internal changes to support integration into a native iOS app.
+
+### Fixed
+
+- Correctly display non-decimal values in the terminal renderer.
+- Fix background misalignment for some colored text in the ImGui renderer.
+- Use the correct function for calculating the cube root.
+
 ## [1.2.0] - 2023-10-31
 
 ### Added
