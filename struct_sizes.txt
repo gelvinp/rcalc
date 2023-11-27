@@ -1,0 +1,20 @@
+std::string_view: 16
+uint8_t: 1
+BigInt: 32
+Real: 8
+Vec2: 16
+Vec3: 24
+Vec4: 32
+Mat2: 32
+Mat3: 72
+Mat4: 128
+StackItem: 40
+Type: 1
+Displayable*: 8
+anycase_stringview: 16
+CommandMeta const *: 8
+std::string: 32
+ImGuiDisplayChunk: 48
+ImGuiDisplayEntry: 88
+ImGuiHelpCache::CachedOperatorCategory: 40
+CachedOperator: 64
