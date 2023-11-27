@@ -5,7 +5,7 @@
 
 #include <functional>
 #include <optional>
-#include <vector>
+#include <span>
 
 namespace RCalc {
 
@@ -19,7 +19,7 @@ struct UnitImpl;
 struct UnitFamily {
     const char* p_name;
     Type base_type;
-    const std::vector<Unit*>& units;
+    const std::span<Unit*> units;
 
     void setup();
 };
@@ -49,7 +49,7 @@ class UnitsMap {
 public:
     static UnitsMap& get_units_map();
     std::optional<const Unit*> find_unit(const std::string& str);
-    const std::vector<UnitFamily const *>& get_alphabetical() const;
+    const std::span<UnitFamily const *> get_alphabetical() const;
 
 private:
     bool built = false;

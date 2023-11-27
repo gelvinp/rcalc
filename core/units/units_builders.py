@@ -146,7 +146,7 @@ class Family:
             f'\t&UNIT_ECHO<{self.family_type}>',
             '};',
             '',
-            f'std::vector<Unit*> UNITVEC_BASE_{self.name} {{'
+            f'std::array<Unit*, {len(units) + 1}> UNITVEC_BASE_{self.name} {{'
         ])
 
         usages = [self.units[unit].usage for unit in units]
@@ -213,6 +213,7 @@ class UnitsMapBuilder:
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"units.h\"",
             "#include \"units_internal.h\"", "",
+            '#include <span>', ''
         ]
 
         self.unit_requires.sort()
@@ -228,7 +229,7 @@ class UnitsMapBuilder:
         for family_unit in family_units:
             lines.extend(self.family_units[family_unit].build())
         
-        lines.append(f'std::vector<UnitFamily const *> alphabetical {{')
+        lines.append(f'std::array<UnitFamily const *, {len(family_units)}> alphabetical {{')
         lines.append(',\n'.join([f'\t&UNIT_FAMILY_{family_unit}' for family_unit in family_units]))
         
         lines.extend([
@@ -238,7 +239,7 @@ class UnitsMapBuilder:
             '',
             'namespace RCalc {',
             ''
-            'const std::vector<UnitFamily const*>& UnitsMap::get_alphabetical() const {',
+            'const std::span<UnitFamily const*> UnitsMap::get_alphabetical() const {',
             '\treturn Units::alphabetical;',
             '}',
             '',

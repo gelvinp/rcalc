@@ -37,18 +37,18 @@ class Command:
     
 
     def build(self, scope_name):
-        lines = [
+        lines = [f'std::array<const char*, {len(self.aliases)}> CMDALIASES_{scope_name}_{self.name} {{']
+
+        if len(self.aliases) > 0:
+            lines.append(',\n'.join([f'\t"{alias}"' for alias in self.aliases]))
+
+        lines.extend([
+            '};',
+            '',
             f'CommandMeta CMDMETA_{scope_name}_{self.name} {{',
             f'\t"{self.name}",',
             f'\t"{self.description}",',
-            '\t{',
-        ]
-
-        if len(self.aliases) > 0:
-            lines.append(',\n'.join([f'\t\t"{alias}"' for alias in self.aliases]))
-
-        lines.extend([
-            '\t}',
+            f'\tCMDALIASES_{scope_name}_{self.name}',
             '};',
             '',
         ])
@@ -101,7 +101,7 @@ class Scope:
         for cmd_name in commands:
             lines.extend(self.commands[cmd_name].build(self.name))
         
-        lines.append(f'std::vector<CommandMeta const *> SCOPECMDS_{self.name} {{')
+        lines.append(f'std::array<CommandMeta const *, {len(commands)}> SCOPECMDS_{self.name} {{')
 
         if len(commands) > 0:
             lines.append(',\n'.join([f'\t&CMDMETA_{self.name}_{cmd_name}' for cmd_name in commands]))
@@ -172,6 +172,8 @@ class CommandMapBuilder:
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"commands.h\"",
             "#include \"commands_internal.h\"", "",
+            "#include <array>",
+            ''
         ]
 
         self.scope_requires.sort()

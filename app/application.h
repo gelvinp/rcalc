@@ -36,7 +36,7 @@ public:
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);
 
-    static const RPNStack& get_stack() { return singleton->stack; }
+    static const RPNStack& get_stack() { return singleton.stack; }
 
 private:
     Application();
@@ -56,7 +56,8 @@ private:
 
     void swap_stacks();
 
-    static Application* singleton;
+    static Application singleton;
+    bool initialized = false;
 };
 
 }

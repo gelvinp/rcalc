@@ -8,7 +8,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
-#include <vector>
+#include <span>
 
 namespace RCalc {
 
@@ -25,8 +25,8 @@ public:
         Application* p_application;
     };
 
-    static Result<Renderer*> create(const std::string_view& name, RendererCreateInfo info);
-    static const std::vector<const char*>& get_enabled_renderers();
+    static Result<Renderer*> create(const std::string_view& name, RendererCreateInfo&& info);
+    static const std::span<const char*> get_enabled_renderers();
 
     virtual Result<> init(Application* p_application) = 0;
     virtual void render_loop() = 0;

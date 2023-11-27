@@ -14,6 +14,7 @@ env_app.CommandNoCache(
     None,
     env.Run(renderer_builders.gen_renderers, "Generating renderer definitions.")
 )
+env_app.Depends(renderers_gen_path, "#app/renderers/renderer_builders.py")
 
 env_app.add_source_files(env.app_sources, renderers_gen_path)
 env_app.add_source_files(env.app_sources, "*.cpp")

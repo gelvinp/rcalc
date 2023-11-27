@@ -314,3 +314,6 @@ compile_commands.json
 bin
 *.gen.*
 imgui.ini
+
+# Debug artifacts
+heaptrack*.zst

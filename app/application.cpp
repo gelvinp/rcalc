@@ -12,10 +12,14 @@
 
 namespace RCalc {
 
-Application* Application::singleton;
+Application Application::singleton;
 
 Result<Application*> Application::create(AppConfig config) {
-    Application* p_application = new Application();
+    if (singleton.initialized) {
+        throw std::logic_error("Cannot create two application instances!");
+    }
+
+    Application* p_application = &singleton;
 
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
@@ -31,13 +35,12 @@ Result<Application*> Application::create(AppConfig config) {
             throw std::logic_error("Renderer did not initialize correctly! p_backend == nullptr");
         }
 
-        if (!singleton) { singleton = p_application; }
-
         p_application->p_renderer = renderer_res.unwrap();
+        singleton.initialized = true;
+
         return Ok(p_application);
     }
     else {
-        delete p_application;
         return renderer_res.unwrap_err();
     }
 }

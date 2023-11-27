@@ -21,9 +21,9 @@
 
 namespace RCalc {
 
-ImGuiRenderer::ImGuiRenderer(RendererCreateInfo info) :
-        cb_submit_text(info.cb_submit_text),
-        cb_submit_op(info.cb_submit_op),
+ImGuiRenderer::ImGuiRenderer(RendererCreateInfo&& info) :
+        cb_submit_text(std::move(info.cb_submit_text)),
+        cb_submit_op(std::move(info.cb_submit_op)),
         command_map(CommandMap<ImGuiRenderer>::get_command_map())
 {
     p_backend = RenderBackend::create<ImGuiRenderer>();

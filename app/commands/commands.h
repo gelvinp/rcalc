@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <span>
 
 #define REGISTER_COMMAND(scope, name) static void _CMDIMPL_##name(scope&)
     
@@ -12,7 +13,7 @@ namespace RCalc {
 struct CommandMeta {
     const char* name;
     const char* description;
-    std::vector<const char*> aliases;
+    const std::span<const char*> aliases;
 };
 
 template<typename Scope>
@@ -20,7 +21,7 @@ using Command = void (*)(Scope&);
 
 struct ScopeMeta {
     const char* scope_name;
-    const std::vector<CommandMeta const *>& scope_cmds;
+    const std::span<CommandMeta const *> scope_cmds;
 };
 
 class _GlobalCommandMap {

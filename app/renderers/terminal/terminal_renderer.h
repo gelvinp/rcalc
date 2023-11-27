@@ -11,7 +11,7 @@ namespace RCalc {
 
 class TerminalRenderer : public Renderer {
 public:
-    TerminalRenderer(RendererCreateInfo info);
+    TerminalRenderer(RendererCreateInfo&& info);
 
     virtual Result<> init(Application* p_application) override;
     virtual void render_loop() override;
