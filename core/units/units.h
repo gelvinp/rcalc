@@ -49,7 +49,7 @@ class UnitsMap {
 public:
     static UnitsMap& get_units_map();
     std::optional<const Unit*> find_unit(const std::string& str);
-    const std::span<UnitFamily const *> get_alphabetical() const;
+    const std::span<UnitFamily const * const> get_alphabetical() const;
 
 private:
     bool built = false;

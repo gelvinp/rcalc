@@ -26,7 +26,7 @@ public:
     };
 
     static Result<Renderer*> create(const std::string_view& name, RendererCreateInfo&& info);
-    static const std::span<const char*> get_enabled_renderers();
+    static const std::span<const char * const> get_enabled_renderers();
 
     virtual Result<> init(Application* p_application) = 0;
     virtual void render_loop() = 0;

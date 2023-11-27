@@ -17,7 +17,6 @@ def gen_renderers(target, source, env):
         '#include "core/logger.h"',
         '#include "core/format.h"',
         '',
-        '#include <array>',
         '#include <stdexcept>',
         ''
     ]
@@ -55,7 +54,7 @@ def gen_renderers(target, source, env):
         '',
         f'const char* Renderer::default_renderer = "{env["default_renderer"]}";',
         '',
-        f'std::array<const char*, {len(env["enabled_renderers"])}> enabled_renderers {{'
+        f'constexpr const char* enabled_renderers[] {{'
     ])
 
     lines.append(',\n'.join([f'\t"{renderer}"' for renderer in env["enabled_renderers"]]))
@@ -63,7 +62,7 @@ def gen_renderers(target, source, env):
     lines.extend([
         '};',
         '',
-        'const std::span<const char*> Renderer::get_enabled_renderers() {',
+        'const std::span<const char * const> Renderer::get_enabled_renderers() {',
         '\treturn enabled_renderers;',
         '}',
         '',

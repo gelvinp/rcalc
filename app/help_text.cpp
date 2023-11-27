@@ -9,7 +9,7 @@ This software is developed by Patrick Gelvin, and released under the MIT license
 )foo";
 
 
-const std::vector<HelpText::HelpSection> HelpText::sections {
+constexpr HelpText::HelpSection HelpSections[] =  {
     {
         "Reverse Polish Notation",
 R"foo(Most calculators use a style of notation similar to '1 + 2 = 3', known as _infix_ notation. Reverse Polish Notation, or RPN for short, is instead a _postfix_ notation, where operators are placed after their operands (i.e. '1 2 + = 3'). Intuitively, operands are placed into a _stack_, and then operators operate off the top of the stack.
@@ -112,5 +112,7 @@ To convert a value, push it onto the stack, followed by the unit you want to con
 )foo"
     }
 };
+
+const std::span<const HelpText::HelpSection> HelpText::sections = { HelpSections };
 
 }

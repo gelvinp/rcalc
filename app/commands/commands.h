@@ -13,7 +13,7 @@ namespace RCalc {
 struct CommandMeta {
     const char* name;
     const char* description;
-    const std::span<const char*> aliases;
+    const std::span<const char * const> aliases;
 };
 
 template<typename Scope>
@@ -21,7 +21,7 @@ using Command = void (*)(Scope&);
 
 struct ScopeMeta {
     const char* scope_name;
-    const std::span<CommandMeta const *> scope_cmds;
+    const std::span<CommandMeta const * const> scope_cmds;
 };
 
 class _GlobalCommandMap {

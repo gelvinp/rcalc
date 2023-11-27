@@ -377,65 +377,91 @@ class Operator:
             "\treturn Ok();",
             "}",
             '',
-            f'namespace OP_{self.name}_Data {{',
-            '',
-            'namespace AllowedTypes {',
-            ''
         ])
 
-        for typeIndex in range(len(perm_types)):
-            typeSet = perm_types[typeIndex]
-            typeString = ',\n\t'.join([f'TYPE_{type.upper()}' for type in typeSet])
+        allowed_types_name = "{}"
+        examples_name = "{}"
 
+        if self.param_count > 0 or len(self.examples) > 0:
             lines.extend([
-                f'std::array<Type, {len(typeSet)}> _{typeIndex} {{',
-                f"\t{typeString}",
-                '};',
-                ''
+                f'namespace OP_{self.name}_Data {{',
+                '',
             ])
-        
-        typeString = ',\n\t'.join([f'AllowedTypes::_{index}' for index in range(len(perm_types))])
+
+            if self.param_count > 0:
+                lines.extend([
+                    'namespace AllowedTypes {',
+                    ''
+                ])
+
+                for typeIndex in range(len(perm_types)):
+                    typeSet = perm_types[typeIndex]
+                    typeString = ',\n\t'.join([f'TYPE_{type.upper()}' for type in typeSet])
+
+                    lines.extend([
+                        f'constexpr Type _{typeIndex}[] {{',
+                        f"\t{typeString}",
+                        '};',
+                        ''
+                    ])
+            
+                typeString = ',\n\t'.join([f'AllowedTypes::_{index}' for index in range(len(perm_types))])
+
+                lines.extend([
+                    '}',
+                    '',
+                    f'constexpr const std::span<const Type> allowed_types[] {{',
+                    f'\t{typeString}',
+                    '};',
+                    '', 
+                ])
+
+                allowed_types_name = f'OP_{self.name}_Data::allowed_types'
+            
+
+            if len(self.examples) > 0:
+                lines.extend([
+                    'namespace Examples {',
+                    ''
+                ])
+
+                for exampleIndex in range(len(self.examples)):
+                    example = self.examples[exampleIndex]
+                    exampleString = ',\n\t'.join([f'"{e}"' for e in example])
+
+                    lines.extend([
+                        f'constexpr const char* _{exampleIndex}[] {{',
+                        f'\t{exampleString}',
+                        '};',
+                        ''
+                    ])
+                
+                exampleString = ',\n\t'.join([f'Examples::_{index}' for index in range(len(self.examples))])
+
+                lines.extend([
+                    '}',
+                    '',
+                    f'constexpr const std::span<const char* const> examples[] {{',
+                    f'\t{exampleString}',
+                    '};',
+                    ''
+                ])
+
+                examples_name = f'OP_{self.name}_Data::examples'
+            
+            lines.extend([
+                '}',
+                '',
+            ])
 
         lines.extend([
-            '}',
-            '',
-            f'std::array<const std::span<Type>, {len(perm_types)}> allowed_types {{',
-            f'\t{typeString}',
-            '};',
-            '', 
-            'namespace Examples {',
-            ''
-        ])
-
-        for exampleIndex in range(len(self.examples)):
-            example = self.examples[exampleIndex]
-            exampleString = ',\n\t'.join([f'"{e}"' for e in example])
-
-            lines.extend([
-                f'std::array<const char*, {len(example)}> _{exampleIndex} {{',
-                f'\t{exampleString}',
-                '};',
-                ''
-            ])
-        
-        exampleString = ',\n\t'.join([f'Examples::_{index}' for index in range(len(self.examples))])
-
-        lines.extend([
-            '}',
-            '',
-            f'std::array<const std::span<const char*>, {len(self.examples)}> examples {{',
-            f'\t{exampleString}',
-            '};',
-            '',
-            '}',
-            '',
-            f"Operator OP_{self.name} {{",
+            f"constexpr Operator OP_{self.name} {{",
             f'\t"{self.name}",',
             f'\t"{self.description}",',
             f'\t{self.param_count or 0},',
-            f'\tOP_{self.name}_Data::allowed_types,',
-            f'\tOP_{self.name}_Data::examples,',
-            f'\tOP_Eval_{self.name},',
+            f'\t{allowed_types_name},',
+            f'\t{examples_name},',
+            f'\t&OP_Eval_{self.name},',
             '};',
             ''
         ])
@@ -493,9 +519,7 @@ class OperatorMapBuilder:
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"operators.h\"",
             "#include \"operators_internal.gen.h\"", ""
-            "#include <array>",
-            '#include "core/comparison.h"',
-            ''
+            '#include "core/comparison.h"', ''
         ]
 
         self.operator_requires.sort()
@@ -518,7 +542,7 @@ class OperatorMapBuilder:
             '',
             'namespace OperatorCategories {',
             '',
-            f'std::array<Operator const *, {len(self.categories[None])}> NoCategoryOperators {{'
+            f'constexpr Operator const * NoCategoryOperators[] {{'
         ])
 
         lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[None]]))
@@ -536,7 +560,7 @@ class OperatorMapBuilder:
         category_names.remove(None)
         category_names.sort(key=lambda e: e.lower())
         for category_name in category_names:
-            lines.append(f'std::array<Operator const *, {len(self.categories[category_name])}> {category_name}CategoryOperators {{')
+            lines.append(f'constexpr Operator const * {category_name}CategoryOperators[] {{')
             lines.append(',\n'.join([f'\t&Operators::OP_{op_name}' for op_name in self.categories[category_name]]))
             lines.extend([
                 '};',
@@ -549,7 +573,7 @@ class OperatorMapBuilder:
 
         category_count = len(category_names) + 1
 
-        lines.append(f'std::array<OperatorCategory const *, {category_count}> alphabetical_categories {{')
+        lines.append(f'constexpr OperatorCategory const * const alphabetical_categories[] {{')
 
         category_lines = [
             '\t&OperatorCategories::NoCategory'
@@ -563,7 +587,7 @@ class OperatorMapBuilder:
             '',
             '}',
             '',
-            'const std::span<OperatorCategory const *> OperatorMap::get_alphabetical() const {',
+            'const std::span<OperatorCategory const * const> OperatorMap::get_alphabetical() const {',
             '\treturn OperatorCategories::alphabetical_categories;',
             '}',
             '',

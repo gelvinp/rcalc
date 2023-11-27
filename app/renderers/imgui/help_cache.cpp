@@ -14,7 +14,7 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 
     OperatorMap& op_map = OperatorMap::get_operator_map();
 
-    for (const std::vector<const char*>& example_params : op.examples) {
+    for (const std::span<const char * const>& example_params : op.examples) {
         stack.clear();
 
         for (const char* param : example_params) {

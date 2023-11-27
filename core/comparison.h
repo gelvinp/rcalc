@@ -9,4 +9,9 @@ bool operator==(const std::span<T>& lhs, const std::vector<T>& rhs) {
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
+template<typename T>
+bool operator==(const std::span<const T>& lhs, const std::vector<T>& rhs) {
+    return std::equal(lhs.begin(), lhs.end(), rhs.cbegin(), rhs.cend());
+}
+
 }

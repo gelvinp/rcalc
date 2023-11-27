@@ -792,7 +792,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
 
         if (types_open) {
             bool first_set = true;
-            for (const std::vector<Type>& call_types : op.op.allowed_types) {
+            for (const std::span<const Type>& call_types : op.op.allowed_types) {
                 ImGui::SetCursorPosX(20.0);
                 bool first = true;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <span>
 
 namespace RCalc {
 
@@ -11,7 +11,7 @@ struct HelpText {
     };
 
     static const char* program_info;
-    static const std::vector<HelpSection> sections;
+    static const std::span<const HelpSection> sections;
 };
 
 }

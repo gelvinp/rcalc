@@ -177,7 +177,7 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
             if (!stack_types.empty()) {
                 auto stack_range = std::ranges::subrange(stack_types.end() - op->param_count, stack_types.end());
 
-                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_range](const std::span<Type>& op_types) {
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_range](const std::span<const Type>& op_types) {
                     auto op_range = std::ranges::subrange(op_types.begin(), op_types.end());
                     return std::ranges::equal(stack_range, op_range);
                 });

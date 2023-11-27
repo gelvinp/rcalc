@@ -225,7 +225,7 @@ ftxui::Component render_help_operator(const Operator* op) {
 
     if (op->param_count != 0) {
         ftxui::Elements allowed_types;
-        for (const std::vector<Type>& set : op->allowed_types) {
+        for (const std::span<const Type>& set : op->allowed_types) {
             std::stringstream ss;
             ss << "   ";
             
@@ -271,7 +271,7 @@ ftxui::Component render_help_operator(const Operator* op) {
         ftxui::Elements examples;
         RPNStack example_stack;
 
-        for (const std::vector<const char*>& example_params : op->examples) {
+        for (const std::span<const char * const>& example_params : op->examples) {
             example_stack.clear();
 
             if (!examples.empty()) {
