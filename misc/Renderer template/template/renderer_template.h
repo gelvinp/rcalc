@@ -7,10 +7,10 @@ namespace RCalc {
 
 class RendererTemplate : public Renderer {
 public:
-    RendererTemplate(RendererCreateInfo info);
+    RendererTemplate(RendererCreateInfo&& info);
 
     virtual Result<> init(Application* p_application) override;
-    virtual void render() override;
+    virtual void render_loop() override;
     virtual void cleanup() override;
 
     virtual void display_info(const std::string& str) override;
