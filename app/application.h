@@ -31,6 +31,7 @@ public:
     REGISTER_COMMAND(Application, Copy);
     REGISTER_COMMAND(Application, Dup);
     REGISTER_COMMAND(Application, Count);
+    REGISTER_COMMAND(Application, Undo);
 
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);
@@ -39,6 +40,9 @@ public:
 
 private:
     Application();
+
+    RPNStack _stack_a, _stack_b;
+    RPNStack *p_stack_active, *p_stack_backup;
 
     RPNStack stack;
     Renderer* p_renderer;
@@ -49,6 +53,8 @@ private:
     CommandMap<Application> command_map;
 
     bool try_swizzle(const std::string& str);
+
+    void swap_stacks();
 
     static Application* singleton;
 };

@@ -47,6 +47,9 @@ Application::Application() :
 {
     command_map = CommandMap<Application>::get_command_map();
     command_map.activate();
+
+    p_stack_active = &_stack_a;
+    p_stack_backup = &_stack_b;
 }
 
 
@@ -64,10 +67,13 @@ void Application::cleanup() {
 
 
 void Application::on_renderer_submit_text(const std::string& str) {
+    stack = *p_stack_active;
+
     // If it starts with '\', it's a command
     if (str.starts_with('\\')) {
         if (try_application_command(str) || p_renderer->try_renderer_command(str)) {
             p_renderer->replace_stack_items(stack.get_items());
+            swap_stacks();
             return;
         }
 
@@ -91,15 +97,25 @@ void Application::on_renderer_submit_text(const std::string& str) {
 
         p_renderer->add_stack_item(stack_item);
         stack.push_item(std::move(stack_item));
+        swap_stacks();
         return;
     }
 
     // Try to parse as Operator third
 
-    if (on_renderer_submit_operator(str)) { return; }
+    if (op_map.has_operator(str)) {
+        Result<> res = op_map.evaluate(str, stack);
+        if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
+        p_renderer->replace_stack_items(stack.get_items());
+        swap_stacks();
+        return;
+    }
 
     // Try to parse as swizzle last
-    if (try_swizzle(str)) { return; }
+    if (try_swizzle(str)) { 
+        swap_stacks();
+        return;
+    }
 
     // Unknown command!
     p_renderer->display_error(fmt("Unknown operator: '%s'", str.c_str()));
@@ -107,10 +123,13 @@ void Application::on_renderer_submit_text(const std::string& str) {
 
 
 bool Application::on_renderer_submit_operator(const std::string& str) {
+    stack = *p_stack_active;
+    
     if (op_map.has_operator(str)) {
         Result<> res = op_map.evaluate(str, stack);
         if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
         p_renderer->replace_stack_items(stack.get_items());
+        swap_stacks();
         return true;
     }
     return false;
@@ -267,6 +286,12 @@ bool Application::try_swizzle(const std::string& str) {
     p_renderer->add_stack_item(stack_item);
     stack.push_item(std::move(stack_item));
     return true;
+}
+
+
+void Application::swap_stacks() {
+    *p_stack_backup = stack;
+    std::swap(p_stack_backup, p_stack_active);
 }
 
 

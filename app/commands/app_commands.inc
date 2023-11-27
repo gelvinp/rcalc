@@ -75,3 +75,9 @@ RCALC_CMD(Application, Count, app) {
     });
 }
 
+// @RCalcCommand
+// Description: Undoes the most recent modification to the stack.
+// Requires: "app/application.h"
+RCALC_CMD(Application, Undo, app) {
+    app.stack = *app.p_stack_backup;
+}
