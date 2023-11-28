@@ -18,3 +18,7 @@ ImGuiDisplayChunk: 48
 ImGuiDisplayEntry: 88
 ImGuiHelpCache::CachedOperatorCategory: 40
 CachedOperator: 64
+ConstCharDisplayable: 40
+StringDisplayable: 56
+ValueDisplayable: 48
+RecursiveDisplayable: 48

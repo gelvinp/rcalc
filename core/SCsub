@@ -4,6 +4,7 @@ env.core_sources = []
 env_core = env.Clone()
 
 env_core.add_source_files(env.core_sources, "*.cpp", True)
+env_core.add_source_files(env.core_sources, "memory/*.cpp", True)
 
 SConscript("units/SCsub")
 
