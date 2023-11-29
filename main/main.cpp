@@ -5,6 +5,8 @@
 #include "app/renderers/renderer.h"
 #include "app/application.h"
 #include "assets/license.gen.h"
+#include "core/memory/allocator.h"
+#include "app/displayable/displayable.h"
 
 #include <iostream>
 #include <string_view>
@@ -15,6 +17,8 @@
 int main(int argc, char** pp_argv)
 {
     Main m;
+
+    Allocator::setup();
 
     RCalc::AppConfig config = m.parse_args(argc, pp_argv);
     RCalc::initialize_modules();
@@ -32,6 +36,7 @@ int main(int argc, char** pp_argv)
     }
 
     RCalc::cleanup_modules();
+    Allocator::cleanup();
 
     return res ? 0 : 255;
 }
