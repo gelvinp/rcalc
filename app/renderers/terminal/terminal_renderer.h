@@ -75,6 +75,9 @@ private:
     std::optional<size_t> history_state = std::nullopt;
 
     AutocompleteManager autocomp;
+
+    std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;
+    void build_help_cache();
 };
 
 }

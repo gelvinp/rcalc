@@ -4,6 +4,7 @@
 #include "colors.h"
 #include "entry_component.h"
 #include "scroll_component.h"
+#include "app/operators/operators.h"
 
 #include <cstring>
 
@@ -87,7 +88,8 @@ void TerminalRenderer::activate_help_page() {
     comp_container->DetachAllChildren();
 
     if (!help_cache) {
-        help_cache = TerminalHelpCache::build_help_cache();
+        if (help_op_cache.empty()) { build_help_cache(); }
+        help_cache = TerminalHelpCache::build_help_cache(help_op_cache);
     }
     
     comp_container->Add(help_cache);
@@ -467,6 +469,15 @@ ftxui::Elements TerminalRenderer::split_paragraphs(std::string str) {
     lines.push_back(ftxui::paragraph(str.substr(prev, str.size() - prev)));
 
     return lines;
+}
+
+
+void TerminalRenderer::build_help_cache() {
+    help_op_cache.clear();
+
+    for (const OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
+        help_op_cache.emplace_back(*category);
+    }
 }
 
 }
