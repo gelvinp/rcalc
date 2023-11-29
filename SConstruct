@@ -130,6 +130,7 @@ opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
 opts.Add(BoolVariable("enable_terminal_clipboard", "Enable clipboard support for the terminal renderer, requiring a desktop manager on linux.", True))
+opts.Add(BoolVariable("debug_alloc", "Enable allocator debugging. Will slow down RCalc considerably.", False))
 
 opts.Add("CXX", "C++ compiler")
 opts.Add("CC", "C compiler")
@@ -351,6 +352,9 @@ if selected_platform in available_platforms:
     if env["target"] == "release":
         env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
         env.Append(CPPDEFINES=["NDEBUG"])
+    
+    if env["debug_alloc"]:
+        env.Append(CPPDEFINES=["DEBUG_ALLOC"])
 
     if hasattr(detect, "get_program_suffix"):
         suffix = "." + detect.get_program_suffix()

@@ -53,7 +53,7 @@ private:
         bool resize(void* p_addr, size_t new_size_bytes);
         void release(void* p_addr);
 
-        #ifndef NDEBUG
+        #ifdef DEBUG_ALLOC
         void ENSURE_CORRECTNESS(std::source_location src_loc = std::source_location::current());
         #else
         void ENSURE_CORRECTNESS() {}
@@ -100,7 +100,7 @@ private:
         Chunk* p_free = nullptr;
         Page* p_next = nullptr;
 
-        #ifndef NDEBUG
+        #ifdef DEBUG_ALLOC
         std::set<Chunk*> DBG_chunks_reserved;
         #endif
     };
@@ -113,7 +113,7 @@ private:
 
     bool not_ready() const { return p_page_begin == nullptr || p_page_end == nullptr; }
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     std::set<void*> DBG_addresses_allocated;
     void ENSURE_CORRECTNESS(std::source_location src_loc = std::source_location::current());
     #else

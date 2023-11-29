@@ -16,7 +16,7 @@ void* Allocator::alloc(size_t size_bytes) {
         std::optional<void*> op_addr = p_page->reserve(size_bytes);
         
         if (op_addr.has_value()) {
-            #ifndef NDEBUG
+            #ifdef DEBUG_ALLOC
             shared.DBG_addresses_allocated.insert(op_addr.value());
             shared.ENSURE_CORRECTNESS();
             #endif
@@ -25,7 +25,7 @@ void* Allocator::alloc(size_t size_bytes) {
     }
 
     void* p_addr = shared.add_new_page(size_bytes)->reserve(size_bytes).value();
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     shared.DBG_addresses_allocated.insert(p_addr);
     shared.ENSURE_CORRECTNESS();
     #endif
@@ -37,7 +37,7 @@ void* Allocator::realloc(void* p_addr, size_t new_size_bytes) {
         throw std::logic_error("Cannot reallocate before allocator is setup!");
     }
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     if (!shared.DBG_addresses_allocated.contains(p_addr)) {
         throw std::logic_error("Cannot reallocate an address never allocated!");
     }
@@ -72,7 +72,7 @@ void Allocator::free(void* p_addr) {
         throw std::logic_error("Cannot free before allocator is setup!");
     }
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     if (!shared.DBG_addresses_allocated.contains(p_addr)) {
         throw std::logic_error("Cannot free an address never allocated!");
     }
@@ -376,8 +376,9 @@ void Allocator::Page::reincorporate_contiguous(Chunk* p_chunk) {
             RCalc::Logger::log_err("p_chunk: %p : %d", p_chunk, p_chunk->contiguous_size);
             RCalc::Logger::log_err("p_chunk_end: %p", p_chunk_end);
             RCalc::Logger::log_err("p_after: %p : %d", p_after, p_after->contiguous_size);
-            RCalc::Logger::log_err("");
 
+            #ifdef DEBUG_ALLOC
+            RCalc::Logger::log_err("");
             for (Chunk* p_dbg = p_previous; p_dbg <= p_chunk_end; ++p_dbg) {
                 if (DBG_chunks_reserved.contains(p_dbg)) {
                     RCalc::Logger::log_err("%p: RESERVED", p_dbg);
@@ -386,6 +387,7 @@ void Allocator::Page::reincorporate_contiguous(Chunk* p_chunk) {
                     RCalc::Logger::log_err("%p: free", p_dbg);
                 }
             }
+            #endif
             throw std::logic_error("Cannot reincorporate contiguous when <previous> <given> <after> is not maintained!");
         }
 
@@ -404,7 +406,7 @@ void Allocator::Page::prepare_reservation(Chunk* p_chunk) {
     p_chunk->p_next = p_chunk + 1;
     memset(chunk_to_void_addr(p_chunk->p_next), 0, bytes);
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     for (size_t index = 0; index < p_chunk->contiguous_size; ++index) {
         DBG_chunks_reserved.insert(p_chunk + index);
     }
@@ -426,7 +428,7 @@ void Allocator::Page::merge_reservations(Chunk* p_first, Chunk* p_second) {
 
     p_first->contiguous_size += second_chunk_count;
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     for (size_t index = 0; index < second_chunk_count; ++index) {
         DBG_chunks_reserved.insert(p_second + index);
     }
@@ -454,7 +456,7 @@ void Allocator::Page::close_reservation(Chunk* p_chunk) {
     memset(chunk_to_void_addr(p_chunk->p_next), 0, bytes);
     p_chunk->p_next = nullptr;
 
-    #ifndef NDEBUG
+    #ifdef DEBUG_ALLOC
     for (size_t index = 0; index < p_chunk->contiguous_size; ++index) {
         if (!DBG_chunks_reserved.contains(p_chunk + index)) {
             throw std::logic_error("Closing reservation that contains an unreserved chunk!");
@@ -464,7 +466,7 @@ void Allocator::Page::close_reservation(Chunk* p_chunk) {
     #endif
 }
 
-#ifndef NDEBUG
+#ifdef DEBUG_ALLOC
 
 void Allocator::ENSURE_CORRECTNESS(std::source_location src_loc) {
     for (Page* p_page = p_page_begin; p_page != nullptr; p_page = p_page->next()) {
