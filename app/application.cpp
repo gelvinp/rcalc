@@ -62,10 +62,12 @@ void Application::run() {
 
 
 void Application::cleanup() {
-    stack.clear();
     p_renderer->cleanup();
-
     delete p_renderer;
+
+    stack.clear();
+    _stack_a.clear();
+    _stack_b.clear();
 }
 
 

@@ -415,15 +415,17 @@ Value Value::parse_numeric(const std::string& str, Value&& value, Representation
 }
 
 
-std::optional<Value> Value::parse_real(std::string_view sv) {
+std::optional<Value> Value::parse_real(std::string str) {
     std::stringstream ss;
     bool negate = false;
+
+    std::string_view sv { str };
 
     // Support 1en6
     auto exp_it = std::find(sv.begin(), sv.end(), 'e');
     if (exp_it != sv.end()) {
         size_t exp_idx = std::distance(sv.begin(), exp_it);
-        std::string str { sv };
+        str = std::string { sv };
 
         if ((exp_idx + 1) < str.size() && str[exp_idx + 1] == 'n') {
             str[exp_idx + 1] = '-';
@@ -501,8 +503,8 @@ std::optional<Value> Value::parse_vec(std::string_view sv) {
             begin += 1;
         }
 
-        sv = std::string_view(token + begin, end - begin);
-        std::optional<Value> real = parse_real(sv);
+        std::string str { token + begin, end - begin };
+        std::optional<Value> real = parse_real(str);
 
         if (real) {
             if (components.size() >= 4) { return std::nullopt; }
