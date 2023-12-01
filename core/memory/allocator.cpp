@@ -72,6 +72,8 @@ void Allocator::free(void* p_addr) {
         throw std::logic_error("Cannot free before allocator is setup!");
     }
 
+    if (shared.noop_free_enabled) { return; }
+
     #ifdef DEBUG_ALLOC
     if (!shared.DBG_addresses_allocated.contains(p_addr)) {
         throw std::logic_error("Cannot free an address never allocated!");
@@ -83,7 +85,29 @@ void Allocator::free(void* p_addr) {
     for (Page* p_page = shared.p_page_begin; p_page != nullptr; p_page = p_page->next()) {
         if (p_page->contains(p_addr)) {
             p_page->release(p_addr);
+            shared.ENSURE_CORRECTNESS();
             return;
+        }
+    }
+}
+
+
+size_t Allocator::get_allocation_size(void* p_addr) {
+    if (shared.not_ready()) {
+        throw std::logic_error("Cannot get allocation size before allocator is setup!");
+    }
+
+    #ifdef DEBUG_ALLOC
+    if (!shared.DBG_addresses_allocated.contains(p_addr)) {
+        throw std::logic_error("Cannot get allocation size for an address never allocated!");
+    }
+    #endif
+
+    shared.ENSURE_CORRECTNESS();
+
+    for (Page* p_page = shared.p_page_begin; p_page != nullptr; p_page = p_page->next()) {
+        if (p_page->contains(p_addr)) {
+            return p_page->reservation_size_bytes(p_addr);
         }
     }
 }
@@ -127,7 +151,7 @@ Allocator::Page* Allocator::add_new_page(size_t size_bytes) {
 
 
 Allocator::Page::Page(size_t size_bytes) {
-    chunk_count = bytes_to_chunk_count(size_bytes);
+    chunk_count = bytes_to_chunk_count(size_bytes) + 1;
     if (chunk_count == 0) {
         throw std::logic_error("Cannot allocate a zero-chunk page!");
     }
@@ -135,6 +159,9 @@ Allocator::Page::Page(size_t size_bytes) {
     p_data = new Chunk[chunk_count];
     p_data[0].contiguous_size = chunk_count;
     p_free = p_data;
+    #ifndef NDEBUG
+    _thread_id = std::this_thread::get_id();
+    #endif
 }
 
 Allocator::Page::~Page() {
@@ -150,6 +177,12 @@ std::optional<Allocator::Page*> Allocator::Page::try_append_new_page(size_t size
     if (p_next != nullptr) {
         return std::nullopt;
     }
+
+    #ifndef NDEBUG
+    if (size_bytes > DEFAULT_PAGE_SIZE) {
+        RCalc::Logger::log_info("Requesting large page: %d bytes", size_bytes);
+    }
+    #endif
 
     p_next = new Page(size_bytes);
     return p_next;
@@ -171,6 +204,11 @@ size_t Allocator::Page::reservation_size_bytes(void* p_addr) const {
 
 
 std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
+    #ifndef NDEBUG
+    if (_thread_id != std::this_thread::get_id()) {
+        throw std::logic_error("Allocator is not currently thread safe!");
+    }
+    #endif
     size_t chunk_count = bytes_to_chunk_count(size_bytes);
     std::optional<Chunk*> op_chunk = get_first_contiguous(chunk_count);
     
@@ -189,6 +227,11 @@ std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
 }
 
 bool Allocator::Page::resize(void* p_addr, size_t new_size_bytes) {
+    #ifndef NDEBUG
+    if (_thread_id != std::this_thread::get_id()) {
+        throw std::logic_error("Allocator is not currently thread safe!");
+    }
+    #endif
     Chunk* p_chunk = void_to_header_addr(p_addr);
     size_t current_chunk_count = p_chunk->contiguous_size;
     size_t new_chunk_count = bytes_to_chunk_count(new_size_bytes);
@@ -209,6 +252,11 @@ bool Allocator::Page::resize(void* p_addr, size_t new_size_bytes) {
 }
 
 void Allocator::Page::release(void* p_addr) {
+    #ifndef NDEBUG
+    if (_thread_id != std::this_thread::get_id()) {
+        throw std::logic_error("Allocator is not currently thread safe!");
+    }
+    #endif
     Chunk* p_chunk = void_to_header_addr(p_addr);
     if (!contains(p_chunk)) {
         throw std::logic_error("Cannot release a chunk not contained by this page!");
@@ -351,6 +399,7 @@ void Allocator::Page::reincorporate_contiguous(Chunk* p_chunk) {
 
     // Find the chunk most "to the right" that is just before the given chunk
     Chunk* p_previous = nullptr;
+    Chunk* p_after = nullptr;
     for (Chunk* p_contiguous_start = p_free; p_contiguous_start != nullptr; p_contiguous_start = p_contiguous_start->p_next) {
         if (p_contiguous_start >= p_chunk) {
             break;
@@ -365,11 +414,12 @@ void Allocator::Page::reincorporate_contiguous(Chunk* p_chunk) {
 
     if (p_previous == nullptr) {
         // Inserting at beginning of list
+        p_after = p_free;
         p_chunk->p_next = p_free;
         p_free = p_chunk;
     }
     else {
-        Chunk* p_after = p_previous->p_next;
+        p_after = p_previous->p_next;
         if (p_after != nullptr && p_after < p_chunk_end) {
             RCalc::Logger::log_err("Cannot reincorporate contiguous");
             RCalc::Logger::log_err("p_previous: %p : %d", p_previous, p_previous->contiguous_size);
@@ -393,6 +443,25 @@ void Allocator::Page::reincorporate_contiguous(Chunk* p_chunk) {
 
         p_chunk->p_next = p_after;
         p_previous->p_next = p_chunk;
+    }
+
+    ENSURE_CORRECTNESS();
+
+    // Try to merge adjacent contiguous chunks
+    if (p_chunk_end == p_after) {
+        p_chunk->contiguous_size += p_after->contiguous_size;
+        p_chunk->p_next = p_after->p_next;
+        p_after->contiguous_size = 0;
+        p_after->p_next = 0;
+    }
+
+    ENSURE_CORRECTNESS();
+
+    if (p_previous != nullptr && (p_previous + p_previous->contiguous_size) == p_chunk) {
+        p_previous->contiguous_size += p_chunk->contiguous_size;
+        p_previous->p_next = p_chunk->p_next;
+        p_chunk->contiguous_size = 0;
+        p_chunk->p_next = 0;
     }
 
     ENSURE_CORRECTNESS();

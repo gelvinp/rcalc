@@ -32,6 +32,8 @@ int main(int argc, char** pp_argv)
     } else {
         RCalc::Application* p_application = res.unwrap();
         p_application->run();
+
+        Allocator::set_noop_free(true);
         p_application->cleanup();
     }
 

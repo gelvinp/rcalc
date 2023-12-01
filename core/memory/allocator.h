@@ -7,6 +7,7 @@
 #include <source_location>
 #include <set>
 #include <map>
+#include <thread>
 
 // Motivation:  Displayable linked list nodes are allocated from the heap one at a time,
 //              and that sucks. This allocator will completely prevent small allocations
@@ -19,7 +20,10 @@ public:
     static void* realloc(void* p_addr, size_t new_size_bytes);
     static void free(void* p_addr);
 
+    static size_t get_allocation_size(void* p_addr);
+
     static void setup();
+    static void set_noop_free(bool enabled) { shared.noop_free_enabled = enabled; } // Allow for "instant" exit by not doing any bookkeeping
     static void cleanup();
 
     template<typename T, typename... Args>
@@ -103,7 +107,12 @@ private:
         #ifdef DEBUG_ALLOC
         std::set<Chunk*> DBG_chunks_reserved;
         #endif
+        #ifndef NDEBUG
+        std::thread::id _thread_id;
+        #endif
     };
+
+    bool noop_free_enabled = false;
 
     Page* p_page_begin = nullptr;
     Page* p_page_end = nullptr;
