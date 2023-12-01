@@ -1,6 +1,8 @@
 UNIT_FAMILY(Storage, Real, Bytes, byte);
 
 
+// @RCalcUnit
+// SortOrder: 0
 UNIT_FROM_BASE(Storage, Real, Bits, bit) {
     return Ok(value * 8.0);
 }

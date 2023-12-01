@@ -31,6 +31,7 @@ class Capture:
         self.type = None
 
         self.filename = filename
+        self.sort_order = None
 
 
 class Unit:
@@ -41,6 +42,8 @@ class Unit:
 
         self.found_from = capture.type == Capture.Type.From
         self.found_to = capture.type == Capture.Type.To
+
+        self.sort_order = capture.sort_order
     
 
     def try_update(self, capture: Capture):
@@ -51,6 +54,9 @@ class Unit:
         
         self.found_from |= capture.type == Capture.Type.From
         self.found_to |= capture.type == Capture.Type.To
+
+        if not capture.sort_order is None:
+            self.sort_order = capture.sort_order
 
         return None
     
@@ -80,6 +86,7 @@ class Family:
         self.name = capture.family_name
         self.family_unit_name = capture.family_unit_name
         self.family_unit_usage = capture.family_unit_usage
+        self.family_unit_sort_order = capture.sort_order
         self.family_type = capture.family_type
 
         self.filenames = [capture.filename]
@@ -101,6 +108,13 @@ class Family:
         elif (not capture.family_type is None) and self.family_type != capture.family_type:
             return f"Unit family '{self.name}' is defined with base type '{self.family_type}', not '{capture.family_type}'!"
         
+        if (not capture.sort_order is None) and (capture.sort_order == self.family_unit_sort_order):
+            return f"Unit family '{self.name}' base unit has already been assigned sort order {capture.sort_order}"
+        
+        for _, unit in self.units.items():
+            if (not capture.sort_order is None) and (capture.sort_order == unit.sort_order):
+                return f"Unit '{unit.name}' has already been assigned sort order {capture.sort_order}"
+        
         if capture.unit_name in self.units:
             error = self.units[capture.unit_name].try_update(capture)
             if not error is None:
@@ -112,6 +126,43 @@ class Family:
             self.filenames.append(capture.filename)
         
         return None
+    
+
+    def get_sorted_usages(self):
+        specified = {}
+        unspecified = []
+
+        if self.family_unit_sort_order is None:
+            unspecified.append(self.family_unit_usage)
+        else:
+            specified[self.family_unit_sort_order] = self.family_unit_usage
+
+        for _, unit in self.units.items():
+            if unit.sort_order is None:
+                unspecified.append(unit.usage)
+            else:
+                specified[unit.sort_order] = unit.usage
+
+        sorted_usages = []
+        count = len(self.units) + 1
+        
+        print(f'Specified: {specified}')
+        print(f'unspecified: {unspecified}')
+        print(f'sorted_usages: {sorted_usages}')
+        print(f'count: {count}')
+
+        for index in range(count):
+            print(index)
+            if index in specified:
+                print(specified[index])
+                sorted_usages.append(specified.pop(index))
+            elif len(unspecified) > 0:
+                print(unspecified[0])
+                sorted_usages.append(unspecified.pop(0))
+            else:
+                sorted_usages.append(specified.pop(list(specified.keys())[0]))
+        
+        return sorted_usages
     
 
     def build(self):
@@ -127,12 +178,6 @@ class Family:
         
         if included:
             lines.append('')
-
-        units = list(self.units.keys())
-        units.sort()
-
-        for unit in units:
-            lines.extend(self.units[unit].build(self.name, self.family_type))
         
         lines.extend([
             f'UnitImpl<{self.family_type}> UNITDEF_{self.family_unit_usage} {{',
@@ -145,12 +190,17 @@ class Family:
             f'\t&UNIT_ECHO<{self.family_type}>,',
             f'\t&UNIT_ECHO<{self.family_type}>',
             '};',
-            '',
-            f'Unit* UNITVEC_BASE_{self.name}[] {{'
+            ''
         ])
 
-        usages = [self.units[unit].usage for unit in units]
-        usages.append(self.family_unit_usage)
+        units = list(self.units.keys())
+
+        for unit in units:
+            lines.extend(self.units[unit].build(self.name, self.family_type))
+        
+        lines.append(f'Unit* UNITVEC_BASE_{self.name}[] {{')
+
+        usages = self.get_sorted_usages()
         
         lines.append(',\n'.join([f'\t&UNITDEF_{usage}' for usage in usages]))
 
@@ -303,6 +353,10 @@ class UnitsMapBuilder:
             case "Requires":
                 if not statement_arg in self.unit_requires:
                     self.unit_requires.append(statement_arg)
+            case "SortOrder":
+                self.current_capture.sort_order = int(statement_arg)
+                if self.current_capture.sort_order < 0:
+                    self._set_error('Sort order cannot be negative!')
             case _:
                 self._set_error(f"Statement type '{statement_type}' is unknown!")
     
