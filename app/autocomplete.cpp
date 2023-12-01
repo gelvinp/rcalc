@@ -218,7 +218,7 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
     if (stack_types.empty()) { return; }
 
     std::optional<Type> type = std::nullopt;
-    std::optional<const UnitFamily*> matchingFamily = std::nullopt;
+    std::optional<Unit> firstUnit = std::nullopt;
 
     if (!stack_types.empty() && stack_types.back() != TYPE_UNIT) {
         type = stack_types.back();
@@ -230,15 +230,16 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
             return;
         }
 
-        matchingFamily = stack.get_items()[stack.size() - 1].result.operator RCalc::Unit().p_family;
+        firstUnit = stack.get_items()[stack.size() - 1].result.operator RCalc::Unit();
     }
 
 
     for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
         if (type && !is_type_castable(type.value(), family->base_type)) { continue; }
-        if (matchingFamily && matchingFamily.value() != family) { continue; }
+        if (firstUnit && firstUnit->p_family != family) { continue; }
         
         for (const Unit* unit : family->units) {
+            if (firstUnit && firstUnit->p_impl == unit->p_impl) { continue; }
             anycase_stringview usage(unit->p_usage);
             if (usage.starts_with(input)) {
                 suggestions.push_back(usage);
