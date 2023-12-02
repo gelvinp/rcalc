@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import os
 from platform_methods import subprocess_main
+import atexit
 
 
 Tags = ['reversable', 'bigint_cast', 'real_cast', 'no_expr'] # Need a string in set check, not ordered
@@ -924,7 +925,8 @@ class OperatorMapBuilder:
         operators.sort(key=lambda e: e.lower())
 
         # Write operators list to temporary file and run gperf
-        with tempfile.NamedTemporaryFile("w", newline='\n') as op_file:
+        with tempfile.NamedTemporaryFile("w", newline='\n', delete=False) as op_file:
+            atexit.register(lambda file: os.unlink(os.path.realpath(file.name)), op_file)
             for op_name in operators:
                 op_file.write(f'{self._filter_name(op_name)}\n')
             op_file.flush()

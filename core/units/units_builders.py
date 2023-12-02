@@ -5,6 +5,7 @@ import tempfile
 import os
 import csv
 from platform_methods import subprocess_main
+import atexit
 
 
 Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8 }
@@ -451,7 +452,8 @@ class UnitsMapBuilder:
         units.sort()
 
         # Write units list to temporary file and run gperf
-        with tempfile.NamedTemporaryFile("w", newline='\n') as unit_file:
+        with tempfile.NamedTemporaryFile("w", newline='\n', delete=False) as unit_file:
+            atexit.register(lambda file: os.unlink(os.path.realpath(file.name)), unit_file)
             for unit in units:
                 unit_file.write(f'_{unit}\n')
             unit_file.flush()
