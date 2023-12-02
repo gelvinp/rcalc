@@ -4,6 +4,8 @@ Import("env_modules")
 env_clip = env_modules.Clone()
 if "-Werror" in env_clip["CCFLAGS"]:
     env_clip["CCFLAGS"].remove("-Werror")
+if "/WX" in env_clip["CCFLAGS"]:
+    env_clip["CCFLAGS"].remove("/WX")
 
 env_clip.add_source_files(env.modules_sources, "upstream/clip.cpp")
 env_clip.add_source_files(env.modules_sources, "upstream/image.cpp")

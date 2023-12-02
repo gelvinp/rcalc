@@ -60,7 +60,7 @@ std::optional<std::string> AutocompleteManager::Autocomplete::get_next_suggestio
     if (!suggestion_index) { return std::nullopt; }
 
     std::string str { suggestions[suggestion_index.value()].data() };
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return (char)std::tolower(ch); });
 
     suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
 
@@ -82,7 +82,7 @@ std::optional<std::string> AutocompleteManager::Autocomplete::get_previous_sugge
     }
 
     std::string str { suggestions[suggestion_index.value()].data() };
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return (char)std::tolower(ch); });
 
     suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
 
@@ -134,7 +134,7 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_next_su
 
     std::string str = "\\";
     str.append(suggestions[suggestion_index.value()].data());
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return (char)std::tolower(ch); });
 
     suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
 
@@ -156,7 +156,7 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_previou
 
     std::string str = "\\";
     str.append(suggestions[suggestion_index.value()].data());
-    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return std::tolower(ch); });
+    std::transform(str.begin(), str.end(), str.begin(), [](const unsigned char ch) { return (char)std::tolower(ch); });
 
     suggestion_index = (suggestion_index.value() + 1) % suggestions.size();
 

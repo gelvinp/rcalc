@@ -335,7 +335,7 @@ if selected_platform in available_platforms:
         env.Prepend(CXXFLAGS=["/std:c++20"])
 
         if env["target"] == "release":
-            env.Append(CCFLAGS=["/W4", "/Wx"])
+            env.Append(CCFLAGS=["/W4", "/WX"])
             env.Append(CPPDEFINES=["NDEBUG"])
         else:
             env.Append(CCFLAGS=["/W3"])

@@ -120,8 +120,8 @@ void ImGuiRenderer::render() {
     const float input_height = ImGui::GetFrameHeight();
     const float input_position = window_height - input_height;
 
-    const float message_height = message.empty() ? 0.0 : ImGui::CalcTextSize(message.c_str(), nullptr, false, window_width).y;
-    const float message_padding = message.empty() ? 0.0 : padding;
+    const float message_height = message.empty() ? 0.0f : ImGui::CalcTextSize(message.c_str(), nullptr, false, window_width).y;
+    const float message_padding = message.empty() ? 0.0f : padding;
     const float message_position = input_position - message_height - padding;
 
     const float separator_position = message_position - message_padding;
@@ -191,20 +191,20 @@ void ImGuiRenderer::render() {
                     int color_index = index % COLOR_GRAY;
                     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[color_index]);
                     if (color_index >= COLOR_BROWN) {
-                        const float padding = 2.0f;
+                        const float background_padding = 2.0f;
                         ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
                         ImVec2 input_size = entry.input.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImVec2(cursor_pos.x - padding, cursor_pos.y - padding),
-                            ImVec2(cursor_pos.x + input_size.x + padding, cursor_pos.y + input_size.y + padding),
+                            ImVec2(cursor_pos.x - background_padding, cursor_pos.y - background_padding),
+                            ImVec2(cursor_pos.x + input_size.x + background_padding, cursor_pos.y + input_size.y + background_padding),
                             ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
                             
                         );
-                        double output_offset = entry.output.position.x;
+                        float output_offset = entry.output.position.x;
                         ImVec2 output_size = entry.output.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
-                            ImVec2(cursor_pos.x + output_offset - padding, cursor_pos.y + entry.output.position.y - padding),
-                            ImVec2(cursor_pos.x + output_offset + output_size.x + padding, cursor_pos.y + entry.output.position.y + output_size.y + padding),
+                            ImVec2(cursor_pos.x + output_offset - background_padding, cursor_pos.y + entry.output.position.y - background_padding),
+                            ImVec2(cursor_pos.x + output_offset + output_size.x + background_padding, cursor_pos.y + entry.output.position.y + output_size.y + background_padding),
                             ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
                         );
                     }
@@ -407,7 +407,7 @@ void ImGuiRenderer::submit_scratchpad() {
     history.push_back(scratchpad);
     history_state = std::nullopt;
 
-    std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
+    std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     cb_submit_text(scratchpad);
     scratchpad.clear();
 }
@@ -600,7 +600,7 @@ bool ImGuiRenderer::try_renderer_command(const std::string& str) {
 
 void ImGuiRenderer::render_help() {
     ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95, viewport_size.y * 0.95), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95f, viewport_size.y * 0.95f), ImGuiCond_Appearing);
     ImGui::SetNextWindowFocus();
 
     if (!ImGui::BeginPopupModal("Help", &help_open)) { return; }
@@ -613,11 +613,11 @@ void ImGuiRenderer::render_help() {
 
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0f);
     ImGui::TextUnformatted("v" VERSION_FULL_BUILD);
     
     ImGui::SameLine();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0f);
     ImGui::Text("(%.6s)", VERSION_HASH);
 
     if (ImGui::IsItemHovered()) {
@@ -639,16 +639,16 @@ void ImGuiRenderer::render_help() {
         help_version_copied = true;
     }
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::TextUnformatted(HelpText::program_info);
 
     for (const HelpText::HelpSection& section : HelpText::sections) {
         render_help_section(section);
     }
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::Separator();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Commands");
@@ -658,9 +658,9 @@ void ImGuiRenderer::render_help() {
         render_help_command(cmd);
     }
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::Separator();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Operators");
@@ -672,7 +672,7 @@ void ImGuiRenderer::render_help() {
 
     for (ImGuiHelpCache::CachedOperatorCategory& category : help_op_cache) {
         if (category.category_name) {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 16.0f);
             ImGui::PushFont(p_font_medium);
             ImGui::Text("%s Operators", category.category_name.value());
             ImGui::PopFont();
@@ -683,9 +683,9 @@ void ImGuiRenderer::render_help() {
         }
     }
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::Separator();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Unit Families");
@@ -695,20 +695,20 @@ void ImGuiRenderer::render_help() {
         render_help_unit_family(family);
     }
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::Separator();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushFont(p_font_large);
     ImGui::TextUnformatted("Licenses");
     ImGui::PopFont();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PopTextWrapPos();
 
     if (ImGui::BeginChild(
         "LicenseInfo",
-        ImVec2(ImGui::GetContentRegionAvail().x * 0.85, 300),
+        ImVec2(ImGui::GetContentRegionAvail().x * 0.85f, 300.0f),
         true
     )) {
         ImGui::PushTextWrapPos(0.0);
@@ -722,19 +722,19 @@ void ImGuiRenderer::render_help() {
 
 
 void ImGuiRenderer::render_help_section(const HelpText::HelpSection& section) {
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 24.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 24.0f);
 
     ImGui::PushFont(p_font_medium);
     ImGui::TextUnformatted(section.header);
     ImGui::PopFont();
 
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
     ImGui::TextUnformatted(section.text);
 }
 
 
 void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_BLUE]);
     ImGui::TextUnformatted(cmd->name);
@@ -747,7 +747,7 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 
         bool first = true;
         for (const char* sig : cmd->aliases) {
-            ImGui::SameLine(0.0, 0.0);
+            ImGui::SameLine(0.0f, 0.0f);
 
             if (first) {
                 ImGui::TextUnformatted(sig);
@@ -758,7 +758,7 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
             }
         }
 
-        ImGui::SameLine(0.0, 0.0);
+        ImGui::SameLine(0.0f, 0.0f);
         ImGui::TextUnformatted("]");
         ImGui::PopStyleColor();
     }
@@ -768,7 +768,7 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 
 
 void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
     ImGui::TextUnformatted(op.op.name);
@@ -793,7 +793,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
         if (types_open) {
             bool first_set = true;
             for (const std::span<const Type>& call_types : op.op.allowed_types) {
-                ImGui::SetCursorPosX(20.0);
+                ImGui::SetCursorPosX(20.0f);
                 bool first = true;
 
                 if (first_set) {
@@ -810,7 +810,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
                         first = false;
                     }
                     else {
-                        ImGui::SameLine(0.0, 0.0);
+                        ImGui::SameLine(0.0f, 0.0f);
                         ImGui::Text(", %s", Value::get_type_name(type));
                     }
                 }
@@ -825,7 +825,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
             for (ImGuiDisplayEntry& example : op.examples) {
                 if (!example.valid) { example.calculate_size(-1, false, false); }
                 
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
                 ImVec2 entry_start_pos = ImGui::GetCursorPos();
 
@@ -867,7 +867,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
 
                 ImGui::TextUnformatted(example.output.str.c_str());
                 
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
             }
 
             ImGui::TreePop();
@@ -879,7 +879,7 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
 
 
 void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_YELLOW]);
     ImGui::TextUnformatted(family->p_name);

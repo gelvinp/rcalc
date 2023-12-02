@@ -1,6 +1,7 @@
 extern int main(int argc, char** pp_argv);
 
 #include <Windows.h>
+#include "core/coredef.h"
 
 EXTERN_C BOOL WINAPI _CRT_INIT(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved);
 
@@ -11,6 +12,9 @@ EXTERN_C BOOL WINAPI _CRT_INIT(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpRes
 // are commemorated here. Nothing valued is here.
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    UNUSED(hPrevInstance);
+    UNUSED(lpCmdLine);
+    UNUSED(nCmdShow);
     _CRT_INIT(hInstance, DLL_PROCESS_ATTACH, NULL);
 
     int argc;

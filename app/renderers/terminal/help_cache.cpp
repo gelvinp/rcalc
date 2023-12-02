@@ -283,8 +283,8 @@ ftxui::Component render_help_operator(const Operator* op) {
                 example_stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
             }
 
-            std::string op_name = filter_name(op->name);
-            Result<> err = OperatorMap::get_operator_map().evaluate(op_name, example_stack);
+            std::string filtered_op_name = filter_name(op->name);
+            Result<> err = OperatorMap::get_operator_map().evaluate(filtered_op_name, example_stack);
 
             if (!err) {
                 Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());

@@ -155,7 +155,7 @@ bool Application::try_swizzle(const std::string& str) {
     if (str.length() > 5) { return false; }
 
     std::string pattern { str.data() + 1, str.length() - 1 };
-    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return std::tolower(c); });
+    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     std::vector<Real> values;
     std::vector<StackItem> source_value = stack.pop_items(1);
 
