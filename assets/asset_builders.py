@@ -48,8 +48,7 @@ def embed_text(target, source, env):
         g.write(f'static const char* {asset_name} = R"EMBEDTEXTDELIMIT(')
         
         with open(src, 'r') as src_text:
-            for line in src_text:
-                g.write(f'{line}')
+            g.write(src_text.read().replace('\n\n\n', '\n\n\n)EMBEDTEXTDELIMIT" R"EMBEDTEXTDELIMIT('))
         
         g.write(')EMBEDTEXTDELIMIT";\n')
         g.write("\n}\n")

@@ -77,12 +77,15 @@ sources = [
 env_ftxui = env.Clone()
 if "-Werror" in env_ftxui["CCFLAGS"]:
     env_ftxui["CCFLAGS"].remove("-Werror")
-
-env_ftxui.Append(CCFLAGS=["-std=c++17"])
-env_ftxui.Append(CPPPATH=["#/modules/ftxui/upstream/src"])
-
-env_ftxui.add_source_files(env.modules_sources, sources)
+if "/WX" in env_ftxui["CCFLAGS"]:
+    env_ftxui["CCFLAGS"].remove("/WX")
 
 if env["platform"] == "win":
     env_ftxui.Append(CPPDEFINES=["FTXUI_MICROSOFT_TERMINAL_FALLBACK"])
     env_ftxui.Append(CPPDEFINES=["UNICODE", "_UNICODE"])
+else:
+    env_ftxui.Append(CCFLAGS=["-std=c++17"])
+
+env_ftxui.Append(CPPPATH=["#/modules/ftxui/upstream/src"])
+
+env_ftxui.add_source_files(env.modules_sources, sources)

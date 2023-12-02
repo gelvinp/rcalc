@@ -4,6 +4,10 @@ import sys
 def get_opts(env: "Environment"):
     from SCons.Variables import BoolVariable, EnumVariable
 
+    if env["platform"] == "win":
+        env["builtin_glfw"] = True
+        return []
+
     opts = [
         BoolVariable("builtin_glfw", "Statically link the vendored copy of GLFW", False)
     ]
@@ -54,7 +58,8 @@ def configure(env: "Environment"):
             
             env.ParseConfig("pkg-config --cflags --libs glfw3")
     elif env["platform"] == "win":
-        env.Append(LIBS=["opengl32", "gdi32"])
+        LIBS=["gdi32"]
+        env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
         
         if env["builtin_glfw"]:
             pass

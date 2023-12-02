@@ -24,6 +24,8 @@ env_cmd.add_source_files(env.command_sources, "*.cpp")
 env_cmd_gen = env_cmd.Clone()
 if "-Werror" in env_cmd_gen["CCFLAGS"]:
     env_cmd_gen["CCFLAGS"].remove("-Werror")
+if "/WX" in env_cmd_gen["CCFLAGS"]:
+    env_cmd_gen["CCFLAGS"].remove("/WX")
 env_cmd_gen.add_source_files(env.command_sources, commands_gen_path)
 
 lib = env_cmd.add_library("commands", env.command_sources)

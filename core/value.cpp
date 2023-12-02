@@ -441,24 +441,27 @@ std::optional<Value> Value::parse_real(std::string_view sv) {
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 16);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 16);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_HEX);
         }
     }
     else if (sv.starts_with("0o")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 8);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 8);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_OCT);
         }
     }
     else if (sv.starts_with("0b")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 2);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 2);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_BINARY);
         }

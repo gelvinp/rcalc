@@ -1,6 +1,7 @@
 #include "allocator.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "core/logger.h"
 
@@ -9,7 +10,7 @@ void* Allocator::alloc(size_t bytes) {
     static_assert(sizeof(size_t) == sizeof(Chunk));
     if (bytes == 0) { return nullptr; }
 
-    size_t chunk_count = std::ceil(std::max(bytes, (size_t)8) / 8.0);
+    size_t chunk_count = (size_t)std::ceil(std::max(bytes, (size_t)8) / 8.0);
 
     // Allocate initial page
     if (self.p_page_begin == nullptr) {
@@ -47,7 +48,7 @@ void* Allocator::realloc(void* ptr, size_t bytes) {
     if (ptr == nullptr) { return nullptr; }
     if (self.p_page_begin == nullptr) { return nullptr; }
 
-    size_t chunk_count = std::ceil(std::max(bytes, (size_t)8) / 8.0);
+    size_t chunk_count = (size_t)std::ceil(std::max(bytes, (size_t)8) / 8.0);
 
     Chunk* p_chunk = reinterpret_cast<Chunk*>(ptr);
 

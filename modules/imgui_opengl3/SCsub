@@ -4,6 +4,8 @@ Import("env_modules")
 env_imgui = env_modules.Clone()
 if "-Werror" in env_imgui["CCFLAGS"]:
     env_imgui["CCFLAGS"].remove("-Werror")
+if "/WX" in env_imgui["CCFLAGS"]:
+    env_imgui["CCFLAGS"].remove("/WX")
 
 env.Append(CPPPATH=["#/modules/imgui_opengl3/"])
 

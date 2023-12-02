@@ -7,7 +7,10 @@ def get_opts(env: "Environment"):
 
 
 def configure(env: "Environment"):
-    if env["platform"] != "win":
+    if env["platform"] == "win":
+        LIBS = ["opengl32"]
+        env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
+    else:
         deps = ['gl']
 
         if os.system(f"pkg-config --exists {' '.join(deps)}"):

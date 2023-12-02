@@ -8,6 +8,7 @@
 #include "types.h"
 #include "core/units/units.h"
 #include "display_tags.h"
+#include "core/coredef.h"
 
 namespace RCalc {
 

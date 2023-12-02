@@ -22,6 +22,8 @@ env_units.add_source_files(env.units_sources, "*.cpp")
 env_units_gen = env_units.Clone()
 if "-Werror" in env_units_gen["CCFLAGS"]:
     env_units_gen["CCFLAGS"].remove("-Werror")
+if "/WX" in env_units_gen["CCFLAGS"]:
+    env_units_gen["CCFLAGS"].remove("/WX")
 env_units_gen.add_source_files(env.units_sources, units_gen_path)
 
 lib = env_units.add_library("units", env.units_sources)

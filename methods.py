@@ -461,3 +461,9 @@ def detect_darwin_sdk_path(platform, env):
         except (subprocess.CalledProcessError, OSError):
             print("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
             raise
+
+
+def precious_program(env, program, sources, **args):
+    program = env.ProgramOriginal(program, sources, **args)
+    env.Precious(program)
+    return program

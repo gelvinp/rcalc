@@ -1,5 +1,7 @@
 #include "commands.h"
 
+#include <algorithm>
+
 namespace RCalc {
 
 std::vector<CommandMeta const *> _GlobalCommandMap::commands = {};

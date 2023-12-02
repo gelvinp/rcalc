@@ -49,6 +49,8 @@ if env["builtin_freetype"]:
     env_freetype = env.Clone()
     if "-Werror" in env_freetype["CCFLAGS"]:
         env_freetype["CCFLAGS"].remove("-Werror")
+    if "/WX" in env_freetype["CCFLAGS"]:
+        env_freetype["CCFLAGS"].remove("/WX")
     
     env_freetype.Append(CPPDEFINES=[
         "FT_DISABLE_ZLIB=TRUE",

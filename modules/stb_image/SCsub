@@ -4,6 +4,8 @@ Import("env_modules")
 env_stb_image = env_modules.Clone()
 if "-Werror" in env_stb_image["CCFLAGS"]:
     env_stb_image["CCFLAGS"].remove("-Werror")
+if "/WX" in env_stb_image["CCFLAGS"]:
+    env_stb_image["CCFLAGS"].remove("/WX")
 
 
 env_stb_image.add_source_files(env.modules_sources, "*.cpp")

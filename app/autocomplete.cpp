@@ -5,6 +5,8 @@
 #include "app/commands/commands.h"
 #include "core/format.h"
 
+#include <algorithm>
+
 
 namespace RCalc {
 

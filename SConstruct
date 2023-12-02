@@ -68,7 +68,7 @@ for platform_path in sorted(glob.glob("platform/*")):
     sys.modules.pop("detect")
 
 
-for renderer_path in sorted(glob.glob("app/renderers/*")):
+for renderer_path in sorted(glob.glob(os.path.join("app", "renderers/*"))):
     if not os.path.isdir(renderer_path) or not os.path.exists(renderer_path + "/renderer.py"):
         continue
     
@@ -167,6 +167,11 @@ else:
     
     if selected_platform != "":
         print("Automatically detected platform: " + selected_platform)
+
+
+if not selected_platform in available_platforms:
+    print(f"Platform '{selected_platform}' is unavailable!")
+    sys.exit(255)
 
 
 if selected_platform in platform_opts:
@@ -317,40 +322,54 @@ if selected_platform in available_platforms:
     print("Building for %s-%s-%s" % (selected_platform, env["arch"], env["target"]))
 
     # TODO: support msvc
-
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["-gdwarf-4", "-g3", "-Og"])
-    else:
-        if methods.using_apple_clang(env):
-            env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x", "-Wl,-dead_strip"])
-        elif methods.using_clang(env):
-            env.Append(LINKFLAGS=["-s"])
+    if env.msvc:
+        if env["target"] == "debug":
+            env.Append(CCFLAGS=["/Zi", "/FS", "/Od"])
+            env.Append(LINKFLAGS=["/DEBUG:FULL"])
+        else:
+            env.Append(CCFLAGS=["/O2"])
+            env.Append(LINKFLAGS=["/OPT:REF"])
         
-        env.Append(CCFLAGS=["-O3"])
-    
-    if env["lto"] != "none":
-        print("Using LTO: " + env["lto"])
-    
-    env.Prepend(CFLAGS=["-std=c17"])
-    env.Prepend(CXXFLAGS=["-std=c++20"])
+        env.Prepend(CFLAGS=["/std:c17"])
+        env.Prepend(CXXFLAGS=["/std:c++20"])
 
-    cc_version = methods.get_compiler_version(env) or -1
+        if env["target"] == "release":
+            env.Append(CCFLAGS=["/W4", "/Wx"])
+            env.Append(CPPDEFINES=["NDEBUG"])
+        else:
+            env.Append(CCFLAGS=["/W3"])
+            
+        env.Append(CCFLAGS=["/EHsc"])
+    else:
+        if env["target"] == "debug":
+            env.Append(CCFLAGS=["-gdwarf-4", "-g3", "-Og"])
+        else:
+            if methods.using_apple_clang(env):
+                env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x", "-Wl,-dead_strip"])
+            elif methods.using_clang(env):
+                env.Append(LINKFLAGS=["-s"])
+            
+            env.Append(CCFLAGS=["-O3"])
+        
+        if env["lto"] != "none":
+            print("Using LTO: " + env["lto"])
+        
+        env.Prepend(CFLAGS=["-std=c17"])
+        env.Prepend(CXXFLAGS=["-std=c++20"])
 
-    if cc_version == -1:
-        print("Couldn't detect compiler version, skipping version checks. This may have consequences.")
-    elif cc_version < 10:
-        # Both GCC and clang added support for c++20 in version 10, a coinkidink
-        print("Detected GCC version < 10, which does not support C++20")
-        sys.exit(255)
-    
-    # Compiler warnings
+        cc_version = methods.get_compiler_version(env) or -1
 
-    # TODO: support msvc
+        if cc_version == -1:
+            print("Couldn't detect compiler version, skipping version checks. This may have consequences.")
+        elif cc_version < 10:
+            # Both GCC and clang added support for c++20 in version 10, a coinkidink
+            print("Detected GCC version < 10, which does not support C++20")
+            sys.exit(255)
 
-    env.Append(CCFLAGS=["-Wall", "-Wextra"])
-    if env["target"] == "release":
-        env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
-        env.Append(CPPDEFINES=["NDEBUG"])
+        env.Append(CCFLAGS=["-Wall", "-Wextra"])
+        if env["target"] == "release":
+            env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
+            env.Append(CPPDEFINES=["NDEBUG"])
 
     if hasattr(detect, "get_program_suffix"):
         suffix = "." + detect.get_program_suffix()
@@ -374,8 +393,6 @@ if selected_platform in available_platforms:
     env.NoClean("compile_commands.json")
 
     env["extra_sources"] = []
-
-    env.Append(CPPDEFINES=["\"UNUSED(arg)=(void)(arg)\""])
     
     if env["gperf_path"]:
         env.Append(CPPDEFINES=["GPERF_ENABLED"]) # Not used anywhere, but will force recompilation
