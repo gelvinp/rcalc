@@ -130,6 +130,11 @@ def post_build(target, source, env):
     replace = {
         "$VERSION": f'{version.major}.{version.minor}.{version.patch}'
     }
+
+    if env["arch"] == "arm64":
+        replace["$MINIMUM_SYSTEM_VERSION"] = "11.0"
+    elif env["arch"] == "x86_64":
+        replace["$MINIMUM_SYSTEM_VERSION"] = "10.13"
     
     with open(plist_path, 'w') as file:
         for line in plist:
