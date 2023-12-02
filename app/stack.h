@@ -2,6 +2,7 @@
 
 #include "core/value.h"
 #include "app/displayable/displayable.h"
+#include "core/memory/cowvec.h"
 
 #include <any>
 #include <optional>
@@ -22,19 +23,21 @@ struct StackItem {
 
 class RPNStack {
 public:
-    void push_item(StackItem&& item);
-    void push_items(std::vector<StackItem>&& items);
+    void push_item(StackItem item);
+    void push_items(CowVec<StackItem> items);
+    void reserve_items(size_t count);
 
     size_t size() const;
     void clear();
+    bool same_ref(const RPNStack& other) { return stack.same_ref(other.stack); }
 
     std::string peek_types(uint64_t count) const;
-    std::vector<Type> peek_types_vec(uint64_t count) const;
+    CowVec<Type> peek_types_vec(uint64_t count) const;
     std::string display_types(uint64_t count) const;
 
-    std::vector<StackItem> pop_items(uint64_t count);
+    CowVec<StackItem> pop_items(uint64_t count);
 
-    const std::vector<StackItem>& get_items() const;
+    const CowVec<StackItem> get_items() const;
 
     template<typename T, typename... Args>
     void set_message(Args&&... args) {
@@ -80,7 +83,7 @@ public:
     }
 
 private:
-    std::vector<StackItem> stack;
+    CowVec<StackItem> stack;
     std::any message;
 };
 

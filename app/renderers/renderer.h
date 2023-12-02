@@ -39,7 +39,7 @@ public:
 
     virtual void add_stack_item(const StackItem& item) = 0;
     virtual void remove_stack_item() = 0;
-    virtual void replace_stack_items(const std::vector<StackItem>& items) = 0;
+    virtual void replace_stack_items(const CowVec<StackItem> items) = 0;
 
     static const char* default_renderer;
 

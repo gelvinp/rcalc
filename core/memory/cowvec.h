@@ -59,6 +59,9 @@ public:
     bool empty() const { return size() == 0; }
 
 
+    bool same_ref(const CowVec& other) const { return p_data == other.p_data; }
+
+
     void reserve(size_t new_capacity) {
         ensure_unique();
         size_t new_size_bytes = capacity_to_allocation_size(new_capacity);
@@ -76,7 +79,8 @@ public:
         }
 
         #ifndef NDEBUG
-        if (capacity() != new_capacity) {
+        if (capacity() < new_capacity) {
+            RCalc::Logger::log_err("Capacity after reserve: %d is not what was expected: %d", capacity(), new_capacity);
             throw std::logic_error("Capacity after reserve is not what was expected!");
         }
         #endif
@@ -111,7 +115,8 @@ public:
             p_data = reinterpret_cast<CowData*>(Allocator::realloc(reinterpret_cast<void*>(p_data), new_size_bytes));
 
             #ifndef NDEBUG
-            if (capacity() != new_size) {
+            if (capacity() < new_size) {
+                RCalc::Logger::log_err("Capacity after shrink %d is not what was expected: %d!", capacity(), new_size);
                 throw std::logic_error("Capacity after resize (shrink) is not what was expected!");
             }
             #endif
@@ -139,11 +144,11 @@ public:
     T& emplace_back(Args&&... args) {
         ensure_unique();
         ensure_capacity_for_new_element();
-        return *new(p_data->ptr[p_data->size++]) T(args...);
+        return *new(&p_data->ptr[p_data->size++]) T(args...);
     }
 
 
-    const T& operator[](size_t index) const {
+    const T& at(size_t index) const {
         #ifndef NDEBUG
         if (index >= size()) {
             RCalc::Logger::log_err("CowVec index %d is out of bounds (size: %d)", index, size());
@@ -152,6 +157,55 @@ public:
         #endif
         return p_data->ptr[index];
     }
+
+    T& mut_at(size_t index) {
+        ensure_unique();
+        #ifndef NDEBUG
+        if (index >= size()) {
+            RCalc::Logger::log_err("CowVec index %d is out of bounds (size: %d)", index, size());
+            throw std::logic_error("CowVec index out of bounds!");
+        }
+        #endif
+        return p_data->ptr[index];
+    }
+
+
+    const T& operator[](size_t index) const {
+        return at(index);
+    }
+        
+    struct Iterator {
+        using iterator_category = std::contiguous_iterator_tag;
+        using difference_type = std::size_t;
+        using value_type = T;
+        using pointer = T*;
+        using reference = T&;
+
+        Iterator(pointer ptr) : ptr(ptr) {}
+
+        reference operator*() const { return *ptr; }
+        pointer operator->() const { return ptr; }
+
+        Iterator& operator++() { ptr++; return *this; }
+        Iterator operator++(int) { Iterator prev = *this; ptr++; return prev; }
+
+        Iterator& operator--() { ptr--; return *this; }
+        Iterator operator--(int) { Iterator prev = *this; ptr--; return prev; }
+
+        Iterator& operator+=(difference_type dist) { ptr += dist; return *this; }
+        Iterator& operator-=(difference_type dist) { ptr -= dist; return *this; }
+
+        auto operator<=>(const Iterator&) const = default;
+
+        friend bool operator==(const Iterator& a, const Iterator& b) { return a.ptr == b.ptr; }
+
+        friend Iterator operator+(Iterator a, difference_type b) { return a += b; }
+        friend Iterator operator-(Iterator a, difference_type b) { return a -= b; }
+        friend difference_type operator-(Iterator a, const Iterator& b) { return b.ptr - a.ptr; }
+
+    private:
+        pointer ptr = nullptr;
+    };
 
 
     struct ConstIterator {
@@ -188,6 +242,23 @@ public:
     };
 
 
+    Iterator mut_begin() {
+        ensure_unique();
+        if (p_data == nullptr) {
+            return Iterator(nullptr);
+        }
+        return Iterator(p_data->ptr);
+    }
+
+    Iterator mut_end() {
+        ensure_unique();
+        if (p_data == nullptr) {
+            return Iterator(nullptr);
+        }
+        return Iterator(p_data->ptr + p_data->size);
+    }
+
+
     ConstIterator begin() const {
         if (p_data == nullptr) {
             return ConstIterator(nullptr);
@@ -210,6 +281,15 @@ public:
         return p_data->ptr[0];
     }
 
+    T& mut_front() {
+        ensure_unique();
+        if (p_data == nullptr) {
+            throw std::logic_error("Cannot call front on an empty CowVec!");
+        }
+        return p_data->ptr[0];
+    }
+
+
     const T& back() const {
         if (p_data == nullptr) {
             throw std::logic_error("Cannot call back on an empty CowVec!");
@@ -217,81 +297,19 @@ public:
         return p_data->ptr[p_data->size - 1];
     }
 
-
-    // class WriteProxy {
-    // public:
-    //     WriteProxy(const WriteProxy&) = delete;
-    //     WriteProxy(WriteProxy&&) = delete;
-    //     WriteProxy& operator=(const WriteProxy&) = delete;
-    //     WriteProxy& operator=(WriteProxy&&) = delete;
-    //     ~WriteProxy() {}
-
-    //     T& operator[](size_t index) {
-    //         //
-    //     }
-        
-    //     struct Iterator {
-    //         using iterator_category = std::contiguous_iterator_tag;
-    //         using difference_type = std::size_t;
-    //         using value_type = T;
-    //         using pointer = T*;
-    //         using reference = T&;
-
-    //         Iterator(pointer ptr) : ptr(ptr) {}
-
-    //         reference operator*() const { return *ptr; }
-    //         pointer operator->() const { return ptr; }
-
-    //         Iterator& operator++() { ptr++; return *this; }
-    //         Iterator operator++(int) { Iterator prev = *this; ptr++; return prev; }
-
-    //         Iterator& operator--() { ptr--; return *this; }
-    //         Iterator operator--(int) { Iterator prev = *this; ptr--; return prev; }
-
-    //         Iterator& operator+=(difference_type dist) { ptr += dist; return *this; }
-    //         Iterator& operator-=(difference_type dist) { ptr -= dist; return *this; }
-
-    //         auto operator<=>(const Iterator&) const = default;
-
-    //         friend bool operator==(const Iterator& a, const Iterator& b) { return a.ptr == b.ptr; }
-
-    //         friend Iterator operator+(Iterator a, difference_type b) { return a += b; }
-    //         friend Iterator operator-(Iterator a, difference_type b) { return a -= b; }
-    //         friend difference_type operator-(Iterator a, const Iterator& b) { return b.ptr - a.ptr; }
-
-    //     private:
-    //         pointer ptr = nullptr;
-    //     };
-
-
-    //     Iterator begin() const {
-    //         //
-    //     }
-
-    //     Iterator end() const {
-    //         //
-    //     }
-
-
-    //     T& front() const {
-    //         //
-    //     }
-
-    //     T& back() const {
-    //         //
-    //     }
-
-    // private:
-    //     WriteProxy() {}
-
-    //     friend class CowVec;
-    // };
+    T& mut_back() {
+        ensure_unique();
+        if (p_data == nullptr) {
+            throw std::logic_error("Cannot call back on an empty CowVec!");
+        }
+        return p_data->ptr[p_data->size - 1];
+    }
 
 private:
     struct CowData {
         size_t refcount;
         size_t size;
-        T* ptr;
+        T ptr[1];
     };
 
     CowData* p_data = nullptr;
@@ -306,17 +324,22 @@ private:
         p_new_data->refcount = 1;
         p_new_data->size = p_data->size;
 
-        if (std::is_trivially_copyable<T>::value) {
-            memcpy(p_new_data->ptr, p_data->ptr, p_data->size * sizeof(T));
-        }
-        else {
-            for (size_t index = 0; index < p_data->size; ++index) {
-                new(&p_new_data->ptr[index]) T(p_data->ptr[index]);
-            }
-        }
+        copy_elements(p_new_data);
 
         unref();
         p_data = p_new_data;
+    }
+
+    template<typename R = T, std::enable_if_t<std::is_trivially_copy_assignable<R>::value, bool> = true>
+    void copy_elements(CowData* p_new_data) {
+        memcpy(p_new_data->ptr, p_data->ptr, p_data->size * sizeof(R));
+    }
+
+    template<typename R = T, std::enable_if_t<!std::is_trivially_copy_assignable<R>::value, bool> = true>
+    void copy_elements(CowData* p_new_data) {
+        for (size_t index = 0; index < p_data->size; ++index) {
+            new(&p_new_data->ptr[index]) R(p_data->ptr[index]);
+        }
     }
 
     void ensure_capacity_for_new_element() {
@@ -350,11 +373,11 @@ private:
     }
 
 
-    size_t capacity_to_allocation_size(size_t count) {
+    size_t capacity_to_allocation_size(size_t count) const {
         return (2 * sizeof(size_t)) + (count * sizeof(T));
     }
 
-    size_t allocation_size_to_capacity(size_t size_bytes) {
+    size_t allocation_size_to_capacity(size_t size_bytes) const {
         return (size_bytes - (2 * sizeof(size_t))) / sizeof(T);
     }
 

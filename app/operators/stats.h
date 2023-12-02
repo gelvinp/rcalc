@@ -10,8 +10,9 @@
 namespace RCalc {
 
 
-std::vector<Real> get_reals(std::vector<RCalc::StackItem>&& items, std::stringstream& ss) {
-    std::vector<Real> values;
+CowVec<Real> get_reals(CowVec<RCalc::StackItem> items, std::stringstream& ss) {
+    CowVec<Real> values;
+    values.reserve(items.size());
     bool first = true;
 
     for (const RCalc::StackItem& item : items) {

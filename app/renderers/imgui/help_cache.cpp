@@ -47,8 +47,8 @@ void CachedOperator::build() {
             ss << item.result.to_string();
         }
 
-        std::vector<StackItem> _items = stack.pop_items(1);
-        StackItem& res = _items[0];
+        CowVec<StackItem> _items = stack.pop_items(1);
+        const StackItem& res = _items[0];
 
         ImGuiDisplayEntry entry { res };
         entry.output.str = ss.str();

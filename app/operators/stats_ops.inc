@@ -33,20 +33,22 @@ RCALC_OP_1_S(Min, Int, count) {
     switch (smallest_scalar) {
         case TYPE_INT:
         {
-            std::vector<Int> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<Int> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 values.push_back((Int)item.result);
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Int>::iterator min = std::min_element(values.begin(), values.end());
+            CowVec<Int>::ConstIterator min = std::min_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
         case TYPE_BIGINT:
         {
-            std::vector<BigInt> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<BigInt> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case TYPE_INT:
                     values.push_back(BigInt((long long int)(item.result.operator Int())));
@@ -60,14 +62,15 @@ RCALC_OP_1_S(Min, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<BigInt>::iterator min = std::min_element(values.begin(), values.end());
+            CowVec<BigInt>::ConstIterator min = std::min_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
         case TYPE_REAL:
         {
-            std::vector<Real> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<Real> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case TYPE_INT:
                     values.push_back((Real)(item.result.operator Int()));
@@ -84,7 +87,7 @@ RCALC_OP_1_S(Min, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Real>::iterator min = std::min_element(values.begin(), values.end());
+            CowVec<Real>::ConstIterator min = std::min_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*min));
         }
@@ -136,20 +139,22 @@ RCALC_OP_1_S(Max, Int, count) {
     switch (smallest_scalar) {
         case TYPE_INT:
         {
-            std::vector<Int> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<Int> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 values.push_back((Int)item.result);
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Int>::iterator max = std::max_element(values.begin(), values.end());
+            CowVec<Int>::ConstIterator max = std::max_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
         case TYPE_BIGINT:
         {
-            std::vector<BigInt> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<BigInt> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case TYPE_INT:
                     values.push_back(BigInt((long long int)(item.result.operator Int())));
@@ -163,14 +168,15 @@ RCALC_OP_1_S(Max, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<BigInt>::iterator max = std::max_element(values.begin(), values.end());
+            CowVec<BigInt>::ConstIterator max = std::max_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
         case TYPE_REAL:
         {
-            std::vector<Real> values;
-            for (StackItem& item : stack.pop_items(count)) {
+            CowVec<Real> values;
+            values.reserve(count);
+            for (const StackItem& item : stack.pop_items(count)) {
                 switch (item.result.get_type()) {
                 case TYPE_INT:
                     values.push_back((Real)(item.result.operator Int()));
@@ -187,7 +193,7 @@ RCALC_OP_1_S(Max, Int, count) {
                 if (first) { first = false; } else { ss << ", "; }
                 ss << item.result.to_string();
             }
-            std::vector<Real>::iterator max = std::max_element(values.begin(), values.end());
+            CowVec<Real>::ConstIterator max = std::max_element(values.begin(), values.end());
             stack.set_message<std::string>(ss.str());
             return Ok(Value(*max));
         }
@@ -228,7 +234,7 @@ RCALC_OP_1_S(Avg, Int, count) {
     }
 
     std::stringstream ss;
-    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
     stack.set_message<std::string>(ss.str());
@@ -269,12 +275,12 @@ RCALC_OP_1_S(StdDev, Int, count) {
     }
 
     std::stringstream ss;
-    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
     stack.set_message<std::string>(ss.str());
 
-    std::vector<Real> sqr_dev;
+    CowVec<Real> sqr_dev;
     sqr_dev.reserve(count);
 
     for (Real real : values) {
@@ -320,12 +326,12 @@ RCALC_OP_1_S(NormDist, Int, count) {
     }
 
     std::stringstream ss;
-    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
     stack.set_message<std::string>(ss.str());
 
-    std::vector<Real> sqr_dev;
+    CowVec<Real> sqr_dev;
     sqr_dev.reserve(count);
 
     for (Real real : values) {
@@ -377,7 +383,7 @@ RCALC_OP_1_S(Sum, Int, count) {
     bool first = true;
 
     Real sum = 0.0;
-    for (StackItem& item : stack.pop_items(count)) {
+    for (const StackItem& item : stack.pop_items(count)) {
         switch (item.result.get_type()) {
         case TYPE_INT:
             sum += (Real)(item.result.operator Int());
@@ -439,11 +445,11 @@ RCALC_OP_2_S(NPV, Real, Int, discount_rate, count) {
     }
 
     std::stringstream ss;
-    std::vector<Real> values = get_reals(stack.pop_items(count), ss);
+    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
     stack.set_message<std::string>(ss.str());
 
     size_t index = 0;
-    std::transform(values.begin(), values.end(), values.begin(),
+    std::transform(values.mut_begin(), values.mut_end(), values.mut_begin(),
         [&index, discount_rate](Real net_cash_flow) {
             return net_cash_flow / std::pow(1 + discount_rate, index++);
         }

@@ -924,7 +924,7 @@ void ImGuiRenderer::remove_stack_item() {
 }
 
 
-void ImGuiRenderer::replace_stack_items(const std::vector<StackItem>& items) {
+void ImGuiRenderer::replace_stack_items(const CowVec<StackItem> items) {
     display_stack.entries.clear();
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
 }

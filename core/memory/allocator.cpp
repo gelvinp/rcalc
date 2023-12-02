@@ -110,6 +110,8 @@ size_t Allocator::get_allocation_size(void* p_addr) {
             return p_page->reservation_size_bytes(p_addr);
         }
     }
+
+    throw std::logic_error("Cannot get allocation size for an address not claimed by any page!");
 }
 
 
@@ -178,12 +180,6 @@ std::optional<Allocator::Page*> Allocator::Page::try_append_new_page(size_t size
         return std::nullopt;
     }
 
-    #ifndef NDEBUG
-    if (size_bytes > DEFAULT_PAGE_SIZE) {
-        RCalc::Logger::log_info("Requesting large page: %d bytes", size_bytes);
-    }
-    #endif
-
     p_next = new Page(size_bytes);
     return p_next;
 }
@@ -199,7 +195,7 @@ bool Allocator::Page::contains(void* p_addr) const {
 }
 
 size_t Allocator::Page::reservation_size_bytes(void* p_addr) const {
-    return void_to_header_addr(p_addr)->contiguous_size * sizeof(Chunk);
+    return (void_to_header_addr(p_addr)->contiguous_size - 1) * sizeof(Chunk);
 }
 
 
@@ -209,7 +205,7 @@ std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
         throw std::logic_error("Allocator is not currently thread safe!");
     }
     #endif
-    size_t chunk_count = bytes_to_chunk_count(size_bytes);
+    size_t chunk_count = bytes_to_chunk_count(size_bytes) + 1;
     std::optional<Chunk*> op_chunk = get_first_contiguous(chunk_count);
     
     if (!op_chunk.has_value()) {
@@ -234,7 +230,7 @@ bool Allocator::Page::resize(void* p_addr, size_t new_size_bytes) {
     #endif
     Chunk* p_chunk = void_to_header_addr(p_addr);
     size_t current_chunk_count = p_chunk->contiguous_size;
-    size_t new_chunk_count = bytes_to_chunk_count(new_size_bytes);
+    size_t new_chunk_count = bytes_to_chunk_count(new_size_bytes) + 1;
 
     if (new_chunk_count == current_chunk_count) {
         // Nothing to do
@@ -289,12 +285,10 @@ size_t Allocator::Page::bytes_to_chunk_count(size_t bytes) const {
 std::optional<Allocator::Page::Chunk*> Allocator::Page::get_first_contiguous(size_t chunk_count) {
     ENSURE_CORRECTNESS();
 
-    size_t chunk_count_with_header = chunk_count + 1;
-
     Chunk* p_previous = nullptr;
     Chunk* p_found = nullptr;
     for (Chunk* p_contiguous_start = p_free; p_contiguous_start != nullptr; p_contiguous_start = p_contiguous_start->p_next) {
-        if (p_contiguous_start->contiguous_size >= chunk_count_with_header) {
+        if (p_contiguous_start->contiguous_size >= chunk_count) {
             p_found = p_contiguous_start;
             break;
         }
@@ -305,13 +299,13 @@ std::optional<Allocator::Page::Chunk*> Allocator::Page::get_first_contiguous(siz
         return std::nullopt;
     }
 
-    if (p_found->contiguous_size > chunk_count_with_header) {
+    if (p_found->contiguous_size > chunk_count) {
         // Shrink contiguous region first
-        Chunk* p_remainder = p_found + chunk_count_with_header;
-        p_remainder->contiguous_size = p_found->contiguous_size - chunk_count_with_header;
+        Chunk* p_remainder = p_found + chunk_count;
+        p_remainder->contiguous_size = p_found->contiguous_size - chunk_count;
         p_remainder->p_next = p_found->p_next;
 
-        p_found->contiguous_size = chunk_count_with_header;
+        p_found->contiguous_size = chunk_count;
         p_found->p_next = p_remainder;
     }
 

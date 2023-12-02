@@ -426,7 +426,7 @@ void TerminalRenderer::remove_stack_item() {
 }
 
 
-void TerminalRenderer::replace_stack_items(const std::vector<StackItem>& items) {
+void TerminalRenderer::replace_stack_items(const CowVec<StackItem> items) {
     comp_stack->DetachAllChildren();
     std::for_each(items.begin(), items.end(), std::bind(&TerminalRenderer::add_stack_item, this, std::placeholders::_1));
 }

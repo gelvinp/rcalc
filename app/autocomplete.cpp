@@ -164,7 +164,7 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_previou
 
 // Operator Autocomplete
 
-void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
+void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const CowVec<Type> stack_types) {
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
@@ -175,11 +175,8 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
             if (op->param_count > stack_types.size()) { continue; }
 
             if (!stack_types.empty()) {
-                auto stack_range = std::ranges::subrange(stack_types.end() - op->param_count, stack_types.end());
-
-                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_range](const std::span<const Type>& op_types) {
-                    auto op_range = std::ranges::subrange(op_types.begin(), op_types.end());
-                    return std::ranges::equal(stack_range, op_range);
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_types, &op](const std::span<const Type>& op_types) {
+                    return std::equal(stack_types.end() - op->param_count, stack_types.end(), op_types.begin(), op_types.end());
                 });
 
                 if (it == op->allowed_types.end()) {
@@ -213,7 +210,7 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
-    std::vector<Type> stack_types = stack.peek_types_vec(stack.size());
+    CowVec<Type> stack_types = stack.peek_types_vec(stack.size());
 
     if (stack_types.empty()) { return; }
 

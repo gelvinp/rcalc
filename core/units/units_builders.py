@@ -145,19 +145,11 @@ class Family:
 
         sorted_usages = []
         count = len(self.units) + 1
-        
-        print(f'Specified: {specified}')
-        print(f'unspecified: {unspecified}')
-        print(f'sorted_usages: {sorted_usages}')
-        print(f'count: {count}')
 
         for index in range(count):
-            print(index)
             if index in specified:
-                print(specified[index])
                 sorted_usages.append(specified.pop(index))
             elif len(unspecified) > 0:
-                print(unspecified[0])
                 sorted_usages.append(unspecified.pop(0))
             else:
                 sorted_usages.append(specified.pop(list(specified.keys())[0]))

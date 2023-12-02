@@ -373,8 +373,8 @@ void CachedOperator::build() {
             ss << item.result.to_string();
         }
 
-        std::vector<StackItem> _items = example_stack.pop_items(1);
-        StackItem& res = _items[0];
+        CowVec<StackItem> _items = example_stack.pop_items(1);
+        const StackItem& res = _items[0];
 
         ftxui::Elements chunks { ftxui::text("   ") };
 
