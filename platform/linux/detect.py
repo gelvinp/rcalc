@@ -83,7 +83,6 @@ def configure(env: "Environment"):
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
-    env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 
     if env["use_asan"]:

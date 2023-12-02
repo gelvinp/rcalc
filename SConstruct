@@ -99,6 +99,7 @@ env_base["enabled_modules"] = [
     "bigint",
     "glm"
 ]
+env_base.msvc = False
 
 
 # Set up env functions
