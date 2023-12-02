@@ -1,7 +1,67 @@
-# RCalc - A Lightweight RPN Calculator
+# RCalc
+
+<p align="center">
+    <img src="docs/images/header.jpg" alt="RCalc Logo">
+</p>
 
 RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)) calculator written in C++.
 It aims to be quick to open and use, and easy to extend with new types, operators, and commands.
+
+| [Features](#features) | [Install](#install) | [Build](#build) | [Future Plans](#future-plans) | [Contribute](#contribute) |
+| :-: | :-: | :-: | :-: | :-: |
+| | | | | |
+
+## Features
+
+### RPN Stack
+
+### Extended Types
+
+### XYZ Operators
+
+### Unit Conversions
+
+### Value Representation
+
+### Multi-Platform, Multi-Modal
+
+## Install
+
+### Arch Linux
+
+### Debian
+
+### MacOS
+
+### Windows
+
+## Build
+
+Please see the relevant wiki page for instructions:
+
+* [Building for Linux](#building-for-linux)
+* [Building for MacOS](#building-for-macos)
+* [Building for Windows](#building-for-windows)
+
+## Future Plans
+
+In no particular order
+
+- Publish iOS version
+- Publish iPadOS version
+- Add configurable precision framework, implement in iOS port
+- Add settings page to ImGui renderer including render scaling, default theme (light/dark/system?), precision
+- Add ability to "dump the api" in debug builds, i.e. save the help text, command/operator/unit list, license info, etc to JSON or equivalent. Have some sort of python script after that can help keep any wiki documentation in the repo up to date.
+
+## Contribute
+
+Please see the relevant wiki page for instructions:
+
+- Adding new operators
+- Adding new commands
+- Adding new units / unit families
+- Adding new renderers
+- Adding new types
 
 
 ## Install RCalc Now

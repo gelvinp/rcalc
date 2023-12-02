@@ -676,7 +676,7 @@ std::string Value::to_string(DisplayableTag tags) const {
             return (operator BigInt()).get_str();
         }
         case TYPE_REAL: {
-            return fmt("%.15g", operator Real());
+            return fmt("%g", operator Real());
         }
         case TYPE_VEC2: {
             const Vec2 value = operator Vec2();
@@ -689,7 +689,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x]", Int(value.x), Int(value.y));
                 default:
-                    return fmt("[%.15g, %.15g]", value.x, value.y);
+                    return fmt("[%g, %g]", value.x, value.y);
             }
         }
         case TYPE_VEC3: {
@@ -703,7 +703,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z));
                 default:
-                    return fmt("[%.15g, %.15g, %.15g]", value.x, value.y, value.z);
+                    return fmt("[%g, %g, %g]", value.x, value.y, value.z);
             }
             UNREACHABLE();
         }
@@ -718,7 +718,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z), Int(value.w));
                 default:
-                    return fmt("[%.15g, %.15g, %.15g, %.15g]", value.x, value.y, value.z, value.w);
+                    return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
             }
             UNREACHABLE();
         }
