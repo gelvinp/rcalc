@@ -112,7 +112,11 @@ To use gperf to generate the operator, command, and unit maps, instead of std::m
 
 ### Building for Windows
 
-CL.exe / MSVC is *not* a supported build method at this time. Instead, please install a MinGW distribution.
+~~CL.exe / MSVC is *not* a supported build method at this time. Instead, please install a MinGW distribution.~~
+
+You may use MSVC to compile RCalc. SCons should auto-detect your installation from any command line, but if it is unable to,
+please run SCons from a "Native Tools Command Prompt for VS". More specific instructions are coming soon.
+
 The following package lists assume you are using MSYS2:
 
 #### Building with MSYS2 using GCC
