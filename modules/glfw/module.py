@@ -59,7 +59,10 @@ def configure(env: "Environment"):
             env.ParseConfig("pkg-config --cflags --libs glfw3")
     elif env["platform"] == "win":
         LIBS=["gdi32"]
-        env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
+        if env.msvc:
+            env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
+        else:
+            env.Append(LIBS=LIBS)
         
         if env["builtin_glfw"]:
             pass

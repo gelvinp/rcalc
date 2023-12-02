@@ -379,6 +379,7 @@ def configure_mingw(env):
     env.use_windows_spawn_fix()
     
     env.Tool("mingw")
+    env.extra_suffix += ".mingw"
 
     ## Build type
 
@@ -448,7 +449,6 @@ def configure_mingw(env):
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_WINDOWS"])
-    env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 
     env.Append(LINKFLAGS=["-Wl,--stack," + str(STACK_SIZE)])
