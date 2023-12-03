@@ -376,7 +376,7 @@ def package_static_lib(target, source, env):
 
     lib_dir = os.path.join(working_dir, "lib")
     os.mkdir(lib_dir)
-    shutil.copy(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
+    shutil.move(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
 
     include_dir = os.path.join(working_dir, "include")
     os.mkdir(include_dir)

@@ -7,214 +7,149 @@
 RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)) calculator written in C++.
 It aims to be quick to open and use, and easy to extend with new types, operators, and commands.
 
-| [Features](#features) | [Install](#install) | [Build](#build) | [Future Plans](#future-plans) | [Contribute](#contribute) |
-| :-: | :-: | :-: | :-: | :-: |
-| | | | | |
+| [Features](#features) | [Install](#install) | [Usage](#usage) | [Build](#build) | [Future Plans](#future-plans) | [Contribute](#contribute) |
+| :-: | :-: | :-: | :-: | :-: | | :-: |
+| | | | | | |
 
 ## Features
 
 ### RPN Stack
 
+Work quickly and efficiently using the RPN Stack by pushing and popping values. The stack will always show what series
+of inputs led to each output, so you won't lose context during complicated expressions.
+
 ### Extended Types
+
+RCalc can understand scalar types like integers and real numbers, as well as vectors and square matrices of sizes 2, 3, and 4.
+When operating purely in the scalar integer domain, RCalc can promote up to BigInts to avoid floating point imprecision.
 
 ### XYZ Operators
 
+RCalc has XYZ built-in operators with included documentation and examples.
+All the expected operators (basic arithmetic, exponents, logarithms) are present, as are:
+
+- Rounding functions (floor/ceil/trunc/round)
+- [Unit conversions](#unit-conversions)
+- Bitwise operations (and/or/not/xor/shift left/shift right)
+- Statistics (avg/min/max/sum/std dev/NPV)
+- Trigonometry (sin/cos/tan + arc/hyperbolic variants)
+- Vector operations (dot/cross/normalize/length/swizzle)
+- Matrix operations (identity/inverse/transpose + translation/scale/rotation matrix generators)
+
+For a complete listing of operators you can see the in-app help menu or the [Operators wiki page](https://github.com/gelvinp/rcalc/wiki/Operators)
+
 ### Unit Conversions
+
+RCalc can convert between units within a wide variety of families, including:
+
+- Angle
+- Area
+- Colors (3 and 4 components)
+- Coordinate systems (2D and 3D)
+- Length
+- Mass
+- Storage (Base 10 [SI, 1000 bytes in a kb] and Base 2 [1024 bytes in a kb])
+- Temperature
+- Time
+- Volume
+
+For a complete listing of units and families, you can see the in-app help menu or the [Units wiki page](https://github.com/gelvinp/rcalc/wiki/Units)
 
 ### Value Representation
 
+RCalc recognizes values represented in binary, octal, decimal, and hexidecimal. You can:
+
+- Enter values in one representation, and convert them to another
+- See the result of bitwise operations in binary automatically
+- View vec3 and vec4 components (truncated) in hexidecimal when working with colors.
+
 ### Multi-Platform, Multi-Modal
+
+RCalc runs in a lot of places, in a lot of ways. You can run RCalc on:
+
+- Linux, with an official package in the Arch AUR, and an official Debian package in development,
+- MacOS, with integration into the native menu bar,
+- and Windows, either portably or with an installer for a start menu entry.
+
+Additionally, RCalc can run in different modes, either graphically with an ImGui frontend or text-based with a FTXUI frontend.
+Use the same familiar calculator on all of your computers, over SSH, and on servers with no display server (when compiled for that purpose).
+
+Finally, RCalc can be used as a component in other software, such as an (in-development) official iOS/iPadOS port called SwiftRPN.
+More details about SwiftRPN will be coming soon.
 
 ## Install
 
 ### Arch Linux
 
+RCalc has an official package in the AUR, simply install `rcalc` with your preferred AUR helper. The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
+
 ### Debian
+
+An official Debian package is in the works. Until then, you may find success using the `debian` branch to build a .deb package.
 
 ### MacOS
 
+RCalc is available as an official signed and notarized package for MacOS. [Download it here](https://github.com/gelvinp/rcalc/releases/latest).
+It probably supports OSX 10.13 or later for x64 based Macs, and MacOS 11 or later for arm64 (Apple Silicon) based Macs,
+however I am unable to test this, so I just have to trust that apple-clang does what I want it to do.
+
+It is possible to access the terminal frontend from a console by creating a shell script somewhere in your path with the following:
+
+```
+#!/bin/zsh
+/path/to/RCalc.app/Contents/MacOS/rcalc --renderer terminal $@
+```
+
 ### Windows
+
+RCalc is available on Windows as a portable zip, and as a .msi installer. Both packages contain the same content,
+however the installer will also add an entry to the start menu and a shortcut to the desktop.
+[Download it here](https://github.com/gelvinp/rcalc/releases/latest).
+
+Due to how Windows works, the package comes with two separate .exe files. `RCalc.exe` is the graphical version, and
+`rcalc-console.exe` in the portable package or `console/rcalc.exe` in the installed packge is the text-based console version.
+
+## Usage
+
+RCalc is designed to be simple to use. You can always access help from within RCalc by entering `\help` into the scratchpad,
+and if you are using the graphical frontend, you can press F1, navigate to File > Show Help on Linux and Windows, or Help > RCalc Help on Mac OS.
+
+RCalc supports some command line options, which you can view by running RCalc from a terminal with the `--help` flag.
+The most important flag is `--renderer`, which allows you to select which frontend to open.
+
+`rcalc --renderer imgui` will open the graphical frontend ()
 
 ## Build
 
-Please see the relevant wiki page for instructions:
+> [!IMPORTANT]  
+> This repository makes use of git submodules, it is important to make sure all
+> submodules have been initialized or you will not be able to build RCalc.
 
-* [Building for Linux](#building-for-linux)
-* [Building for MacOS](#building-for-macos)
-* [Building for Windows](#building-for-windows)
+RCalc is built using SCons (4.4 or later) and Python (3.10 or later).
+For specific instructions for each platform, please see the relevant wiki page:
+
+* [Building for Linux](https://github.com/gelvinp/rcalc/wiki/Building-for-Linux)
+* [Building for MacOS](https://github.com/gelvinp/rcalc/wiki/Building-for-MacOS)
+* [Building for Windows](https://github.com/gelvinp/rcalc/wiki/Building-for-Windows)
 
 ## Future Plans
 
-In no particular order
+In no particular order:
 
 - Publish iOS version
 - Publish iPadOS version
 - Add configurable precision framework, implement in iOS port
 - Add settings page to ImGui renderer including render scaling, default theme (light/dark/system?), precision
 - Add ability to "dump the api" in debug builds, i.e. save the help text, command/operator/unit list, license info, etc to JSON or equivalent. Have some sort of python script after that can help keep any wiki documentation in the repo up to date.
+- Add representation-aware operator implementations (bitwise ops should preserve the representations of their arguments).
+- Add Wayland support for the linux builds (waiting on getting a new computer that can hopefully run wayland).
 
 ## Contribute
 
 Please see the relevant wiki page for instructions:
 
-- Adding new operators
-- Adding new commands
-- Adding new units / unit families
-- Adding new renderers
-- Adding new types
-
-
-## Install RCalc Now
-
-If you use Arch Linux, RCalc is in the AUR. Simply `paru -S rcalc` (or equivalent AUR helper).
-
-If you use Debian, MacOS, or Windows, you can download the appropriate file from the [latest release](https://github.com/gelvinp/rcalc/releases/latest).
-
-
-## Feature Table
-
-| Feature                                                       | Status            |
-| -------                                                       | ------            |
-| Standard datatypes (ints and doubles)                         | Complete          |
-| BigInt datatype                                               | Complete          |
-| Vec2 / 3 / 4 datatypes                                        | Complete          |
-| Mat2 / 3 / 4 datatypes                                        | Complete          |
-| Basic operators (add, sub, mul, div, neg, abs)                | Complete          |
-| Extended core operators (pow, log, ceil, sign, fact)          | Complete          |
-| Trig operators ({,a}{sin,cos,tan}{,h})                        | Complete          |
-| Floating point division (quot, rem, mod)                      | Complete          |
-| Range operators (min, max, avg)                               | Complete          |
-| Vector operators                                              | Complete          |
-| Matrix operators                                              | Complete          |
-| Conversion operators (deg<>rad, f<>c, ft<>m, mi<>km)          | Complete          |
-| Core app commands (clear, quit, pop, swap, copy, dup, count)  | Complete          |
-| Renderer commands (help)                                      | Complete          |
-| Renderer scratchpad history                                   | Complete          |
-| Renderer scratchpad autocomplete                              | Complete          |
-| Extended Conversion Operators                                 | Complete          |
-| Binary/Bitwise operators + Alternate display modes (hex, etc) | Complete          |
-| Alternate renderer (TUI)                                      | Complete          |
-| Lib target (for SwiftUI port)                                 | Complete          |
-
-
-## Technical debt
- - [ ] Implement arena allocator (At least for the displayables? Just generally audit for unneeded allocations)
- - [ ] Go poke at wayland? Find a machine that can *actually* run it?
- - [ ] Rewrite readme / create wiki with documentation on usage and development
-
-
-## Platform support
-
-| Platform  | Status                            |
-| --------  | ------                            |
-| Linux     | [Supported](#building-for-linux)  |
-| Mac OS    | [Supported](#building-for-macos)  |
-| Windows   | [Supported](#building-for-windows)|
-
-
-### Building for Linux
-
-The following dependencies are required to build RCalc:
-
- - Python 3.10 or later
- - SCons 4.4 or later
- - pkg-config
- - glfw3 + development headers*
- - OpenGL + development headers
- - freetype2 + development headers*
- - A version of GCC or clang that supports c++20
-
-\* GLFW and FreeType can be statically linked using the vendored modules.
-To do this, first make sure to initialize the git submodules, and then
-run `scons builtin_glfw=yes builtin_freetype=yes`.
-(You can also choose to only statically link one or the other.)
-
-For a debug build, run `scons` from the project root.
-
-For a release build, run `scons target=release` from the project root.
-
-To build with clang instead of GCC, use `scons use_llvm=yes`.
-
-To build with asan, use `scons use_asan=yes`.
-
-To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
-
-
-### Building for MacOS
-
-The following dependencies are required to build RCalc:
-
- - Python 3.10 or later
- - SCons
- - pkg-config
- - glfw3 + development headers*
- - freetype2 + development headers*
- - A version of apple-clang, clang or gcc that supports c++20
-
-\* GLFW and FreeType can be statically linked using the vendored modules.
-To do this, first make sure to initialize the git submodules, and then
-run `scons builtin_glfw=yes builtin_freetype=yes`.
-(You can also choose to only statically link one or the other.)
-
-For a debug build, run `scons` from the project root.
-
-For a release build, run `scons target=release` from the project root.
-
-Building on MacOS will always produce a `.app` bundle.
-
-To build with GCC instead of clang, use `scons use_gcc=yes`, and make sure your `CC`, `CXX`, `RANLIB` and `AR` are set appropriately.
-You must set these yourself as MacOS aliases `gcc` and `g++` to use Apple Clang instead.
-
-To build with asan, use `scons use_asan=yes`.
-
-To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
-
-
-### Building for Windows
-
-~~CL.exe / MSVC is *not* a supported build method at this time. Instead, please install a MinGW distribution.~~
-
-You may use MSVC to compile RCalc. SCons should auto-detect your installation from any command line, but if it is unable to,
-please run SCons from a "Native Tools Command Prompt for VS". More specific instructions are coming soon.
-
-The following package lists assume you are using MSYS2:
-
-#### Building with MSYS2 using GCC
-
-The following dependencies, or suitable alternatives, are required to build RCalc:
-
-- python 3.10 or later
-- mingw-w64-ucrt-x86_64-scons 4.4 or later
-- mingw-w64-ucrt-x86_64-pkg-config
-- mingw-w64-ucrt-x86_64-glfw*
-- mingw-w64-ucrt-x86_64-freetype*
-- mingw-w64-ucrt-x86_64-gcc (A version that supports c++20)
-
-#### Building with MSYS2 using clang
-
-The following dependencies, or suitable alternatives, are required to build RCalc:
-
-- python 3.10 or later
-- mingw-w64-clang-x86_64-scons 4.4 or later
-- mingw-w64-clang-x86_64-pkg-config
-- mingw-w64-clang-x86_64-glfw*
-- mingw-w64-clang-x86_64-freetype*
-- mingw-w64-clang-x86_64-clang (A version that supports c++20)
-
-
-\* GLFW and FreeType can be linked using the vendored modules.
-To do this, first make sure to initialize the git submodules, and then
-run `scons builtin_glfw=yes builtin_freetype=yes`.
-(You can also choose to only use one builtin or the other.)
-
-When compiling with MinGW, both GLFW and Freetype will be statically linked, regardless
-if using the builtin modules or not. Additionally, libgcc and libstdc++ will also be
-statically linked.
-
-For a debug build, run `scons` from the project root.
-
-For a release build, run `scons target=release` from the project root.
-
-To build with clang instead of GCC, use `scons use_llvm=yes`.
-
-To use gperf to generate the operator, command, and unit maps, instead of std::map, use `scons gperf_path=/path/to/gperf`.
+- [Adding new operators](https://github.com/gelvinp/rcalc/wiki/Adding-new-operators)
+- [Adding new commands](https://github.com/gelvinp/rcalc/wiki/Adding-new-commands)
+- [Adding new units / unit families](https://github.com/gelvinp/rcalc/wiki/Adding-new-units)
+- [Adding new renderers](https://github.com/gelvinp/rcalc/wiki/Adding-new-renderers)
+- [Adding new types](https://github.com/gelvinp/rcalc/wiki/Adding-new-types)

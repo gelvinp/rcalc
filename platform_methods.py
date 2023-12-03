@@ -85,13 +85,7 @@ architecture_aliases = {
     "armv7": "arm32",
     "armv8": "arm64",
     "arm64v8": "arm64",
-    "aarch64": "arm64",
-    "rv": "rv64",
-    "riscv": "rv64",
-    "riscv64": "rv64",
-    "ppcle": "ppc32",
-    "ppc": "ppc32",
-    "ppc64le": "ppc64",
+    "aarch64": "arm64"
 }
 
 

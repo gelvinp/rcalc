@@ -20,3 +20,8 @@ def configure(env: "Environment"):
             env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
         else:
             env.Append(LIBS=LIBS)
+    elif env["platform"] == "macos":
+        env.Append(LINKFLAGS=[
+            "-framework", "Foundation",
+            "-framework", "Cocoa",
+        ])

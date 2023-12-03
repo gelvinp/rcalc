@@ -48,7 +48,7 @@ def configure(env: "Environment"):
     supported_arches = ["x86_64", "arm64"]
     if env["arch"] not in supported_arches:
         print(
-            "Unsupported CPU architecture %s for platform Linux. Supported architectures are: [%s]"
+            "Unsupported CPU architecture %s for platform iOS. Supported architectures are: [%s]"
             % (env["arch"], ", ".join(supported_arches))
         )
 

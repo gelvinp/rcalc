@@ -25,7 +25,6 @@ def get_opts():
     from SCons.Variables import BoolVariable
 
     return [
-        BoolVariable("use_gcc", "Use the GCC compiler", False),
         BoolVariable("use_asan", "Compile with -fsanitize=address", False)
     ]
 
@@ -41,20 +40,11 @@ def configure(env: "Environment"):
     supported_arches = ["x86_64", "arm64"]
     if env["arch"] not in supported_arches:
         print(
-            "Unsupported CPU architecture %s for platform Linux. Supported architectures are: [%s]"
+            "Unsupported CPU architecture %s for platform MacOS. Supported architectures are: [%s]"
             % (env["arch"], ", ".join(supported_arches))
         )
 
         sys.exit(255)
-    
-    if "CXX" in env and ("gcc-" in os.path.basename(env["CC"]) or "g++-" in os.path.basename(env["CXX"])):
-        env["use_gcc"] = True
-    
-    if env["use_gcc"]:
-        if (not "gcc-" in os.path.basename(env["CC"])) or (not "g++-" in os.path.basename(env["CXX"])) or (not "gcc-ranlib-" in os.path.basename(env["RANLIB"])) or (not "gcc-ar-" in os.path.basename(env["AR"])):
-            print("To compile with GCC on MacOS, please set the 'CC', 'CXX', 'RANLIB', and 'AR' environment variables manually!\n\t(i.e. CC=gcc-13 CXX=g++-13, RANLIB=gcc-ranlib-13 AR=gcc-ar-13)")
-            sys.exit(255)
-        env.extra_suffix = ".gcc" + env.extra_suffix
     
 
     if env["arch"] == "arm64":
@@ -69,25 +59,13 @@ def configure(env: "Environment"):
     
     # LTO
     if env["target"] == "release":
-        if env["use_gcc"]:
-            env.Append(CCFLAGS=["-flto"])
-
-            if env.GetOption("num_jobs") > 1:
-                env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
-            else:
-                env.Append(LINKFLAGS=["-flto"])
-
-            env["lto"] = "full"
-        else:
-            env.Append(CCFLAGS=["-flto=thin"])
-            env.Append(LINKFLAGS=["-flto=thin"])
-            env["lto"] = "thin"
+        env.Append(CCFLAGS=["-flto=thin"])
+        env.Append(LINKFLAGS=["-flto=thin"])
+        env["lto"] = "thin"
     else:
         env["lto"] = "none"
     
-    # RPath
-    if not env["use_gcc"]:
-        env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
+    env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
     
     env.Append(CCFLAGS=["-pipe"])
 

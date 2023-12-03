@@ -132,13 +132,13 @@ opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
 opts.Add(BoolVariable("enable_terminal_clipboard", "Enable clipboard support for the terminal renderer, requiring a desktop manager on linux.", True))
 
-opts.Add("CXX", "C++ compiler")
-opts.Add("CC", "C compiler")
-opts.Add("LINK", "Linker")
-opts.Add("CCFLAGS", "Flags for the C and C++ compilers")
-opts.Add("CFLAGS", "Flags for the C compiler only")
-opts.Add("CXXFLAGS", "Flags for the C++ compiler only")
-opts.Add("LINKFLAGS", "Flags for the linker")
+opts.Add("CXX", "C++ compiler", os.environ.get("CXX"))
+opts.Add("CC", "C compiler", os.environ.get("CC"))
+opts.Add("LINK", "Linker", os.environ.get("LINK"))
+opts.Add("CCFLAGS", "Flags for the C and C++ compilers", os.environ.get("CCFLAGS"))
+opts.Add("CFLAGS", "Flags for the C compiler only", os.environ.get("CFLAGS"))
+opts.Add("CXXFLAGS", "Flags for the C++ compiler only", os.environ.get("CXXFLAGS"))
+opts.Add("LINKFLAGS", "Flags for the linker", os.environ.get("LINKFLAGS"))
 
 for renderer in available_renderers:
     opts.Add(BoolVariable(f"enable_{renderer}_renderer", f"Enable the {renderer} renderer.", True))
@@ -298,14 +298,19 @@ if selected_platform in available_platforms:
 
             if "get_opts" in dir(module):
                 for opt in module.get_opts(env):
-                    if opt[0] in opts.args.keys():
-                        env[opt[0]] = opts.args[opt[0]]
-                    else:
-                        opts.Add(opt)
-                        env[opt[0]] = opt[2]
+                    opts.Add(opt)
 
             sys.path.remove(tmp_path)
             sys.modules.pop("module")
+
+    opts.Update(env)
+    env["platform"] = selected_platform
+    env["enabled_renderers"] = enabled_renderers
+    env["default_renderer"] = default_renderer
+    for flag in platform_flags[selected_platform]:
+        # Overwrite if command line specifies non-auto value
+        if (not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto":
+            env[flag[0]] = flag[1]
 
     for module_name in env.module_list:
         if os.path.exists("./modules/" + module_name + "/module.py"):
