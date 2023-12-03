@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import os
 from platform_methods import subprocess_main
+import atexit
 
 
 Tags = ['app_only']
@@ -441,7 +442,8 @@ class CommandMapBuilder:
             usage_names.sort()
 
             # Write commands list to temporary file and run gperf
-            with tempfile.NamedTemporaryFile("w", newline='\n') as cmd_file:
+            with tempfile.NamedTemporaryFile("w", newline='\n', delete=False) as cmd_file:
+                atexit.register(lambda file: os.unlink(os.path.realpath(file.name)), cmd_file)
                 for usage in usage_names:
                     cmd_file.write(f'\\{_filter_name(usage)}\n')
                 cmd_file.flush()

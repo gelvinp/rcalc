@@ -49,7 +49,6 @@ Application::Application() :
     op_map(OperatorMap::get_operator_map())
 {
     command_map = CommandMap<Application>::get_command_map();
-    command_map.activate();
 
     p_stack_active = &_stack_a;
     p_stack_backup = &_stack_b;
@@ -57,6 +56,7 @@ Application::Application() :
 
 
 void Application::run() {
+    command_map.activate();
     p_renderer->render_loop();
 }
 

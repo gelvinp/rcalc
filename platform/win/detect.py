@@ -2,6 +2,7 @@ import os
 import sys
 from platform_methods import detect_arch
 import subprocess
+import methods
 
 # To match other platforms
 STACK_SIZE = 8388608
@@ -31,6 +32,53 @@ def get_mingw_bin_prefix(prefix, arch):
 
 
 def detect_build_env_arch():
+    msvc_target_aliases = {
+        "amd64": "x86_64",
+        "i386": "x86_32",
+        "i486": "x86_32",
+        "i586": "x86_32",
+        "i686": "x86_32",
+        "x86": "x86_32",
+        "x64": "x86_64",
+        "x86_64": "x86_64"
+    }
+    if os.getenv("VCINSTALLDIR") or os.getenv("VCTOOLSINSTALLDIR"):
+        if os.getenv("Platform"):
+            msvc_arch = os.getenv("Platform").lower()
+            if msvc_arch in msvc_target_aliases.keys():
+                return msvc_target_aliases[msvc_arch]
+
+        if os.getenv("VSCMD_ARG_TGT_ARCH"):
+            msvc_arch = os.getenv("VSCMD_ARG_TGT_ARCH").lower()
+            if msvc_arch in msvc_target_aliases.keys():
+                return msvc_target_aliases[msvc_arch]
+
+        # Pre VS 2017 checks.
+        if os.getenv("VCINSTALLDIR"):
+            PATH = os.getenv("PATH").upper()
+            VCINSTALLDIR = os.getenv("VCINSTALLDIR").upper()
+            path_arch = {
+                "BIN\\x86_ARM;": "arm32",
+                "BIN\\amd64_ARM;": "arm32",
+                "BIN\\x86_ARM64;": "arm64",
+                "BIN\\amd64_ARM64;": "arm64",
+                "BIN\\x86_amd64;": "a86_64",
+                "BIN\\amd64;": "x86_64",
+                "BIN\\amd64_x86;": "x86_32",
+                "BIN;": "x86_32",
+            }
+            for path, arch in path_arch.items():
+                final_path = VCINSTALLDIR + path
+                if final_path in PATH:
+                    return arch
+
+        # VS 2017 and newer.
+        if os.getenv("VCTOOLSINSTALLDIR"):
+            host_path_index = os.getenv("PATH").upper().find(os.getenv("VCTOOLSINSTALLDIR").upper() + "BIN\\HOST")
+            if host_path_index > -1:
+                first_path_arch = os.getenv("PATH").split(";")[0].rsplit("\\", 1)[-1].lower()
+                return msvc_target_aliases[first_path_arch]
+
     msys_target_aliases = {
         "mingw32": "x86_32",
         "mingw64": "x86_64",
@@ -80,25 +128,18 @@ def try_cmd(test, prefix, arch):
 
 
 def is_available():
-    if os.name == "nt":
+    if os.name == "nt" or os.name == "posix":
         if os.getenv("VCINSTALLDIR"):  # MSVC, manual setup
-            print("MSVC is not yet supported, please use MinGW")
-            return False
+            return True
 
         prefix = os.getenv("MINGW_PREFIX", "")
 
-        if not os.system(f"{prefix}/bin/pkg-config --version > /dev/null"):
-            print("Error: pkg-config not found. Windows platform is unavailable.")
-            return False
-
         if try_cmd("gcc --version", prefix, "") or try_cmd("clang --version", prefix, ""):
-            return True
-
-    if os.name == "posix":
-        prefix = os.getenv("MINGW_PREFIX", "")
-
-        if try_cmd("gcc --version", prefix, "") or try_cmd("clang --version", prefix, ""):
-            return True
+            if not os.system(f"{prefix}/bin/pkg-config --version > /dev/null"):
+                print("Error: pkg-config not found. Windows (mingw) platform is unavailable.")
+                return False
+        
+        return True
 
     return False
 
@@ -111,7 +152,14 @@ def get_opts():
     return [
         ("mingw_prefix", "MinGW prefix", mingw),
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
-        EnumVariable("windows_subsystem", "Windows subsystem", "gui", ("gui", "console"))
+        EnumVariable("windows_subsystem", "Windows subsystem", "gui", ("gui", "console")),
+        BoolVariable("use_mingw", "Use the Mingw compiler, even if MSVC is installed.", False),
+        BoolVariable("use_asan", "Compile with the address sanitizer", False),
+        (
+            "target_win_version",
+            "Targeted Windows version, >= 0x0601 (Windows 7)",
+            "0x0601",
+        )
     ]
 
 
@@ -155,6 +203,59 @@ def build_res_file(target, source, env):
     return 0
 
 
+def setup_msvc_manual(env):
+    """Running from VCVARS environment"""
+
+    env_arch = detect_build_env_arch()
+    if env["arch"] != env_arch:
+        print(
+            """
+            Arch argument (%s) is not matching Native/Cross Compile Tools Prompt/Developer Console (or Visual Studio settings) that is being used to run SCons (%s).
+            Run SCons again without arch argument (example: scons p=windows) and SCons will attempt to detect what MSVC compiler will be executed and inform you.
+            """
+            % (env["arch"], env_arch)
+        )
+        sys.exit(200)
+
+    print("Found MSVC, arch %s" % (env_arch))
+
+
+def setup_msvc_auto(env):
+    """Set up MSVC using SCons's auto-detection logic"""
+
+    # If MSVC_VERSION is set by SCons, we know MSVC is installed.
+    # But we may want a different version or target arch.
+
+    # Valid architectures for MSVC's TARGET_ARCH:
+    # ['amd64', 'emt64', 'i386', 'i486', 'i586', 'i686', 'ia64', 'itanium', 'x86', 'x86_64']
+    # Our x86_64 and arm64 are the same, and we need to map the 32-bit
+    # architectures to other names since MSVC isn't as explicit.
+    # The rest we don't need to worry about because they are
+    # aliases or aren't supported.
+    msvc_arch_aliases = {"x86_32": "x86"}
+    if env["arch"] in msvc_arch_aliases.keys():
+        env["TARGET_ARCH"] = msvc_arch_aliases[env["arch"]]
+    else:
+        env["TARGET_ARCH"] = env["arch"]
+
+    # The env may have already been set up with default MSVC tools, so
+    # reset a few things so we can set it up with the tools we want.
+    # (Ideally we'd decide on the tool config before configuring any
+    # environment, and just set the env up once, but this function runs
+    # on an existing env so this is the simplest way.)
+    env["MSVC_SETUP_RUN"] = False  # Need to set this to re-run the tool
+    env["MSVS_VERSION"] = None
+    env["MSVC_VERSION"] = None
+
+    if "msvc_version" in env:
+        env["MSVC_VERSION"] = env["msvc_version"]
+    env.Tool("msvc")
+    env.Tool("mssdk")  # we want the MS SDK
+
+    # Note: actual compiler version can be found in env['MSVC_VERSION'], e.g. "14.1" for VS2015
+    print("Found MSVC version %s, arch %s" % (env["MSVC_VERSION"], env["arch"]))
+
+
 def setup_mingw(env):
     """Set up env for use with mingw"""
 
@@ -190,12 +291,95 @@ def setup_mingw(env):
     print("Using MinGW, arch %s" % (env["arch"]))
 
 
+def configure_msvc(env, vcvars_msvc_config):
+    """Configure env to work with MSVC"""
+
+    ## Build type
+    env.Append(LINKFLAGS=["/ENTRY:WinMain"])
+
+    if env["windows_subsystem"] == "gui":
+        env.Append(LINKFLAGS=["/SUBSYSTEM:WINDOWS"])
+    else:
+        env.Append(LINKFLAGS=["/SUBSYSTEM:CONSOLE"])
+        env.extra_suffix += ".terminal"
+
+    ## Compile/link flags
+
+    if env["target"] == "debug":
+        env.AppendUnique(CCFLAGS=["/MTd"])
+    else:
+        env.AppendUnique(CCFLAGS=["/MT"])
+
+    env.AppendUnique(CCFLAGS=["/Gd", "/GR", "/nologo"])
+    env.AppendUnique(CCFLAGS=["/utf-8"])  # Force to use Unicode encoding.
+    env.AppendUnique(CXXFLAGS=["/TP"])  # assume all sources are C++
+    # Once it was thought that only debug builds would be too large,
+    # but this has recently stopped being true. See the mingw function
+    # for notes on why this shouldn't be enabled for gcc
+    env.AppendUnique(CCFLAGS=["/bigobj"])
+
+    if vcvars_msvc_config:  # should be automatic if SCons found it
+        if os.getenv("WindowsSdkDir") is not None:
+            env.Prepend(CPPPATH=[os.getenv("WindowsSdkDir") + "/Include"])
+        else:
+            print("Missing environment variable: WindowsSdkDir")
+
+    env.AppendUnique(
+        CPPDEFINES=[
+            "ENABLE_PLATFORM_WINDOWS",
+            "strtok_p=strtok_s",
+            "WIN32",
+            "MSVC",
+            "WINVER=%s" % env["target_win_version"],
+            "_WIN32_WINNT=%s" % env["target_win_version"],
+        ]
+    )
+    env.AppendUnique(CPPDEFINES=["NOMINMAX"])  # disable bogus min/max WinDef.h macros
+    if env["arch"] == "x86_64":
+        env.AppendUnique(CPPDEFINES=["_WIN64"])
+
+    ## Libs
+
+    LIBS = ["Shell32"]
+
+    if env["target"] == "debug":
+        LIBS.append("libucrtd")
+    else:
+        LIBS.append("libucrt")
+
+    env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
+
+    if vcvars_msvc_config:
+        if os.getenv("WindowsSdkDir") is not None:
+            env.Append(LIBPATH=[os.getenv("WindowsSdkDir") + "/Lib"])
+        else:
+            print("Missing environment variable: WindowsSdkDir")
+
+    if vcvars_msvc_config:
+        env.Prepend(CPPPATH=[p for p in os.getenv("INCLUDE").split(";")])
+        env.Append(LIBPATH=[p for p in os.getenv("LIB").split(";")])
+
+    # Sanitizers
+    if env["use_asan"]:
+        env.extra_suffix += ".san"
+        env.Append(LINKFLAGS=["/INFERASANLIBS"])
+        env.Append(CCFLAGS=["/fsanitize=address"])
+
+    # Incremental linking fix
+    env["BUILDERS"]["ProgramOriginal"] = env["BUILDERS"]["Program"]
+    env["BUILDERS"]["Program"] = methods.precious_program
+
+    env.AppendUnique(LINKFLAGS=["/STACK:" + str(STACK_SIZE)])
+    env["lto"] = "none"
+
+
 def configure_mingw(env):
     # Workaround for MinGW. See:
     # https://www.scons.org/wiki/LongCmdLinesOnWin32
     env.use_windows_spawn_fix()
     
     env.Tool("mingw")
+    env.extra_suffix += ".mingw"
 
     ## Build type
 
@@ -265,7 +449,6 @@ def configure_mingw(env):
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_WINDOWS"])
-    env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 
     env.Append(LINKFLAGS=["-Wl,--stack," + str(STACK_SIZE)])
@@ -276,7 +459,7 @@ def configure_mingw(env):
         env.Append(CCFLAGS=["-mwindows"])
 
     env.Append(LIBS=["mingw32"])
-    env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])
+    env.Append(LINKFLAGS=["-static", "-static-libgcc", "-static-libstdc++"])
     env.Append(BUILDERS={"RES": env.Builder(action=build_res_file, suffix=".o", src_suffix=".rc")})
 
 
@@ -290,6 +473,26 @@ def configure(env: "Environment"):
         )
         sys.exit()
 
-    setup_mingw(env)
+    if os.name == "nt":
+        env["ENV"] = os.environ  # this makes build less repeatable, but simplifies some things
+        env["ENV"]["TMP"] = os.environ["TMP"]
 
-    configure_mingw(env)
+    # First figure out which compiler, version, and target arch we're using
+    if os.getenv("VCINSTALLDIR") and detect_build_env_arch() and not env["use_mingw"]:
+        setup_msvc_manual(env)
+        env.msvc = True
+        vcvars_msvc_config = True
+    elif env.get("MSVC_VERSION", "") and not env["use_mingw"]:
+        setup_msvc_auto(env)
+        env.msvc = True
+        vcvars_msvc_config = False
+    else:
+        setup_mingw(env)
+        env.msvc = False
+
+    # Now set compiler/linker flags
+    if env.msvc:
+        configure_msvc(env, vcvars_msvc_config)
+
+    else:  # MinGW
+        configure_mingw(env)

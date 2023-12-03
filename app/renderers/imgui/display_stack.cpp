@@ -48,7 +48,7 @@ void ImGuiDisplayLine::calculate_size(float max_width) {
     // Step 1: Calculate sizes
 
     float available_width = max_width;
-    float line_no = 0.1; // Avoid any potential floating point weirdness
+    float line_no = 0.1f; // Avoid any potential floating point weirdness
 
     for (ImGuiDisplayChunk& chunk : chunks) {
         chunk.calculate_size();
@@ -113,7 +113,7 @@ void ImGuiDisplayLine::calculate_size(float max_width) {
         for (auto iter = from_iter; iter < to_iter; ++iter) {
             iter->position = ImVec2(
                 chunk_start_x,                                  // Left align
-                size.y + ((line_height - iter->size.y) / 2.0)   // Center align
+                size.y + ((line_height - iter->size.y) / 2.0f)   // Center align
             );
 
             chunk_start_x += iter->size.x;
@@ -137,12 +137,12 @@ void ImGuiDisplayEntry::calculate_size(float max_width, bool scrollbar_visible, 
         available_width = output.size.x;
     }
     else {
-        available_width = max_width - STACK_HORIZ_BIAS - (2.0 * STACK_OUTER_PADDING);
+        available_width = max_width - STACK_HORIZ_BIAS - (2.0f * STACK_OUTER_PADDING);
         if (scrollbar_visible) {
             available_width -= ImGui::GetStyle().ScrollbarSize;
         }
 
-        float output_max_width = available_width / 2.0 - STACK_HORIZ_PADDING;
+        float output_max_width = available_width / 2.0f - STACK_HORIZ_PADDING;
         output.calculate_size(output_max_width);
 
         float input_max_width = available_width - output.size.x - STACK_HORIZ_PADDING;

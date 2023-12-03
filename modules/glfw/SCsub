@@ -16,8 +16,11 @@ if env["builtin_glfw"]:
     env_glfw = env.Clone()
     if "-Werror" in env_glfw["CCFLAGS"]:
         env_glfw["CCFLAGS"].remove("-Werror")
-    
-    env_glfw.Append(CCFLAGS=["-std=c99"])
+    if "/WX" in env_glfw["CCFLAGS"]:
+        env_glfw["CCFLAGS"].remove("/WX")
+
+    if env["platform"] != "win":
+        env_glfw.Append(CCFLAGS=["-std=c99"])
 
     env_glfw.add_source_files(env.modules_sources, common_sources)
 

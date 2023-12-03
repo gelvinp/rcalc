@@ -443,24 +443,27 @@ std::optional<Value> Value::parse_real(std::string str) {
     // Check for numeric prefixes
     if (sv.starts_with("0x")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 16);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 16);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_HEX);
         }
     }
     else if (sv.starts_with("0o")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 8);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 8);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_OCT);
         }
     }
     else if (sv.starts_with("0b")) {
         Int i_value;
-        auto [ptr, ec] = std::from_chars(sv.data() + 2, sv.end(), i_value, 2);
-        if (ec == std::errc() && ptr == sv.end()) {
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 2);
+        if (ec == std::errc() && ptr == end) {
             if (negate) { i_value *= -1; }
             return Value((Real)i_value, REPR_BINARY);
         }
@@ -492,7 +495,7 @@ std::optional<Value> Value::parse_vec(std::string_view sv) {
     char* token = strtok_p(source.data(), delims, &ctx);
     while (token) {
         // Trim whitespace
-        std::string_view sv(token);
+        sv = std::string_view { token };
         size_t begin = sv.find_first_not_of(" ");
         size_t end = sv.find_last_not_of(" ") + 1;
 
@@ -661,7 +664,7 @@ std::string Value::to_string(DisplayableTag tags) const {
                     return std::to_string(operator Int());
                 case REPR_BINARY: {
                     std::string str = std::bitset<64>(std::bit_cast<uint64_t>(operator Int())).to_string();
-                    int offset = 64 - std::bit_width(std::bit_cast<uint64_t>(operator Int()));
+                    uint64_t offset = 64 - std::bit_width(std::bit_cast<uint64_t>(operator Int()));
                     return fmt("0b%s", str.c_str() + offset);
                 }
                 case REPR_OCT:

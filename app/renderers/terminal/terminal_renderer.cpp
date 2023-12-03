@@ -205,7 +205,7 @@ void TerminalRenderer::submit_scratchpad() {
     history.push_back(scratchpad);
     history_state = std::nullopt;
 
-    std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return std::tolower(c); });
+    std::transform(scratchpad.begin(), scratchpad.end(), scratchpad.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     cb_submit_text(scratchpad);
     scratchpad.clear();
 }

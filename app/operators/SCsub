@@ -33,6 +33,8 @@ env_ops.add_source_files(env.operator_sources, "*.cpp")
 env_ops_gen = env_ops.Clone()
 if "-Werror" in env_ops_gen["CCFLAGS"]:
     env_ops_gen["CCFLAGS"].remove("-Werror")
+if "/WX" in env_ops_gen["CCFLAGS"]:
+    env_ops_gen["CCFLAGS"].remove("/WX")
 env_ops_gen.add_source_files(env.operator_sources, operators_gen_path)
 
 lib = env_ops.add_library("operators", env.operator_sources)

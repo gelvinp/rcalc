@@ -317,3 +317,4 @@ imgui.ini
 
 # Debug artifacts
 heaptrack*.zst
+*.pdb

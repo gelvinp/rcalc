@@ -4,6 +4,10 @@ import sys
 def get_opts(env: "Environment"):
     from SCons.Variables import BoolVariable, EnumVariable
 
+    if env["platform"] == "win":
+        env["builtin_freetype"] = True
+        return []
+
     opts = [
         BoolVariable("builtin_freetype", "Statically link the vendored copy of freetype", False)
     ]

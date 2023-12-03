@@ -6,3 +6,9 @@ if env["build_type"] == "application":
     res_obj = env.RES(res_target, res_file)
 
     env["extra_sources"].append(res_obj)
+
+    env.winmain_sources = []
+    env_winmain = env.Clone()
+    env_winmain.add_source_files(env.winmain_sources, "winmain.cpp")
+    lib = env_winmain.add_library("winmain", env.winmain_sources)
+    env.Prepend(LIBS=[lib])

@@ -7,6 +7,11 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <stdexcept>
+
 
 void* Allocator::alloc(size_t size_bytes) {
     if (shared.not_ready()) { shared.setup(); }

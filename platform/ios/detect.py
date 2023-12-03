@@ -120,5 +120,4 @@ def configure(env: "Environment"):
     env.Append(CCFLAGS=["-pipe"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_IOS"])
-    env.Append(CPPDEFINES=["UNREACHABLE=__builtin_unreachable"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
