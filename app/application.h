@@ -32,6 +32,7 @@ public:
     REGISTER_COMMAND(Application, Dup);
     REGISTER_COMMAND(Application, Count);
     REGISTER_COMMAND(Application, Undo);
+    REGISTER_COMMAND(Application, Type);
 
     void on_renderer_submit_text(const std::string& str);
     bool on_renderer_submit_operator(const std::string& str);

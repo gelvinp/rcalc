@@ -23,9 +23,9 @@ of inputs led to each output, so you won't lose context during complicated expre
 RCalc can understand scalar types like integers and real numbers, as well as vectors and square matrices of sizes 2, 3, and 4.
 When operating purely in the scalar integer domain, RCalc can promote up to BigInts to avoid floating point imprecision.
 
-### XYZ Operators
+### 80 Operators
 
-RCalc has XYZ built-in operators with included documentation and examples.
+RCalc has 80 built-in operators with included documentation and examples.
 All the expected operators (basic arithmetic, exponents, logarithms) are present, as are:
 
 - Rounding functions (floor/ceil/trunc/round)
@@ -40,7 +40,7 @@ For a complete listing of operators you can see the in-app help menu or the [Ope
 
 ### Unit Conversions
 
-RCalc can convert between units within a wide variety of families, including:
+RCalc has 71 built-in units, and can convert between units within families, including:
 
 - Angle
 - Area

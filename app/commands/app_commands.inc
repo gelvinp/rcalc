@@ -81,3 +81,16 @@ RCALC_CMD(Application, Count, app) {
 RCALC_CMD(Application, Undo, app) {
     app.stack = *app.p_stack_backup;
 }
+
+// @RCalcCommand
+// Description: Interrogate the type of the top-most value on the stack.
+// Requires: "app/application.h"
+// Requires: "core/format.h"
+RCALC_CMD(Application, Type, app) {
+    if (app.stack.size() == 0) { return; }
+
+    const StackItem& back = app.stack.get_items().back();
+    std::string type_info = fmt("Type: %s", Value::get_type_name(back.result.get_type()));
+
+    app.p_renderer->display_info(type_info);
+}
