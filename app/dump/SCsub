@@ -1,0 +1,11 @@
+Import("env")
+from glob import glob
+
+if env["target"] == "debug":
+    env.dump_sources = []
+
+    env_dump = env.Clone()
+    env_dump.add_source_files(env.dump_sources, "*.cpp")
+
+    lib = env_dump.add_library("dump", env.dump_sources)
+    env.Prepend(LIBS=[lib])

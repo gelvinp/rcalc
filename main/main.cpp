@@ -5,6 +5,7 @@
 #include "app/renderers/renderer.h"
 #include "app/application.h"
 #include "assets/license.gen.h"
+#include "app/dump/dump.h"
 
 #include <iostream>
 #include <string_view>
@@ -90,6 +91,12 @@ void Main::print_help(bool print_description)
     std::cout << "Run Options:\n";
     std::cout << "  --renderer <renderer>       Select an available renderer.\n";
     std::cout << "\n";
+
+    #ifndef NDEBUG
+    std::cout << "Debug Options:\n";
+    std::cout << "  --dump-info                 Dump the application info to JSON.\n";
+    std::cout << "\n";
+    #endif
 }
 
 
@@ -186,6 +193,15 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
             print_licenses();
             exit(0);
         }
+
+        #ifndef NDEBUG
+        if (
+            arg->compare("--dump-info") == 0
+        ) {
+            RCalc::Dump::dump_info();
+            exit(0);
+        }
+        #endif
 
         
         std::cout << "Unrecognized option: " << *arg << "\n";

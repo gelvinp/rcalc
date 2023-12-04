@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <span>
+#include <utility>
 
 #define REGISTER_COMMAND(scope, name) static void _CMDIMPL_##name(scope&)
     
@@ -27,6 +28,7 @@ struct ScopeMeta {
 class _GlobalCommandMap {
 public:
     static const std::vector<CommandMeta const *>& get_alphabetical() { return commands; }
+    static const std::span<ScopeMeta const * const> get_compiled_alphabetical();
 
 protected:
     static void register_scope(const ScopeMeta& scope);

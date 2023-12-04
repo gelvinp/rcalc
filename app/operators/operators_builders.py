@@ -488,6 +488,9 @@ class OperatorMapBuilder:
         self.operator_requires = ["<algorithm>", "<iterator>"]
 
         self.categories = {}
+
+        self.manual_impl_count = 0
+        self.total_impl_count = 0
     
 
     def process_file(self, path):
@@ -535,6 +538,8 @@ class OperatorMapBuilder:
 
         for op_name in operators:
             lines.extend(self.operators[op_name].build())
+            self.manual_impl_count += len(self.operators[op_name].calls)
+            self.total_impl_count += len(self.operators[op_name].permutations)
         
         lines.extend([
             '}',
@@ -592,6 +597,9 @@ class OperatorMapBuilder:
             '\treturn OperatorCategories::alphabetical_categories;',
             '}',
             '',
+            f'size_t OperatorMap::stat_manual_impl_count = {self.manual_impl_count};',
+            f'size_t OperatorMap::stat_total_impl_count = {self.total_impl_count};',
+            ''
             '}',
             ''
         ])

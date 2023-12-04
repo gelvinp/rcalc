@@ -14,6 +14,7 @@ if env["build_type"] == "application":
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")
 SConscript("displayable/SCsub")
+SConscript("dump/SCsub")
 
 lib = env_app.add_library("app", env.app_sources)
 

@@ -143,6 +143,7 @@ In no particular order:
 - Add ability to "dump the api" in debug builds, i.e. save the help text, command/operator/unit list, license info, etc to JSON or equivalent. Have some sort of python script after that can help keep any wiki documentation in the repo up to date.
 - Add representation-aware operator implementations (bitwise ops should preserve the representations of their arguments).
 - Add Wayland support for the linux builds (waiting on getting a new computer that can hopefully run wayland).
+- Unit / fuzzing tests
 
 ## Contribute
 

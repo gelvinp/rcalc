@@ -35,6 +35,9 @@ public:
     Result<> evaluate(const std::string& str, RPNStack& stack);
     const std::span<OperatorCategory const * const> get_alphabetical() const;
 
+    static size_t stat_manual_impl_count;
+    static size_t stat_total_impl_count;
+
 private:
     bool built = false;
     void build();

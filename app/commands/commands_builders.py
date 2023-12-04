@@ -206,8 +206,18 @@ class CommandMapBuilder:
         for scope_name in scopes:
             lines.extend(self.scopes[scope_name].build())
         
+        compiled_scopes = ',\n\t'.join([f'&SCOPEMETA_{scope_name}' for scope_name in scopes])
+        
         lines.extend([
+            'constexpr ScopeMeta const * compiled_scopes[] {',
+            f'\t{compiled_scopes}',
+            '};',
+            '',
             '}',
+            '',
+            'const std::span<ScopeMeta const * const> _GlobalCommandMap::get_compiled_alphabetical() {',
+            '\treturn Commands::compiled_scopes;',
+            '};',
             ''
         ])
 
