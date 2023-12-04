@@ -724,15 +724,15 @@ std::string Value::to_string(DisplayableTag tags) const {
         }
         case TYPE_MAT2: {
             const Mat2 value = operator Mat2();
-            return fmt_mat2(value);
+            return fmt_mat2(value, tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_MAT3: {
             const Mat3 value = operator Mat3();
-            return fmt_mat3(value);
+            return fmt_mat3(value, tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_MAT4: {
             const Mat4 value = operator Mat4();
-            return fmt_mat4(value);
+            return fmt_mat4(value, tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_UNIT: {
             const Unit value = operator Unit();

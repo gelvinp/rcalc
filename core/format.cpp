@@ -85,7 +85,15 @@ std::string fmt_col_vec4(Vec4 value) {
 }
 
 
-std::string fmt_mat2(Mat2 value) {
+std::string fmt_mat2(Mat2 value, bool one_line) {
+    if (one_line) {
+        return fmt(
+            "mat2([%g, %g], [%g, %g])",
+            value[0].x, value[1].x,
+            value[0].y, value[1].y
+        );
+    }
+
     int col0_len = std::max(
         snprintf(nullptr, 0, "%g", value[0].x),
         snprintf(nullptr, 0, "%g", value[0].y)
@@ -104,7 +112,16 @@ std::string fmt_mat2(Mat2 value) {
     );
 }
 
-std::string fmt_mat3(Mat3 value) {
+std::string fmt_mat3(Mat3 value, bool one_line) {
+    if (one_line) {
+        return fmt(
+            "mat3([%g, %g, %g], [%g, %g, %g], [%g, %g, %g])",
+            value[0].x, value[1].x, value[2].x,
+            value[0].y, value[1].y, value[2].y,
+            value[0].z, value[1].z, value[2].z
+        );
+    }
+
     int col0_len = std::max(
         snprintf(nullptr, 0, "%g", value[0].x),
         std::max(
@@ -141,7 +158,17 @@ std::string fmt_mat3(Mat3 value) {
     );
 }
 
-std::string fmt_mat4(Mat4 value) {
+std::string fmt_mat4(Mat4 value, bool one_line) {
+    if (one_line) {
+        return fmt(
+            "mat4([%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g], [%g, %g, %g, %g])",
+            value[0].x, value[1].x, value[2].x, value[3].x,
+            value[0].y, value[1].y, value[2].y, value[3].y,
+            value[0].z, value[1].z, value[2].z, value[3].z,
+            value[0].w, value[1].w, value[2].w, value[3].w
+        );
+    }
+
     int col0_len = std::max(
         snprintf(nullptr, 0, "%g", value[0].x),
         std::max(

@@ -7,6 +7,7 @@
 #include "core/units/units.h"
 #include "app/stack.h"
 #include "core/filter.h"
+#include "assets/license.gen.h"
 
 #include <fstream>
 #include <iostream>
@@ -110,12 +111,44 @@ void RCalc::Dump::dump_info() {
                 }
 
                 json example_outputs = json::array();
+                json example_outputs_formatted = json::array();
 
                 for (const StackItem& item : stack.get_items()) {
-                    example_outputs.push_back(item.result.to_string());
+                    example_outputs.push_back(item.result.to_string(DisplayableTag::ONE_LINE));
+                    example_outputs_formatted.push_back(item.result.to_string(item.p_input->tags));
+                }
+
+                std::vector<StackItem> _items = stack.pop_items(1);
+                StackItem& res = _items[0];
+
+                json example_params_formatted = json::array();
+
+                for (const Displayable& disp : *res.p_input) {
+                    std::string str;
+
+                    switch (disp.get_type()) {
+                        case Displayable::Type::CONST_CHAR: {
+                            str = reinterpret_cast<const ConstCharDisplayable&>(disp).p_char;
+                            break;
+                        }
+                        case Displayable::Type::STRING: {
+                            str = reinterpret_cast<const StringDisplayable&>(disp).str;
+                            break;
+                        }
+                        case Displayable::Type::VALUE: {
+                            str = reinterpret_cast<const ValueDisplayable&>(disp).value.to_string(disp.tags);
+                            break;
+                        }
+                        case Displayable::Type::RECURSIVE:
+                            UNREACHABLE(); // Handled by the iterator
+                    }
+
+                    example_params_formatted.push_back(str);
                 }
 
                 rendered_example["outputs"] = example_outputs;
+                rendered_example["formatted_params"] = example_params_formatted;
+                rendered_example["formatted_outputs"] = example_outputs_formatted;
 
                 renderered_examples.push_back(rendered_example);
             }
@@ -207,6 +240,8 @@ void RCalc::Dump::dump_info() {
         { "unit_family_count", unit_family_count },
         { "unit_count", unit_count },
     });
+
+    info["licenses"] = RCalc::Assets::license_md;
 
     std::ofstream file {
         "rcalc_dump.json",

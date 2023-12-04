@@ -73,7 +73,7 @@ class Permutation:
         return rev
 
 
-    def get_type_names(self):
+    def get_stack_types(self):
         return [self.types[idx].stack_type for idx in self.call_args]
     
 
@@ -139,24 +139,21 @@ class Call:
                 if type == 'BigInt':
                     typesets.append(bigint_cast_types)
                 else:
-                    typesets.append([type])
+                    typesets.append([f'^{type}'])
             
             bigint_perm_types = [list(x) for x in list(itertools.product(*typesets))]
-            bigint_perm_types.sort(key=lambda types: [Types[t] for t in types])
+            bigint_perm_types.sort(key=lambda types: [Types[t.replace('^', '')] for t in types])
             for bigint_perm_type in bigint_perm_types:
-                if bigint_perm_type in defined:
-                    continue
-                
-                defined.append(bigint_perm_types)
+                bigint_perm_type_clean = [t.replace('^', '') for t in bigint_perm_type]
                 perm_types = []
                 perm_call_args = []
                 for type_idx in range(len(bigint_perm_type)):
-                    value_type = 'BigInt' if bigint_perm_type[type_idx] in bigint_cast_types else bigint_perm_type[type_idx]
+                    value_type = 'BigInt' if bigint_perm_type[type_idx] in bigint_cast_types else bigint_perm_type_clean[type_idx]
                     perm_types.append(
                         PermutationType(
                             value_type,
                             type_idx,
-                            bigint_perm_type[type_idx],
+                            bigint_perm_type_clean[type_idx],
                             type_idx
                         )
                     )
@@ -164,11 +161,13 @@ class Call:
         
                 perm = Permutation(perm_types, self.types, perm_call_args, self.stack_ref)
                 perm.source.append("bigint cast")
-                permutations[",".join(bigint_perm_type)] = perm
+                if not bigint_perm_type_clean in defined:                
+                    defined.append(bigint_perm_type_clean)
+                    permutations[",".join(bigint_perm_type_clean)] = perm
 
                 # Check for reverse
                 if 'reversable' in self.tags:
-                    reversed_types = [bigint_perm_type[1], bigint_perm_type[0]]
+                    reversed_types = [bigint_perm_type_clean[1], bigint_perm_type_clean[0]]
                     if not reversed_types in defined:
                         defined.append(reversed_types)
                         permutations[",".join(reversed_types)] = perm.reverse()
@@ -182,24 +181,21 @@ class Call:
                 if type == 'Real':
                     typesets.append(real_cast_types)
                 else:
-                    typesets.append([type])
+                    typesets.append([f'^{type}'])
             
             real_perm_types = [list(x) for x in list(itertools.product(*typesets))]
-            real_perm_types.sort(key=lambda types: [Types[t] for t in types])
+            real_perm_types.sort(key=lambda types: [Types[t.replace('^', '')] for t in types])
             for real_perm_type in real_perm_types:
-                if real_perm_type in defined:
-                    continue
-
-                defined.append(real_perm_type)
+                real_perm_type_clean = [t.replace('^', '') for t in real_perm_type]
                 perm_types = []
                 perm_call_args = []
-                for type_idx in range(len(real_perm_type)):
-                    value_type = 'Real' if real_perm_type[type_idx] in real_cast_types else real_perm_type[type_idx]
+                for type_idx in range(len(real_perm_type_clean)):
+                    value_type = 'Real' if real_perm_type[type_idx] in real_cast_types else real_perm_type_clean[type_idx]
                     perm_types.append(
                         PermutationType(
                             value_type,
                             type_idx,
-                            real_perm_type[type_idx],
+                            real_perm_type_clean[type_idx],
                             type_idx
                         )
                     )
@@ -207,11 +203,13 @@ class Call:
         
                 perm = Permutation(perm_types, self.types, perm_call_args, self.stack_ref)
                 perm.source.append("real cast")
-                permutations[",".join(real_perm_type)] = perm
+                if not real_perm_type_clean in defined:
+                    defined.append(real_perm_type_clean)
+                    permutations[",".join(real_perm_type_clean)] = perm
 
                 # Check for reverse
                 if 'reversable' in self.tags:
-                    reversed_types = [real_perm_type[1], real_perm_type[0]]
+                    reversed_types = [real_perm_type_clean[1], real_perm_type_clean[0]]
                     if not reversed_types in defined:
                         defined.append(reversed_types)
                         permutations[",".join(reversed_types)] = perm.reverse()
@@ -271,7 +269,10 @@ class Operator:
         for typeset in self.types:
             typeset_perm = self.calls[",".join(typeset)].get_permutations(defined_types)
             for types in typeset_perm:
-                type_names = typeset_perm[types].get_type_names()
+                type_names = typeset_perm[types].get_stack_types()
+                if types != ",".join(type_names):
+                    print(f'{self.name}:\n\ttype_names: {type_names}\n\ttypes: {types}\n\tfunction types: {typeset_perm[types].function_types}\n\ttypeset: {typeset}')
+                    print(f'Defined types:\n\t{defined_types}')
                 if type_names not in defined_types:
                     # Our original permutation will already be in the defined types list
                     defined_types.append(type_names)
@@ -294,7 +295,7 @@ class Operator:
             
         lines.append(f"Result<> OP_Eval_{self.name}(RPNStack& stack, const Operator& op) {{")
 
-        perm_types = [perm.get_type_names() for _name, perm in self.permutations.items()]
+        perm_types = [perm.get_stack_types() for _name, perm in self.permutations.items()]
         perm_types.sort(key=lambda types: [Types[t] for t in types])
             
         if self.param_count == 0:

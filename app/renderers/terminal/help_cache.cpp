@@ -183,19 +183,26 @@ ftxui::Component render_help_command(const CommandMeta* cmd) {
 
     if (!cmd->aliases.empty()) {
         std::stringstream ss;
-        ss << " aliases: [";
+        if (cmd->aliases.size() == 1) {
+            ss << " alias: ";
+        }
+        else {
+            ss << " aliases: [";
+        }
 
         bool first = true;
         for (const char* sig : cmd->aliases) {
             if (first) {
-                ss << sig;
+                ss << "\\" << sig;
             }
             else {
-                ss << ", " << sig;
+                ss << ", \\" << sig;
             }
         }
 
-        ss << "]";
+        if (cmd->aliases.size() > 1) {
+            ss << "]";
+        }
 
         ftxui::Element cmd_aliases = ftxui::text(ss.str());
         if (gray_color) { cmd_aliases |= ftxui::color(gray_color.value()); }

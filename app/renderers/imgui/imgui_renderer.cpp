@@ -743,14 +743,19 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
     if (!cmd->aliases.empty()) {
         ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
         ImGui::SameLine();
-        ImGui::TextUnformatted("aliases: [");
+        if (cmd->aliases.size() == 1) {
+            ImGui::TextUnformatted("alias: ");
+        }
+        else {
+            ImGui::TextUnformatted("aliases: [");
+        }
 
         bool first = true;
         for (const char* sig : cmd->aliases) {
             ImGui::SameLine(0.0f, 0.0f);
 
             if (first) {
-                ImGui::TextUnformatted(sig);
+                ImGui::Text("\\%s", sig);
                 first = false;
             }
             else {
@@ -758,8 +763,10 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
             }
         }
 
-        ImGui::SameLine(0.0f, 0.0f);
-        ImGui::TextUnformatted("]");
+        if (cmd->aliases.size() > 1) {
+            ImGui::SameLine(0.0f, 0.0f);
+            ImGui::TextUnformatted("]");
+        }
         ImGui::PopStyleColor();
     }
 

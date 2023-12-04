@@ -23,7 +23,7 @@ struct Displayable {
     std::shared_ptr<Displayable> p_next = {};
     DisplayableTag tags = DisplayableTag::NONE;
 
-    virtual Type get_type() = 0;
+    virtual Type get_type() const = 0;
 
     struct Iterator {
         using iterator_category = std::forward_iterator_tag;
@@ -72,7 +72,7 @@ struct ConstCharDisplayable : public Displayable {
 
     const char* p_char;
 
-    virtual Type get_type() override { return Type::CONST_CHAR; }
+    virtual Type get_type() const override { return Type::CONST_CHAR; }
 };
 
 struct StringDisplayable : public Displayable {
@@ -80,7 +80,7 @@ struct StringDisplayable : public Displayable {
 
     std::string str;
 
-    virtual Type get_type() override { return Type::STRING; }
+    virtual Type get_type() const override { return Type::STRING; }
 };
 
 struct ValueDisplayable : public Displayable {
@@ -88,7 +88,7 @@ struct ValueDisplayable : public Displayable {
 
     Value value;
 
-    virtual Type get_type() override { return Type::VALUE; }
+    virtual Type get_type() const override { return Type::VALUE; }
 };
 
 struct RecursiveDisplayable : public Displayable {
@@ -96,7 +96,7 @@ struct RecursiveDisplayable : public Displayable {
 
     std::shared_ptr<Displayable> p_displayable;
 
-    virtual Type get_type() override { return Type::RECURSIVE; }
+    virtual Type get_type() const override { return Type::RECURSIVE; }
 };
 
 

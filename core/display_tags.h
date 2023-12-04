@@ -13,7 +13,9 @@ enum class DisplayableTag : uint8_t {
 
     COL_VEC = 4, // When multiplying Mat * Vec, represent as a column vector
 
-    OP_NEG = 8 // Turn -(-(5)) into 5
+    OP_NEG = 8, // Turn -(-(5)) into 5
+
+    ONE_LINE = 16 // Avoid newlines in the output string
 };
 
 }
