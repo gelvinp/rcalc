@@ -315,7 +315,7 @@ class Operator:
         else:
             param_string = "paramters" if self.param_count > 1 else "parameter"
             lines.extend([
-                f"\tstd::vector<Type> types = stack.peek_types_vec({self.param_count});",
+                f"\tCowVec<Type> types = stack.peek_types_vec({self.param_count});",
                 '',
                 '\tif (types.empty()) {',
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} {param_string}");',
@@ -329,7 +329,7 @@ class Operator:
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op does not recognize " + stack.display_types({self.param_count}));',
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
-                f"\tstd::vector<StackItem> values = stack.pop_items({self.param_count});",
+                f"\tCowVec<StackItem> values = stack.pop_items({self.param_count});",
                 "",
                 "\tswitch (index) {"
             ])

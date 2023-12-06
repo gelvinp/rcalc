@@ -24,7 +24,7 @@ public:
 
     virtual void add_stack_item(const StackItem& item) override;
     virtual void remove_stack_item() override;
-    virtual void replace_stack_items(const std::vector<StackItem>& items) override;
+    virtual void replace_stack_items(const CowVec<StackItem> items) override;
 
     static ftxui::Elements split_lines(std::string str);
     static ftxui::Elements split_paragraphs(std::string str);
@@ -75,6 +75,9 @@ private:
     std::optional<size_t> history_state = std::nullopt;
 
     AutocompleteManager autocomp;
+
+    std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;
+    void build_help_cache();
 };
 
 }

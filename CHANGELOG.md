@@ -9,20 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Byte unit family (Power of 2 and power of 10)
-- Undo command (reset stack to before previous action)
+- Byte unit family (Power of 2 and power of 10).
+- Undo command (reset stack to before previous action).
 
 ### Changed
 
-- Allow the hex operator to operate on vectors (useful for colors)
+- Allow the hex operator to operate on vectors (useful for colors).
 - Clarify the error message when given too few parameters, fix pluralization as well.
-- Unify the whitespace for help text sections
-- Reduce redundant negation (i.e. -(-(5)) becomes just 5)
-- Change floating point precision to 15 places (Likely to become adjustable soon)
+- Unify the whitespace for help text sections.
+- Reduce redundant negation (i.e. -(-(5)) becomes just 5).
+- Change floating point precision to 15 places (Likely to become adjustable soon).
 - Improve units autocomplete to only suggest the second unit from the same family as the first unit.
+- Improve units autocomplete to not suggest a second unit equal to the first unit.
 - Display all commands in one list, not separated by Application / Renderer scope.
 - Clear scratchpad on backspace during autocomplete in the terminal renderer
 - Lots of internal changes to support integration into a native iOS app.
+- Changed sort order of units within families in the help page to be more natural.
+- Optimized memory allocation.
 
 ### Fixed
 

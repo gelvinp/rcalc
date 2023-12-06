@@ -1,3 +1,5 @@
+// @RCalcUnit
+// SortOrder: 7
 UNIT_FAMILY(Mass, Real, Kilograms, kg);
 
 

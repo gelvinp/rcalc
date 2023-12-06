@@ -20,7 +20,7 @@ public:
 
     virtual void add_stack_item(const StackItem& item) override;
     virtual void remove_stack_item() override;
-    virtual void replace_stack_items(const std::vector<StackItem>& items) override;
+    virtual void replace_stack_items(const CowVec<StackItem> items) override;
 };
 
 }

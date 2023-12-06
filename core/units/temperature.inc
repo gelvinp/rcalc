@@ -1,3 +1,5 @@
+// @RCalcUnit
+// SortOrder: 2
 UNIT_FAMILY(Temperature, Real, Kelvin, k);
 
 

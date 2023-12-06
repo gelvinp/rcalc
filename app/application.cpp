@@ -62,10 +62,12 @@ void Application::run() {
 
 
 void Application::cleanup() {
-    stack.clear();
     p_renderer->cleanup();
-
     delete p_renderer;
+
+    stack.clear();
+    _stack_a.clear();
+    _stack_b.clear();
 }
 
 
@@ -75,7 +77,10 @@ void Application::on_renderer_submit_text(const std::string& str) {
     // If it starts with '\', it's a command
     if (str.starts_with('\\')) {
         if (try_application_command(str) || p_renderer->try_renderer_command(str)) {
-            p_renderer->replace_stack_items(stack.get_items());
+            if (!stack.same_ref(*p_stack_active)) {
+                // Copy on write happened, stack was mutated
+                p_renderer->replace_stack_items(stack.get_items());
+            }
             swap_stacks();
             return;
         }
@@ -155,9 +160,9 @@ bool Application::try_swizzle(const std::string& str) {
     if (str.length() > 5) { return false; }
 
     std::string pattern { str.data() + 1, str.length() - 1 };
-    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return (char)std::tolower(c); });
-    std::vector<Real> values;
-    std::vector<StackItem> source_value = stack.pop_items(1);
+    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return std::tolower(c); });
+    CowVec<Real> values;
+    CowVec<StackItem> source_value = stack.pop_items(1);
 
     // Swizzles can only operate on vectors
     switch (source_value[0].result.get_type()) {

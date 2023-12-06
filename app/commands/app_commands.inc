@@ -26,8 +26,8 @@ RCALC_CMD(Application, Pop, app) {
 // Requires: "app/application.h"
 // Requires: <algorithm>
 RCALC_CMD(Application, Swap, app) {
-    std::vector<StackItem> items = app.stack.pop_items(2);
-    std::swap(items[0], items[1]);
+    CowVec<StackItem> items = app.stack.pop_items(2);
+    std::swap(items.mut_at(0), items.mut_at(1));
     app.stack.push_items(std::move(items));
 }
 
@@ -44,9 +44,7 @@ RCALC_CMD(Application, Copy, app) {
 // Requires: "app/application.h"
 RCALC_CMD(Application, Dup, app) {
     if (app.stack.size() == 0) { return; }
-    
-    const StackItem& back = app.stack.get_items().back();
-    app.stack.push_item(StackItem(back));
+    app.stack.push_item(app.stack.get_items().back());
 }
 
 // @RCalcCommand

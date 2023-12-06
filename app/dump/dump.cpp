@@ -118,8 +118,8 @@ void RCalc::Dump::dump_info() {
                     example_outputs_formatted.push_back(item.result.to_string(item.p_input->tags));
                 }
 
-                std::vector<StackItem> _items = stack.pop_items(1);
-                StackItem& res = _items[0];
+                CowVec<StackItem> _items = stack.pop_items(1);
+                const StackItem& res = _items[0];
 
                 json example_params_formatted = json::array();
 

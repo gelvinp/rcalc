@@ -350,6 +350,7 @@ RCALC_FMT_0(e) {
 // Example: [3]
 // Example: [5]
 RCALC_OP_1_S(Range, Int, arg0) {
+    stack.reserve_items(stack.size() + arg0);
     for (Int index = 0; index < arg0; index++) {
         Value value = Value(index);
         stack.push_item(StackItem{

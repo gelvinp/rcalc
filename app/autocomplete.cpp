@@ -166,7 +166,7 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_previou
 
 // Operator Autocomplete
 
-void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const std::vector<Type>& stack_types) {
+void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const CowVec<Type> stack_types) {
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
@@ -177,11 +177,8 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
             if (op->param_count > stack_types.size()) { continue; }
 
             if (!stack_types.empty()) {
-                auto stack_range = std::ranges::subrange(stack_types.end() - op->param_count, stack_types.end());
-
-                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_range](const std::span<const Type>& op_types) {
-                    auto op_range = std::ranges::subrange(op_types.begin(), op_types.end());
-                    return std::ranges::equal(stack_range, op_range);
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_types, &op](const std::span<const Type>& op_types) {
+                    return std::equal(stack_types.end() - op->param_count, stack_types.end(), op_types.begin(), op_types.end());
                 });
 
                 if (it == op->allowed_types.end()) {
@@ -215,12 +212,12 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
-    std::vector<Type> stack_types = stack.peek_types_vec(stack.size());
+    CowVec<Type> stack_types = stack.peek_types_vec(stack.size());
 
     if (stack_types.empty()) { return; }
 
     std::optional<Type> type = std::nullopt;
-    std::optional<const UnitFamily*> matchingFamily = std::nullopt;
+    std::optional<Unit> firstUnit = std::nullopt;
 
     if (!stack_types.empty() && stack_types.back() != TYPE_UNIT) {
         type = stack_types.back();
@@ -232,15 +229,16 @@ void AutocompleteManager::UnitAutocomplete::init_suggestions(std::string_view st
             return;
         }
 
-        matchingFamily = stack.get_items()[stack.size() - 1].result.operator RCalc::Unit().p_family;
+        firstUnit = stack.get_items()[stack.size() - 1].result.operator RCalc::Unit();
     }
 
 
     for (const UnitFamily* family : UnitsMap::get_units_map().get_alphabetical()) {
         if (type && !is_type_castable(type.value(), family->base_type)) { continue; }
-        if (matchingFamily && matchingFamily.value() != family) { continue; }
+        if (firstUnit && firstUnit->p_family != family) { continue; }
         
         for (const Unit* unit : family->units) {
+            if (firstUnit && firstUnit->p_impl == unit->p_impl) { continue; }
             anycase_stringview usage(unit->p_usage);
             if (usage.starts_with(input)) {
                 suggestions.push_back(usage);

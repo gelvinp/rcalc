@@ -4,7 +4,6 @@
 #include "core/format.h"
 #include "app/help_text.h"
 #include "app/commands/commands.h"
-#include "app/operators/operators.h"
 #include "core/units/units.h"
 #include "terminal_renderer.h"
 #include "colors.h"
@@ -22,7 +21,7 @@ namespace RCalc::TerminalHelpCache {
 
 ftxui::Component render_help_section(const HelpText::HelpSection& section);
 ftxui::Component render_help_command(const CommandMeta* cmd);
-ftxui::Component render_help_operator(const Operator* op);
+ftxui::Component render_help_operator(CachedOperator& op);
 ftxui::Component render_help_unit_family(const UnitFamily* family);
 
 
@@ -47,7 +46,7 @@ To exit this help screen, press Escape.
 };
 
 
-ftxui::Component build_help_cache() {
+ftxui::Component build_help_cache(std::vector<CachedOperatorCategory>& cachedOperatorCategories) {
     if (SUPPORTS_PALETTE(Palette16)) {
         if (SUPPORTS_PALETTE(TrueColor)) {
             gray_color = ftxui::Color(COLORS_TRUE[COLOR_GRAY][0], COLORS_TRUE[COLOR_GRAY][1], COLORS_TRUE[COLOR_GRAY][2]);
@@ -111,23 +110,21 @@ ftxui::Component build_help_cache() {
         });
     }));
 
-    OperatorMap& op_map = OperatorMap::get_operator_map();
-
-    for (const OperatorCategory* category : op_map.get_alphabetical()) {
+    for (CachedOperatorCategory& category : cachedOperatorCategories) {
         v_lines->Add(ftxui::Renderer([]{
             return ftxui::separatorEmpty();
         }));
 
-        if (category->category_name) {
+        if (category.category_name) {
             v_lines->Add(ftxui::Renderer([category]{
                 return ftxui::vbox({
-                    ftxui::paragraph(fmt("%s Operators", category->category_name)),
+                    ftxui::paragraph(fmt("%s Operators", category.category_name)),
                     ftxui::separatorLight()
                 });
             }));
         }
 
-        for (const Operator* op : category->category_ops) {
+        for (CachedOperator& op : category.category_ops) {
             v_lines->Add(render_help_operator(op));
         }
     }
@@ -217,22 +214,22 @@ ftxui::Component render_help_command(const CommandMeta* cmd) {
     return ftxui::Renderer([lines = std::move(lines)]{ return ftxui::vbox(lines); });
 }
 
-ftxui::Component render_help_operator(const Operator* op) {
+ftxui::Component render_help_operator(CachedOperator& op) {
     ftxui::Component v_lines = ftxui::Container::Vertical({});
     
-    ftxui::Element op_name = ftxui::text(op->name);
+    ftxui::Element op_name = ftxui::text(op.op.name);
     if (green_color) { op_name |= ftxui::color(green_color.value()); }
 
     v_lines->Add(ftxui::Renderer([op, op_name = std::move(op_name)]{
         return ftxui::vbox({
             op_name,
-            ftxui::paragraph(op->description)
+            ftxui::paragraph(op.op.description)
         });
     }));
 
-    if (op->param_count != 0) {
+    if (op.op.param_count != 0) {
         ftxui::Elements allowed_types;
-        for (const std::span<const Type>& set : op->allowed_types) {
+        for (const std::span<const Type>& set : op.op.allowed_types) {
             std::stringstream ss;
             ss << "   ";
             
@@ -260,7 +257,7 @@ ftxui::Component render_help_operator(const Operator* op) {
             }
         );
 
-        if (op->allowed_types.size() == 1) {
+        if (op.op.allowed_types.size() == 1) {
             v_lines->Add(ftxui::Collapsible(
                 "Accepts 1 argument",
                 allowed_renderer
@@ -268,106 +265,17 @@ ftxui::Component render_help_operator(const Operator* op) {
         }
         else {
             v_lines->Add(ftxui::Collapsible(
-                fmt("Accepts %lld arguments", (unsigned long long)op->param_count),
+                fmt("Accepts %lld arguments", (unsigned long long)op.op.param_count),
                 allowed_renderer
             ));
         }
     }
 
-    if (!op->examples.empty()) {
-        ftxui::Elements examples;
-        RPNStack example_stack;
-
-        for (const std::span<const char * const>& example_params : op->examples) {
-            example_stack.clear();
-
-            if (!examples.empty()) {
-                examples.push_back(ftxui::separatorEmpty());
-            }
-
-            for (const char* param : example_params) {
-                Value value = Value::parse(param).value();
-                example_stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
-            }
-
-            std::string filtered_op_name = filter_name(op->name);
-            Result<> err = OperatorMap::get_operator_map().evaluate(filtered_op_name, example_stack);
-
-            if (!err) {
-                Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());
-                continue;
-            }
-
-            bool first = true;
-            std::stringstream ss;
-
-            for (const StackItem& item : example_stack.get_items()) {
-                if (first) {
-                    first = false;
-                }
-                else {
-                    ss << ", ";
-                }
-
-                ss << item.result.to_string();
-            }
-
-            std::vector<StackItem> _items = example_stack.pop_items(1);
-            StackItem& res = _items[0];
-
-            ftxui::Elements chunks { ftxui::text("   ") };
-
-            for (Displayable& disp : *res.p_input) {
-                std::string str;
-
-                switch (disp.get_type()) {
-                    case Displayable::Type::CONST_CHAR: {
-                        str = reinterpret_cast<ConstCharDisplayable&>(disp).p_char;
-                        break;
-                    }
-                    case Displayable::Type::STRING: {
-                        str = reinterpret_cast<StringDisplayable&>(disp).str;
-                        break;
-                    }
-                    case Displayable::Type::VALUE: {
-                        str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
-                        break;
-                    }
-                    case Displayable::Type::RECURSIVE:
-                        UNREACHABLE(); // Handled by the iterator
-                }
-
-                if (std::find(str.begin(), str.end(), '\n') == str.end()) {
-                    chunks.push_back(ftxui::text(str));
-                }
-                else {
-                    // FTXUI ignores newlines in strings (even in paragraph blocks)
-                    chunks.push_back(ftxui::vbox(TerminalRenderer::split_lines(str)));
-                }
-            }
-
-            chunks.push_back(ftxui::separatorEmpty());
-            chunks.push_back(ftxui::text("->"));
-            chunks.push_back(ftxui::separatorEmpty());
-
-            std::string output_str = ss.str();
-            if (std::find(output_str.begin(), output_str.end(), '\n') == output_str.end()) {
-                chunks.push_back(ftxui::vbox({ ftxui::filler(), ftxui::text(output_str) }));
-            }
-            else {
-                // FTXUI ignores newlines in strings (even in paragraph blocks)
-                chunks.push_back(ftxui::vbox(TerminalRenderer::split_lines(output_str)));
-            }
-
-            auto flexconf = ftxui::FlexboxConfig()
-                .Set(ftxui::FlexboxConfig::AlignItems::Center);
-            
-            examples.push_back(ftxui::flexbox(chunks, flexconf));
-        }
-
+    if (!op.op.examples.empty()) {
         ftxui::Component examples_comp =
-            ftxui::Renderer([examples = std::move(examples)]{
-                return ftxui::vbox(examples);
+            ftxui::Renderer([&op]{
+                if (!op.cached_examples.has_value()) { op.build(); }
+                return ftxui::vbox(op.cached_examples.value());
             }
         );
 
@@ -433,5 +341,107 @@ ftxui::Component render_help_unit_family(const UnitFamily* family) {
     return v_lines;
 }
 
+
+void CachedOperator::build() {
+    ftxui::Elements examples;
+    RPNStack example_stack;
+
+    for (const std::span<const char * const>& example_params : op.examples) {
+        example_stack.clear();
+
+        if (!examples.empty()) {
+            examples.push_back(ftxui::separatorEmpty());
+        }
+
+        for (const char* param : example_params) {
+            Value value = Value::parse(param).value();
+            example_stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        }
+
+        std::string op_name = filter_name(op.name);
+        Result<> err = OperatorMap::get_operator_map().evaluate(op_name, example_stack);
+
+        if (!err) {
+            Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());
+            continue;
+        }
+
+        bool first = true;
+        std::stringstream ss;
+
+        for (const StackItem& item : example_stack.get_items()) {
+            if (first) {
+                first = false;
+            }
+            else {
+                ss << ", ";
+            }
+
+            ss << item.result.to_string();
+        }
+
+        CowVec<StackItem> _items = example_stack.pop_items(1);
+        const StackItem& res = _items[0];
+
+        ftxui::Elements chunks { ftxui::text("   ") };
+
+        for (Displayable& disp : *res.p_input) {
+            std::string str;
+
+            switch (disp.get_type()) {
+                case Displayable::Type::CONST_CHAR: {
+                    str = reinterpret_cast<ConstCharDisplayable&>(disp).p_char;
+                    break;
+                }
+                case Displayable::Type::STRING: {
+                    str = reinterpret_cast<StringDisplayable&>(disp).str;
+                    break;
+                }
+                case Displayable::Type::VALUE: {
+                    str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
+                    break;
+                }
+                case Displayable::Type::RECURSIVE:
+                    UNREACHABLE(); // Handled by the iterator
+            }
+
+            if (std::find(str.begin(), str.end(), '\n') == str.end()) {
+                chunks.push_back(ftxui::text(str));
+            }
+            else {
+                // FTXUI ignores newlines in strings (even in paragraph blocks)
+                chunks.push_back(ftxui::vbox(TerminalRenderer::split_lines(str)));
+            }
+        }
+
+        chunks.push_back(ftxui::separatorEmpty());
+        chunks.push_back(ftxui::text("->"));
+        chunks.push_back(ftxui::separatorEmpty());
+
+        std::string output_str = ss.str();
+        if (std::find(output_str.begin(), output_str.end(), '\n') == output_str.end()) {
+            chunks.push_back(ftxui::vbox({ ftxui::filler(), ftxui::text(output_str) }));
+        }
+        else {
+            // FTXUI ignores newlines in strings (even in paragraph blocks)
+            chunks.push_back(ftxui::vbox(TerminalRenderer::split_lines(output_str)));
+        }
+
+        auto flexconf = ftxui::FlexboxConfig()
+            .Set(ftxui::FlexboxConfig::AlignItems::Center);
+        
+        examples.push_back(ftxui::flexbox(chunks, flexconf));
+    }
+
+    cached_examples = examples;
+}
+
+CachedOperatorCategory::CachedOperatorCategory(const OperatorCategory& category)
+    : category_name(category.category_name)
+{
+    for (const Operator* op : category.category_ops) {
+        category_ops.emplace_back(*op);
+    }
+}
 
 }

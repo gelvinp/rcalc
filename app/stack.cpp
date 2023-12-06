@@ -6,15 +6,19 @@
 
 namespace RCalc {
 
-void RPNStack::push_item(StackItem&& item) {
-    stack.emplace_back(std::move(item));
+void RPNStack::push_item(StackItem item) {
+    stack.push_back(item);
 }
 
 
-void RPNStack::push_items(std::vector<StackItem>&& items) {
+void RPNStack::push_items(CowVec<StackItem> items) {
     for (auto it = items.begin(); it < items.end(); ++it) {
-        stack.push_back(std::move(*it));
+        stack.push_back(*it);
     }
+}
+
+void RPNStack::reserve_items(size_t count) {
+    stack.reserve(count);
 }
 
 
@@ -34,10 +38,11 @@ std::string RPNStack::peek_types(uint64_t count) const {
 }
 
 
-std::vector<Type> RPNStack::peek_types_vec(uint64_t count) const {
+CowVec<Type> RPNStack::peek_types_vec(uint64_t count) const {
     if (stack.size() < count) { return {}; }
 
-    std::vector<Type> types;
+    CowVec<Type> types;
+    types.reserve(count);
     for (uint64_t idx = count; idx > 0; --idx) {
         types.push_back(stack[stack.size() - idx].result.get_type());
     }
@@ -70,10 +75,11 @@ std::string RPNStack::display_types(uint64_t count) const {
 size_t RPNStack::size() const { return stack.size(); }
 
 
-std::vector<StackItem> RPNStack::pop_items(uint64_t count) {
+CowVec<StackItem> RPNStack::pop_items(uint64_t count) {
     uint64_t safe_count = std::min((size_t)count, stack.size());
 
-    std::vector<StackItem> items;
+    CowVec<StackItem> items;
+    items.reserve(count);
     for (uint64_t idx = safe_count; idx > 0; --idx) {
         items.push_back(std::move(stack[stack.size() - idx]));
     }
@@ -88,7 +94,7 @@ void RPNStack::clear() {
 }
 
 
-const std::vector<StackItem>& RPNStack::get_items() const { return stack; }
+const CowVec<StackItem> RPNStack::get_items() const { return stack; }
 
 std::shared_ptr<Displayable> StackItem::get_input_formatted() const {
     if (input_is_expression) {

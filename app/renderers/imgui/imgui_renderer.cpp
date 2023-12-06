@@ -829,6 +829,8 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
     
     if (!op.op.examples.empty()) {
         if (ImGui::TreeNode(op.id.c_str(), "Examples")) {
+            if (op.examples.empty()) { op.build(); }
+
             for (ImGuiDisplayEntry& example : op.examples) {
                 if (!example.valid) { example.calculate_size(-1, false, false); }
                 
@@ -912,10 +914,9 @@ void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
 
 void ImGuiRenderer::build_help_cache() {
     help_op_cache.clear();
-    RPNStack example_stack;
 
     for (const OperatorCategory* category : OperatorMap::get_operator_map().get_alphabetical()) {
-        help_op_cache.emplace_back(*category, example_stack);
+        help_op_cache.emplace_back(*category);
     }
 }
 
@@ -930,7 +931,7 @@ void ImGuiRenderer::remove_stack_item() {
 }
 
 
-void ImGuiRenderer::replace_stack_items(const std::vector<StackItem>& items) {
+void ImGuiRenderer::replace_stack_items(const CowVec<StackItem> items) {
     display_stack.entries.clear();
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
 }

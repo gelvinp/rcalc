@@ -7,10 +7,13 @@
 
 namespace RCalc::ImGuiHelpCache {
 
-CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
-    : op(op)
-{
+
+CachedOperator::CachedOperator(const Operator& op) : op(op) {
     id = fmt("#op_examples_%s", op.name);
+}
+
+void CachedOperator::build() {
+    RPNStack stack;
 
     OperatorMap& op_map = OperatorMap::get_operator_map();
 
@@ -44,8 +47,8 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
             ss << item.result.to_string();
         }
 
-        std::vector<StackItem> _items = stack.pop_items(1);
-        StackItem& res = _items[0];
+        CowVec<StackItem> _items = stack.pop_items(1);
+        const StackItem& res = _items[0];
 
         ImGuiDisplayEntry entry { res };
         entry.output.str = ss.str();
@@ -55,11 +58,11 @@ CachedOperator::CachedOperator(const Operator& op, RPNStack& stack)
 }
 
 
-CachedOperatorCategory::CachedOperatorCategory(const OperatorCategory& category, RPNStack& stack)
+CachedOperatorCategory::CachedOperatorCategory(const OperatorCategory& category)
     : category_name(category.category_name)
 {
     for (const Operator* op : category.category_ops) {
-        category_ops.emplace_back(*op, stack);
+        category_ops.emplace_back(*op);
     }
 }
 

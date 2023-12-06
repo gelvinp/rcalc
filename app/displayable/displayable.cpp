@@ -1,6 +1,9 @@
 #include "displayable.h"
 
+#include "core/memory/allocator.h"
+
 #include <sstream>
+#include <set>
 
 namespace RCalc {
 
@@ -65,19 +68,23 @@ Displayable& Displayable::back() {
 
 
 std::shared_ptr<Displayable> Displayable::create(const char* p_char) {
-    return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new ConstCharDisplayable(p_char)));
+    return Allocator::make_shared<ConstCharDisplayable>(p_char);
+    // return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new ConstCharDisplayable(p_char)));
 }
 
 std::shared_ptr<Displayable> Displayable::create(std::string str) {
-    return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new StringDisplayable(str)));
+    return Allocator::make_shared<StringDisplayable>(str);
+    // return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new StringDisplayable(str)));
 }
 
 std::shared_ptr<Displayable> Displayable::create(Value value) {
-    return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new ValueDisplayable(value)));
+    return Allocator::make_shared<ValueDisplayable>(value);
+    // return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new ValueDisplayable(value)));
 }
 
 std::shared_ptr<Displayable> Displayable::create(std::shared_ptr<Displayable> p_displayable) {
-    return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new RecursiveDisplayable(p_displayable)));
+    return Allocator::make_shared<RecursiveDisplayable>(p_displayable);
+    // return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new RecursiveDisplayable(p_displayable)));
 }
 
 

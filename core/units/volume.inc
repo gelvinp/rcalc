@@ -1,3 +1,5 @@
+// @RCalcUnit
+// SortOrder: 10
 UNIT_FAMILY(Volume, Real, Cubic Meters, m3);
 
 
@@ -57,22 +59,6 @@ UNIT_TO_BASE(Volume, Real, US Liquid Gallons, gal) {
     return Ok(value / 264.172);
 }
 
-UNIT_FROM_BASE(Volume, Real, Cubic Centimeters, cm3) {
-    return Ok(value * 1000000);
-}
-
-UNIT_TO_BASE(Volume, Real, Cubic Centimeters, cm3) {
-    return Ok(value * 0.000001);
-}
-
-UNIT_FROM_BASE(Volume, Real, Cubic Kilometers, km3) {
-    return Ok(value * 0.000000001);
-}
-
-UNIT_TO_BASE(Volume, Real, Cubic Kilometers, km3) {
-    return Ok(value * 1000000000);
-}
-
 UNIT_FROM_BASE(Volume, Real, Milliliters, ml) {
     return Ok(value * 1000000);
 }
@@ -87,4 +73,20 @@ UNIT_FROM_BASE(Volume, Real, Liters, l) {
 
 UNIT_TO_BASE(Volume, Real, Liters, l) {
     return Ok(value * 0.001);
+}
+
+UNIT_FROM_BASE(Volume, Real, Cubic Centimeters, cm3) {
+    return Ok(value * 1000000);
+}
+
+UNIT_TO_BASE(Volume, Real, Cubic Centimeters, cm3) {
+    return Ok(value * 0.000001);
+}
+
+UNIT_FROM_BASE(Volume, Real, Cubic Kilometers, km3) {
+    return Ok(value * 0.000000001);
+}
+
+UNIT_TO_BASE(Volume, Real, Cubic Kilometers, km3) {
+    return Ok(value * 1000000000);
 }
