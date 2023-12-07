@@ -18,6 +18,6 @@ bool RendererTemplate::try_renderer_command(const std::string& str) { return fal
 
 void RendererTemplate::add_stack_item(const StackItem& item) {}
 void RendererTemplate::remove_stack_item() {}
-void RendererTemplate::replace_stack_items(const CowVec<StackItem> items) {}
+void RendererTemplate::replace_stack_items(const CowVec<StackItem>& items) {}
 
 }

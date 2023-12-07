@@ -94,7 +94,7 @@ void RPNStack::clear() {
 }
 
 
-const CowVec<StackItem> RPNStack::get_items() const { return stack; }
+const CowVec<StackItem>& RPNStack::get_items() const { return stack; }
 
 std::shared_ptr<Displayable> StackItem::get_input_formatted() const {
     if (input_is_expression) {

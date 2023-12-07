@@ -37,7 +37,7 @@ public:
 
     CowVec<StackItem> pop_items(uint64_t count);
 
-    const CowVec<StackItem> get_items() const;
+    const CowVec<StackItem>& get_items() const;
 
     template<typename T, typename... Args>
     void set_message(Args&&... args) {
