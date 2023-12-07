@@ -19,6 +19,7 @@ class Capture:
         self.op_name = None
         self.op_description = None
         self.op_category = None
+        self.op_is_expression = True
 
         self.call_types = []
         self.call_tags = []
@@ -83,9 +84,6 @@ class Permutation:
         arg_names = [f'arg{type.arg_number}' for type in self.types]
         if self.stack_ref:
             arg_names.insert(0, "stack")
-
-        if 'no_expr' in tags:
-            lines.append('\t\t\texpression = false;')
         
         lines.extend([
             f"\t\t\tres = OP{len(self.types)}{'S' if self.stack_ref else ''}_{'_'.join(self.function_types)}_{name}({', '.join(arg_names)});",
@@ -102,7 +100,7 @@ class Call:
         self.stack_ref = capture.call_stack_ref
     
 
-    def get_permutations(self, manually_defined: list[str]):
+    def get_permutations(self, manually_defined: list[str], phase: int = 1):
         defined = manually_defined.copy()
         permutations = {}
 
@@ -123,12 +121,18 @@ class Call:
         perm = Permutation(perm_types, self.types, perm_call_args, self.stack_ref)
         permutations[",".join(self.types)] = perm
 
+        if phase <= 1:
+            return permutations
+
         # Check for reverse
         if 'reversable' in self.tags:
             reversed_types = [self.types[1], self.types[0]]
             if not reversed_types in defined:
                 defined.append(reversed_types)
                 permutations[",".join(reversed_types)] = perm.reverse()
+
+        if phase <= 2:
+            return permutations
         
         # Check for BigInt cast
         if 'bigint_cast' in self.tags:
@@ -165,12 +169,18 @@ class Call:
                     defined.append(bigint_perm_type_clean)
                     permutations[",".join(bigint_perm_type_clean)] = perm
 
+                if phase <= 3:
+                    continue
+
                 # Check for reverse
                 if 'reversable' in self.tags:
                     reversed_types = [bigint_perm_type_clean[1], bigint_perm_type_clean[0]]
                     if not reversed_types in defined:
                         defined.append(reversed_types)
                         permutations[",".join(reversed_types)] = perm.reverse()
+
+        if phase <= 4:
+            return permutations
         
         # Check for Real cast
         if 'real_cast' in self.tags:
@@ -207,6 +217,9 @@ class Call:
                     defined.append(real_perm_type_clean)
                     permutations[",".join(real_perm_type_clean)] = perm
 
+                if phase <= 5:
+                    continue
+
                 # Check for reverse
                 if 'reversable' in self.tags:
                     reversed_types = [real_perm_type_clean[1], real_perm_type_clean[0]]
@@ -231,6 +244,7 @@ class Operator:
         self.calls = { ",".join(capture.call_types): Call(capture) }
         self.types = [capture.call_types]
         self.examples = capture.call_examples
+        self.is_expression = capture.op_is_expression
 
         self.format_found = False
         self.format_stack_ref = False
@@ -251,6 +265,7 @@ class Operator:
         self.types.append(capture.call_types)
         self.examples.extend(capture.call_examples)
         self.filenames.append(capture.filename)
+        self.is_expression = self.is_expression & capture.op_is_expression
 
         if self.description is None:
             self.description = capture.op_description
@@ -264,19 +279,21 @@ class Operator:
     def generate_permutations(self):
         self.types.sort(key=lambda types: [Types[t] for t in types])
         self.permutations = {}
-        defined_types = self.types.copy()
 
-        for typeset in self.types:
-            typeset_perm = self.calls[",".join(typeset)].get_permutations(defined_types)
-            for types in typeset_perm:
-                type_names = typeset_perm[types].get_stack_types()
-                if types != ",".join(type_names):
-                    print(f'{self.name}:\n\ttype_names: {type_names}\n\ttypes: {types}\n\tfunction types: {typeset_perm[types].function_types}\n\ttypeset: {typeset}')
-                    print(f'Defined types:\n\t{defined_types}')
-                if type_names not in defined_types:
-                    # Our original permutation will already be in the defined types list
-                    defined_types.append(type_names)
-            self.permutations.update(typeset_perm)
+        for phase in [1, 2, 3, 4, 5, 6]:
+            defined_types = self.types.copy()
+
+            for typeset in self.types:
+                typeset_perm = self.calls[",".join(typeset)].get_permutations(defined_types, phase)
+                for types in typeset_perm:
+                    type_names = typeset_perm[types].get_stack_types()
+                    if types != ",".join(type_names):
+                        print(f'{self.name}:\n\ttype_names: {type_names}\n\ttypes: {types}\n\tfunction types: {typeset_perm[types].function_types}\n\ttypeset: {typeset}')
+                        print(f'Defined types:\n\t{defined_types}')
+                    if type_names not in defined_types:
+                        # Our original permutation will already be in the defined types list
+                        defined_types.append(type_names)
+                self.permutations.update(typeset_perm)
     
 
     def build(self):
@@ -311,11 +328,6 @@ class Operator:
             else:
                 lines.append(f"\tResult<Value> res = OP0_{self.name}();")
             
-            if 'no_expr' in call.tags:
-                lines.append("\tbool expression = false;")
-            else:
-                lines.append("\tbool expression = true;")
-            
             lines.append("")
         else:
             param_string = "paramters" if self.param_count > 1 else "parameter"
@@ -326,7 +338,6 @@ class Operator:
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} {param_string}");',
                 '\t}',
                 '',
-                "\tbool expression = true;",
                 "\tResult<Value> res = Ok(Value());",
                 "",
                 "\tauto it = std::find(op.allowed_types.begin(), op.allowed_types.end(), types);",
@@ -381,7 +392,7 @@ class Operator:
             '\tstack.push_item(StackItem {',
             '\t\tformat,',
             "\t\tstd::move(value),",
-            "\t\texpression",
+            f"\t\t{'true' if self.is_expression else 'false'}",
             "\t});",
             '',
             '\tif (stack_mutated_in_op) {',
@@ -706,7 +717,9 @@ class OperatorMapBuilder:
 
         for tag in tags:
             # Ensure the given tag is recognized
-            if tag in Tags:
+            if tag == 'no_expr':
+                self.current_capture.op_is_expression = False
+            elif tag in Tags:
                 self.current_capture.call_tags.append(tag)
             else:
                 self._set_error(f"Tag `{tag}` is unknown!")

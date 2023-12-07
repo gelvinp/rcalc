@@ -303,6 +303,7 @@ RCALC_FMT_1(Inv, arg0) {
 // Description: Flips a matrix over its diagonal
 // Category: Matrix
 // Requires: <glm/mat2x2.hpp>
+// Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}]
 RCALC_OP_1(TPose, Mat2, arg0) {
     return Ok(Value(glm::transpose(arg0)));
@@ -329,6 +330,7 @@ RCALC_FMT_1(TPose, arg0) {
 // Description: Calculates the determinant matrix of arg0
 // Category: Matrix
 // Requires: <glm/mat2x2.hpp>
+// Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}]
 RCALC_OP_1(Det, Mat2, arg0) {
     return Ok(Value(glm::determinant(arg0)));
@@ -356,6 +358,7 @@ RCALC_FMT_1(Det, arg0) {
 // Category: Matrix
 // Requires: <glm/mat2x2.hpp>
 // Requires: "core/format.h"
+// Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Col, Mat2, Int, arg0, arg1) {
     if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat2", arg1)); }
@@ -388,6 +391,7 @@ RCALC_FMT_2(Col, arg0, arg1) {
 // Category: Matrix
 // Requires: <glm/mat2x2.hpp>
 // Requires: "core/format.h"
+// Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Row, Mat2, Int, arg0, arg1) {
     if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat2", arg1)); }

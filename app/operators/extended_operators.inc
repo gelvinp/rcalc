@@ -99,7 +99,7 @@ RCALC_FMT_1(Cube, arg0) {
 // @RCalcOperator
 // Description: Takes the square root of arg0.
 // Requires: <cmath>
-// Tags: [real_cast]
+// Tags: [no_expr, real_cast]
 // Example: [35]
 RCALC_OP_1(Sqrt, Real, arg0) {
     Real value = std::sqrt(arg0);
@@ -119,7 +119,7 @@ RCALC_FMT_1(Sqrt, arg0) {
 // @RCalcOperator
 // Description: Takes the cube root of arg0.
 // Requires: <cmath>
-// Tags: [real_cast]
+// Tags: [no_expr, real_cast]
 // Example: [85]
 RCALC_OP_1(Cbrt, Real, arg0) {
     Real value = std::cbrt(arg0);
