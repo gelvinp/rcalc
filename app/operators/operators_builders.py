@@ -797,6 +797,10 @@ class OperatorMapBuilder:
             else:
                 self._set_error(f'Operator declaration {declaration} is invalid!\n\tType {type} is invalid!')
                 return
+        
+        if self.current_capture.call_stack_ref:
+            if 'stack' in args[param_count+1:]:
+                self._set_error(f"Operator declaration {declaration} is invalid!\n\tParameter name 'stack' is reserved because declaration is also stack ref!")
     
     def _finish_call(self):
         if self.current_capture.op_name in self.operators:
@@ -856,6 +860,10 @@ class OperatorMapBuilder:
 
         self.operators[op_name].format_found = True
         self.operators[op_name].format_stack_ref = stack_ref
+        
+        if stack_ref:
+            if 'stack' in args[1:]:
+                self._set_error(f"Operator format declaration {declaration} is invalid!\n\tParameter name 'stack' is reserved because declaration is also stack ref!")
     
 
     def _finalize_operators(self):
