@@ -42,6 +42,8 @@ public:
     operator Mat4() const;
     operator Unit() const;
 
+    bool operator==(const Value& other) const;
+
     Value(Int value, Representation repr = REPR_NONE);
     Value(BigInt value, Representation repr = REPR_NONE);
     Value(Real value, Representation repr = REPR_NONE);

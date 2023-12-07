@@ -812,4 +812,47 @@ void Value::unref() {
 #undef POOL_UNREF
 
 #pragma endregion refcounted
+
+#pragma region equality
+
+bool Value::operator==(const Value& other) const {
+    if (type != other.type) { return false; }
+
+    switch (type) {
+        case TYPE_INT:
+            return data == other.data;
+        
+        case TYPE_BIGINT:
+            return operator RCalc::BigInt() == other.operator RCalc::BigInt();
+        
+        case TYPE_REAL:
+            return operator RCalc::Real() == other.operator RCalc::Real();
+        
+        case TYPE_VEC2:
+            return operator RCalc::Vec2() == other.operator RCalc::Vec2();
+        
+        case TYPE_VEC3:
+            return operator RCalc::Vec3() == other.operator RCalc::Vec3();
+        
+        case TYPE_VEC4:
+            return operator RCalc::Vec4() == other.operator RCalc::Vec4();
+        
+        case TYPE_MAT2:
+            return operator RCalc::Mat2() == other.operator RCalc::Mat2();
+        
+        case TYPE_MAT3:
+            return operator RCalc::Mat3() == other.operator RCalc::Mat3();
+        
+        case TYPE_MAT4:
+            return operator RCalc::Mat4() == other.operator RCalc::Mat4();
+        
+        case TYPE_UNIT:
+            return operator RCalc::Unit().p_impl == other.operator RCalc::Unit().p_impl;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+#pragma endregion equality
 }
