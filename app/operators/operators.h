@@ -18,7 +18,7 @@ struct Operator {
     uint64_t param_count;
     const std::span<const std::span<const Type>> allowed_types;
     const std::span<const std::span<const char * const>> examples;
-    Result<>(*evaluate)(RPNStack&, const Operator&);
+    Result<std::optional<size_t>>(*evaluate)(RPNStack&, const Operator&);
 
     const std::vector<StackItem>& get_examples();
 };
@@ -32,7 +32,7 @@ class OperatorMap {
 public:
     static OperatorMap& get_operator_map();
     bool has_operator(const std::string& str);
-    Result<> evaluate(const std::string& str, RPNStack& stack);
+    Result<std::optional<size_t>> evaluate(const std::string& str, RPNStack& stack);
     const std::span<OperatorCategory const * const> get_alphabetical() const;
 
     static size_t stat_manual_impl_count;

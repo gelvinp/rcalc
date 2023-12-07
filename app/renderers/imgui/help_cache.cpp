@@ -26,7 +26,7 @@ void CachedOperator::build() {
         }
 
         std::string op_name = filter_name(op.name);
-        Result<> err = op_map.evaluate(op_name, stack);
+        Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
 
         if (!err) {
             Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());

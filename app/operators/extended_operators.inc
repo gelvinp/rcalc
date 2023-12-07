@@ -367,6 +367,5 @@ RCALC_OP_1_S(Range, Int, arg0) {
 RCALC_FMT_1_S(Range, arg0) {
     UNUSED(arg0);
     std::string str = stack.get_message<std::string>();
-    stack.clear_message();
     return create_displayables_from(str);
 }

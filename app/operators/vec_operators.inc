@@ -327,7 +327,6 @@ RCALC_FMT_2_S(Concat, arg0, arg1) {
     UNUSED(arg1);
 
     std::string str = stack.get_message<std::string>();
-    stack.clear_message();
     return create_displayables_from(str);
 }
 

@@ -922,16 +922,19 @@ void ImGuiRenderer::build_help_cache() {
 
 
 void ImGuiRenderer::add_stack_item(const StackItem& item) {
+    Logger::log("add");
     display_stack.entries.emplace_back(item);
 }
 
 
 void ImGuiRenderer::remove_stack_item() {
+    Logger::log("remove");
     display_stack.entries.pop_back();
 }
 
 
 void ImGuiRenderer::replace_stack_items(const CowVec<StackItem> items) {
+    Logger::log("replace");
     display_stack.entries.clear();
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
 }

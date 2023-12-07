@@ -359,7 +359,7 @@ void CachedOperator::build() {
         }
 
         std::string op_name = filter_name(op.name);
-        Result<> err = OperatorMap::get_operator_map().evaluate(op_name, example_stack);
+        Result<std::optional<size_t>> err = OperatorMap::get_operator_map().evaluate(op_name, example_stack);
 
         if (!err) {
             Logger::log_err("Cannot display example: %s", err.unwrap_err().get_message().c_str());

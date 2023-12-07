@@ -59,8 +59,8 @@ public:
         message.emplace<T>(il, args...);
     }
 
-    template<typename T, typename U = T&>
-    U get_message() {
+    template<typename T, typename U = T&&>
+    T get_message() {
         #ifndef NDEBUG
         if (!message.has_value()) {
             throw std::logic_error("Cannot get message on RPNStack without setting one first!");
@@ -70,16 +70,9 @@ public:
         }
         #endif
         // Dereference address into ref to avoid creating copies
-        return *std::any_cast<T>(&message);
-    }
-
-    void clear_message() {
-        #ifndef NDEBUG
-        if (!message.has_value()) {
-            throw std::logic_error("Cannot clear message on RPNStack without setting one first!");
-        }
-        #endif
+        T ret = std::any_cast<T>(std::move(message));
         message.reset();
+        return ret;
     }
 
 private:

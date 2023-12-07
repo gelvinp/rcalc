@@ -293,14 +293,19 @@ class Operator:
         if included:
             lines.append('')
             
-        lines.append(f"Result<> OP_Eval_{self.name}(RPNStack& stack, const Operator& op) {{")
+        lines.append(f"Result<std::optional<size_t>> OP_Eval_{self.name}(RPNStack& stack, const Operator& op) {{")
 
         perm_types = [perm.get_stack_types() for _name, perm in self.permutations.items()]
         perm_types.sort(key=lambda types: [Types[t] for t in types])
             
         if self.param_count == 0:
             call = self.calls['']
-            lines.append("UNUSED(op);")
+            lines.extend([
+                "\tUNUSED(op);",
+                '\tRPNStack stack_post_pop = stack;',
+                ''
+            ])
+
             if call.stack_ref:
                 lines.append(f"\tResult<Value> res = OP0S_{self.name}(stack);")
             else:
@@ -330,6 +335,7 @@ class Operator:
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
                 f"\tCowVec<StackItem> values = stack.pop_items({self.param_count});",
+                '\tRPNStack stack_post_pop = stack;',
                 "",
                 "\tswitch (index) {"
             ])
@@ -361,22 +367,28 @@ class Operator:
             '\t\treturn res.unwrap_err();',
             '\t}',
             '',
-            '\tValue value = res.unwrap_move(std::move(res));',
-            '',
-            '\tstack.push_item(StackItem {'
+            '\tValue value = res.unwrap_move(std::move(res));'
         ])
     
         if self.format_stack_ref:
-            lines.append(f"\t\tOPS_FormatInput_{self.name}(stack, {', '.join([f'values[{idx}]' for idx in range(self.param_count)])}),")
+            lines.append(f"\tstd::shared_ptr<Displayable> format = OPS_FormatInput_{self.name}(stack, {', '.join([f'values[{idx}]' for idx in range(self.param_count)])});")
         else:
-            lines.append(f"\t\tOP_FormatInput_{self.name}({', '.join([f'values[{idx}]' for idx in range(self.param_count)])}),")
+            lines.append(f"\tstd::shared_ptr<Displayable> format = OP_FormatInput_{self.name}({', '.join([f'values[{idx}]' for idx in range(self.param_count)])});")
         
         lines.extend([
+            '\tbool stack_mutated_in_op = !stack_post_pop.same_ref(stack);',
+            '',
+            '\tstack.push_item(StackItem {',
+            '\t\tformat,',
             "\t\tstd::move(value),",
             "\t\texpression",
             "\t});",
             '',
-            "\treturn Ok();",
+            '\tif (stack_mutated_in_op) {',
+            "\t\treturn Ok(std::optional<size_t> { std::nullopt });",
+            '\t} else {',
+            f'\t\treturn Ok(std::optional<size_t> {{ {self.param_count} }});',
+            '\t}',
             "}",
             '',
         ])
@@ -903,7 +915,7 @@ class OperatorMapBuilder:
             '\treturn operator_map.contains(str);',
             '}',
             '',
-            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
+            'Result<std::optional<size_t>> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
             '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map.at(str);',
             '\treturn op.evaluate(stack, op);',
@@ -991,7 +1003,7 @@ class OperatorMapBuilder:
             '\treturn Operators::GPerf::in_word_set(str.c_str(), str.size()) != nullptr;',
             '}',
             '',
-            'Result<> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
+            'Result<std::optional<size_t>> OperatorMap::evaluate(const std::string& str, RPNStack& stack) {',
             '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map[Operators::GPerf::hash(str.c_str(), str.size()) - MIN_HASH_VALUE];',
             '\treturn op.evaluate(stack, op);',

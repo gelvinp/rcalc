@@ -112,9 +112,23 @@ void Application::on_renderer_submit_text(const std::string& str) {
     // Try to parse as Operator third
 
     if (op_map.has_operator(str)) {
-        Result<> res = op_map.evaluate(str, stack);
+        Result<std::optional<size_t>> res = op_map.evaluate(str, stack);
         if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
-        p_renderer->replace_stack_items(stack.get_items());
+        if (!stack.same_ref(*p_stack_active)) {
+            // Copy on write happened, stack was mutated
+            std::optional<size_t> pop_count = res.unwrap();
+
+            if (pop_count.has_value()) {
+                // Stack was not mutated further during the operator, we don't need to replace the entire stack
+                for (size_t index = 0; index < pop_count.value(); ++index) {
+                    p_renderer->remove_stack_item();
+                }
+                p_renderer->add_stack_item(stack.get_items().back());
+            }
+            else {
+                p_renderer->replace_stack_items(stack.get_items());
+            }
+        }
         swap_stacks();
         return;
     }
@@ -134,12 +148,27 @@ bool Application::on_renderer_submit_operator(const std::string& str) {
     stack = *p_stack_active;
     
     if (op_map.has_operator(str)) {
-        Result<> res = op_map.evaluate(str, stack);
+        Result<std::optional<size_t>> res = op_map.evaluate(str, stack);
         if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
-        p_renderer->replace_stack_items(stack.get_items());
+        if (!stack.same_ref(*p_stack_active)) {
+            // Copy on write happened, stack was mutated
+            std::optional<size_t> pop_count = res.unwrap();
+
+            if (pop_count.has_value()) {
+                // Stack was not mutated further during the operator, we don't need to replace the entire stack
+                for (size_t index = 0; index < pop_count.value(); ++index) {
+                    p_renderer->remove_stack_item();
+                }
+                p_renderer->add_stack_item(stack.get_items().back());
+            }
+            else {
+                p_renderer->replace_stack_items(stack.get_items());
+            }
+        }
         swap_stacks();
         return true;
     }
+
     return false;
 }
 
