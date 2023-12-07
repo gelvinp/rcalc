@@ -140,7 +140,7 @@ In no particular order:
 - Publish iPadOS version
 - Add configurable precision framework, implement in iOS port
 - Add settings page to ImGui renderer including render scaling, default theme (light/dark/system?), precision
-- Add ability to "dump the api" in debug builds, i.e. save the help text, command/operator/unit list, license info, etc to JSON or equivalent. Have some sort of python script after that can help keep any wiki documentation in the repo up to date.
+- Add settings page to Terminal renderer for precision
 - Add representation-aware operator implementations (bitwise ops should preserve the representations of their arguments).
 - Add Wayland support for the linux builds (waiting on getting a new computer that can hopefully run wayland).
 - Unit / fuzzing tests
