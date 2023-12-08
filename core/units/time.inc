@@ -43,3 +43,27 @@ UNIT_FROM_BASE(Time, Real, Hours, hr) {
 UNIT_TO_BASE(Time, Real, Hours, hr) {
     return Ok(value * 3600);
 }
+
+UNIT_FROM_BASE(Time, Real, Days, day) {
+    return Ok(value / 86400.0);
+}
+
+UNIT_TO_BASE(Time, Real, Days, day) {
+    return Ok(value * 86400);
+}
+
+UNIT_FROM_BASE(Time, Real, Weeks, week) {
+    return Ok(value / 604800.0);
+}
+
+UNIT_TO_BASE(Time, Real, Weeks, week) {
+    return Ok(value * 604800);
+}
+
+UNIT_FROM_BASE(Time, Real, Julian Year, yr) {
+    return Ok(value / 31557600.0);
+}
+
+UNIT_TO_BASE(Time, Real, Julian Year, yr) {
+    return Ok(value * 31557600);
+}
