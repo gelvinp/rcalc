@@ -44,7 +44,7 @@ private:
 
     class OperatorAutocomplete : public Autocomplete {
     public:
-        void init_suggestions(std::string_view str, const CowVec<Type> stack_types);
+        void init_suggestions(std::string_view str, const CowVec<Type>& stack_types);
     };
 
     class UnitAutocomplete : public Autocomplete {

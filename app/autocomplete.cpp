@@ -4,6 +4,7 @@
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
 #include "core/format.h"
+#include "core/comparison.h"
 
 #include <algorithm>
 
@@ -166,7 +167,7 @@ std::optional<std::string> AutocompleteManager::CommandAutocomplete::get_previou
 
 // Operator Autocomplete
 
-void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const CowVec<Type> stack_types) {
+void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_view str, const CowVec<Type>& stack_types) {
     anycase_stringview input(str.begin(), str.end());
     suggestions.clear();
 
@@ -177,8 +178,8 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
             if (op->param_count > stack_types.size()) { continue; }
 
             if (!stack_types.empty()) {
-                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_types, &op](const std::span<const Type>& op_types) {
-                    return std::equal(stack_types.end() - op->param_count, stack_types.end(), op_types.begin(), op_types.end());
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_types](const std::span<const Type>& op_types) {
+                    return op_types == stack_types;
                 });
 
                 if (it == op->allowed_types.end()) {
