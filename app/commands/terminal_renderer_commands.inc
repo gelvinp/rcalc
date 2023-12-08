@@ -13,6 +13,14 @@ RCALC_CMD(TerminalRenderer, Queer, renderer) {
     renderer.queer_active = !renderer.queer_active;
 }
 
+// @RCalcCommand
+// Description: Quits RCalc.
+// Alias: q
+// Requires: "app/renderers/terminal/terminal_renderer.h"
+RCALC_CMD(TerminalRenderer, Quit, renderer) {
+    renderer.p_backend->close_requested = true;
+}
+
 
 // @RCalcCommand
 // Description: Clears the history buffer.

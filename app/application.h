@@ -25,7 +25,6 @@ public:
     static Result<Application*> create(AppConfig config);
 
     REGISTER_COMMAND(Application, Clear);
-    REGISTER_COMMAND(Application, Quit);
     REGISTER_COMMAND(Application, Pop);
     REGISTER_COMMAND(Application, Swap);
     REGISTER_COMMAND(Application, Copy);

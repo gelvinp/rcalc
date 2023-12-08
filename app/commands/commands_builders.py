@@ -7,9 +7,6 @@ from platform_methods import subprocess_main
 import atexit
 
 
-Tags = ['app_only']
-
-
 def _filter_name(name):
     # Only allow lowercase letters, numbers, and underscores
     lower = name.lower()
@@ -23,7 +20,6 @@ class Capture:
         self.cmd_description = None
         self.cmd_aliases = []
 
-        self.call_tags = []
         self.scope_name = None
 
         self.filename = filename
@@ -292,25 +288,8 @@ class CommandMapBuilder:
             case "Requires":
                 if not statement_arg in self.current_capture.requires:
                     self.current_capture.requires.append(statement_arg)
-            case "Tags":
-                self._validate_tags(statement_arg)
             case _:
                 self._set_error(f"Statement type '{statement_type}' is unknown!")
-    
-
-    def _validate_tags(self, tags):
-        if not tags.startswith("[") or not tags.endswith("]"):
-            self._set_error(f"Tag statement '{tags}' is invalid!\n\tExpected form is [tag1, tag2, ...]")
-            return
-
-        tags = [tag.strip() for tag in tags[1:-1].split(",")]
-
-        for tag in tags:
-            # Ensure the given tag is recognized
-            if tag in Tags:
-                self.current_capture.call_tags.append(tag)
-            else:
-                self._set_error(f"Tag `{tag}` is unknown!")
     
 
     def _process_declaration(self, declaration):
@@ -331,7 +310,7 @@ class CommandMapBuilder:
     
     
     def _finish_cmd(self, env):
-        if (not self.current_capture.scope_name in env["enabled_command_scopes"]) or ('app_only' in self.current_capture.call_tags and env["build_type"] != 'application'):
+        if (not self.current_capture.scope_name in env["enabled_command_scopes"]):
             self.current_capture = None
             self.state = self.State.WAITING
             return

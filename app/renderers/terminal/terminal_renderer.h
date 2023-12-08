@@ -31,6 +31,7 @@ public:
 
     REGISTER_COMMAND(TerminalRenderer, Help);
     REGISTER_COMMAND(TerminalRenderer, Queer);
+    REGISTER_COMMAND(TerminalRenderer, Quit);
     REGISTER_COMMAND(TerminalRenderer, ClearHist);
 
 private:

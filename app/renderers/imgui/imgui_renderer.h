@@ -33,6 +33,7 @@ public:
 
     REGISTER_COMMAND(ImGuiRenderer, Help);
     REGISTER_COMMAND(ImGuiRenderer, Queer);
+    REGISTER_COMMAND(ImGuiRenderer, Quit);
     REGISTER_COMMAND(ImGuiRenderer, ClearHist);
 
 private:

@@ -6,15 +6,6 @@ RCALC_CMD(Application, Clear, app) {
 }
 
 // @RCalcCommand
-// Description: Quits RCalc.
-// Alias: q
-// Requires: "app/application.h"
-// Tags: [app_only]
-RCALC_CMD(Application, Quit, app) {
-    app.p_renderer->p_backend->close_requested = true;
-}
-
-// @RCalcCommand
 // Description: Removes the top element from the stack.
 // Requires: "app/application.h"
 RCALC_CMD(Application, Pop, app) {
