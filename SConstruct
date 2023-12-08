@@ -395,7 +395,7 @@ if selected_platform in available_platforms:
     env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
     env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
-    env["GENSUFFIX"] = ''.join([f'.{r}' for r in enabled_renderers]) + ".gen"
+    env["GENSUFFIX"] = ''.join([f'.{r}' for r in env["enabled_command_scopes"]]) + ".gen"
 
     # compile_commands.json
     env.Tool("compilation_db")

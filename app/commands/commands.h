@@ -6,7 +6,7 @@
 #include <span>
 #include <utility>
 
-#define REGISTER_COMMAND(scope, name) static void _CMDIMPL_##name(scope&)
+#define REGISTER_COMMAND(scope, name) void _CMDIMPL_##name()
     
 
 namespace RCalc {
@@ -16,9 +16,6 @@ struct CommandMeta {
     const char* description;
     const std::span<const char * const> aliases;
 };
-
-template<typename Scope>
-using Command = void (*)(Scope&);
 
 struct ScopeMeta {
     const char* scope_name;

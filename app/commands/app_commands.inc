@@ -1,54 +1,54 @@
 // @RCalcCommand
 // Description: Clears the stack.
 // Requires: "app/application.h"
-RCALC_CMD(Application, Clear, app) {
-    app.stack.clear();
+RCALC_CMD(Application, Clear) {
+    stack.clear();
 }
 
 // @RCalcCommand
 // Description: Removes the top element from the stack.
 // Requires: "app/application.h"
-RCALC_CMD(Application, Pop, app) {
-    app.stack.pop_items(1);
+RCALC_CMD(Application, Pop) {
+    stack.pop_items(1);
 }
 
 // @RCalcCommand
 // Description: Swaps the top two elements from the stack.
 // Requires: "app/application.h"
 // Requires: <algorithm>
-RCALC_CMD(Application, Swap, app) {
-    CowVec<StackItem> items = app.stack.pop_items(2);
+RCALC_CMD(Application, Swap) {
+    CowVec<StackItem> items = stack.pop_items(2);
     std::swap(items.mut_at(0), items.mut_at(1));
-    app.stack.push_items(std::move(items));
+    stack.push_items(std::move(items));
 }
 
 // @RCalcCommand
 // Description: Copies the top element from the stack to the clipboard.
 // Requires: "app/application.h"
-RCALC_CMD(Application, Copy, app) {
-    if (app.stack.size() == 0) { return; }
-    app.p_renderer->p_backend->copy_to_clipboard(app.stack.get_items().back().result.to_string());
+RCALC_CMD(Application, Copy) {
+    if (stack.size() == 0) { return; }
+    p_renderer->p_backend->copy_to_clipboard(stack.get_items().back().result.to_string());
 }
 
 // @RCalcCommand
 // Description: Duplicates the top element from the stack.
 // Requires: "app/application.h"
-RCALC_CMD(Application, Dup, app) {
-    if (app.stack.size() == 0) { return; }
-    app.stack.push_item(app.stack.get_items().back());
+RCALC_CMD(Application, Dup) {
+    if (stack.size() == 0) { return; }
+    stack.push_item(stack.get_items().back());
 }
 
 // @RCalcCommand
 // Description: Pushes the current stack size onto the stack.
 // Requires: "app/application.h"
 // Requires: <limits>
-RCALC_CMD(Application, Count, app) {
-    size_t count = app.stack.size();
+RCALC_CMD(Application, Count) {
+    size_t count = stack.size();
 
     // No floating point, check for int64_t
     if (count > std::numeric_limits<int64_t>::max()) {
         Value value { BigInt((long long int)count) };
-        app.stack.push_item(StackItem {
+        stack.push_item(StackItem {
             create_displayables_from("count"),
             std::move(value),
             false
@@ -57,7 +57,7 @@ RCALC_CMD(Application, Count, app) {
     }
 
     Value value { (int64_t)count };
-    app.stack.push_item(StackItem {
+    stack.push_item(StackItem {
         create_displayables_from("count"),
         std::move(value),
         false
@@ -67,19 +67,19 @@ RCALC_CMD(Application, Count, app) {
 // @RCalcCommand
 // Description: Return the stack to its state before the previous action.
 // Requires: "app/application.h"
-RCALC_CMD(Application, Undo, app) {
-    app.stack = *app.p_stack_backup;
+RCALC_CMD(Application, Undo) {
+    stack = *p_stack_backup;
 }
 
 // @RCalcCommand
 // Description: Interrogate the type of the top-most value on the stack.
 // Requires: "app/application.h"
 // Requires: "core/format.h"
-RCALC_CMD(Application, Type, app) {
-    if (app.stack.size() == 0) { return; }
+RCALC_CMD(Application, Type) {
+    if (stack.size() == 0) { return; }
 
-    const StackItem& back = app.stack.get_items().back();
+    const StackItem& back = stack.get_items().back();
     std::string type_info = fmt("Type: %s", Value::get_type_name(back.result.get_type()));
 
-    app.p_renderer->display_info(type_info);
+    p_renderer->display_info(type_info);
 }

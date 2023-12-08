@@ -301,8 +301,8 @@ class CommandMapBuilder:
             return
 
         args = [arg.strip() for arg in declaration[args_start+1:args_end].split(",")]
-        if len(args) != 3:
-            self._set_error(f'Operator declaration {declaration} is invalid!\n\tThree arguments are required (Scope name, command name, scope parameter name)')
+        if len(args) != 2:
+            self._set_error(f'Operator declaration {declaration} is invalid!\n\tTwo arguments are required (Scope name, command name)')
             return
 
         self.current_capture.scope_name = args[0]
@@ -387,7 +387,7 @@ class CommandMapBuilder:
                 'template<>',
                 f'void CommandMap<{scope_name}>::execute(const std::string& str, {scope_name}& scope) {{',
                 '\tif (!built) { build(); }',
-                f'\tCMDMAP_{scope_name}.at(str)(scope);',
+                f'\t(scope.*CMDMAP_{scope_name}.at(str))();',
                 '}',
                 '',
                 'template<>',
@@ -500,7 +500,7 @@ class CommandMapBuilder:
                 'template<>',
                 f'void CommandMap<{scope_name}>::execute(const std::string& str, {scope_name}& scope) {{',
                 '\tif (!built) { build(); }',
-                f'\tCMDMAP_{scope_name}[Commands::GPerf::SCOPEHASH_{scope_name}(str.c_str(), str.size()) - MIN_HASH_VALUE](scope);',
+                f'\t(scope.*CMDMAP_{scope_name}[Commands::GPerf::SCOPEHASH_{scope_name}(str.c_str(), str.size()) - MIN_HASH_VALUE])();',
                 '}',
                 '',
                 'template<>',
