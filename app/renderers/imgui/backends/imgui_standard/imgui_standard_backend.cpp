@@ -15,9 +15,9 @@
 namespace RCalc {
 
 
-template<>
-RenderBackend* RenderBackend::create<ImGuiRenderer>() {
-    return reinterpret_cast<RenderBackend*>(new ImGuiStandardBackend());
+ImGuiBackend& ImGuiBackend::get_platform_backend() {
+    static ImGuiStandardBackend backend;
+    return reinterpret_cast<ImGuiBackend&>(backend);
 }
 
 

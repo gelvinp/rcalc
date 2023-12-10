@@ -14,11 +14,6 @@
 
 namespace RCalc {
 
-template<>
-RenderBackend* RenderBackend::create<TerminalRenderer>() {
-    return reinterpret_cast<RenderBackend*>(new TerminalBackend());
-}
-
 Result<> TerminalBackend::init(std::function<void(const std::string&)> _cb_report_error) {
     cb_report_error = _cb_report_error;
     return Ok();

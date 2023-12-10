@@ -16,7 +16,6 @@ TerminalRenderer::TerminalRenderer(RendererCreateInfo&& info) :
     cb_submit_op(std::move(info.cb_submit_op)),
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
-    p_backend = RenderBackend::create<TerminalRenderer>();
     command_map.activate();
 }
 
@@ -24,7 +23,7 @@ TerminalRenderer::TerminalRenderer(RendererCreateInfo&& info) :
 Result<> TerminalRenderer::init(Application* p_application) {
     UNUSED(p_application);
 
-    Result<> res = get_backend().init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
+    Result<> res = backend.init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
     if (!res) { return res; }
 
     return Ok();
@@ -66,7 +65,7 @@ void TerminalRenderer::render_loop() {
     comp_container |= ftxui::CatchEvent(event_func);
 
     std::function<ftxui::Element()> render_func = std::bind(&TerminalRenderer::render, this);
-    get_backend().render_loop(ftxui::Renderer(comp_container, render_func));
+    backend.render_loop(ftxui::Renderer(comp_container, render_func));
 }
 
 
@@ -338,8 +337,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
 
 
 void TerminalRenderer::cleanup() {
-    get_backend().cleanup();
-    delete p_backend;
+    backend.cleanup();
 }
 
 
@@ -398,15 +396,6 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
     }
 
     std::string output_str = item.result.to_string(item.p_input->tags);
-    ftxui::Element output_element;
-
-    if (std::find(output_str.begin(), output_str.end(), '\n') == output_str.end()) {
-        output_element = ftxui::vbox({ ftxui::filler(), ftxui::text(output_str) });
-    }
-    else {
-        // FTXUI ignores newlines in strings (even in paragraph blocks)
-        output_element = ftxui::vbox(split_lines(output_str));
-    }
 
     auto flexconf = ftxui::FlexboxConfig()
         .Set(ftxui::FlexboxConfig::AlignItems::Center)
@@ -414,7 +403,7 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
     
     auto input_flow = ftxui::flexbox(input_chunks, flexconf);
 
-    comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_element)));
+    comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_str)));
 
     comp_stack_scroll->OnEvent(ftxui::Event::End);
 }

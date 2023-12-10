@@ -1,5 +1,7 @@
 #include "entry_component.h"
 
+#include "terminal_renderer.h"
+
 
 ftxui::Element StackEntryComponent::RenderEntry(std::optional<ftxui::Color> background) {
     auto flexconf = ftxui::FlexboxConfig()
@@ -7,6 +9,16 @@ ftxui::Element StackEntryComponent::RenderEntry(std::optional<ftxui::Color> back
         .Set(ftxui::FlexboxConfig::AlignContent::FlexEnd);
     
     auto input_flow = ftxui::flexbox(input, flexconf);
+
+    ftxui::Element output_element;
+
+    if (std::find(output.begin(), output.end(), '\n') == output.end()) {
+        output_element = ftxui::vbox({ ftxui::filler(), ftxui::text(output) });
+    }
+    else {
+        // FTXUI ignores newlines in strings (even in paragraph blocks)
+        output_element = ftxui::vbox(RCalc::TerminalRenderer::split_lines(output));
+    }
 
     if (background) {
         auto input_bg = ftxui::hbox({
@@ -18,21 +30,21 @@ ftxui::Element StackEntryComponent::RenderEntry(std::optional<ftxui::Color> back
             input_bg,
             ftxui::filler(),
             ftxui::separatorEmpty(),
-            output | ftxui::bgcolor(background.value())
+            output_element | ftxui::bgcolor(background.value())
         });
     }
 
     return ftxui::hbox({
         input_flow | ftxui::xflex_grow,
         ftxui::separatorEmpty(),
-        output
+        output_element
     });
 }
 
 
-ftxui::Component StackEntryComponent::make(ftxui::Elements&& input, ftxui::Element&& output) {
+ftxui::Component StackEntryComponent::make(ftxui::Elements&& input, std::string&& output) {
     return ftxui::Make<StackEntryComponent>(
         std::forward<ftxui::Elements&&>(input),
-        std::forward<ftxui::Element&&>(output)
+        std::forward<std::string&&>(output)
     );
 }

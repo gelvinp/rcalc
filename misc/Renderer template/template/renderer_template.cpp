@@ -3,13 +3,11 @@
 
 namespace RCalc {
 
-RendererTemplate::RendererTemplate(RendererCreateInfo&& info) {
-    p_backend = RenderBackend::create<RendererTemplate>();
-}
+RendererTemplate::RendererTemplate(RendererCreateInfo&& info) {}
 
 Result<> RendererTemplate::init(Application* p_application) { return Ok(); }
 void RendererTemplate::render_loop() { while(true) {} }
-void RendererTemplate::cleanup() { delete p_backend; }
+void RendererTemplate::cleanup() {}
 
 void RendererTemplate::display_info(const std::string& str) {}
 void RendererTemplate::display_error(const std::string& str) {}

@@ -31,14 +31,13 @@ public:
     virtual void remove_stack_item() override;
     virtual void replace_stack_items(const CowVec<StackItem>& items) override;
 
+    REGISTER_COMMAND(ImGuiRenderer, Copy);
     REGISTER_COMMAND(ImGuiRenderer, Help);
     REGISTER_COMMAND(ImGuiRenderer, Queer);
     REGISTER_COMMAND(ImGuiRenderer, Quit);
     REGISTER_COMMAND(ImGuiRenderer, ClearHist);
 
 private:
-    ImGuiBackend& get_backend() const { return *reinterpret_cast<ImGuiBackend*>(p_backend); }
-
     void render();
 
     SubmitTextCallback cb_submit_text;
@@ -95,6 +94,8 @@ private:
     void render_help_unit_family(const UnitFamily* family);
 
     void build_help_cache();
+
+    ImGuiBackend& backend;
 };
 
 }

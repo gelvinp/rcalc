@@ -23,14 +23,6 @@ RCALC_CMD(Application, Swap) {
 }
 
 // @RCalcCommand
-// Description: Copies the top element from the stack to the clipboard.
-// Requires: "app/application.h"
-RCALC_CMD(Application, Copy) {
-    if (stack.size() == 0) { return; }
-    p_renderer->p_backend->copy_to_clipboard(stack.get_items().back().result.to_string());
-}
-
-// @RCalcCommand
 // Description: Duplicates the top element from the stack.
 // Requires: "app/application.h"
 RCALC_CMD(Application, Dup) {

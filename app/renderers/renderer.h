@@ -2,7 +2,6 @@
 
 #include "core/value.h"
 #include "core/error.h"
-#include "render_backend.h"
 #include "app/stack.h"
 
 #include <functional>
@@ -42,8 +41,6 @@ public:
     virtual void replace_stack_items(const CowVec<StackItem>& items) = 0;
 
     static const char* default_renderer;
-
-    RenderBackend* p_backend = nullptr;
 
     virtual ~Renderer() = default;
 };

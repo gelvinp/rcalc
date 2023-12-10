@@ -31,10 +31,6 @@ Result<Application*> Application::create(AppConfig config) {
     );
 
     if (renderer_res) {
-        if (renderer_res.unwrap()->p_backend == nullptr) {
-            throw std::logic_error("Renderer did not initialize correctly! p_backend == nullptr");
-        }
-
         p_application->p_renderer = renderer_res.unwrap();
         singleton.initialized = true;
 

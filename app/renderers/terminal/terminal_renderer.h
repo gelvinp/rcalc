@@ -29,14 +29,13 @@ public:
     static ftxui::Elements split_lines(std::string str);
     static ftxui::Elements split_paragraphs(std::string str);
 
+    REGISTER_COMMAND(TerminalRenderer, Copy);
     REGISTER_COMMAND(TerminalRenderer, Help);
     REGISTER_COMMAND(TerminalRenderer, Queer);
     REGISTER_COMMAND(TerminalRenderer, Quit);
     REGISTER_COMMAND(TerminalRenderer, ClearHist);
 
 private:
-    TerminalBackend& get_backend() const { return *reinterpret_cast<TerminalBackend*>(p_backend); }
-
     ftxui::Element render();
     ftxui::Element render_stack();
     ftxui::Element render_stack_scroll();
@@ -75,10 +74,14 @@ private:
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
+    std::string last_output = "";
+
     AutocompleteManager autocomp;
 
     std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;
     void build_help_cache();
+
+    TerminalBackend backend;
 };
 
 }

@@ -24,15 +24,15 @@ namespace RCalc {
 ImGuiRenderer::ImGuiRenderer(RendererCreateInfo&& info) :
         cb_submit_text(std::move(info.cb_submit_text)),
         cb_submit_op(std::move(info.cb_submit_op)),
-        command_map(CommandMap<ImGuiRenderer>::get_command_map())
+        command_map(CommandMap<ImGuiRenderer>::get_command_map()),
+        backend(ImGuiBackend::get_platform_backend())
 {
-    p_backend = RenderBackend::create<ImGuiRenderer>();
     command_map.activate();
 }
 
 
 Result<> ImGuiRenderer::init(Application* p_application) {
-    Result<> res = get_backend().init(p_application);
+    Result<> res = backend.init(p_application);
     if (!res) { return res; }
 
     // Load font
@@ -45,7 +45,7 @@ Result<> ImGuiRenderer::init(Application* p_application) {
     glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
     glyphs.BuildRanges(&glyph_ranges);
 
-    float screen_dpi = get_backend().get_screen_dpi();
+    float screen_dpi = backend.get_screen_dpi();
     float font_size_standard = std::floor(14 * screen_dpi);
     float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
@@ -61,14 +61,14 @@ Result<> ImGuiRenderer::init(Application* p_application) {
 
 
 void ImGuiRenderer::render_loop() {
-    while (!get_backend().close_requested) {
+    while (!backend.close_requested) {
         render();
     }
 }
 
 
 void ImGuiRenderer::render() {
-    get_backend().start_frame();
+    backend.start_frame();
 
     // Avoid weirdness with delete key
     bool scratchpad_empty = scratchpad.empty();
@@ -92,14 +92,14 @@ void ImGuiRenderer::render() {
     }
 
     
-    if (get_backend().app_menu_bar()) {
+    if (backend.app_menu_bar()) {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
                 ImGui::MenuItem("Show Help", "F1", &help_requested);
                 ImGui::Separator();
-                ImGui::MenuItem("Quit", "Ctrl+Q", &get_backend().close_requested);
+                ImGui::MenuItem("Quit", "Ctrl+Q", &backend.close_requested);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -241,7 +241,7 @@ void ImGuiRenderer::render() {
 
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
-                        get_backend().copy_to_clipboard(entry.output.str);
+                        backend.copy_to_clipboard(entry.output.str);
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -339,13 +339,13 @@ void ImGuiRenderer::render() {
     render_help();
 
     // Handle shortcuts
-    if (get_backend().app_menu_bar()) {
+    if (backend.app_menu_bar()) {
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Q)) {
-            get_backend().close_requested = true;
+            backend.close_requested = true;
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
             if (!display_stack.entries.empty()) {
-                get_backend().copy_to_clipboard(display_stack.entries.back().output.str);
+                backend.copy_to_clipboard(display_stack.entries.back().output.str);
             }
             copy_requested = false;
         }
@@ -370,13 +370,12 @@ void ImGuiRenderer::render() {
         should_suggest_previous = true;
     }
 
-    get_backend().render_frame();
+    backend.render_frame();
 }
 
 
 void ImGuiRenderer::cleanup() {
-    get_backend().cleanup();
-    delete p_backend;
+    backend.cleanup();
 }
 
 
@@ -635,7 +634,7 @@ void ImGuiRenderer::render_help() {
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
-        get_backend().copy_to_clipboard(VERSION_HASH);
+        backend.copy_to_clipboard(VERSION_HASH);
         help_version_copied = true;
     }
 

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "app/renderers/render_backend.h"
-
+#include "core/error.h"
 #include "ftxui/component/component.hpp"
 
 #include <functional>
@@ -9,14 +8,16 @@
 
 namespace RCalc {
 
-class TerminalBackend : public RenderBackend {
+class TerminalBackend {
 public:
     Result<> init(std::function<void(const std::string&)> cb_report_error);
     void cleanup();
 
     void render_loop(ftxui::Component component);
     
-    virtual void copy_to_clipboard(const std::string_view& string) override;
+    void copy_to_clipboard(const std::string_view& string);
+
+    bool close_requested = false;
 
 private:
     std::function<void(const std::string&)> cb_report_error = nullptr;

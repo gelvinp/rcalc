@@ -56,7 +56,7 @@ class Unit:
         self.found_from |= capture.type == Capture.Type.From
         self.found_to |= capture.type == Capture.Type.To
 
-        if not capture.sort_order is None:
+        if self.sort_order is None:
             self.sort_order = capture.sort_order
 
         return None

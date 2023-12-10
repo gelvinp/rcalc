@@ -27,7 +27,6 @@ public:
     REGISTER_COMMAND(Application, Clear);
     REGISTER_COMMAND(Application, Pop);
     REGISTER_COMMAND(Application, Swap);
-    REGISTER_COMMAND(Application, Copy);
     REGISTER_COMMAND(Application, Dup);
     REGISTER_COMMAND(Application, Count);
     REGISTER_COMMAND(Application, Undo);
