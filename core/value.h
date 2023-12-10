@@ -85,6 +85,18 @@ private:
 
     void ref();
     void unref();
+
+    void swap(RCalc::Value& other) {
+        std::swap(data, other.data);
+
+        Representation s_repr = repr;
+        repr = other.repr;
+        other.repr = s_repr;
+
+        Type s_type = type;
+        type = other.type;
+        other.type = s_type;
+    }
 };
 
 }

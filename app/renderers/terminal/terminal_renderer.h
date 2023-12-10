@@ -74,8 +74,6 @@ private:
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
-    std::string last_output = "";
-
     AutocompleteManager autocomp;
 
     std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;

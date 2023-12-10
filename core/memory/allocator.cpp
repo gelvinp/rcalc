@@ -24,6 +24,11 @@ void* Allocator::alloc(size_t size_bytes) {
             #ifdef DEBUG_ALLOC
             shared.DBG_addresses_allocated.insert(op_addr.value());
             shared.ENSURE_CORRECTNESS();
+
+            if (p_page->reservation_size_bytes(op_addr.value()) < size_bytes) {
+                RCalc::Logger::log("Size after alloc (%d) is less than what was asked for (%d)!", p_page->reservation_size_bytes(op_addr.value()), size_bytes);
+                throw std::logic_error("Size after alloc is less than what was asked for!");
+            }
             #endif
             return op_addr.value();
         }
@@ -33,6 +38,10 @@ void* Allocator::alloc(size_t size_bytes) {
     #ifdef DEBUG_ALLOC
     shared.DBG_addresses_allocated.insert(p_addr);
     shared.ENSURE_CORRECTNESS();
+    if (shared.p_page_end->reservation_size_bytes(p_addr) < size_bytes) {
+        RCalc::Logger::log("Size after alloc (%d) is less than what was asked for (%d)!", shared.p_page_end->reservation_size_bytes(p_addr), size_bytes);
+        throw std::logic_error("Size after alloc is less than what was asked for!");
+                }
     #endif
     return p_addr;
 }
@@ -55,6 +64,13 @@ void* Allocator::realloc(void* p_addr, size_t new_size_bytes) {
             // Try to resize in place
             if (p_page->resize(p_addr, new_size_bytes)) {
                 shared.ENSURE_CORRECTNESS();
+
+                #ifdef DEBUG_ALLOC
+                if (p_page->reservation_size_bytes(p_addr) < new_size_bytes) {
+                    RCalc::Logger::log("Size after resize in place (%d) is less than what was asked for (%d)!", p_page->reservation_size_bytes(p_addr), new_size_bytes);
+                    throw std::logic_error("Size after resize in place is less than what was asked for!");
+                }
+                #endif
                 return p_addr;
             }
             else {
@@ -64,6 +80,13 @@ void* Allocator::realloc(void* p_addr, size_t new_size_bytes) {
                 memmove(p_new_addr, p_addr, copy_amount);
                 free(p_addr);
                 shared.ENSURE_CORRECTNESS();
+
+                #ifdef DEBUG_ALLOC
+                if (p_page->reservation_size_bytes(p_new_addr) < new_size_bytes) {
+                    RCalc::Logger::log("Size after alloc + copy in place (%d) is less than what was asked for (%d)!", p_page->reservation_size_bytes(p_new_addr), new_size_bytes);
+                    throw std::logic_error("Size after alloc + copy in place is less than what was asked for!");
+                }
+                #endif
                 return p_new_addr;
             }
         }
@@ -83,6 +106,7 @@ void Allocator::free(void* p_addr) {
     if (!shared.DBG_addresses_allocated.contains(p_addr)) {
         throw std::logic_error("Cannot free an address never allocated!");
     }
+    shared.DBG_addresses_allocated.erase(p_addr);
     #endif
 
     shared.ENSURE_CORRECTNESS();
@@ -217,12 +241,18 @@ std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
         return std::nullopt;
     }
 
+    #ifndef NDEBUG
     if (void_to_chunk_addr(chunk_to_void_addr(op_chunk.value())) != op_chunk.value()) {
         throw std::logic_error("Cannot convert through void*!");
     }
     if (void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->p_next != op_chunk.value()) {
         throw std::logic_error("Header is malformed!");
     }
+    if (void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size != chunk_count) {
+        RCalc::Logger::log("Page reserve contiguous size (%d) is not what was expected (%d)!", void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size, chunk_count);
+        throw std::logic_error("Page reserve contiguous size is not what was expected!");
+    }
+    #endif
 
     return chunk_to_void_addr(op_chunk.value());
 }
@@ -338,7 +368,7 @@ bool Allocator::Page::extend_contiguous_from(Chunk* p_from, size_t new_chunk_cou
     ENSURE_CORRECTNESS();
 
     Chunk* p_target = p_from + p_from->contiguous_size;
-    size_t chunk_count = new_chunk_count - p_target->contiguous_size;
+    size_t chunk_count = new_chunk_count - p_from->contiguous_size;
 
     Chunk* p_previous = nullptr;
     Chunk* p_found = nullptr;

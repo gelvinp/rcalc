@@ -333,34 +333,18 @@ Value::Value(const Value& value) {
     ref();
 }
 
+Value::Value(Value&& value) : Value() {
+    swap(value);
+}
+
 Value& Value::operator=(const Value& value) {
-    unref();
-
-    type = value.type;
-    data = value.data;
-    repr = value.repr;
-    ref();
-
+    Value other { value };
+    swap(other);
     return *this;
 }
 
-Value::Value(Value&& value) {
-    type = value.type;
-    data = value.data;
-    repr = value.repr;
-
-    value.type = TYPE_INT;
-    value.data = 0;
-}
-
 Value& Value::operator=(Value&& value) {
-    type = value.type;
-    data = value.data;
-    repr = value.repr;
-
-    value.type = TYPE_INT;
-    value.data = 0;
-
+    swap(value);
     return *this;
 }
 

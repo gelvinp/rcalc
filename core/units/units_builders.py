@@ -405,6 +405,10 @@ class UnitsMapBuilder:
                 self._set_error(error)
                 return
         else:
+            if self.current_capture.type != Capture.Type.Family:
+                self._set_error(f"Unit family {self.current_capture.family_name} must be defined before its units!")
+                return
+            
             self.family_units[self.current_capture.family_name] = Family(self.current_capture)
         
         self.state = self.State.WAITING
