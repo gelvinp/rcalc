@@ -178,8 +178,9 @@ void AutocompleteManager::OperatorAutocomplete::init_suggestions(std::string_vie
             if (op->param_count > stack_types.size()) { continue; }
 
             if (!stack_types.empty()) {
-                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&stack_types](const std::span<const Type>& op_types) {
-                    return op_types == stack_types;
+                const std::span<const Type> comp_types { stack_types.end() - op->param_count, (size_t)op->param_count };
+                auto it = std::find_if(op->allowed_types.begin(), op->allowed_types.end(), [&comp_types](const std::span<const Type>& op_types) {
+                    return std::equal(op_types.begin(), op_types.end(), comp_types.begin(), comp_types.end());
                 });
 
                 if (it == op->allowed_types.end()) {

@@ -180,8 +180,9 @@ public:
         using value_type = T;
         using pointer = T*;
         using reference = T&;
+        using element_type = T;
 
-        Iterator(pointer ptr) : ptr(ptr) {}
+        Iterator(pointer ptr = nullptr) : ptr(ptr) {}
 
         reference operator*() const { return *ptr; }
         pointer operator->() const { return ptr; }
@@ -197,10 +198,16 @@ public:
 
         auto operator<=>(const Iterator&) const = default;
 
+        reference operator[](size_t index) const { return *(ptr + index); }
+
         friend bool operator==(const Iterator& a, const Iterator& b) { return a.ptr == b.ptr; }
 
         friend Iterator operator+(Iterator a, difference_type b) { return a += b; }
         friend Iterator operator-(Iterator a, difference_type b) { return a -= b; }
+
+        friend Iterator operator+(difference_type b, Iterator a) { return a += b; }
+        friend Iterator operator-(difference_type b, Iterator a) { return a -= b; }
+
         friend difference_type operator-(Iterator a, const Iterator& b) { return b.ptr - a.ptr; }
 
     private:
@@ -210,12 +217,13 @@ public:
 
     struct ConstIterator {
         using iterator_category = std::contiguous_iterator_tag;
-        using difference_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
         using value_type = const T;
         using pointer = const T*;
         using reference = const T&;
+        using element_type = const T;
 
-        ConstIterator(pointer ptr) : ptr(ptr) {}
+        ConstIterator(pointer ptr = nullptr) : ptr(ptr) {}
 
         reference operator*() const { return *ptr; }
         pointer operator->() const { return ptr; }
@@ -231,10 +239,16 @@ public:
 
         auto operator<=>(const ConstIterator&) const = default;
 
+        reference operator[](size_t index) const { return *(ptr + index); }
+
         friend bool operator==(const ConstIterator& a, const ConstIterator& b) { return a.ptr == b.ptr; }
 
         friend ConstIterator operator+(ConstIterator a, difference_type b) { return a += b; }
         friend ConstIterator operator-(ConstIterator a, difference_type b) { return a -= b; }
+
+        friend ConstIterator operator+(difference_type b, ConstIterator a) { return a += b; }
+        friend ConstIterator operator-(difference_type b, ConstIterator a) { return a -= b; }
+
         friend difference_type operator-(ConstIterator a, const ConstIterator& b) { return b.ptr - a.ptr; }
 
     private:

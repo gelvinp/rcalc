@@ -395,6 +395,8 @@ void ImGuiRenderer::submit_scratchpad() {
     if (enter_pressed) { return; }
     enter_pressed = true;
 
+    autocomp.cancel_suggestion();
+
     stack_needs_scroll_down = true;
     message = "";
 
