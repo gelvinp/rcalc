@@ -8,8 +8,7 @@ RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse
 It aims to be quick to open and use, and easy to extend with new types, operators, and commands.
 
 | [Features](#features) | [Install](#install) | [Usage](#usage) | [Build](#build) | [Future Plans](#future-plans) | [Contribute](#contribute) |
-| :-: | :-: | :-: | :-: | :-: | | :-: |
-| | | | | | |
+| :-: | :-: | :-: | :-: | :-: | :-: |
 
 ## Features
 
