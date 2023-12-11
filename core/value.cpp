@@ -799,6 +799,11 @@ void Value::unref() {
 
 #pragma region equality
 
+#define POOL_COMPARE(pool_type, enum_type) \
+case enum_type: { \
+    return operator pool_type() == other.operator pool_type(); \
+}
+
 bool Value::operator==(const Value& other) const {
     if (type != other.type) { return false; }
 
@@ -806,29 +811,14 @@ bool Value::operator==(const Value& other) const {
         case TYPE_INT:
             return data == other.data;
         
-        case TYPE_BIGINT:
-            return operator RCalc::BigInt() == other.operator RCalc::BigInt();
-        
-        case TYPE_REAL:
-            return operator RCalc::Real() == other.operator RCalc::Real();
-        
-        case TYPE_VEC2:
-            return operator RCalc::Vec2() == other.operator RCalc::Vec2();
-        
-        case TYPE_VEC3:
-            return operator RCalc::Vec3() == other.operator RCalc::Vec3();
-        
-        case TYPE_VEC4:
-            return operator RCalc::Vec4() == other.operator RCalc::Vec4();
-        
-        case TYPE_MAT2:
-            return operator RCalc::Mat2() == other.operator RCalc::Mat2();
-        
-        case TYPE_MAT3:
-            return operator RCalc::Mat3() == other.operator RCalc::Mat3();
-        
-        case TYPE_MAT4:
-            return operator RCalc::Mat4() == other.operator RCalc::Mat4();
+        POOL_COMPARE(BigInt, TYPE_BIGINT)
+        POOL_COMPARE(Real, TYPE_REAL)
+        POOL_COMPARE(Vec2, TYPE_VEC2)
+        POOL_COMPARE(Vec3, TYPE_VEC3)
+        POOL_COMPARE(Vec4, TYPE_VEC4)
+        POOL_COMPARE(Mat2, TYPE_MAT2)
+        POOL_COMPARE(Mat3, TYPE_MAT3)
+        POOL_COMPARE(Mat4, TYPE_MAT4)
         
         case TYPE_UNIT:
             return operator RCalc::Unit().p_impl == other.operator RCalc::Unit().p_impl;
@@ -837,6 +827,8 @@ bool Value::operator==(const Value& other) const {
             UNREACHABLE();
     }
 }
+
+#undef POOL_COMPARE
 
 #pragma endregion equality
 }
