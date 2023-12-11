@@ -193,15 +193,15 @@ static void glfw_error_callback(int error, const char* description) {
 }
 
 - (void) menuCallbackCopy {
-    _application->on_renderer_submit_text("\\copy");
+    _submitTextCallback("\\copy");
 }
 
 - (void) menuCallbackDuplicate {
-    _application->on_renderer_submit_text("\\dup");
+    _submitTextCallback("\\dup");
 }
 
 - (void) menuCallbackHelp {
-    _application->on_renderer_submit_text("\\help");
+    _submitTextCallback("\\help");
 }
 
 @end

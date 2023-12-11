@@ -15,26 +15,19 @@ class Application;
 
 class Renderer {
 public:
-    typedef std::function<void(const std::string&)> SubmitTextCallback;
-    typedef std::function<void(const std::string&)> SubmitOperatorCallback;
+    typedef std::function<void(std::string_view)> SubmitTextCallback;
 
-    struct RendererCreateInfo {
-        SubmitTextCallback cb_submit_text;
-        SubmitOperatorCallback cb_submit_op;
-        Application* p_application;
-    };
-
-    static Result<Renderer*> create(const std::string_view& name, RendererCreateInfo&& info);
+    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text);
     static const std::span<const char * const> get_enabled_renderers();
 
-    virtual Result<> init(Application* p_application) = 0;
+    virtual Result<> init() = 0;
     virtual void render_loop() = 0;
     virtual void cleanup() = 0;
 
-    virtual void display_info(const std::string& str) = 0;
-    virtual void display_error(const std::string& str) = 0;
+    virtual void display_info(std::string_view str) = 0;
+    virtual void display_error(std::string_view str) = 0;
 
-    virtual bool try_renderer_command(const std::string& str) = 0;
+    virtual bool try_renderer_command(std::string_view str) = 0;
 
     virtual void add_stack_item(const StackItem& item) = 0;
     virtual void remove_stack_item() = 0;

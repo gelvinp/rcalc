@@ -32,8 +32,7 @@ public:
     REGISTER_COMMAND(Application, Undo);
     REGISTER_COMMAND(Application, Type);
 
-    void on_renderer_submit_text(const std::string& str);
-    bool on_renderer_submit_operator(const std::string& str);
+    void on_renderer_submit_text(std::string_view str);
 
     static const RPNStack& get_stack() { return singleton.stack; }
 
@@ -48,10 +47,10 @@ private:
     OperatorMap& op_map;
 
     typedef std::function<void()> AppCommand;
-    bool try_application_command(const std::string& str);
+    bool try_application_command(std::string_view str);
     CommandMap<Application> command_map;
 
-    bool try_swizzle(const std::string& str);
+    bool try_swizzle(std::string_view str);
 
     void swap_stacks();
 

@@ -11,18 +11,15 @@
 
 namespace RCalc {
 
-TerminalRenderer::TerminalRenderer(RendererCreateInfo&& info) :
-    cb_submit_text(std::move(info.cb_submit_text)),
-    cb_submit_op(std::move(info.cb_submit_op)),
+TerminalRenderer::TerminalRenderer(SubmitTextCallback cb_submit_text) :
+    cb_submit_text(cb_submit_text),
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
     command_map.activate();
 }
 
 
-Result<> TerminalRenderer::init(Application* p_application) {
-    UNUSED(p_application);
-
+Result<> TerminalRenderer::init() {
     Result<> res = backend.init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
     if (!res) { return res; }
 
@@ -231,28 +228,28 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
                 if (!scratchpad.empty()) {
                     submit_scratchpad();
                 }
-                cb_submit_op("add");
+                cb_submit_text("add");
                 scratchpad.clear();
                 return true;
             case '-':
                 if (!scratchpad.empty()) {
                     submit_scratchpad();
                 }
-                cb_submit_op("sub");
+                cb_submit_text("sub");
                 scratchpad.clear();
                 return true;
             case '*':
                 if (!scratchpad.empty()) {
                     submit_scratchpad();
                 }
-                cb_submit_op("mul");
+                cb_submit_text("mul");
                 scratchpad.clear();
                 return true;
             case '/':
                 if (!scratchpad.empty()) {
                     submit_scratchpad();
                 }
-                cb_submit_op("div");
+                cb_submit_text("div");
                 scratchpad.clear();
                 return true;
             default:
@@ -341,19 +338,19 @@ void TerminalRenderer::cleanup() {
 }
 
 
-void TerminalRenderer::display_info(const std::string& str) {
+void TerminalRenderer::display_info(std::string_view str) {
     message = str;
     message_is_error = false;
 }
 
 
-void TerminalRenderer::display_error(const std::string& str) {
+void TerminalRenderer::display_error(std::string_view str) {
     message = str;
     message_is_error = true;
 }
 
 
-bool TerminalRenderer::try_renderer_command(const std::string& str) {   
+bool TerminalRenderer::try_renderer_command(std::string_view str) {   
     if (command_map.has_command(str)) {
         command_map.execute(str, *this);
         return true;

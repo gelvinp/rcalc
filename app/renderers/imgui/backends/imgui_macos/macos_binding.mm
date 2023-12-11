@@ -38,9 +38,9 @@ void MacOS::cleanup() {
 }
 
 
-void MacOS::set_application(Application* p_application) {
+void MacOS::set_submit_text_callback(Renderer::SubmitTextCallback cb_submit_text) {
     if (!p_binding) { return; }
-    [p_binding->p_impl setApplication:p_application];
+    [p_binding->p_impl setSubmitTextCallback:cb_submit_text];
 }
 
 

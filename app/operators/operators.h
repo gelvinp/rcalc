@@ -31,8 +31,8 @@ struct OperatorCategory {
 class OperatorMap {
 public:
     static OperatorMap& get_operator_map();
-    bool has_operator(const std::string& str);
-    Result<std::optional<size_t>> evaluate(const std::string& str, RPNStack& stack);
+    bool has_operator(std::string_view str);
+    Result<std::optional<size_t>> evaluate(std::string_view str, RPNStack& stack);
     const std::span<OperatorCategory const * const> get_alphabetical() const;
 
     static size_t stat_manual_impl_count;

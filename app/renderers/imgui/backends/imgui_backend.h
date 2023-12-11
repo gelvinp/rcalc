@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/application.h"
+#include "app/renderers/renderer.h"
 #include "core/error.h"
 
 #include <string_view>
@@ -12,7 +12,7 @@ class ImGuiBackend {
 public:
     static ImGuiBackend& get_platform_backend();
 
-    virtual Result<> init(Application* p_application) = 0;
+    virtual Result<> init(Renderer::SubmitTextCallback cb_submit_text) = 0;
     virtual void cleanup() = 0;
 
     virtual void start_frame() = 0;

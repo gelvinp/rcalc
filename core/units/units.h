@@ -48,7 +48,7 @@ struct UnitImpl : public Unit {
 class UnitsMap {
 public:
     static UnitsMap& get_units_map();
-    std::optional<const Unit*> find_unit(const std::string& str);
+    std::optional<const Unit*> find_unit(std::string_view str);
     const std::span<UnitFamily const * const> get_alphabetical() const;
 
 private:

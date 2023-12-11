@@ -28,7 +28,7 @@ def gen_renderers(target, source, env):
         '',
         'namespace RCalc {',
         '',
-        'Result<Renderer*> Renderer::create(const std::string_view& name, RendererCreateInfo&& info) {',
+        'Result<Renderer*> Renderer::create(const std::string_view& name, SubmitTextCallback cb_submit_text) {',
         '\tRenderer* p_renderer = nullptr;',
         ''
     ])
@@ -36,7 +36,7 @@ def gen_renderers(target, source, env):
     for name, meta in env["renderer_meta"].items():
         lines.extend([
             f'\tif (name == "{name}") {{',
-            f'\t\tp_renderer = reinterpret_cast<Renderer*>(new {meta["class"]}(std::move(info)));',
+            f'\t\tp_renderer = reinterpret_cast<Renderer*>(new {meta["class"]}(cb_submit_text));',
             '\t}',
             ''
         ])
@@ -46,7 +46,7 @@ def gen_renderers(target, source, env):
         '\t\treturn Err(ERR_INIT_FAILURE, fmt("The requested renderer \'%s\' is invalid!", name.data()));',
         '\t}',
         '',
-        '\tResult<> res = p_renderer->init(info.p_application);',
+        '\tResult<> res = p_renderer->init();',
         '\tif (!res) { return res.unwrap_err(); }',
         '',
         '\treturn Ok(p_renderer);',

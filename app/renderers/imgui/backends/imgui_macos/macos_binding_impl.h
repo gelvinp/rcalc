@@ -13,6 +13,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include "app/renderers/renderer.h"
+
 namespace RCalc
 {
 
@@ -36,7 +38,7 @@ class Application;
     id <MTLRenderCommandEncoder> renderEncoder;
 }
 
-@property RCalc::Application* application;
+@property RCalc::Renderer::SubmitTextCallback submitTextCallback;
 
 - (instancetype) init;
 

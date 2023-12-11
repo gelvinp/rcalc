@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app/renderers/renderer.h"
 #include "core/error.h"
 
 
@@ -18,7 +19,7 @@ public:
     Result<> init();
     void cleanup();
 
-    void set_application(Application* p_application);
+    void set_submit_text_callback(Renderer::SubmitTextCallback cb_submit_text);
 
     void start_frame();
     void render_frame();

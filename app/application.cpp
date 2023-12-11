@@ -23,11 +23,7 @@ Result<Application*> Application::create(AppConfig config) {
 
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
-        {
-            std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1),
-            std::bind(&Application::on_renderer_submit_operator, p_application, std::placeholders::_1),
-            p_application
-        }
+        std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1)
     );
 
     if (renderer_res) {
@@ -67,7 +63,7 @@ void Application::cleanup() {
 }
 
 
-void Application::on_renderer_submit_text(const std::string& str) {
+void Application::on_renderer_submit_text(std::string_view str) {
     stack = *p_stack_active;
 
     // If it starts with '\', it's a command
@@ -82,10 +78,10 @@ void Application::on_renderer_submit_text(const std::string& str) {
         }
 
         const char* error_format = "Unknown command: '%s'";
-        int size = snprintf(nullptr, 0, error_format, str.c_str()) + 1;
+        int size = snprintf(nullptr, 0, error_format, str.data()) + 1;
         std::string error;
         error.resize(size);
-        snprintf(error.data(), error.size(), error_format, str.c_str());
+        snprintf(error.data(), error.size(), error_format, str.data());
         p_renderer->display_error(error);
         return;
     }
@@ -136,40 +132,11 @@ void Application::on_renderer_submit_text(const std::string& str) {
     }
 
     // Unknown command!
-    p_renderer->display_error(fmt("Unknown operator: '%s'", str.c_str()));
+    p_renderer->display_error(fmt("Unknown operator: '%s'", str.data()));
 }
 
 
-bool Application::on_renderer_submit_operator(const std::string& str) {
-    stack = *p_stack_active;
-    
-    if (op_map.has_operator(str)) {
-        Result<std::optional<size_t>> res = op_map.evaluate(str, stack);
-        if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
-        if (!stack.same_ref(*p_stack_active)) {
-            // Copy on write happened, stack was mutated
-            std::optional<size_t> pop_count = res.unwrap();
-
-            if (pop_count.has_value()) {
-                // Stack was not mutated further during the operator, we don't need to replace the entire stack
-                for (size_t index = 0; index < pop_count.value(); ++index) {
-                    p_renderer->remove_stack_item();
-                }
-                p_renderer->add_stack_item(stack.get_items().back());
-            }
-            else {
-                p_renderer->replace_stack_items(stack.get_items());
-            }
-        }
-        swap_stacks();
-        return true;
-    }
-
-    return false;
-}
-
-
-bool Application::try_application_command(const std::string& str) {
+bool Application::try_application_command(std::string_view str) {
     if (command_map.has_command(str)) {
         command_map.execute(str, *this);
         return true;
@@ -179,7 +146,7 @@ bool Application::try_application_command(const std::string& str) {
 }
 
 
-bool Application::try_swizzle(const std::string& str) {
+bool Application::try_swizzle(std::string_view str) {
     // Swizzles take the pattern .rgba or .xyzw (or any combination)
     if (!str.starts_with('.')) { return false; }
     if (str.length() > 5) { return false; }
@@ -208,11 +175,11 @@ bool Application::try_swizzle(const std::string& str) {
                     case 'z':
                     case 'a':
                     case 'w':
-                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec2: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec2: '%s'", str.data()));
                         stack.push_items(std::move(source_value));
                         return true;
                     default:
-                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }
@@ -239,11 +206,11 @@ bool Application::try_swizzle(const std::string& str) {
                         break;
                     case 'a':
                     case 'w':
-                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec3: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Swizzle out of bounds for Vec3: '%s'", str.data()));
                         stack.push_items(std::move(source_value));
                         return true;
                     default:
-                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }
@@ -273,7 +240,7 @@ bool Application::try_swizzle(const std::string& str) {
                         values.push_back(value.a);
                         break;
                     default:
-                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.c_str()));
+                        p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
                         stack.push_items(std::move(source_value));
                         return true;
                 }

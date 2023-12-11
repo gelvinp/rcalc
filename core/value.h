@@ -24,7 +24,7 @@ enum Representation: uint8_t {
 
 class Value {
 public:
-    static std::optional<Value> parse(const std::string& str);
+    static std::optional<Value> parse(std::string_view str);
 
     static const char* get_type_name(Type type);
 
@@ -55,7 +55,7 @@ public:
     Value(Mat4 value, Representation repr = REPR_NONE);
     Value(Unit value, Representation repr = REPR_NONE);
 
-    static Value find_int(Real value, std::optional<const std::string*> source = std::nullopt, Representation repr = REPR_NONE);
+    static Value find_int(Real value, std::optional<std::string_view> source = std::nullopt, Representation repr = REPR_NONE);
 
     std::string to_string(DisplayableTag tags = DisplayableTag::NONE) const;
 
@@ -77,11 +77,11 @@ private:
     Type type : 4 = TYPE_INT;
     uint64_t data = 0;
 
-    static Value parse_numeric(const std::string& str, Value&& value, Representation repr = REPR_NONE);
-    static std::optional<Value> parse_real(std::string str);
+    static Value parse_numeric(std::string_view str, Value&& value, Representation repr = REPR_NONE);
+    static std::optional<Value> parse_real(std::string_view str);
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
-    static std::optional<Value> parse_unit(const std::string& str);
+    static std::optional<Value> parse_unit(std::string_view str);
 
     void ref();
     void unref();

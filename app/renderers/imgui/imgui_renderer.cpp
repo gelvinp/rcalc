@@ -21,9 +21,8 @@
 
 namespace RCalc {
 
-ImGuiRenderer::ImGuiRenderer(RendererCreateInfo&& info) :
-        cb_submit_text(std::move(info.cb_submit_text)),
-        cb_submit_op(std::move(info.cb_submit_op)),
+ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
+        cb_submit_text(cb_submit_text),
         command_map(CommandMap<ImGuiRenderer>::get_command_map()),
         backend(ImGuiBackend::get_platform_backend())
 {
@@ -31,8 +30,8 @@ ImGuiRenderer::ImGuiRenderer(RendererCreateInfo&& info) :
 }
 
 
-Result<> ImGuiRenderer::init(Application* p_application) {
-    Result<> res = backend.init(p_application);
+Result<> ImGuiRenderer::init() {
+    Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
 
     // Load font
@@ -379,13 +378,13 @@ void ImGuiRenderer::cleanup() {
 }
 
 
-void ImGuiRenderer::display_info(const std::string& str) {
+void ImGuiRenderer::display_info(std::string_view str) {
     message = str;
     message_is_error = false;
 }
 
 
-void ImGuiRenderer::display_error(const std::string& str) {
+void ImGuiRenderer::display_error(std::string_view str) {
     message = str;
     message_is_error = true;
 }
@@ -455,7 +454,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
                 self->scratchpad_needs_clear = true;
                 self->enter_pressed = false;
             }
-            self->cb_submit_op("add");
+            self->cb_submit_text("add");
             return 1;
         case '-':
             if (!self->scratchpad.empty()) {
@@ -463,7 +462,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
                 self->scratchpad_needs_clear = true;
                 self->enter_pressed = false;
             }
-            self->cb_submit_op("sub");
+            self->cb_submit_text("sub");
             return 1;
         case '*':
             if (!self->scratchpad.empty()) {
@@ -471,7 +470,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
                 self->scratchpad_needs_clear = true;
                 self->enter_pressed = false;
             }
-            self->cb_submit_op("mul");
+            self->cb_submit_text("mul");
             return 1;
         case '/':
             if (!self->scratchpad.empty()) {
@@ -479,7 +478,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
                 self->scratchpad_needs_clear = true;
                 self->enter_pressed = false;
             }
-            self->cb_submit_op("div");
+            self->cb_submit_text("div");
             return 1;
         default:
             return 0;
@@ -589,7 +588,7 @@ int ImGuiRenderer::scratchpad_input_completion_callback(ImGuiInputTextCallbackDa
 }
 
 
-bool ImGuiRenderer::try_renderer_command(const std::string& str) {
+bool ImGuiRenderer::try_renderer_command(std::string_view str) {
     if (command_map.has_command(str)) {
         command_map.execute(str, *this);
         return true;

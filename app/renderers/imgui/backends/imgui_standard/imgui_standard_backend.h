@@ -11,7 +11,7 @@ namespace RCalc {
 
 class ImGuiStandardBackend : ImGuiBackend {
 public:
-    virtual Result<> init(Application* p_application) override;
+    virtual Result<> init(Renderer::SubmitTextCallback cb_submit_text) override;
     virtual void cleanup() override;
 
     virtual void start_frame() override;

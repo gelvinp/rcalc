@@ -349,19 +349,18 @@ Value& Value::operator=(Value&& value) {
 }
 
 
-Value Value::find_int(Real value, std::optional<const std::string*> source, Representation repr) {
+Value Value::find_int(Real value, std::optional<std::string_view> source, Representation repr) {
     // No floating point, check for int64_t
     if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
         return Value(static_cast<Int>(value), repr);
     }
     if (source) {
-        const std::string* str = source.value();
-        if (str->starts_with("n")) {
-            std::string new_str(*str);
-            new_str.data()[0] = '-';
-            return Value(new_str, repr);
+        std::string str { source.value() };
+        if (str.starts_with("n")) {
+            str.data()[0] = '-';
+            return Value(str, repr);
         }
-        return Value(BigInt(*source.value()), repr);
+        return Value(BigInt(str), repr);
     }
 
     // BigInt, have to convert through string first
@@ -372,7 +371,7 @@ Value Value::find_int(Real value, std::optional<const std::string*> source, Repr
 
 #pragma region parse
 
-std::optional<Value> Value::parse(const std::string& str) {
+std::optional<Value> Value::parse(std::string_view str) {
     // Check for vec or mat
     if (str.starts_with('[')) { return parse_vec(str); }
     if (str.starts_with('{')) { return parse_mat(str); }
@@ -388,22 +387,22 @@ std::optional<Value> Value::parse(const std::string& str) {
     return std::nullopt;
 }
 
-Value Value::parse_numeric(const std::string& str, Value&& value, Representation repr) {
+Value Value::parse_numeric(std::string_view str, Value&& value, Representation repr) {
     // Check for floating point
     if (std::find(str.begin(), str.end(), '.') != str.end() || std::find(str.begin(), str.end(), 'e') != str.end()) {
         // Contains a decimal separator, treat as float
         return value;
     }
     
-    return find_int(value, &str, repr);
+    return find_int(value, str, repr);
 }
 
 
-std::optional<Value> Value::parse_real(std::string str) {
+std::optional<Value> Value::parse_real(std::string_view sv) {
     std::stringstream ss;
     bool negate = false;
 
-    std::string_view sv { str };
+    std::string str { sv };
 
     // Support 1en6
     auto exp_it = std::find(sv.begin(), sv.end(), 'e');
@@ -598,7 +597,7 @@ std::optional<Value> Value::parse_mat(std::string_view sv) {
     }
 }
 
-std::optional<Value> Value::parse_unit(const std::string& str) {
+std::optional<Value> Value::parse_unit(std::string_view str) {
     std::optional<Unit const*> unit = UnitsMap::get_units_map().find_unit(str);
     if (unit) { return Value(*unit.value()); }
     return std::nullopt;

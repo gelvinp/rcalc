@@ -15,8 +15,8 @@ ImGuiMacOSBackend::ImGuiMacOSBackend()
 {}
 
 
-Result<> ImGuiMacOSBackend::init(Application* p_application) {
-    binding.set_application(p_application);
+Result<> ImGuiMacOSBackend::init(Renderer::SubmitTextCallback cb_submit_text) {
+    binding.set_submit_text_callback(cb_submit_text);
     return binding.init();
 }
 

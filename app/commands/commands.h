@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <span>
+#include <string_view>
 #include <utility>
 
 #define REGISTER_COMMAND(scope, name) void _CMDIMPL_##name()
@@ -40,8 +41,8 @@ public:
     static CommandMap<Scope>& get_command_map();
 
     void activate();
-    bool has_command(const std::string& str);
-    void execute(const std::string& str, Scope& scope);
+    bool has_command(std::string_view str);
+    void execute(std::string_view str, Scope& scope);
 
 private:
     bool built = false;

@@ -1,4 +1,4 @@
-#if defined(ENABLE_PLATFORM_MACOS)
+#ifdef ENABLE_PLATFORM_MACOS
 
 #pragma once
 
@@ -12,7 +12,7 @@ class ImGuiMacOSBackend : public ImGuiBackend {
 public:
     ImGuiMacOSBackend();
 
-    virtual Result<> init(Application* p_application) override;
+    virtual Result<> init(Renderer::SubmitTextCallback cb_submit_text) override;
     virtual void cleanup() override;
 
     virtual void start_frame() override;

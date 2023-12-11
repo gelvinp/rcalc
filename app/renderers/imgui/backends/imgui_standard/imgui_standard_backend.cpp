@@ -25,8 +25,8 @@ static void glfw_error_callback(int error, const char* description) {
     Logger::log_err("[GLFW] Error %d: %s\n", error, description);
 }
 
-Result<> ImGuiStandardBackend::init(Application* p_application) {
-    IM_UNUSED(p_application);
+Result<> ImGuiStandardBackend::init(Renderer::SubmitTextCallback cb_submit_text) {
+    UNUSED(cb_submit_text);
 
     glfwSetErrorCallback(glfw_error_callback);
 

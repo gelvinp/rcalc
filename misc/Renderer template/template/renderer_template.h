@@ -7,16 +7,16 @@ namespace RCalc {
 
 class RendererTemplate : public Renderer {
 public:
-    RendererTemplate(RendererCreateInfo&& info);
+    RendererTemplate(SubmitTextCallback cb_submit_text);
 
-    virtual Result<> init(Application* p_application) override;
+    virtual Result<> init() override;
     virtual void render_loop() override;
     virtual void cleanup() override;
 
-    virtual void display_info(const std::string& str) override;
-    virtual void display_error(const std::string& str) override;
+    virtual void display_info(std::string_view str) override;
+    virtual void display_error(std::string_view str) override;
 
-    virtual bool try_renderer_command(const std::string& str) override;
+    virtual bool try_renderer_command(std::string_view str) override;
 
     virtual void add_stack_item(const StackItem& item) override;
     virtual void remove_stack_item() override;
