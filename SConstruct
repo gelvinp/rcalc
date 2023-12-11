@@ -121,6 +121,23 @@ if profile:
     elif os.path.isfile(profile + ".py"):
         opt_files.append(profile + ".py")
 
+optfile_values = {}
+
+for filename in opt_files:
+    if os.path.exists(filename):
+        optfile_dir = os.path.split(os.path.abspath(filename))[0]
+        if optfile_dir:
+            sys.path.insert(0, optfile_dir)
+        try:
+            optfile_values['__name__'] = filename
+            with open(filename) as f:
+                contents = f.read()
+            exec(contents, {}, optfile_values)
+        finally:
+            if optfile_dir:
+                del sys.path[0]
+            del optfile_values['__name__']
+
 opts = Variables(opt_files, ARGUMENTS)
 
 opts.Add("platform", "Target platform (%s)" % ("|".join(available_platforms)), "")
@@ -278,9 +295,10 @@ if selected_platform in available_platforms:
     env.Append(LINKFLAGS=str(LINKFLAGS).split())
 
     # Platform specific flags
+
     for flag in platform_flags[selected_platform]:
         # Overwrite if command line specifies non-auto value
-        if (not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto":
+        if (not flag[0] in optfile_values) and ((not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto"):
             env[flag[0]] = flag[1]
     
     detect.configure(env)
@@ -310,7 +328,7 @@ if selected_platform in available_platforms:
     env["default_renderer"] = default_renderer
     for flag in platform_flags[selected_platform]:
         # Overwrite if command line specifies non-auto value
-        if (not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto":
+        if (not flag[0] in optfile_values) and ((not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto"):
             env[flag[0]] = flag[1]
 
     for module_name in env.module_list:
