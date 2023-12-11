@@ -148,8 +148,10 @@ In no particular order:
 
 Please see the relevant wiki page for instructions:
 
-- [Adding new operators](https://github.com/gelvinp/rcalc/wiki/Adding-new-operators)
+- [Adding new assets](https://github.com/gelvinp/rcalc/wiki/Adding-new-assets)
 - [Adding new commands](https://github.com/gelvinp/rcalc/wiki/Adding-new-commands)
-- [Adding new units / unit families](https://github.com/gelvinp/rcalc/wiki/Adding-new-units)
+- [Adding new modules](https://github.com/gelvinp/rcalc/wiki/Adding-new-modules)
+- [Adding new operators](https://github.com/gelvinp/rcalc/wiki/Adding-new-operators)
 - [Adding new renderers](https://github.com/gelvinp/rcalc/wiki/Adding-new-renderers)
 - [Adding new types](https://github.com/gelvinp/rcalc/wiki/Adding-new-types)
+- [Adding new units / unit families](https://github.com/gelvinp/rcalc/wiki/Adding-new-units)
