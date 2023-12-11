@@ -1,5 +1,5 @@
 def get_priority():
-    return 1
+    return 5
 
 
 def is_available():
