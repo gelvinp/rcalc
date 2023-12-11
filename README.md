@@ -80,7 +80,7 @@ More details about SwiftRPN will be coming soon.
 
 ### Arch Linux
 
-RCalc has an official package in the AUR, simply install `rcalc` with your preferred AUR helper. The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
+RCalc has an official package in the AUR, simply install `rcalc` with your preferred AUR helper, or [download the PKGBUILD here](https://github.com/gelvinp/rcalc/releases/latest). The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
 
 ### Debian
 
@@ -136,7 +136,7 @@ For specific instructions for each platform, please see the relevant wiki page:
 In no particular order:
 
 - Publish iOS version
-- Publish iPadOS version
+- Create + publish iPadOS version
 - Add configurable precision framework, implement in iOS port
 - Add settings page to ImGui renderer including render scaling, default theme (light/dark/system?), precision
 - Add settings page to Terminal renderer for precision
