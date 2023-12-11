@@ -394,7 +394,6 @@ def package_static_lib(target, source, env):
         "core/filter.h",
         "core/anycase_str.h",
         "app/renderers/renderer.h",
-        "app/renderers/render_backend.h",
         "app/operators/operators.h",
         "app/operators/stats.h",
         "app/application.h",
@@ -433,7 +432,7 @@ def package_static_lib(target, source, env):
     with open(os.path.join(include_dir, "module.modulemap"), 'w') as f:
         f.write('\n'.join(modulemap))
     
-    shutil.make_archive(target[0], "zip", working_dir, ".")
+    shutil.make_archive(target[0] + env.combined_suffix, "zip", working_dir, ".")
 
     shutil.rmtree(working_dir)
     shutil.rmtree(env["staticlib_working_dir"])

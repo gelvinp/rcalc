@@ -408,12 +408,15 @@ if selected_platform in available_platforms:
     suffix += "." + env["arch"]
     suffix += env.extra_suffix
 
+    env.combined_suffix = suffix
+
     methods.generate_version_header()
 
     env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
     env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
     env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
     env["GENSUFFIX"] = ''.join([f'.{r}' for r in env["enabled_command_scopes"]]) + ".gen"
+    
 
     # compile_commands.json
     env.Tool("compilation_db")

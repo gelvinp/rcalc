@@ -56,7 +56,7 @@ def configure(env: "Environment"):
 
     if env["build_type"] != "staticlib":
         print("iOS builds are only supported as a static library. Please re-run with 'build_type=staticlib'")
-        sys.exit(2550)
+        sys.exit(255)
     
     env["lto"] = "none"
 
@@ -100,7 +100,7 @@ def configure(env: "Environment"):
             CCFLAGS=(
                 "-fobjc-arc -arch x86_64"
                 " -fobjc-abi-version=2 -fobjc-legacy-dispatch -fmessage-length=0 -fpascal-strings -fblocks"
-                " -fasm-blocks -isysroot $IOS_SDK_PATH"
+                f" -fasm-blocks -isysroot \"{env['IOS_SDK_PATH']}\""
             ).split()
         )
         env.Append(ASFLAGS=["-arch", "x86_64"])
@@ -110,8 +110,8 @@ def configure(env: "Environment"):
                 "-fobjc-arc -arch arm64 -fmessage-length=0 -fno-strict-aliasing"
                 " -fdiagnostics-print-source-range-info -fdiagnostics-show-category=id -fdiagnostics-parseable-fixits"
                 " -fpascal-strings -fblocks -fvisibility=hidden -MMD -MT dependencies"
-                " -isysroot $IOS_SDK_PATH".split()
-            )
+                f" -isysroot \"{env['IOS_SDK_PATH']}\""
+            ).split()
         )
         env.Append(ASFLAGS=["-arch", "arm64"])
         env.Append(CPPDEFINES=["NEED_LONG_INT"])
