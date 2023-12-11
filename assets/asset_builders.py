@@ -22,10 +22,10 @@ def embed_asset(target, source, env):
 
     with open(dst, "w") as g:
         g.write("/* THIS FILE IS GENERATED DO NOT EDIT */\n")
-        g.write("#pragma once\n")
-        g.write("namespace RCalc::Assets {\n")
-        g.write(f"static const size_t {asset_name}_size = {len(buf)};\n")
-        g.write(f"static const unsigned char {asset_name}[] = {{\n")
+        g.write("#pragma once\n\n")
+        g.write("#include <array>\n\n")
+        g.write("namespace RCalc::Assets {\n\n")
+        g.write(f"constexpr const std::array<unsigned char, {len(buf)}> {asset_name} = {{\n")
         for i in range(len(buf)):
             g.write(str(buf[i]) + ",\n")
         g.write("};\n")

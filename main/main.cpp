@@ -17,12 +17,11 @@
 
 int main(int argc, char** pp_argv)
 {
-    Main m;
-
     Allocator::setup();
-
-    RCalc::AppConfig config = m.parse_args(argc, pp_argv);
     RCalc::initialize_modules();
+    
+    Main m;
+    RCalc::AppConfig config = m.parse_args(argc, pp_argv);
 
     RCalc::Result<RCalc::Application*> res = RCalc::Application::create(config);
     
