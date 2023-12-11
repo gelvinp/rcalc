@@ -49,9 +49,9 @@ Result<> ImGuiRenderer::init() {
     float font_size_medium = std::floor(18 * screen_dpi);
     float font_size_large = std::floor(24 * screen_dpi);
 
-    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), Assets::b612mono_regular_ttf.size(), font_size_standard, &font_cfg, &glyph_ranges[0]);
-    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), Assets::b612mono_regular_ttf.size(), font_size_medium, &font_cfg, &glyph_ranges[0]);
-    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), Assets::b612mono_regular_ttf.size(), font_size_large, &font_cfg, &glyph_ranges[0]);
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_standard, &font_cfg, &glyph_ranges[0]);
+    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_medium, &font_cfg, &glyph_ranges[0]);
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_large, &font_cfg, &glyph_ranges[0]);
 
     io.FontGlobalScale = 1.0f / screen_dpi;
 

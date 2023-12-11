@@ -152,7 +152,7 @@ bool Application::try_swizzle(std::string_view str) {
     if (str.length() > 5) { return false; }
 
     std::string pattern { str.data() + 1, str.length() - 1 };
-    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return std::tolower(c); });
+    std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     CowVec<Real> values;
     CowVec<StackItem> source_value = stack.pop_items(1);
 

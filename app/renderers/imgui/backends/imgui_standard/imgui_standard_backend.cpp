@@ -46,7 +46,7 @@ Result<> ImGuiStandardBackend::init(Renderer::SubmitTextCallback cb_submit_text)
 
     // Set app icon
     int x, y, n;
-    unsigned char* icon = stbi_load_from_memory(Assets::app_icon_png, Assets::app_icon_png_size, &x, &y, &n, 4);
+    unsigned char* icon = stbi_load_from_memory(Assets::app_icon_png.data(), (int)Assets::app_icon_png.size(), &x, &y, &n, 4);
     GLFWimage glfw_icon { 256, 256, icon };
     glfwSetWindowIcon(p_window, 1, &glfw_icon);
     stbi_image_free(icon);

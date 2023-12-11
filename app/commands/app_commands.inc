@@ -38,7 +38,7 @@ RCALC_CMD(Application, Count) {
     size_t count = stack.size();
 
     // No floating point, check for int64_t
-    if (count > std::numeric_limits<int64_t>::max()) {
+    if (count > (size_t)std::numeric_limits<int64_t>::max()) {
         Value value { BigInt((long long int)count) };
         stack.push_item(StackItem {
             create_displayables_from("count"),

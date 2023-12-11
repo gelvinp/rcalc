@@ -234,8 +234,8 @@ std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
         throw std::logic_error("Allocator is not currently thread safe!");
     }
     #endif
-    size_t chunk_count = bytes_to_chunk_count(size_bytes) + 1;
-    std::optional<Chunk*> op_chunk = get_first_contiguous(chunk_count);
+    size_t chunk_count_with_header = bytes_to_chunk_count(size_bytes) + 1;
+    std::optional<Chunk*> op_chunk = get_first_contiguous(chunk_count_with_header);
     
     if (!op_chunk.has_value()) {
         return std::nullopt;
@@ -248,8 +248,8 @@ std::optional<void*> Allocator::Page::reserve(size_t size_bytes) {
     if (void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->p_next != op_chunk.value()) {
         throw std::logic_error("Header is malformed!");
     }
-    if (void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size != chunk_count) {
-        RCalc::Logger::log("Page reserve contiguous size (%d) is not what was expected (%d)!", void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size, chunk_count);
+    if (void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size != chunk_count_with_header) {
+        RCalc::Logger::log("Page reserve contiguous size (%d) is not what was expected (%d)!", void_to_header_addr(chunk_to_void_addr(op_chunk.value()))->contiguous_size, chunk_count_with_header);
         throw std::logic_error("Page reserve contiguous size is not what was expected!");
     }
     #endif
@@ -317,13 +317,13 @@ size_t Allocator::Page::bytes_to_chunk_count(size_t bytes) const {
 }
 
 
-std::optional<Allocator::Page::Chunk*> Allocator::Page::get_first_contiguous(size_t chunk_count) {
+std::optional<Allocator::Page::Chunk*> Allocator::Page::get_first_contiguous(size_t contiguous_chunk_count) {
     ENSURE_CORRECTNESS();
 
     Chunk* p_previous = nullptr;
     Chunk* p_found = nullptr;
     for (Chunk* p_contiguous_start = p_free; p_contiguous_start != nullptr; p_contiguous_start = p_contiguous_start->p_next) {
-        if (p_contiguous_start->contiguous_size >= chunk_count) {
+        if (p_contiguous_start->contiguous_size >= contiguous_chunk_count) {
             p_found = p_contiguous_start;
             break;
         }
@@ -334,13 +334,13 @@ std::optional<Allocator::Page::Chunk*> Allocator::Page::get_first_contiguous(siz
         return std::nullopt;
     }
 
-    if (p_found->contiguous_size > chunk_count) {
+    if (p_found->contiguous_size > contiguous_chunk_count) {
         // Shrink contiguous region first
-        Chunk* p_remainder = p_found + chunk_count;
-        p_remainder->contiguous_size = p_found->contiguous_size - chunk_count;
+        Chunk* p_remainder = p_found + contiguous_chunk_count;
+        p_remainder->contiguous_size = p_found->contiguous_size - contiguous_chunk_count;
         p_remainder->p_next = p_found->p_next;
 
-        p_found->contiguous_size = chunk_count;
+        p_found->contiguous_size = contiguous_chunk_count;
         p_found->p_next = p_remainder;
     }
 
@@ -368,13 +368,13 @@ bool Allocator::Page::extend_contiguous_from(Chunk* p_from, size_t new_chunk_cou
     ENSURE_CORRECTNESS();
 
     Chunk* p_target = p_from + p_from->contiguous_size;
-    size_t chunk_count = new_chunk_count - p_from->contiguous_size;
+    size_t additional_chunk_count = new_chunk_count - p_from->contiguous_size;
 
     Chunk* p_previous = nullptr;
     Chunk* p_found = nullptr;
     for (Chunk* p_contiguous_start = p_free; p_contiguous_start != nullptr; p_contiguous_start = p_contiguous_start->p_next) {
         if (p_contiguous_start == p_target) {
-            if (p_contiguous_start->contiguous_size >= chunk_count) {
+            if (p_contiguous_start->contiguous_size >= additional_chunk_count) {
                 p_found = p_contiguous_start;
             }
             break;
@@ -391,13 +391,13 @@ bool Allocator::Page::extend_contiguous_from(Chunk* p_from, size_t new_chunk_cou
         return false;
     }
 
-    if (p_found->contiguous_size > chunk_count) {
+    if (p_found->contiguous_size > additional_chunk_count) {
         // Shrink contiguous region first
-        Chunk* p_remainder = p_found + chunk_count;
-        p_remainder->contiguous_size = p_found->contiguous_size - chunk_count;
+        Chunk* p_remainder = p_found + additional_chunk_count;
+        p_remainder->contiguous_size = p_found->contiguous_size - additional_chunk_count;
         p_remainder->p_next = p_found->p_next;
 
-        p_found->contiguous_size = chunk_count;
+        p_found->contiguous_size = additional_chunk_count;
         p_found->p_next = p_remainder;
     }
 

@@ -90,7 +90,7 @@ private:
         Chunk* void_to_header_addr(void* p_void_addr) const;
         size_t bytes_to_chunk_count(size_t bytes) const;
 
-        std::optional<Chunk*> get_first_contiguous(size_t chunk_count);
+        std::optional<Chunk*> get_first_contiguous(size_t contiguous_chunk_count);
         bool extend_contiguous_from(Chunk* p_from, size_t new_chunk_count);
         void reincorporate_contiguous(Chunk* p_chunk);
 

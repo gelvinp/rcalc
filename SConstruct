@@ -391,10 +391,10 @@ if selected_platform in available_platforms:
             print("Detected GCC version < 10, which does not support C++20")
             sys.exit(255)
 
-    env.Append(CCFLAGS=["-Wall", "-Wextra"])
-    if env["target"] == "release":
-        env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
-        env.Append(CPPDEFINES=["NDEBUG"])
+        env.Append(CCFLAGS=["-Wall", "-Wextra"])
+        if env["target"] == "release":
+            env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
+            env.Append(CPPDEFINES=["NDEBUG"])
     
     if env["debug_alloc"]:
         env.Append(CPPDEFINES=["DEBUG_ALLOC"])

@@ -362,7 +362,7 @@ RCALC_FMT_1(Det, arg0) {
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Col, Mat2, Int, arg0, arg1) {
     if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat2", arg1)); }
-    return Ok(Value(arg0[arg1]));
+    return Ok(Value(arg0[(Mat2::length_type)arg1]));
 }
 
 // @RCalcOperator
@@ -370,7 +370,7 @@ RCALC_OP_2(Col, Mat2, Int, arg0, arg1) {
 // Requires: "core/format.h"
 RCALC_OP_2(Col, Mat3, Int, arg0, arg1) {
     if (arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat3", arg1)); }
-    return Ok(Value(arg0[arg1]));
+    return Ok(Value(arg0[(Mat2::length_type)arg1]));
 }
 
 // @RCalcOperator
@@ -378,7 +378,7 @@ RCALC_OP_2(Col, Mat3, Int, arg0, arg1) {
 // Requires: "core/format.h"
 RCALC_OP_2(Col, Mat4, Int, arg0, arg1) {
     if (arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat4", arg1)); }
-    return Ok(Value(arg0[arg1]));
+    return Ok(Value(arg0[(Mat2::length_type)arg1]));
 }
 
 RCALC_FMT_2(Col, arg0, arg1) {
@@ -395,7 +395,7 @@ RCALC_FMT_2(Col, arg0, arg1) {
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Row, Mat2, Int, arg0, arg1) {
     if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat2", arg1)); }
-    return Ok(Value(glm::transpose(arg0)[arg1]));
+    return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
 }
 
 // @RCalcOperator
@@ -403,7 +403,7 @@ RCALC_OP_2(Row, Mat2, Int, arg0, arg1) {
 // Requires: "core/format.h"
 RCALC_OP_2(Row, Mat3, Int, arg0, arg1) {
     if (arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat3", arg1)); }
-    return Ok(Value(glm::transpose(arg0)[arg1]));
+    return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
 }
 
 // @RCalcOperator
@@ -411,7 +411,7 @@ RCALC_OP_2(Row, Mat3, Int, arg0, arg1) {
 // Requires: "core/format.h"
 RCALC_OP_2(Row, Mat4, Int, arg0, arg1) {
     if (arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat4", arg1)); }
-    return Ok(Value(glm::transpose(arg0)[arg1]));
+    return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
 }
 
 RCALC_FMT_2(Row, arg0, arg1) {
