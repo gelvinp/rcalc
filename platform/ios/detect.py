@@ -53,6 +53,10 @@ def configure(env: "Environment"):
         )
 
         sys.exit(255)
+
+    if env["build_type"] != "staticlib":
+        print("iOS builds are only supported as a static library. Please re-run with 'build_type=staticlib'")
+        sys.exit(2550)
     
     env["lto"] = "none"
 
