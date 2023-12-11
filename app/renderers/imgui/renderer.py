@@ -16,6 +16,8 @@ def meta():
 
 
 def configure(env: "Environment"):
+    env["enabled_command_scopes"].append(meta()['class'])
+
     if env["platform"] == "win" and env["windows_subsystem"] == "console":
         print("The ImGui renderer does NOT work on windows with the console subsystem!")
         print("Either...")
@@ -36,5 +38,3 @@ def configure(env: "Environment"):
             "imgui_opengl3",
             "stb_image"
         ])
-    
-    env["enabled_command_scopes"].append("ImGuiRenderer")

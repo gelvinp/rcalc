@@ -14,4 +14,4 @@ def meta():
 
 
 def configure(env: "Environment"):
-    env["enabled_command_scopes"].append("RendererTemplate")
+    env["enabled_command_scopes"].append(meta()['class'])
