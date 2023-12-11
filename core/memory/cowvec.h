@@ -2,6 +2,7 @@
 
 #include "allocator.h"
 
+#include <bit>
 #include <cstring>
 
 

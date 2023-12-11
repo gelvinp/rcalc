@@ -382,6 +382,7 @@ def package_static_lib(target, source, env):
     os.mkdir(include_dir)
 
     headers = [
+        "core/coredef.h",
         "core/error.h",
         "core/version.h",
         "core/types.h",
@@ -393,6 +394,8 @@ def package_static_lib(target, source, env):
         "core/format.h",
         "core/filter.h",
         "core/anycase_str.h",
+        "core/memory/allocator.h",
+        "core/memory/cowvec.h",
         "app/renderers/renderer.h",
         "app/operators/operators.h",
         "app/operators/stats.h",
