@@ -23,6 +23,7 @@ def get_opts():
     return [
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
         BoolVariable("use_asan", "Compile with -fsanitize=address", False),
+        BoolVariable("use_coverage", "Compile with the needed flags to measure test coverage", False),
         EnumVariable(
             "windowing",
             help="windowing system to use",
@@ -81,6 +82,10 @@ def configure(env: "Environment"):
         env["lto"] = "none"
     
     env.Append(CCFLAGS=["-pipe"])
+
+    if env["use_coverage"]:
+        env.Append(CCFLAGS=["--coverage"])
+        env.Append(LINKFLAGS=["--coverage"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_LINUX"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])

@@ -163,6 +163,9 @@ for renderer in available_renderers:
 
 opts.Update(env_base)
 
+opts.Add(BoolVariable("tests_enabled", "Enable running tests from the command line.", env_base["target"] == "debug"))
+opts.Update(env_base)
+
 # Select platform
 selected_platform = ""
 
@@ -303,6 +306,9 @@ if selected_platform in available_platforms:
     
     detect.configure(env)
 
+    if env["tests_enabled"]:
+        env["enabled_modules"].append("snitch")
+
     # Now that everything else has had a chance to configure, we can properly detect and configure modules
     env.module_list = methods.detect_modules("modules", env["enabled_modules"])
     methods.write_modules(env.module_list)
@@ -399,6 +405,9 @@ if selected_platform in available_platforms:
     if env["debug_alloc"]:
         env.Append(CPPDEFINES=["DEBUG_ALLOC"])
 
+    if env["tests_enabled"]:
+        env.Append(CPPDEFINES=["TESTS_ENABLED"])
+
     if hasattr(detect, "get_program_suffix"):
         suffix = "." + detect.get_program_suffix()
     else:
@@ -435,6 +444,7 @@ if selected_platform in available_platforms:
     SConscript("core/SCsub")
     SConscript("app/SCsub")
     SConscript("platform/SCsub")
+    SConscript("tests/SCsub")
     SConscript("main/SCsub")
 
     # Prevent from using C compiler (can't infer without sources)

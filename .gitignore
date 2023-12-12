@@ -320,3 +320,9 @@ heaptrack*.zst
 *.pdb
 
 rcalc_dump.json
+
+# Code coverage
+*.gcda
+*.gcno
+coverage.info
+coverage.gen/

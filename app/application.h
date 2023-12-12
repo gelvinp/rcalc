@@ -4,10 +4,12 @@
 #include "app/renderers/renderer.h"
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
+#include "tests/test_config.h"
 
 #include <functional>
 #include <string>
 #include <string_view>
+#include <optional>
 
 namespace RCalc {
 
@@ -15,6 +17,10 @@ struct AppConfig {
     bool quiet = false;
     bool verbose = false;
     std::string renderer_name;
+
+    #ifdef TESTS_ENABLED
+    std::optional<TestConfig> test_config;
+    #endif
 };
 
 class Application {

@@ -1,0 +1,29 @@
+import sys
+
+Import("env")
+
+sources = [
+    "upstream/src/snitch_append.cpp",
+    "upstream/src/snitch_capture.cpp",
+    "upstream/src/snitch_cli.cpp",
+    "upstream/src/snitch_console.cpp",
+    "upstream/src/snitch_error_handling.cpp",
+    "upstream/src/snitch_file.cpp",
+    "upstream/src/snitch_main.cpp",
+    "upstream/src/snitch_matcher.cpp",
+    "upstream/src/snitch_registry.cpp",
+    "upstream/src/snitch_reporter_catch2_xml.cpp",
+    "upstream/src/snitch_reporter_console.cpp",
+    "upstream/src/snitch_reporter_teamcity.cpp",
+    "upstream/src/snitch_section.cpp",
+    "upstream/src/snitch_string_utility.cpp",
+    "upstream/src/snitch_test_data.cpp"
+]
+
+env_snitch = env.Clone()
+if "-Werror" in env_snitch["CCFLAGS"]:
+    env_snitch["CCFLAGS"].remove("-Werror")
+if "/WX" in env_snitch["CCFLAGS"]:
+    env_snitch["CCFLAGS"].remove("/WX")
+
+env_snitch.add_source_files(env.modules_sources, sources)

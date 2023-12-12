@@ -8,6 +8,7 @@
 #include "core/memory/allocator.h"
 #include "app/displayable/displayable.h"
 #include "app/dump/dump.h"
+#include "tests/test_main.h"
 
 #include <iostream>
 #include <string_view>
@@ -22,6 +23,17 @@ int main(int argc, char** pp_argv)
     
     Main m;
     RCalc::AppConfig config = m.parse_args(argc, pp_argv);
+
+    #ifdef TESTS_ENABLED
+    if (config.test_config && config.test_config->run_tests) {
+        int res = RCalc::test_main(config.test_config.value());
+        
+        RCalc::cleanup_modules();
+        Allocator::cleanup();
+
+        return res;
+    }
+    #endif
 
     RCalc::Result<RCalc::Application*> res = RCalc::Application::create(config);
     
@@ -101,6 +113,21 @@ void Main::print_help(bool print_description)
     #ifndef NDEBUG
     std::cout << "Debug Options:\n";
     std::cout << "  --dump-info                 Dump the application info to JSON.\n";
+    std::cout << "\n";
+    #endif
+
+    #ifdef TESTS_ENABLED
+    std::cout << "Test Options:\n";
+    std::cout << "  --run-tests                 Run the tests.\n";
+    std::cout << "  --filter <filter>           Use <filter> to select which tests to run.\n";
+    std::cout << "        Can provide multiple times for AND logic, or provide comma separated for OR logic.\n";
+    std::cout << "        Multiple tags in the same filter are combined with AND logic.\n";
+    std::cout << "        Maximum of 8 filters can be provided at once.\n";
+    std::cout << "\n";
+    std::cout << "  --list-tests                List all tests.\n";
+    std::cout << "  --list-tags                 List all test tags.\n";
+    std::cout << "  --list-tests-with-tag <tag> List all tests with the given tag.\n";
+    std::cout << "  --monochrome                Disable colors in the test output.\n";
     std::cout << "\n";
     #endif
 }
@@ -189,7 +216,12 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
 
         if (arg->compare("--renderer") == 0)
         {
-            config.renderer_name = validate_renderer(++arg);
+            if (++arg == args.end()) {
+                std::cout << "Error: No renderer specified!\n\n";
+                print_help();
+                exit(255);
+            }
+            config.renderer_name = validate_renderer(arg);
             continue;
         }
 
@@ -209,6 +241,104 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
         }
         #endif
 
+        #ifdef TESTS_ENABLED
+        if (
+            arg->compare("--run-tests") == 0
+        ) {
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            if (config.test_config->command_given.has_value()) {
+                std::cout << "Ignoring '--run-tests', already given command '" << config.test_config->command_given.value() << "'\n";
+                exit(255);
+            }
+            config.test_config->command_given = "--run-tests";
+            config.test_config->run_tests = true;
+            continue;
+        }
+
+        if (arg->compare("--filter") == 0)
+        {
+            if (++arg == args.end()) {
+                std::cout << "Error: No filter specified!\n\n";
+                print_help();
+                exit(255);
+            }
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            if (config.test_config->filter_count >= 8) {
+                std::cout << "Error: Too many filters specified! (Maximum: 8)\n";
+                exit(255);
+            }
+            config.test_config->filters[config.test_config->filter_count++] = *arg;
+            continue;
+        }
+
+        if (
+            arg->compare("--list-tests") == 0
+        ) {
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            if (config.test_config->command_given.has_value()) {
+                std::cout << "Ignoring '--run-tests', already given command '" << config.test_config->command_given.value() << "'\n";
+                exit(255);
+            }
+            config.test_config->command_given = "--list-tests";
+            config.test_config->list_tests = true;
+            config.test_config->run_tests = true;
+            continue;
+        }
+
+        if (
+            arg->compare("--list-tags") == 0
+        ) {
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            if (config.test_config->command_given.has_value()) {
+                std::cout << "Ignoring '--run-tests', already given command '" << config.test_config->command_given.value() << "'\n";
+                exit(255);
+            }
+            config.test_config->command_given = "--list-tags";
+            config.test_config->list_tags = true;
+            config.test_config->run_tests = true;
+            continue;
+        }
+
+        if (
+            arg->compare("--list-tests-with-tag") == 0
+        ) {
+            if (++arg == args.end()) {
+                std::cout << "Error: No tag specified!\n\n";
+                print_help();
+                exit(255);
+            }
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            if (config.test_config->command_given.has_value()) {
+                std::cout << "Ignoring '--run-tests', already given command '" << config.test_config->command_given.value() << "'\n";
+                exit(255);
+            }
+            config.test_config->command_given = "--list-tests-with-tag";
+            config.test_config->list_tests = true;
+            config.test_config->list_test_tag = (arg)->data();
+            config.test_config->run_tests = true;
+            continue;
+        }
+
+        if (
+            arg->compare("--monochrome") == 0
+        ) {
+            if (!config.test_config.has_value()) {
+                config.test_config = RCalc::TestConfig();
+            }
+            config.test_config->monochrome = true;
+            continue;
+        }
+        #endif
         
         std::cout << "Unrecognized option: " << *arg << "\n";
         print_help(false);

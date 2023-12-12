@@ -1,0 +1,13 @@
+Import('env')
+
+if not env["tests_enabled"]:
+    Return()
+
+env.test_sources = []
+env_tests = env.Clone()
+
+env_tests.add_source_files(env.test_sources, "core/*.cpp")
+
+env_tests.add_source_files(env.test_sources, "*.cpp")
+
+env["extra_sources"].extend(env.test_sources)

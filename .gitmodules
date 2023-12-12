@@ -10,3 +10,6 @@
 [submodule "modules/clip/upstream"]
 	path = modules/clip/upstream
 	url = https://github.com/dacap/clip
+[submodule "modules/snitch/upstream"]
+	path = modules/snitch/upstream
+	url = https://github.com/snitch-org/snitch
