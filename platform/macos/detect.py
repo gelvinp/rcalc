@@ -25,7 +25,8 @@ def get_opts():
     from SCons.Variables import BoolVariable
 
     return [
-        BoolVariable("use_asan", "Compile with -fsanitize=address", False)
+        BoolVariable("use_asan", "Compile with -fsanitize=address", False),
+        BoolVariable("use_coverage", "Compile with the needed flags to measure test coverage", False),
     ]
 
 
@@ -68,6 +69,10 @@ def configure(env: "Environment"):
     env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
     
     env.Append(CCFLAGS=["-pipe"])
+
+    if env["use_coverage"]:
+        env.Append(CCFLAGS=["--coverage"])
+        env.Append(LINKFLAGS=["--coverage"])
 
     env.Append(CPPDEFINES=["ENABLE_PLATFORM_MACOS"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
