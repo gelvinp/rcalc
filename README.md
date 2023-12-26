@@ -39,7 +39,7 @@ For a complete listing of operators you can see the in-app help menu or the [Ope
 
 ### Unit Conversions
 
-RCalc has 71 built-in units, and can convert between units within families, including:
+RCalc has 74 built-in units, and can convert between units within families, including:
 
 - Angle
 - Area
