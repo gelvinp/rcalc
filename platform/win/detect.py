@@ -6,6 +6,7 @@ import methods
 
 # To match other platforms
 STACK_SIZE = 8388608
+HEAP_SIZE = 8388608
 
 def get_name():
     return "Windows"
@@ -370,6 +371,7 @@ def configure_msvc(env, vcvars_msvc_config):
     env["BUILDERS"]["Program"] = methods.precious_program
 
     env.AppendUnique(LINKFLAGS=["/STACK:" + str(STACK_SIZE)])
+    env.AppendUnique(LINKFLAGS=["/HEAP:" + str(STACK_SIZE)])
     env["lto"] = "none"
 
 

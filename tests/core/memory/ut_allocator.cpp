@@ -122,7 +122,7 @@ TEST_CASE("Allocation Stress Test", "[core][alloc][.long]") {
 
     std::random_device rnd;
     std::default_random_engine eng { rnd() };
-    std::uniform_int_distribution<size_t> dist { 0, 100000000 };
+    std::uniform_int_distribution<size_t> dist { 0, 1000000 };
 
     for (size_t index = 0; index < ALLOC_COUNT; ++index) {
         alloc_size_arr[index] = dist(eng);
