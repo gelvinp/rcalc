@@ -328,10 +328,21 @@ if selected_platform in available_platforms:
             sys.path.remove(tmp_path)
             sys.modules.pop("module")
 
+    CCFLAGS = env["CCFLAGS"]
+    CFLAGS = env["CFLAGS"]
+    CXXFLAGS = env["CXXFLAGS"]
+    LINKFLAGS = env["LINKFLAGS"]
+
     opts.Update(env)
     env["platform"] = selected_platform
     env["enabled_renderers"] = enabled_renderers
     env["default_renderer"] = default_renderer
+
+    env["CCFLAGS"] = CCFLAGS
+    env["CFLAGS"] = CFLAGS
+    env["CXXFLAGS"] = CXXFLAGS
+    env["LINKFLAGS"] = LINKFLAGS
+
     for flag in platform_flags[selected_platform]:
         # Overwrite if command line specifies non-auto value
         if (not flag[0] in optfile_values) and ((not flag[0] in ARGUMENTS) or ARGUMENTS[flag[0]] == "auto"):
