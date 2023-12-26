@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.3.0 - 2023-12-26
 
 ### Added
 
 - Byte unit family (Power of 2 and power of 10).
+- Add days, weeks, and Julian years (365.25 days) to the Time unit family.
 - Undo command (reset stack to before previous action).
 
 ### Changed
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correctly display non-decimal values in the terminal renderer.
 - Fix background misalignment for some colored text in the ImGui renderer.
 - Use the correct function for calculating the cube root.
+- Fix autocomplete behavior for suggesting operators and units.
 
 ## [1.2.0] - 2023-10-31
 
