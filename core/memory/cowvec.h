@@ -5,6 +5,7 @@
 
 #include <bit>
 #include <cstring>
+#include <stdexcept>
 
 
 template<typename T>
