@@ -66,29 +66,29 @@ RCalc recognizes values represented in binary, octal, decimal, and hexidecimal. 
 
 RCalc runs in a lot of places, in a lot of ways. You can run RCalc on:
 
-- Linux, with an official package in the Arch AUR, and an official Debian package in development,
+- Linux, with a maintained package in the Arch AUR, and a maintained Debian package in development,
 - MacOS, with integration into the native menu bar,
 - and Windows, either portably or with an installer for a start menu entry.
 
 Additionally, RCalc can run in different modes, either graphically with an ImGui frontend or text-based with a FTXUI frontend.
 Use the same familiar calculator on all of your computers, over SSH, and on servers with no display server (when compiled for that purpose).
 
-Finally, RCalc can be used as a component in other software, such as an (in-development) official iOS/iPadOS port called SwiftRPN.
+Finally, RCalc can be used as a component in other software, such as an (in-development) iOS/iPadOS port called SwiftRPN.
 More details about SwiftRPN will be coming soon.
 
 ## Install
 
 ### Arch Linux
 
-RCalc has an official package in the AUR, simply install `rcalc` with your preferred AUR helper, or [download the PKGBUILD here](https://github.com/gelvinp/rcalc/releases/latest). The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
+RCalc has a maintained package in the AUR, simply install `rcalc` with your preferred AUR helper, or [download the PKGBUILD here](https://github.com/gelvinp/rcalc/releases/latest). The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
 
 ### Debian
 
-An official Debian package is in the works. Until then, you may find success using the `debian` branch to build a .deb package.
+A maintained Debian package is in the works. Until then, you may find success using the `debian` branch to build a .deb package.
 
 ### MacOS
 
-RCalc is available as an official signed and notarized package for MacOS. [Download it here](https://github.com/gelvinp/rcalc/releases/latest).
+RCalc is available as a maintained signed and notarized package for MacOS. [Download it here](https://github.com/gelvinp/rcalc/releases/latest).
 It probably supports OSX 10.13 or later for x64 based Macs, and MacOS 11 or later for arm64 (Apple Silicon) based Macs,
 however I am unable to test this, so I just have to trust that apple-clang does what I want it to do.
 

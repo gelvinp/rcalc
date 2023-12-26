@@ -1,6 +1,7 @@
 #pragma once
 
 #include "allocator.h"
+#include "core/logger.h"
 
 #include <bit>
 #include <cstring>
@@ -36,8 +37,9 @@ public:
         unref();
     }
 
-    CowVec& operator=(CowVec other) {
-        swap(*this, other);
+    CowVec& operator=(const CowVec& other) {
+        CowVec swap_target { other };
+        swap(*this, swap_target);
         return *this;
     }
     CowVec& operator=(CowVec&& other) {
@@ -207,9 +209,8 @@ public:
         friend Iterator operator-(Iterator a, difference_type b) { return a -= b; }
 
         friend Iterator operator+(difference_type b, Iterator a) { return a += b; }
-        friend Iterator operator-(difference_type b, Iterator a) { return a -= b; }
 
-        friend difference_type operator-(Iterator a, const Iterator& b) { return b.ptr - a.ptr; }
+        friend difference_type operator-(Iterator a, const Iterator& b) { return a.ptr - b.ptr; }
 
     private:
         pointer ptr = nullptr;
@@ -248,9 +249,8 @@ public:
         friend ConstIterator operator-(ConstIterator a, difference_type b) { return a -= b; }
 
         friend ConstIterator operator+(difference_type b, ConstIterator a) { return a += b; }
-        friend ConstIterator operator-(difference_type b, ConstIterator a) { return a -= b; }
 
-        friend difference_type operator-(ConstIterator a, const ConstIterator& b) { return b.ptr - a.ptr; }
+        friend difference_type operator-(ConstIterator a, const ConstIterator& b) { return a.ptr - b.ptr; }
 
     private:
         pointer ptr = nullptr;
@@ -320,7 +320,23 @@ public:
         return p_data->ptr[p_data->size - 1];
     }
 
+    void unref() {
+        if (p_data == nullptr) { return; }
+        if (--p_data->refcount > 0) { p_data = nullptr; return; }
+
+        if (!std::is_trivially_destructible<T>::value) {
+            for (size_t index = 0; index < p_data->size; ++index) {
+                p_data->ptr[index].~T();
+            }
+        }
+
+        Allocator::free(reinterpret_cast<void*>(p_data));
+        p_data = nullptr;
+    }
+
+#ifndef TESTS_ENABLED
 private:
+#endif
     struct CowData {
         size_t refcount;
         size_t size;
@@ -357,34 +373,22 @@ private:
         }
     }
 
+    static constexpr const size_t INITIAL_CAPACITY = 4;
+
     void ensure_capacity_for_new_element() {
         size_t cap = capacity();
         if (size() + 1 <= cap) { return; }
 
         size_t next_cap;
         
-        if (cap < 4) {
-            next_cap = 4;
+        if (cap < INITIAL_CAPACITY) {
+            next_cap = INITIAL_CAPACITY;
         }
         else {
             next_cap = std::bit_ceil(cap + 1);
         }
 
         reserve(next_cap);
-    }
-
-    void unref() {
-        if (p_data == nullptr) { return; }
-        if (--p_data->refcount > 0) { return; }
-
-        if (!std::is_trivially_destructible<T>::value) {
-            for (size_t index = 0; index < p_data->size; ++index) {
-                p_data->ptr[index].~T();
-            }
-        }
-
-        Allocator::free(reinterpret_cast<void*>(p_data));
-        p_data = nullptr;
     }
 
 

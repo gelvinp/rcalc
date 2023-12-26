@@ -5,3 +5,5 @@ gperf_path="/usr/bin/gperf"
 platform="ios"
 build_type="staticlib"
 ios_simulator=True
+tests_enabled=False
+debug_alloc=False

@@ -41,7 +41,7 @@ def get_compiler_version(env):
     return version
 
 
-def add_source_files(self, sources, files, allow_gen=False):
+def add_source_files(self, sources, files, allow_gen=False, recursive=False):
     # Convert to list of absolute paths, expanding wildcards
     if isinstance(files, (str, bytes)):
         if files.startswith("#"):
@@ -52,7 +52,7 @@ def add_source_files(self, sources, files, allow_gen=False):
         else:
             skip_gen_cpp = "*" in files
             dir_path = self.Dir(".").abspath
-            files = sorted(glob.glob(dir_path + "/" + files))
+            files = sorted(glob.glob(dir_path + "/" + files, recursive=recursive))
             if skip_gen_cpp and not allow_gen:
                 files = [f for f in files if not f.endswith(".gen.cpp")]
     
@@ -434,6 +434,8 @@ def package_static_lib(target, source, env):
 
     with open(os.path.join(include_dir, "module.modulemap"), 'w') as f:
         f.write('\n'.join(modulemap))
+
+    shutil.copy("LICENSE.md", working_dir)
     
     shutil.make_archive(target[0] + env.combined_suffix, "zip", working_dir, ".")
 

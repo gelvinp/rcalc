@@ -1,12 +1,16 @@
 Import('env')
 
-if not env["tests_enabled"]:
+if not env["tests_enabled"] or (env["build_type"] != "application"):
     Return()
 
 env.test_sources = []
 env_tests = env.Clone()
+if "-Werror" in env_tests["CCFLAGS"]:
+    env_tests["CCFLAGS"].remove("-Werror")
+if "/WX" in env_tests["CCFLAGS"]:
+    env_tests["CCFLAGS"].remove("/WX")
 
-env_tests.add_source_files(env.test_sources, "core/*.cpp")
+env_tests.add_source_files(env.test_sources, "core/**/*.cpp", recursive=True)
 
 env_tests.add_source_files(env.test_sources, "*.cpp")
 

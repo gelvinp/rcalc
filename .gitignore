@@ -321,6 +321,8 @@ heaptrack*.zst
 
 rcalc_dump.json
 
+build_opts.py
+
 # Code coverage
 *.gcda
 *.gcno

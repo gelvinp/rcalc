@@ -156,17 +156,6 @@ void Allocator::cleanup() {
     shared.p_page_end = nullptr;
 }
 
-
-std::optional<Allocator::Page*> Allocator::get_page_containing(void* p_addr) const {
-    if (not_ready()) { return std::nullopt; }
-
-    for (Page* p_page = p_page_begin; p_page != nullptr; p_page = p_page->next()) {
-        if (p_page->contains(p_addr)) { return p_page; }
-    }
-
-    return std::nullopt;
-}
-
 Allocator::Page* Allocator::add_new_page(size_t size_bytes) {
     size_t page_size_bytes = std::max(size_bytes, DEFAULT_PAGE_SIZE);
 

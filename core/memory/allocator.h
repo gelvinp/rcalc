@@ -39,7 +39,9 @@ public:
         return std::shared_ptr<T>(p_addr, Deleter());
     }
 
+#ifndef TESTS_ENABLED
 private:
+#endif
     static constexpr size_t DEFAULT_PAGE_SIZE = 65536; // 64 KiB
 
     class Page {
@@ -69,7 +71,9 @@ private:
         Page& operator=(const Page&) = delete;
         Page& operator=(Page&&) = delete;
     
+    #ifndef TESTS_ENABLED
     private:
+    #endif
         struct Chunk {
             size_t contiguous_size = 0;
             Chunk* p_next = nullptr;
@@ -117,7 +121,6 @@ private:
     Page* p_page_begin = nullptr;
     Page* p_page_end = nullptr;
 
-    std::optional<Page*> get_page_containing(void* p_addr) const;
     Page* add_new_page(size_t size_bytes = DEFAULT_PAGE_SIZE);
 
     bool not_ready() const { return p_page_begin == nullptr || p_page_end == nullptr; }

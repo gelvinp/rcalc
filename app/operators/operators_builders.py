@@ -319,7 +319,7 @@ class Operator:
             call = self.calls['']
             lines.extend([
                 "\tUNUSED(op);",
-                '\tRPNStack stack_post_pop = stack;',
+                '\tCowVec<StackItem> stack_post_pop = stack.get_items();',
                 ''
             ])
 
@@ -346,7 +346,7 @@ class Operator:
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
                 f"\tCowVec<StackItem> values = stack.pop_items({self.param_count});",
-                '\tRPNStack stack_post_pop = stack;',
+                '\tCowVec<StackItem> stack_post_pop = stack.get_items();',
                 "",
                 "\tswitch (index) {"
             ])
@@ -387,7 +387,8 @@ class Operator:
             lines.append(f"\tstd::shared_ptr<Displayable> format = OP_FormatInput_{self.name}({', '.join([f'values[{idx}]' for idx in range(self.param_count)])});")
         
         lines.extend([
-            '\tbool stack_mutated_in_op = !stack_post_pop.same_ref(stack);',
+            '\tbool stack_mutated_in_op = !stack_post_pop.same_ref(stack.get_items());',
+            '\tstack_post_pop.unref();',
             '',
             '\tstack.push_item(StackItem {',
             '\t\tformat,',
