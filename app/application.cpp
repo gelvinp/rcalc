@@ -105,7 +105,11 @@ void Application::on_renderer_submit_text(std::string_view str) {
 
     if (op_map.has_operator(str)) {
         Result<std::optional<size_t>> res = op_map.evaluate(str, stack);
-        if (!res) { p_renderer->display_error(res.unwrap_err().get_message()); }
+        if (!res) {
+            p_renderer->display_error(res.unwrap_err().get_message());
+            return;
+        }
+        
         if (!stack.same_ref(*p_stack_active)) {
             // Copy on write happened, stack was mutated
             std::optional<size_t> pop_count = res.unwrap();
