@@ -6,6 +6,7 @@
 #include "scroll_component.h"
 #include "app/operators/operators.h"
 
+#include <algorithm>
 #include <cstring>
 
 

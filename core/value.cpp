@@ -4,6 +4,7 @@
 #include "core/format.h"
 
 #include <algorithm>
+#include <bit>
 #include <bitset>
 #include <charconv>
 #include <cstring>
