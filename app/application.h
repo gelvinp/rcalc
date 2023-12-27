@@ -4,7 +4,10 @@
 #include "app/renderers/renderer.h"
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
+
+#ifdef TESTS_ENABLED
 #include "tests/test_config.h"
+#endif
 
 #include <functional>
 #include <string>

@@ -14,5 +14,5 @@ for package in lib_rcalc.ios.*.zip; do
     unzip -n $package
 done
 
-zip -q -9 -r lib_rcalc.ios.all.zip include lib
-rm -rf include lib
+zip -q -9 -r lib_rcalc.ios.all.zip include lib LICENSE.md
+rm -rf include lib LICENSE.md
