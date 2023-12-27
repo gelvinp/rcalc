@@ -186,24 +186,35 @@ TEST_CASE("Allocation Stress Test", "[core][alloc][.long]") {
 }
 
 
+struct UTAllocator_ComplexClass {
+    static size_t destruct_count;
+
+    uint8_t data[sizeof(Allocator::Page::Chunk) * 4];
+
+    UTAllocator_ComplexClass() {}
+    ~UTAllocator_ComplexClass() { ++destruct_count; }
+};
+
+size_t UTAllocator_ComplexClass::destruct_count = 0;
+
+
 TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
     Allocator::cleanup();
     Allocator::setup();
+    UTAllocator_ComplexClass::destruct_count = 0;
 
     size_t initial = Allocator::shared.p_page_begin->p_free->contiguous_size;
     CAPTURE(initial);
 
-    struct TestData {
-        uint8_t data[sizeof(Allocator::Page::Chunk) * 4];
-    };
-    CAPTURE(sizeof(TestData));
-
     {
-        std::shared_ptr<TestData> ptr = Allocator::make_shared<TestData>();
+        std::shared_ptr<UTAllocator_ComplexClass> ptr = Allocator::make_shared<UTAllocator_ComplexClass>();
         size_t during = Allocator::shared.p_page_begin->p_free->contiguous_size;
         CAPTURE(during);
         REQUIRE(during == (initial - 5)); // Four chunks of data + 1 chunk of header
+        REQUIRE(UTAllocator_ComplexClass::destruct_count == 0);
     }
+
+    REQUIRE(UTAllocator_ComplexClass::destruct_count == 1);
 
     size_t after = Allocator::shared.p_page_begin->p_free->contiguous_size;
     CAPTURE(after);

@@ -73,6 +73,9 @@ public:
 
     Representation repr : 4 = REPR_NONE;
 
+    static int get_precision() { return _precision; }
+    static void set_precision(int precision) { _precision = precision; }
+
 private:
     Type type : 4 = TYPE_INT;
     uint64_t data = 0;
@@ -97,6 +100,8 @@ private:
         type = other.type;
         other.type = s_type;
     }
+
+    static int _precision;
 };
 
 }

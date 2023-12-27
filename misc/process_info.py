@@ -1,3 +1,5 @@
+#!python3
+
 import json
 import sys
 
@@ -228,6 +230,11 @@ def run():
     elif command == "get_stats":
         processor = Processor(sys.argv[2])
         processor.get_stats()
+    elif command == "dump_all":
+        processor = Processor(sys.argv[2])
+        processor.dump_commands("Commands.md")
+        processor.dump_operators("Operators.md")
+        processor.dump_units("Units.md")
     else:
         print(f"Invalid command: '{command}'")
         sys.exit(255)
@@ -245,6 +252,7 @@ def print_help():
     print("  dump_commands          Generate a listing of compiled commands.")
     print("  dump_operators         Generate a listing of compiled operators.")
     print("  dump_units             Generate a listing of compiled units.")
+    print("  dump_all               Dump commands, operators, and units.")
     print("  get_stats              Print the dumped statistics to stdout.")
     print("")
 

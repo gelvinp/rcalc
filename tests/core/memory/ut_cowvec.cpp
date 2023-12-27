@@ -230,36 +230,36 @@ TEST_CASE("Performs copy on write", "[core][alloc]") {
 }
 
 
-struct ComplexClass {
+struct UTCowVec_ComplexClass {
     static size_t copy_count;
     static size_t assign_count;
     static size_t destruct_count;
 
-    ComplexClass() {}
-    ComplexClass(const ComplexClass& other) { ++copy_count; }
-    ComplexClass& operator=(const ComplexClass& other) { ++assign_count; return *this; }
-    ~ComplexClass() { ++destruct_count; }
+    UTCowVec_ComplexClass() {}
+    UTCowVec_ComplexClass(const UTCowVec_ComplexClass& other) { ++copy_count; }
+    UTCowVec_ComplexClass& operator=(const UTCowVec_ComplexClass& other) { ++assign_count; return *this; }
+    ~UTCowVec_ComplexClass() { ++destruct_count; }
 };
 
-size_t ComplexClass::copy_count = 0;
-size_t ComplexClass::assign_count = 0;
-size_t ComplexClass::destruct_count = 0;
+size_t UTCowVec_ComplexClass::copy_count = 0;
+size_t UTCowVec_ComplexClass::assign_count = 0;
+size_t UTCowVec_ComplexClass::destruct_count = 0;
 
 TEST_CASE("Handles non-trivial classes", "[core][alloc]") {
-    ComplexClass::copy_count = 0;
-    ComplexClass::assign_count = 0;
-    ComplexClass::destruct_count = 0;
+    UTCowVec_ComplexClass::copy_count = 0;
+    UTCowVec_ComplexClass::assign_count = 0;
+    UTCowVec_ComplexClass::destruct_count = 0;
 
-    CowVec<ComplexClass> vec_a;
+    CowVec<UTCowVec_ComplexClass> vec_a;
     vec_a.resize(16);
 
-    REQUIRE(ComplexClass::assign_count == 16);
+    REQUIRE(UTCowVec_ComplexClass::assign_count == 16);
 
-    CowVec<ComplexClass> vec_b { vec_a };
+    CowVec<UTCowVec_ComplexClass> vec_b { vec_a };
 
     vec_a.resize(14);
-    REQUIRE(ComplexClass::copy_count == 16);
-    REQUIRE(ComplexClass::destruct_count == 4);
+    REQUIRE(UTCowVec_ComplexClass::copy_count == 16);
+    REQUIRE(UTCowVec_ComplexClass::destruct_count == 4);
 }
 
 TEST_CASE("Iterators behave", "[core][alloc]") {

@@ -17,6 +17,8 @@
 
 namespace RCalc {
 
+int Value::_precision = 12;
+
 #pragma region pool
 
 #pragma region pool_macro
