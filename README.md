@@ -78,13 +78,18 @@ More details about SwiftRPN will be coming soon.
 
 ## Install
 
-### Arch Linux
+### Linux
 
-RCalc has a maintained package in the AUR, simply install `rcalc` with your preferred AUR helper, or [download the PKGBUILD here](https://github.com/gelvinp/rcalc/releases/latest). The AUR package enables opening the graphical frontend from your launcher through the `.desktop` file, and opening the terminal version from a console by running `rcalc`.
+There are two ways to install RCalc on Linux: Standalone and Packaged.
 
-### Debian
+Standalone RCalc is packaged as a single executable which should run on most modern distributions (glibc >= 2.36). These builds can be [downloaded here](https://github.com/gelvinp/rcalc/releases/latest). `RCalc_Linux_Graphical.tar.gz` contains a build which defaults to the graphical interface, but supports the terminal interface with full clipboard support. `RCalc_Linux_TermOnly` contains a build which will run on systems with no display server, only supporting the terminal interface, and with no clipboard support.
 
-A maintained Debian package is in the works. Until then, you may find success using the `debian` branch to build a .deb package.
+Depending on your distro, RCalc may be available *packaged*. Packaged RCalc is installed through your system package manager, and defaults to launching the terminal interface for quick access inside a shell, while including a `.desktop` file for launching the graphical interface from your desktop environment.
+
+| Distro | Instructions |
+| ------ | ------------ |
+| Arch   | RCalc is available in the AUR, simply install `rcalc` with your preferred AUR helper. |
+| Debian | We are investigating a Debian package and/or repository. Please stay tuned for updates. |
 
 ### MacOS
 
