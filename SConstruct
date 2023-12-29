@@ -412,6 +412,9 @@ if selected_platform in available_platforms:
         if env["target"] == "release":
             env.Append(CCFLAGS=["-Werror", "-Wno-error=unknown-pragmas"])
             env.Append(CPPDEFINES=["NDEBUG"])
+
+        if env["build_type"] == "staticlib":
+            env.Append(CCFLAGS=["-fPIC"])
     
     if env["debug_alloc"]:
         env.Append(CPPDEFINES=["DEBUG_ALLOC"])
