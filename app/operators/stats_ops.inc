@@ -4,6 +4,7 @@
 // Tags: [no_expr]
 // Requires: <cmath>
 // Requires: <sstream>
+// Requires: <memory>
 // Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Min, Int, count) {
     if (stack.size() < (size_t)count) {
@@ -27,8 +28,7 @@ RCALC_OP_1_S(Min, Int, count) {
     }
 
     // For input formatting
-    std::stringstream ss;
-    bool first = true;
+    std::shared_ptr<Displayable> input_disp, input_disp_front;
 
     switch (smallest_scalar) {
         case TYPE_INT:
@@ -37,11 +37,17 @@ RCALC_OP_1_S(Min, Int, count) {
             values.reserve(count);
             for (const StackItem& item : stack.pop_items(count)) {
                 values.push_back((Int)item.result);
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<Int>::ConstIterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*min));
         }
         case TYPE_BIGINT:
@@ -59,11 +65,17 @@ RCALC_OP_1_S(Min, Int, count) {
                 default:
                     UNREACHABLE();
                 }
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<BigInt>::ConstIterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*min));
         }
         case TYPE_REAL:
@@ -84,11 +96,17 @@ RCALC_OP_1_S(Min, Int, count) {
                 default:
                     UNREACHABLE();
                 }
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<Real>::ConstIterator min = std::min_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*min));
         }
         default:
@@ -98,7 +116,7 @@ RCALC_OP_1_S(Min, Int, count) {
 
 RCALC_FMT_1_S(Min, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("min(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("min(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -132,8 +150,7 @@ RCALC_OP_1_S(Max, Int, count) {
     }
 
     // For input formatting
-    std::stringstream ss;
-    bool first = true;
+    std::shared_ptr<Displayable> input_disp, input_disp_front;
 
     switch (smallest_scalar) {
         case TYPE_INT:
@@ -142,11 +159,17 @@ RCALC_OP_1_S(Max, Int, count) {
             values.reserve(count);
             for (const StackItem& item : stack.pop_items(count)) {
                 values.push_back((Int)item.result);
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<Int>::ConstIterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*max));
         }
         case TYPE_BIGINT:
@@ -164,11 +187,17 @@ RCALC_OP_1_S(Max, Int, count) {
                 default:
                     UNREACHABLE();
                 }
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<BigInt>::ConstIterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*max));
         }
         case TYPE_REAL:
@@ -189,11 +218,17 @@ RCALC_OP_1_S(Max, Int, count) {
                 default:
                     UNREACHABLE();
                 }
-                if (first) { first = false; } else { ss << ", "; }
-                ss << item.result.to_string();
+                if (input_disp) {
+                    input_disp->p_next = create_displayables_from(", ", item.result);
+                    input_disp = input_disp->p_next->p_next;
+                }
+                else {
+                    input_disp = create_displayables_from(item.result);
+                    input_disp_front = input_disp;
+                }
             }
             CowVec<Real>::ConstIterator max = std::max_element(values.begin(), values.end());
-            stack.set_message<std::string>(ss.str());
+            stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
             return Ok(Value(*max));
         }
         default:
@@ -203,7 +238,7 @@ RCALC_OP_1_S(Max, Int, count) {
 
 RCALC_FMT_1_S(Max, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("max(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("max(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -231,17 +266,17 @@ RCALC_OP_1_S(Avg, Int, count) {
         }
     }
 
-    std::stringstream ss;
-    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
-    stack.set_message<std::string>(ss.str());
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
     return Ok(Value(avg));
 }
 
 RCALC_FMT_1_S(Avg, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("avg(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("avg(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -271,11 +306,11 @@ RCALC_OP_1_S(StdDev, Int, count) {
         }
     }
 
-    std::stringstream ss;
-    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
-    stack.set_message<std::string>(ss.str());
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
 
     CowVec<Real> sqr_dev;
     sqr_dev.reserve(count);
@@ -291,7 +326,7 @@ RCALC_OP_1_S(StdDev, Int, count) {
 
 RCALC_FMT_1_S(StdDev, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("stddev(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("stddev(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -321,11 +356,11 @@ RCALC_OP_1_S(NormDist, Int, count) {
         }
     }
 
-    std::stringstream ss;
-    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
     
     Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
-    stack.set_message<std::string>(ss.str());
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
 
     CowVec<Real> sqr_dev;
     sqr_dev.reserve(count);
@@ -341,7 +376,7 @@ RCALC_OP_1_S(NormDist, Int, count) {
 
 RCALC_FMT_1_S(NormDist, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("normdist(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("normdist(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -374,8 +409,7 @@ RCALC_OP_1_S(Sum, Int, count) {
     }
 
     // For input formatting
-    std::stringstream ss;
-    bool first = true;
+    std::shared_ptr<Displayable> input_disp, input_disp_front;
 
     Real sum = 0.0;
     for (const StackItem& item : stack.pop_items(count)) {
@@ -392,11 +426,17 @@ RCALC_OP_1_S(Sum, Int, count) {
         default:
             UNREACHABLE();
         }
-        if (first) { first = false; } else { ss << ", "; }
-        ss << item.result.to_string();
+        if (input_disp) {
+            input_disp->p_next = create_displayables_from(", ", item.result);
+            input_disp = input_disp->p_next->p_next;
+        }
+        else {
+            input_disp = create_displayables_from(item.result);
+            input_disp_front = input_disp;
+        }
     }
 
-    stack.set_message<std::string>(ss.str());
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
 
     if (is_real) {
         return Ok(Value(sum));
@@ -408,7 +448,7 @@ RCALC_OP_1_S(Sum, Int, count) {
 
 RCALC_FMT_1_S(Sum, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("sum(", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("sum(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }
 
@@ -438,9 +478,9 @@ RCALC_OP_2_S(NPV, Real, Int, discount_rate, count) {
         }
     }
 
-    std::stringstream ss;
-    CowVec<Real> values = get_reals(stack.pop_items(count), ss);
-    stack.set_message<std::string>(ss.str());
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
 
     size_t index = 0;
     std::transform(values.mut_begin(), values.mut_end(), values.mut_begin(),
@@ -455,6 +495,6 @@ RCALC_OP_2_S(NPV, Real, Int, discount_rate, count) {
 
 RCALC_FMT_2_S(NPV, discount_rate, _arg) {
     UNUSED(_arg);
-    std::shared_ptr<Displayable> p_disp = create_displayables_from("npv[", discount_rate.get_input_formatted(), "](", stack.get_message<std::string>(), ")");
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("npv[", discount_rate.get_input_formatted(), "](", stack.get_message<std::shared_ptr<Displayable>>(), ")");
     return p_disp;
 }

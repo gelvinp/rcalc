@@ -10,10 +10,10 @@
 namespace RCalc {
 
 
-CowVec<Real> get_reals(CowVec<RCalc::StackItem> items, std::stringstream& ss) {
+CowVec<Real> get_reals(CowVec<RCalc::StackItem> items, std::shared_ptr<Displayable>& input_disp_front) {
     CowVec<Real> values;
     values.reserve(items.size());
-    bool first = true;
+    std::shared_ptr<Displayable> input_disp;
 
     for (const RCalc::StackItem& item : items) {
         switch (item.result.get_type()) {
@@ -29,8 +29,14 @@ CowVec<Real> get_reals(CowVec<RCalc::StackItem> items, std::stringstream& ss) {
         default:
             UNREACHABLE();
         }
-        if (first) { first = false; } else { ss << ", "; }
-        ss << item.result.to_string();
+        if (input_disp) {
+            input_disp->p_next = create_displayables_from(", ", item.result);
+            input_disp = input_disp->p_next->p_next;
+        }
+        else {
+            input_disp = create_displayables_from(item.result);
+            input_disp_front = input_disp;
+        }
     }
     return values;
 }
