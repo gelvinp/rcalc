@@ -9,7 +9,7 @@ namespace std {
 // CowVec iterator comparison is shallow (ptr based), so std::equal is out.
 
 template<typename T>
-bool operator==(const std::span<T>& lhs, const CowVec<T>& rhs) {
+bool operator==(const std::span<T>& lhs, const RCalc::CowVec<T>& rhs) {
     if (lhs.size() != rhs.size()) { return false; }
 
     for (size_t index = 0; index < lhs.size(); ++index) {
@@ -20,7 +20,7 @@ bool operator==(const std::span<T>& lhs, const CowVec<T>& rhs) {
 }
 
 template<typename T>
-bool operator==(const std::span<const T>& lhs, const CowVec<T>& rhs) {
+bool operator==(const std::span<const T>& lhs, const RCalc::CowVec<T>& rhs) {
     if (lhs.size() != rhs.size()) { return false; }
 
     for (size_t index = 0; index < lhs.size(); ++index) {

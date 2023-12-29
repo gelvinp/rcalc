@@ -13,6 +13,8 @@
 #include <stdexcept>
 
 
+namespace RCalc {
+
 void* Allocator::alloc(size_t size_bytes) {
     if (shared.not_ready()) { shared.setup(); }
     shared.ENSURE_CORRECTNESS();
@@ -607,3 +609,5 @@ void Allocator::Page::ENSURE_CORRECTNESS(std::source_location src_loc) {
 
 
 Allocator Allocator::shared;
+
+}

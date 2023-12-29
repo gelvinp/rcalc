@@ -8,12 +8,17 @@
 #include <stdexcept>
 
 
+namespace RCalc {
+
 template<typename T>
 class CowVec;
 
-template<typename T>
-void swap(CowVec<T>& a, CowVec<T>& b);
+}
 
+template<typename T>
+void swap(RCalc::CowVec<T>& a, RCalc::CowVec<T>& b);
+
+namespace RCalc {
 
 template<typename T>
 class CowVec {
@@ -404,9 +409,11 @@ private:
     friend void swap<T>(CowVec& a, CowVec& b);
 };
 
+}
+
 
 template<typename T>
-void swap(CowVec<T>& a, CowVec<T>& b) {
+void swap(RCalc::CowVec<T>& a, RCalc::CowVec<T>& b) {
     using namespace std;
     swap(a.p_data, b.p_data);
 };

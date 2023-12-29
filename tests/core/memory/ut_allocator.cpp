@@ -3,6 +3,8 @@
 
 #include <random>
 
+using namespace RCalc;
+
 TEST_CASE("Must be ready", "[core][alloc]") {
     Allocator::cleanup();
 

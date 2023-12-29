@@ -5,10 +5,10 @@
 
 void initialize_imgui_core_module() {
     ImGuiMemAllocFunc imgui_alloc = [](size_t size_bytes, void* p_udata) {
-        return Allocator::alloc(size_bytes);
+        return RCalc::Allocator::alloc(size_bytes);
     };
     ImGuiMemFreeFunc imgui_free = [](void* ptr, void* p_udata) {
-        Allocator::free(ptr);
+        RCalc::Allocator::free(ptr);
     };
     
     ImGui::SetAllocatorFunctions(imgui_alloc, imgui_free);

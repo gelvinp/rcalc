@@ -1,6 +1,7 @@
 #include "snitch/snitch.hpp"
 #include "core/memory/cowvec.h"
 
+using namespace RCalc;
 
 TEST_CASE("Initial size and capacity are zero", "[core][alloc]") {
     CowVec<int> vec;

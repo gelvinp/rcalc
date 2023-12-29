@@ -13,6 +13,7 @@
 //              and that sucks. This allocator will completely prevent small allocations
 //              by assigning memory from large pages, reducing the quantity of allocations.
 
+namespace RCalc {
 
 class Allocator {
 public:
@@ -37,6 +38,17 @@ public:
 
         T* p_addr = new(Allocator::alloc(sizeof(T))) T(args...);
         return std::shared_ptr<T>(p_addr, Deleter());
+    }
+
+    template<typename T, typename... Args>
+    static T* create(Args... args) {
+        return new(Allocator::alloc(sizeof(T))) T(args...);
+    }
+
+    template<typename T>
+    static void destroy(T* p_addr) {
+        p_addr->~T();
+        Allocator::free(reinterpret_cast<void*>(p_addr));
     }
 
 #ifndef TESTS_ENABLED
@@ -134,3 +146,5 @@ private:
 
     static Allocator shared;
 };
+
+}
