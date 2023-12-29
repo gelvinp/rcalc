@@ -17,6 +17,7 @@ RCALC_CMD(Application, Pop) {
 // Requires: "app/application.h"
 // Requires: <algorithm>
 RCALC_CMD(Application, Swap) {
+    if (stack.size() < 2) { return; }
     CowVec<StackItem> items = stack.pop_items(2);
     std::swap(items.mut_at(0), items.mut_at(1));
     stack.push_items(std::move(items));
