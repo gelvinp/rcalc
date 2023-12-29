@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app/application.h"
 #include "app/stack.h"
 #include "core/anycase_str.h"
 #include "core/types.h"
@@ -16,7 +17,7 @@ namespace RCalc {
 
 class AutocompleteManager {
 public:
-    void init_suggestions(const std::string_view& str);
+    void init_suggestions(const std::string_view& str, const Application& app);
     std::optional<std::string> get_next_suggestion();
     std::optional<std::string> get_previous_suggestion();
     void cancel_suggestion();

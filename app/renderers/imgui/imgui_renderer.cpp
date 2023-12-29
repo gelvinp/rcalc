@@ -8,7 +8,7 @@
 #include "core/filter.h"
 #include "core/format.h"
 #include "constants.h"
-
+#include "main/main.h"
 #include "imgui_ext.h"
 
 #include <algorithm>
@@ -505,7 +505,7 @@ int ImGuiRenderer::scratchpad_input_always_callback(ImGuiInputTextCallbackData* 
 
     if (self->should_suggest_previous) {
         if (!self->autocomp.suggestions_active()) {
-            self->autocomp.init_suggestions(p_cb_data->Buf);
+            self->autocomp.init_suggestions(p_cb_data->Buf, Main::get_app());
         }
 
         std::optional<std::string> next = self->autocomp.get_previous_suggestion();
@@ -575,7 +575,7 @@ int ImGuiRenderer::scratchpad_input_history_callback(ImGuiInputTextCallbackData*
 int ImGuiRenderer::scratchpad_input_completion_callback(ImGuiInputTextCallbackData* p_cb_data) {
     ImGuiRenderer* self = (ImGuiRenderer*)p_cb_data->UserData;
     if (!self->autocomp.suggestions_active()) {
-        self->autocomp.init_suggestions(p_cb_data->Buf);
+        self->autocomp.init_suggestions(p_cb_data->Buf, Main::get_app());
     }
 
     std::optional<std::string> next = self->autocomp.get_next_suggestion();

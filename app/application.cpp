@@ -2,6 +2,7 @@
 
 #include "core/logger.h"
 #include "core/format.h"
+#include "core/memory/allocator.h"
 
 #include <algorithm>
 #include <cmath>
@@ -12,14 +13,8 @@
 
 namespace RCalc {
 
-Application Application::singleton;
-
 Result<Application*> Application::create(AppConfig config) {
-    if (singleton.initialized) {
-        throw std::logic_error("Cannot create two application instances!");
-    }
-
-    Application* p_application = &singleton;
+    Application* p_application = Allocator::create<Application>();
 
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
@@ -28,8 +23,6 @@ Result<Application*> Application::create(AppConfig config) {
 
     if (renderer_res) {
         p_application->p_renderer = renderer_res.unwrap();
-        singleton.initialized = true;
-
         return Ok(p_application);
     }
     else {
@@ -55,7 +48,7 @@ void Application::run() {
 
 void Application::cleanup() {
     p_renderer->cleanup();
-    delete p_renderer;
+    Allocator::destroy(p_renderer);
 
     stack.clear();
     _stack_a.clear();

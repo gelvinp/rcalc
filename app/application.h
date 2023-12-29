@@ -43,7 +43,8 @@ public:
 
     void on_renderer_submit_text(std::string_view str);
 
-    static const RPNStack& get_stack() { return singleton.stack; }
+    const RPNStack& get_stack() const { return stack; }
+    Renderer* get_renderer() const { return p_renderer; }
 
 private:
     Application();
@@ -63,8 +64,7 @@ private:
 
     void swap_stacks();
 
-    static Application singleton;
-    bool initialized = false;
+    friend class Allocator;
 };
 
 }

@@ -11,12 +11,14 @@
 
 namespace RCalc {
 
-void AutocompleteManager::init_suggestions(const std::string_view& str) {
+void AutocompleteManager::init_suggestions(const std::string_view& str, const Application& app) {
     if (active_auto) {
         active_auto.value()->cancel_suggestion();
     }
 
-    const RPNStack& stack = Application::get_stack();
+    const RPNStack& stack = app.get_stack();
+
+    if (str.empty()) { return; }
 
     if (str[0] == '\\') {
         cmd_auto.init_suggestions(str);

@@ -16,6 +16,7 @@ def gen_renderers(target, source, env):
         '#include "renderer.h"',
         '#include "core/logger.h"',
         '#include "core/format.h"',
+        '#include "core/memory/allocator.h"',
         '',
         '#include <stdexcept>',
         ''
@@ -36,7 +37,7 @@ def gen_renderers(target, source, env):
     for name, meta in env["renderer_meta"].items():
         lines.extend([
             f'\tif (name == "{name}") {{',
-            f'\t\tp_renderer = reinterpret_cast<Renderer*>(new {meta["class"]}(cb_submit_text));',
+            f'\t\tp_renderer = reinterpret_cast<Renderer*>(Allocator::create<{meta["class"]}>(cb_submit_text));',
             '\t}',
             ''
         ])

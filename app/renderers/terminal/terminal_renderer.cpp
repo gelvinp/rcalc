@@ -5,6 +5,7 @@
 #include "entry_component.h"
 #include "scroll_component.h"
 #include "app/operators/operators.h"
+#include "main/main.h"
 
 #include <algorithm>
 #include <cstring>
@@ -309,7 +310,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
 
     if (event == ftxui::Event::Tab) {
         if (!autocomp.suggestions_active()) {
-            autocomp.init_suggestions(scratchpad);
+            autocomp.init_suggestions(scratchpad, Main::get_app());
         }
 
         std::optional<std::string> next = autocomp.get_next_suggestion();
@@ -320,7 +321,7 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
     }
     if (event == ftxui::Event::TabReverse) {
         if (!autocomp.suggestions_active()) {
-            autocomp.init_suggestions(scratchpad);
+            autocomp.init_suggestions(scratchpad, Main::get_app());
         }
 
         std::optional<std::string> next = autocomp.get_previous_suggestion();

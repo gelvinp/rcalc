@@ -16,9 +16,12 @@
 #include <cstring>
 
 
+RCalc::Application* Main::p_application = nullptr;
+
+
 int main(int argc, char** pp_argv)
 {
-    Allocator::setup();
+    RCalc::Allocator::setup();
     RCalc::initialize_modules();
     
     Main m;
@@ -29,7 +32,7 @@ int main(int argc, char** pp_argv)
         int res = RCalc::test_main(config.test_config.value());
         
         RCalc::cleanup_modules();
-        Allocator::cleanup();
+        RCalc::Allocator::cleanup();
 
         return res;
     }
@@ -43,14 +46,16 @@ int main(int argc, char** pp_argv)
         RCalc::Logger::log_err("%s", ss.str().c_str());
     } else {
         RCalc::Application* p_application = res.unwrap();
+        Main::p_application = p_application;
         p_application->run();
 
-        Allocator::set_noop_free(true);
+        RCalc::Allocator::set_noop_free(true);
         p_application->cleanup();
+        RCalc::Allocator::destroy(p_application);
     }
 
     RCalc::cleanup_modules();
-    Allocator::cleanup();
+    RCalc::Allocator::cleanup();
 
     return res ? 0 : 255;
 }
