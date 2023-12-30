@@ -1,7 +1,7 @@
 Import("env")
 from glob import glob
 
-if env["target"] == "debug":
+if env["target"] == "debug" and env["build_type"] == "application":
     env.dump_sources = []
 
     env_dump = env.Clone()

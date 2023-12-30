@@ -28,6 +28,7 @@ struct AppConfig {
 
 class Application {
 public:
+    Result<> init();
     void run();
     void cleanup();
 
@@ -46,6 +47,9 @@ public:
     const RPNStack& get_stack() const { return stack; }
     Renderer* get_renderer() const { return p_renderer; }
 
+    _CommandMap& get_command_map() { return cmd_map; }
+    const _CommandMap& get_command_map() const { return cmd_map; }
+
 private:
     Application();
 
@@ -55,6 +59,8 @@ private:
     RPNStack stack;
     Renderer* p_renderer;
     OperatorMap& op_map;
+
+    _CommandMap cmd_map;
 
     typedef std::function<void()> AppCommand;
     bool try_application_command(std::string_view str);

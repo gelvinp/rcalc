@@ -8,6 +8,7 @@
 #include "app/stack.h"
 #include "core/filter.h"
 #include "assets/license.gen.h"
+#include "main/main.h"
 
 #include <fstream>
 #include <iostream>
@@ -171,7 +172,7 @@ void RCalc::Dump::dump_info() {
 
     json command_scopes = json::array();
 
-    for (ScopeMeta const * const compiled_scope : RCalc::_GlobalCommandMap::get_compiled_alphabetical()) {
+    for (ScopeMeta const * const compiled_scope : Main::get_app().get_command_map().get_compiled_alphabetical()) {
         cmd_scope_count += 1;
         json command_scope = json::object();
 

@@ -17,11 +17,12 @@ TerminalRenderer::TerminalRenderer(SubmitTextCallback cb_submit_text) :
     cb_submit_text(cb_submit_text),
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
-    command_map.activate();
 }
 
 
 Result<> TerminalRenderer::init() {
+    command_map.activate(Main::get_app().get_command_map());
+    
     Result<> res = backend.init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
     if (!res) { return res; }
 

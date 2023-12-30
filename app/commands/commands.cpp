@@ -4,11 +4,7 @@
 
 namespace RCalc {
 
-std::vector<CommandMeta const *> _GlobalCommandMap::commands = {};
-
-void _GlobalCommandMap::register_scope(const ScopeMeta& scope) {
-    static std::vector<const char*> active_scopes;
-
+void _CommandMap::register_scope(const ScopeMeta& scope) {
     // See if scope has been activated before
     auto it = std::find(active_scopes.begin(), active_scopes.end(), scope.scope_name);
     if (it != active_scopes.end()) {

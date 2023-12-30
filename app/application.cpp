@@ -39,9 +39,16 @@ Application::Application() :
     p_stack_backup = &_stack_b;
 }
 
+Result<> Application::init() {
+    command_map.activate(cmd_map);
+
+	Result<> res = p_renderer->init();
+	if (!res) { return res; }
+
+    return Ok();
+}
 
 void Application::run() {
-    command_map.activate();
     p_renderer->render_loop();
 }
 

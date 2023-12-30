@@ -47,6 +47,7 @@ int main(int argc, char** pp_argv)
     } else {
         RCalc::Application* p_application = res.unwrap();
         Main::p_application = p_application;
+        p_application->init();
         p_application->run();
 
         RCalc::Allocator::set_noop_free(true);

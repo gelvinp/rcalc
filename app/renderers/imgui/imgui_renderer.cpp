@@ -26,11 +26,12 @@ ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
         command_map(CommandMap<ImGuiRenderer>::get_command_map()),
         backend(ImGuiBackend::get_platform_backend())
 {
-    command_map.activate();
 }
 
 
 Result<> ImGuiRenderer::init() {
+    command_map.activate(Main::get_app().get_command_map());
+
     Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
 
@@ -654,7 +655,7 @@ void ImGuiRenderer::render_help() {
     ImGui::TextUnformatted("Commands");
     ImGui::PopFont();
     
-    for (const CommandMeta* cmd : command_map.get_alphabetical()) {
+    for (const CommandMeta* cmd : Main::get_app().get_command_map().get_alphabetical()) {
         render_help_command(cmd);
     }
 

@@ -21,7 +21,7 @@ void AutocompleteManager::init_suggestions(const std::string_view& str, const Ap
     if (str.empty()) { return; }
 
     if (str[0] == '\\') {
-        cmd_auto.init_suggestions(str);
+        cmd_auto.init_suggestions(str, app.get_command_map());
         active_auto = &cmd_auto;
     }
     else if (str[0] == '_') {
@@ -102,11 +102,11 @@ void AutocompleteManager::Autocomplete::cancel_suggestion() {
 // Command Autocomplete
 // TODO: Eventually, we'll need a way to know which command scopes are *active* at runtime
 
-void AutocompleteManager::CommandAutocomplete::init_suggestions(std::string_view str) {
+void AutocompleteManager::CommandAutocomplete::init_suggestions(std::string_view str, const _CommandMap& cmd_map) {
     anycase_stringview input(str.begin() + 1, str.end());
     suggestions.clear();
 
-    for (const CommandMeta* cmd : _GlobalCommandMap::get_alphabetical()) {
+    for (const CommandMeta* cmd : cmd_map.get_alphabetical()) {
         anycase_stringview name(cmd->name);
         if (name.starts_with(input)) {
             suggestions.push_back(name);

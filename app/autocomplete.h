@@ -38,7 +38,7 @@ private:
 
     class CommandAutocomplete : public Autocomplete {
     public:
-        void init_suggestions(std::string_view str);
+        void init_suggestions(std::string_view str, const _CommandMap& cmd_map);
         virtual std::optional<std::string> get_next_suggestion() override;
         virtual std::optional<std::string> get_previous_suggestion() override;
     };

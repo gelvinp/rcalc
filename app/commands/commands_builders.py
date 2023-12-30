@@ -211,7 +211,7 @@ class CommandMapBuilder:
             '',
             '}',
             '',
-            'const std::span<ScopeMeta const * const> _GlobalCommandMap::get_compiled_alphabetical() {',
+            'const std::span<ScopeMeta const * const> _CommandMap::get_compiled_alphabetical() {',
             '\treturn Commands::compiled_scopes;',
             '};',
             ''
@@ -220,8 +220,8 @@ class CommandMapBuilder:
         for scope_name in scopes:
             lines.extend([
                 'template<>',
-                f'void CommandMap<{scope_name}>::activate() {{',
-                f'\t_GlobalCommandMap::register_scope(Commands::SCOPEMETA_{scope_name});',
+                f'void CommandMap<{scope_name}>::activate(_CommandMap& cmd_map) {{',
+                f'\tcmd_map.register_scope(Commands::SCOPEMETA_{scope_name});',
                 '}',
                 '',
             ])

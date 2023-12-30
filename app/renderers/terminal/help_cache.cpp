@@ -10,6 +10,7 @@
 #include "app/stack.h"
 #include "core/filter.h"
 #include "assets/license.gen.h"
+#include "main/main.h"
 
 #include <cstring>
 #include <string>
@@ -98,7 +99,7 @@ ftxui::Component build_help_cache(std::vector<CachedOperatorCategory>& cachedOpe
         });
     }));
     
-    for (const CommandMeta* cmd : CommandMap<TerminalRenderer>::get_alphabetical()) {
+    for (const CommandMeta* cmd : Main::get_app().get_command_map().get_alphabetical()) {
         v_lines->Add(render_help_command(cmd));
     }
 

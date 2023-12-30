@@ -23,24 +23,24 @@ struct ScopeMeta {
     const std::span<CommandMeta const * const> scope_cmds;
 };
 
-class _GlobalCommandMap {
+class _CommandMap {
 public:
-    static const std::vector<CommandMeta const *>& get_alphabetical() { return commands; }
+    const std::vector<CommandMeta const *>& get_alphabetical() const { return commands; }
     static const std::span<ScopeMeta const * const> get_compiled_alphabetical();
 
-protected:
-    static void register_scope(const ScopeMeta& scope);
+    void register_scope(const ScopeMeta& scope);
 
 private:
-    static std::vector<CommandMeta const *> commands;
+    std::vector<CommandMeta const *> commands = {};
+    std::vector<const char*> active_scopes = {};
 };
 
 template<typename Scope>
-class CommandMap : public _GlobalCommandMap {
+class CommandMap : public _CommandMap {
 public:
     static CommandMap<Scope>& get_command_map();
 
-    void activate();
+    void activate(_CommandMap& cmd_map);
     bool has_command(std::string_view str);
     void execute(std::string_view str, Scope& scope);
 
