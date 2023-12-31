@@ -121,7 +121,7 @@ and if you are using the graphical frontend, you can press F1, navigate to File 
 RCalc supports some command line options, which you can view by running RCalc from a terminal with the `--help` flag.
 The most important flag is `--renderer`, which allows you to select which frontend to open.
 
-`rcalc --renderer imgui` will open the graphical frontend ()
+`rcalc --renderer imgui` will open the graphical frontend, while `--renderer terminal` will open the text-based frontend.
 
 ## Build
 
