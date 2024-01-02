@@ -477,12 +477,8 @@ if selected_platform in available_platforms:
         env.CommandNoCache(
             "#bin/rcalc",
             env["LIBS"],
-            env.Run(methods.build_static_lib, "Building static library.")
+            env.Run(methods.build_static_lib, "Building static library.", False)
         )
-
-        if env.GetOption('clean'):
-            if os.path.isfile("bin/lib_rcalc.zip"):
-                os.remove("bin/lib_rcalc.zip")
 
 elif selected_platform != "":
     if selected_platform == "list":

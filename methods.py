@@ -351,23 +351,27 @@ def use_windows_spawn_fix(self, platform=None):
 
 
 def build_static_lib(target, source, env):
-    working_dir = tempfile.mkdtemp()
-    env["staticlib_working_dir"] = working_dir
+    if env.msvc:
+        lib = str(target[0]) + env["LIBSUFFIX"]
+        subprocess.run(["LIB.exe", f"/OUT:{lib}"] + [str(lib) for lib in source], capture_output=True, check=True)
+    else:
+        working_dir = tempfile.mkdtemp()
+        env["staticlib_working_dir"] = working_dir
 
-    object_dir = os.path.join(working_dir, "objects")
-    os.mkdir(object_dir)
+        object_dir = os.path.join(working_dir, "objects")
+        os.mkdir(object_dir)
 
-    for lib in source:
-        subprocess.run(["ar", "-x", lib], capture_output=True, cwd=object_dir, check=True)
-    
-    objects = glob.glob(os.path.join(object_dir, "*.o"))
+        for lib in source:
+            subprocess.run(["ar", "-x", lib], capture_output=True, cwd=object_dir, check=True)
+        
+        objects = glob.glob(os.path.join(object_dir, "*.o"))
 
-    lib = env.add_library(target[0], objects)
+        lib = env.add_library(target[0], objects)
 
     env.CommandNoCache(
         "#bin/lib_rcalc",
         lib,
-        env.Run(package_static_lib, "Packing static library.")
+        env.Run(package_static_lib, "Packing static library.", False)
     )
 
 
@@ -376,7 +380,7 @@ def package_static_lib(target, source, env):
 
     lib_dir = os.path.join(working_dir, "lib")
     os.mkdir(lib_dir)
-    shutil.move(source[0], os.path.join(lib_dir, os.path.basename(source[0])))
+    shutil.move(str(source[0]), os.path.join(lib_dir, os.path.basename(str(source[0]))))
 
     include_dir = os.path.join(working_dir, "include")
     os.mkdir(include_dir)
@@ -437,10 +441,11 @@ def package_static_lib(target, source, env):
 
     shutil.copy("LICENSE.md", working_dir)
     
-    shutil.make_archive(target[0] + env.combined_suffix, "zip", working_dir, ".")
+    shutil.make_archive(str(target[0]) + env.combined_suffix, "zip", working_dir, ".")
 
     shutil.rmtree(working_dir)
-    shutil.rmtree(env["staticlib_working_dir"])
+    if "staticlib_working_dir" in env:
+        shutil.rmtree(env["staticlib_working_dir"])
 
 
 def detect_darwin_sdk_path(platform, env):
