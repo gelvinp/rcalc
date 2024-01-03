@@ -362,11 +362,11 @@ def build_static_lib(target, source, env):
         os.mkdir(object_dir)
 
         for lib in source:
-            subprocess.run(["ar", "-x", lib], capture_output=True, cwd=object_dir, check=True)
+            subprocess.run(["ar", "-x", lib.get_abspath()], capture_output=True, cwd=object_dir, check=True)
         
         objects = glob.glob(os.path.join(object_dir, "*.o"))
 
-        lib = env.add_library(target[0], objects)
+        lib = env.add_library(str(target[0]) + env["LIBSUFFIX"], objects)
 
     env.CommandNoCache(
         "#bin/lib_rcalc",

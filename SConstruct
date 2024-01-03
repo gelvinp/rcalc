@@ -474,9 +474,10 @@ if selected_platform in available_platforms:
             if hasattr(detect, "platform_clean"):
                 detect.platform_clean(env)
     elif env["build_type"] == "staticlib":
+        libs = list(filter(lambda lib: not isinstance(lib, str), env["LIBS"]))
         env.CommandNoCache(
             "#bin/rcalc",
-            env["LIBS"],
+            libs,
             env.Run(methods.build_static_lib, "Building static library.", False)
         )
 

@@ -406,7 +406,7 @@ private:
         return (size_bytes - (2 * sizeof(size_t))) / sizeof(T);
     }
 
-    friend void ::swap<T>(CowVec& a, CowVec& b);
+    friend void ::swap<T>(CowVec<T>& a, CowVec<T>& b);
 };
 
 }
