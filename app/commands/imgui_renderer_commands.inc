@@ -16,6 +16,14 @@ RCALC_CMD(ImGuiRenderer, Help) {
 
 
 // @RCalcCommand
+// Description: Configure application settings.
+// Requires: "app/renderers/imgui/imgui_renderer.h"
+RCALC_CMD(ImGuiRenderer, Settings) {
+    settings_requested = true;
+}
+
+
+// @RCalcCommand
 // Description: Toggles queer mode.
 // Requires: "app/renderers/imgui/imgui_renderer.h"
 RCALC_CMD(ImGuiRenderer, Queer) {

@@ -10,6 +10,7 @@ Export("env_app")
 
 if env["build_type"] == "application":
     SConscript("renderers/SCsub")
+    SConscript("settings/SCsub")
 
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")

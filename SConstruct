@@ -147,7 +147,6 @@ opts.Add(EnumVariable("build_type", "Build Type", "application", ("application",
 opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
-opts.Add(BoolVariable("enable_terminal_clipboard", "Enable clipboard support for the terminal renderer, requiring a desktop manager on linux.", True))
 opts.Add(BoolVariable("debug_alloc", "Enable allocator debugging. Will slow down RCalc considerably.", False))
 
 opts.Add("CXX", "C++ compiler", os.environ.get("CXX"))
@@ -228,6 +227,19 @@ if env_base["build_type"] == "application":
     else:
         enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
         default_renderer = enabled_renderers[0]
+
+for renderer_name in enabled_renderers:
+    tmp_path = "./app/renderers/" + renderer_name
+    sys.path.insert(0, tmp_path)
+    import renderer
+
+    if "get_opts" in dir(renderer):
+        for opt in renderer.get_opts():
+            if not opt[0] in opts.keys():
+                opts.Add(opt)
+
+    sys.path.remove(tmp_path)
+    sys.modules.pop("renderer")
 
 opts.Update(env_base)
 env_base["platform"] = selected_platform

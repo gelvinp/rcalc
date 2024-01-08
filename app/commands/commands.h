@@ -16,6 +16,9 @@ struct CommandMeta {
     const char* name;
     const char* description;
     const std::span<const char * const> aliases;
+
+    constexpr CommandMeta(const char* name, const char* description, const std::span<const char * const> aliases)
+	: name(name), description(description), aliases(aliases) {}
 };
 
 struct ScopeMeta {

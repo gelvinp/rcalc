@@ -11,6 +11,7 @@
 #include "help_cache.h"
 #include "app/autocomplete.h"
 #include "app/help_text.h"
+#include "app/settings/settings_manager.h"
 
 namespace RCalc {
 
@@ -33,6 +34,7 @@ public:
 
     REGISTER_COMMAND(ImGuiRenderer, Copy);
     REGISTER_COMMAND(ImGuiRenderer, Help);
+    REGISTER_COMMAND(ImGuiRenderer, Settings);
     REGISTER_COMMAND(ImGuiRenderer, Queer);
     REGISTER_COMMAND(ImGuiRenderer, Quit);
     REGISTER_COMMAND(ImGuiRenderer, ClearHist);
@@ -60,6 +62,8 @@ private:
     bool queer_active = false;
     bool enter_pressed = false;
     bool should_suggest_previous = false;
+    bool settings_requested = false;
+    bool settings_open = false;
 
     ImGuiDisplayStack display_stack;
 
@@ -75,9 +79,14 @@ private:
     ImFont* p_font_standard;
     ImFont* p_font_medium;
     ImFont* p_font_large;
-
+    
+    SettingsManager settings;
+    std::optional<ImGuiStyle> update_style;
+    std::span<const ImVec4, 12> palette;
+    
     void submit_scratchpad();
     void render_help();
+    void render_settings();
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_edit_callback(ImGuiInputTextCallbackData* p_cb_data);
@@ -93,6 +102,7 @@ private:
     void render_help_unit_family(const UnitFamily* family);
 
     void build_help_cache();
+    ImGuiStyle build_style();
 
     ImGuiBackend& backend;
 };

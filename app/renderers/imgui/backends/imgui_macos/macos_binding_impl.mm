@@ -55,8 +55,6 @@ static void glfw_error_callback(int error, const char* description) {
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
 
-    ImGui::StyleColorsDark();
-
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
     ImGui_ImplMetal_Init(device);
 

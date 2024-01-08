@@ -7,6 +7,8 @@
 
 namespace RCalc {
 
+using namespace ImGuiRendererConstants;
+
 
 ImGuiDisplayEntry::ImGuiDisplayEntry(const StackItem& item) {
     for (Displayable& disp : *item.p_input) {

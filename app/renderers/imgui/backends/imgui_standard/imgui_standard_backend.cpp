@@ -63,8 +63,6 @@ Result<> ImGuiStandardBackend::init(Renderer::SubmitTextCallback cb_submit_text)
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
 
-    ImGui::StyleColorsDark();
-
     ImGui_ImplGlfw_InitForOpenGL(p_window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 

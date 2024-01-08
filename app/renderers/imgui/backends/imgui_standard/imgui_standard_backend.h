@@ -19,6 +19,8 @@ public:
     
     virtual void copy_to_clipboard(const std::string_view& string) override;
 
+    virtual bool is_dark_theme() const override;
+
     virtual ~ImGuiStandardBackend() = default;
 
 private:

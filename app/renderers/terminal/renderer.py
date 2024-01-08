@@ -15,6 +15,14 @@ def meta():
     }
 
 
+def get_opts():
+    from SCons.Variables import BoolVariable
+
+    return [
+        BoolVariable("enable_terminal_clipboard", "Enable clipboard support for the terminal renderer, requiring a desktop manager on linux.", True),
+    ]
+
+
 def configure(env: "Environment"):
     env["enabled_command_scopes"].append(meta()['class'])
 

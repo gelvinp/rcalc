@@ -20,11 +20,13 @@
 
 
 namespace RCalc {
+using namespace ImGuiRendererConstants;
 
 ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
         cb_submit_text(cb_submit_text),
         command_map(CommandMap<ImGuiRenderer>::get_command_map()),
-        backend(ImGuiBackend::get_platform_backend())
+        backend(ImGuiBackend::get_platform_backend()),
+        palette(ColorPalettes::COLORS_DARK)
 {
 }
 
@@ -34,6 +36,8 @@ Result<> ImGuiRenderer::init() {
 
     Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
+
+    ImGui::GetStyle() = build_style();
 
     // Load font
     ImGuiIO& io = ImGui::GetIO();
@@ -68,6 +72,11 @@ void ImGuiRenderer::render_loop() {
 
 
 void ImGuiRenderer::render() {
+    if (update_style.has_value()) {
+        ImGui::GetStyle() = update_style.value();
+        update_style.reset();
+    }
+
     backend.start_frame();
 
     // Avoid weirdness with delete key
@@ -84,7 +93,7 @@ void ImGuiRenderer::render() {
         ImGuiWindowFlags_NoDecoration
         | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoSavedSettings
-        | ImGuiWindowFlags_NoBackground
+        //| ImGuiWindowFlags_NoBackground
     )) {
         ImGui::End();
         Logger::log_err("Failed to render window!");
@@ -98,6 +107,7 @@ void ImGuiRenderer::render() {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
                 ImGui::MenuItem("Show Help", "F1", &help_requested);
+                ImGui::MenuItem("Settings", nullptr, &settings_requested);
                 ImGui::Separator();
                 ImGui::MenuItem("Quit", "Ctrl+Q", &backend.close_requested);
                 ImGui::EndMenu();
@@ -189,15 +199,24 @@ void ImGuiRenderer::render() {
 
                 if (queer_active) {
                     int color_index = index % COLOR_GRAY;
-                    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[color_index]);
-                    if (color_index >= COLOR_BROWN) {
+                    bool needs_background = false;
+
+                    if (&palette.front() == &ColorPalettes::COLORS_LIGHT[0]) {
+                        needs_background = (color_index == COLOR_YELLOW) || (color_index == COLOR_WHITE) || (color_index == COLOR_LIGHT_BLUE);
+                    }
+                    else {
+                        needs_background = color_index >= COLOR_BROWN;
+                    }
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, palette[color_index]);
+                    if (needs_background) {
                         const float background_padding = 2.0f;
                         ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
                         ImVec2 input_size = entry.input.size;
                         ImGui::GetWindowDrawList()->AddRectFilled(
                             ImVec2(cursor_pos.x - background_padding, cursor_pos.y - background_padding),
                             ImVec2(cursor_pos.x + input_size.x + background_padding, cursor_pos.y + input_size.y + background_padding),
-                            ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
+                            ImGui::ColorConvertFloat4ToU32(palette[COLOR_GRAY])
                             
                         );
                         float output_offset = entry.output.position.x;
@@ -205,7 +224,7 @@ void ImGuiRenderer::render() {
                         ImGui::GetWindowDrawList()->AddRectFilled(
                             ImVec2(cursor_pos.x + output_offset - background_padding, cursor_pos.y + entry.output.position.y - background_padding),
                             ImVec2(cursor_pos.x + output_offset + output_size.x + background_padding, cursor_pos.y + entry.output.position.y + output_size.y + background_padding),
-                            ImGui::ColorConvertFloat4ToU32(COLORS[COLOR_GRAY])
+                            ImGui::ColorConvertFloat4ToU32(palette[COLOR_GRAY])
                         );
                     }
                 }
@@ -312,7 +331,7 @@ void ImGuiRenderer::render() {
         submit_scratchpad();
     }
 
-    if (scratchpad_needs_focus && !help_requested && !help_open) {
+    if (scratchpad_needs_focus && !help_requested && !help_open && !settings_requested && !settings_open) {
         ImGui::SetKeyboardFocusHere(-1);
         scratchpad_needs_focus = false;
         stack_needs_scroll_down = false;
@@ -324,6 +343,8 @@ void ImGuiRenderer::render() {
         && !stack_needs_scroll_down
         && !help_requested
         && !help_open
+        && !settings_requested
+        && !settings_open
     ) {
         ImGui::SetKeyboardFocusHere(-1);
     }
@@ -337,6 +358,14 @@ void ImGuiRenderer::render() {
         help_requested = false;
     }
     render_help();
+
+    if (settings_requested) {
+        settings_open = true;
+        settings.load(); // TODO: Handle errors
+        ImGui::OpenPopup("Settings");
+        settings_requested = false;
+    }
+    render_settings();
 
     // Handle shortcuts
     if (backend.app_menu_bar()) {
@@ -365,6 +394,9 @@ void ImGuiRenderer::render() {
     }
     if (help_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         help_open = false;
+    }
+    if (settings_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        settings_open = false;
     }
     if (!should_suggest_previous && ImGui::IsKeyPressed(ImGuiKey_Tab) && (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift))) {
         should_suggest_previous = true;
@@ -613,7 +645,7 @@ void ImGuiRenderer::render_help() {
     ImGui::PopFont();
 
     ImGui::SameLine();
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GRAY]);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.0f);
     ImGui::TextUnformatted("v" VERSION_FULL_BUILD);
     
@@ -737,12 +769,12 @@ void ImGuiRenderer::render_help_section(const HelpText::HelpSection& section) {
 void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_BLUE]);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_BLUE]);
     ImGui::TextUnformatted(cmd->name);
     ImGui::PopStyleColor();
 
     if (!cmd->aliases.empty()) {
-        ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+        ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GRAY]);
         ImGui::SameLine();
         if (cmd->aliases.size() == 1) {
             ImGui::TextUnformatted("alias: ");
@@ -778,13 +810,13 @@ void ImGuiRenderer::render_help_command(const CommandMeta* cmd) {
 void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GREEN]);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GREEN]);
     ImGui::TextUnformatted(op.op.name);
     ImGui::PopStyleColor();
 
     ImGui::TextUnformatted(op.op.description);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GRAY]);
 
     bool types_open = false;
     
@@ -891,11 +923,16 @@ void ImGuiRenderer::render_help_operator(ImGuiHelpCache::CachedOperator& op) {
 void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_YELLOW]);
+    if (&palette.front() == &ColorPalettes::COLORS_LIGHT[0]) {
+        ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_ORANGE]);
+    }
+    else {
+        ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_YELLOW]);
+    }
     ImGui::TextUnformatted(family->p_name);
     ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+    ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GRAY]);
     ImGui::Text("Base type: %s", Value::get_type_name(family->base_type));
     ImGui::PopStyleColor();
 
@@ -903,7 +940,7 @@ void ImGuiRenderer::render_help_unit_family(const UnitFamily* family) {
         for (const Unit* unit : family->units) {
                 ImGui::BulletText("%s", unit->p_name);
 
-                ImGui::PushStyleColor(ImGuiCol_Text, COLORS[COLOR_GRAY]);
+                ImGui::PushStyleColor(ImGuiCol_Text, palette[COLOR_GRAY]);
                 ImGui::SameLine();
                 ImGui::Text("(Usage: %s)", unit->p_usage);
                 ImGui::PopStyleColor();
@@ -935,6 +972,85 @@ void ImGuiRenderer::remove_stack_item() {
 void ImGuiRenderer::replace_stack_items(const CowVec<StackItem>& items) {
     display_stack.entries.clear();
     std::for_each(items.begin(), items.end(), std::bind(&ImGuiRenderer::add_stack_item, this, std::placeholders::_1));
+}
+
+
+void ImGuiRenderer::render_settings() {
+    ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
+    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95f, viewport_size.y * 0.95f), ImGuiCond_Appearing);
+    ImGui::SetNextWindowFocus();
+
+    if (!ImGui::BeginPopupModal("Settings", &settings_open)) { return; }
+
+    ImGui::PushTextWrapPos(0.0);
+
+    ImGui::PushFont(p_font_medium);
+    ImGui::TextUnformatted("Settings");
+    ImGui::PopFont();
+
+    ImGui::Separator();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+
+    bool style_update_needed = false;
+
+    ImGui::TextUnformatted("Color Scheme: ");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+
+    if (ImGui::RadioButton("Dark", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_DARK)) {
+        style_update_needed = true;
+    }
+    ImGui::SameLine();
+
+    if (ImGui::RadioButton("Light", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_LIGHT)) {
+        style_update_needed = true;
+    }
+    ImGui::SameLine();
+
+    if (SettingsManager::SYSTEM_COLOR_AVAILABLE) {
+        if (ImGui::RadioButton("System", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_SYSTEM)) {
+            style_update_needed = true;
+        }
+    }
+
+    ImGui::EndPopup();
+
+    if (style_update_needed) {
+        update_style = build_style();
+    }
+}
+
+
+ImGuiStyle ImGuiRenderer::build_style() {
+    ImGuiStyle style;
+
+    bool is_dark = settings.colors == SettingsManager::COLORS_DARK;
+
+    if (settings.colors == SettingsManager::COLORS_SYSTEM) {
+        is_dark = backend.is_dark_theme();
+    }
+
+    if (is_dark) {
+        ImGui::StyleColorsDark(&style);
+        palette = ColorPalettes::COLORS_DARK;
+    }
+    else {
+        ImGui::StyleColorsLight(&style);
+        style.FrameBorderSize = 1.0;
+        style.Colors[ImGuiCol_WindowBg] = { 0.816f, 0.921f, 0.949f, 1.0f };
+        style.Colors[ImGuiCol_MenuBarBg] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        style.Colors[ImGuiCol_HeaderHovered] = { 0.8f, 0.894f, 1.0f, 1.0f };
+        style.Colors[ImGuiCol_HeaderActive] = { 0.439f, 0.702f, 1.0f, 1.0f };
+        
+        style.Colors[ImGuiCol_Button] = style.Colors[ImGuiCol_WindowBg];
+        style.Colors[ImGuiCol_ButtonHovered] = style.Colors[ImGuiCol_HeaderHovered];
+        style.Colors[ImGuiCol_ButtonActive] = style.Colors[ImGuiCol_HeaderActive];
+
+        style.Colors[ImGuiCol_ScrollbarBg] = { 244.586f, 249.252f, 250.496f, 1.0f };
+
+        palette = ColorPalettes::COLORS_LIGHT;
+    }
+
+    return style;
 }
 
 

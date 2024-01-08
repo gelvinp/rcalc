@@ -25,6 +25,8 @@ public:
 
     bool close_requested = false;
 
+    virtual bool is_dark_theme() const { return true; };
+
     virtual ~ImGuiBackend() = default;
 };
 
