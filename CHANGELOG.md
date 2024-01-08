@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Added a settings window to the ImGui renderer
+  - Choose your color scheme, light mode or dark mode, or automatically select based on your system.
+  - Change the UI scale to make RCalc more readable, or give yourself more space.
+
 ## [1.3.1] - 2023-12-27
 
 ### Fixed

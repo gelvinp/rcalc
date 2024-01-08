@@ -76,9 +76,9 @@ private:
 
     ImVector<ImWchar> glyph_ranges;
     ImFontGlyphRangesBuilder glyphs;
-    ImFont* p_font_standard;
-    ImFont* p_font_medium;
-    ImFont* p_font_large;
+    ImFont* p_font_standard = nullptr;
+    ImFont* p_font_medium = nullptr;
+    ImFont* p_font_large = nullptr;
     
     SettingsManager settings;
     std::optional<ImGuiStyle> update_style;
@@ -103,6 +103,8 @@ private:
 
     void build_help_cache();
     ImGuiStyle build_style();
+
+    void apply_fonts();
 
     ImGuiBackend& backend;
 };

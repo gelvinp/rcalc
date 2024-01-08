@@ -104,6 +104,10 @@ void ImGuiStandardBackend::render_frame() {
     glfwSwapBuffers(p_window);
 }
 
+void ImGuiStandardBackend::recreate_font_atlas() {
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+}
+
 
 void ImGuiStandardBackend::copy_to_clipboard(const std::string_view& string) {
     glfwSetClipboardString(p_window, string.data());

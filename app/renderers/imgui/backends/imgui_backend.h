@@ -17,6 +17,8 @@ public:
 
     virtual void start_frame() = 0;
     virtual void render_frame() = 0;
+
+    virtual void recreate_font_atlas() = 0;
     
     virtual bool app_menu_bar() { return true; }
     virtual float get_screen_dpi() { return 1.0f; }

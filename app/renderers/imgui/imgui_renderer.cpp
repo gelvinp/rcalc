@@ -37,28 +37,14 @@ Result<> ImGuiRenderer::init() {
     Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
 
-    ImGui::GetStyle() = build_style();
-
-    // Load font
     ImGuiIO& io = ImGui::GetIO();
-
-    ImFontConfig font_cfg;
-    font_cfg.FontDataOwnedByAtlas = false;
 
     glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
     glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
     glyphs.BuildRanges(&glyph_ranges);
 
-    float screen_dpi = backend.get_screen_dpi();
-    float font_size_standard = std::floor(14 * screen_dpi);
-    float font_size_medium = std::floor(18 * screen_dpi);
-    float font_size_large = std::floor(24 * screen_dpi);
-
-    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_standard, &font_cfg, &glyph_ranges[0]);
-    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_medium, &font_cfg, &glyph_ranges[0]);
-    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_large, &font_cfg, &glyph_ranges[0]);
-
-    io.FontGlobalScale = 1.0f / screen_dpi;
+    ImGui::GetStyle() = build_style();
+    apply_fonts();
 
     return Ok();
 }
@@ -74,6 +60,7 @@ void ImGuiRenderer::render_loop() {
 void ImGuiRenderer::render() {
     if (update_style.has_value()) {
         ImGui::GetStyle() = update_style.value();
+        apply_fonts();
         update_style.reset();
     }
 
@@ -1012,6 +999,21 @@ void ImGuiRenderer::render_settings() {
         }
     }
 
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+
+    ImGui::TextUnformatted("UI Scale: ");
+    bool currently_dragging = ImGui::SliderFloat("##ui_scale", &settings.ui_scale, 0.5, 2.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+    static bool was_dragging = false;
+
+    if (currently_dragging && !was_dragging) {
+        was_dragging = true;
+    }
+    else if (was_dragging && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+        was_dragging = false;
+        style_update_needed = true;
+    }
+
     ImGui::EndPopup();
 
     if (style_update_needed) {
@@ -1050,7 +1052,37 @@ ImGuiStyle ImGuiRenderer::build_style() {
         palette = ColorPalettes::COLORS_LIGHT;
     }
 
+    style.ScaleAllSizes(settings.ui_scale);
+
     return style;
+}
+
+void ImGuiRenderer::apply_fonts() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.Fonts->Clear();
+
+    glyphs.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    glyphs.AddText("⌈⌉⌊⌋°πτ·×θφ");
+    glyphs.BuildRanges(&glyph_ranges);
+
+    float screen_dpi = backend.get_screen_dpi();
+    float font_scale = screen_dpi * settings.ui_scale;
+
+    float font_size_standard = std::floor(14 * font_scale);
+    float font_size_medium = std::floor(18 * font_scale);
+    float font_size_large = std::floor(24 * font_scale);
+
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false;
+
+    p_font_standard = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_standard, &font_cfg, &glyph_ranges[0]);
+    p_font_medium = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_medium, &font_cfg, &glyph_ranges[0]);
+    p_font_large = io.Fonts->AddFontFromMemoryTTF((void*)Assets::b612mono_regular_ttf.data(), (int)Assets::b612mono_regular_ttf.size(), font_size_large, &font_cfg, &glyph_ranges[0]);
+
+    io.FontGlobalScale = 1.0f / screen_dpi;
+
+    backend.recreate_font_atlas();
 }
 
 
