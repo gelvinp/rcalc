@@ -4,10 +4,6 @@ UNIT_FAMILY(Color4Comp, Vec4, CIE D65 XYZA, ciexyza);
 // @RCalcUnit
 // Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color4Comp, Vec4, sRGBA, rgba) {
-    if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0 || value.a < 0.0 || value.a > 1.0) {
-        return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
-    }
-
     using namespace colorm;
     XyzD65 src(value.r, value.g, value.b, value.a);
     Rgb rgb(src);
@@ -32,10 +28,6 @@ UNIT_TO_BASE(Color4Comp, Vec4, sRGBA, rgba) {
 // @RCalcUnit
 // Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color4Comp, Vec4, HSLA, hsla) {
-    if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0 || value.a < 0.0 || value.a > 1.0) {
-        return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
-    }
-
     using namespace colorm;
     XyzD65 src(value.r, value.g, value.b, value.a);
     Hsl hsl(src);
@@ -60,10 +52,6 @@ UNIT_TO_BASE(Color4Comp, Vec4, HSLA, hsla) {
 // @RCalcUnit
 // Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color4Comp, Vec4, OKLabA, oklaba) {
-    if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0 || value.a < 0.0 || value.a > 1.0) {
-        return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
-    }
-
     using namespace colorm;
     XyzD65 src(value.r, value.g, value.b, value.a);
     Oklab lab(src);
@@ -88,10 +76,6 @@ UNIT_TO_BASE(Color4Comp, Vec4, OKLabA, oklaba) {
 // @RCalcUnit
 // Requires: "modules/colorm/colorm.h"
 UNIT_FROM_BASE(Color4Comp, Vec4, OKLChA, oklcha) {
-    if (value.r < 0.0 || value.r > 1.0 || value.g < 0.0 || value.g > 1.0 || value.b < 0.0 || value.b > 1.0 || value.a < 0.0 || value.a > 1.0) {
-        return Err(ERR_INVALID_PARAM, "Given color is invalid (expected components in range [0, 1])");
-    }
-
     using namespace colorm;
     XyzD65 src(value.r, value.g, value.b, value.a);
     Oklch lch(src);
