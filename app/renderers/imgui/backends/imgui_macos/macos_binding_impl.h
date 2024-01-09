@@ -48,10 +48,13 @@ class Application;
 - (void) beginFrame;
 - (void) renderFrame;
 
+- (void) recreateFontAtlas;
+
 - (bool) windowShouldClose;
 - (void) copyToClipboard:(const char*)string;
 
 - (CGFloat) getScreenDPI;
+- (bool) isDarkTheme;
 
 - (void) menuCallbackCopy;
 - (void) menuCallbackDuplicate;

@@ -36,6 +36,11 @@ void ImGuiMacOSBackend::render_frame() {
 }
 
 
+void ImGuiMacOSBackend::recreate_font_atlas() {
+    binding.recreate_font_atlas();
+}
+
+
 void ImGuiMacOSBackend::copy_to_clipboard(const std::string_view& string) {
     binding.copy_to_clipboard(string);
 }
@@ -43,6 +48,11 @@ void ImGuiMacOSBackend::copy_to_clipboard(const std::string_view& string) {
 
 float ImGuiMacOSBackend::get_screen_dpi() {
     return binding.get_screen_dpi();
+}
+
+
+bool ImGuiMacOSBackend::is_dark_theme() const {
+    return binding.is_dark_theme();
 }
 
 }

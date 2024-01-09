@@ -7,7 +7,7 @@
 
 namespace fs = std::filesystem;
 
-#if defined(ENABLE_PLATFORM_LINUX) && defined(DBUS_ENABLED)
+#if (defined(ENABLE_PLATFORM_LINUX) && defined(DBUS_ENABLED)) || defined(ENABLE_PLATFORM_MACOS)
 #define IS_SYSTEM_COLOR_AVAILABLE true
 #else
 #define IS_SYSTEM_COLOR_AVAILABLE false

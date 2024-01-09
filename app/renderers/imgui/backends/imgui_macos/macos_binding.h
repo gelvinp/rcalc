@@ -24,8 +24,11 @@ public:
     void start_frame();
     void render_frame();
 
+    void recreate_font_atlas();
+
     void copy_to_clipboard(const std::string_view& string);
     float get_screen_dpi();
+    bool is_dark_theme() const;
 
     // Rule of 5
     #ifndef __OBJC

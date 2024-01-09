@@ -57,6 +57,12 @@ void MacOS::render_frame() {
 }
 
 
+void MacOS::recreate_font_atlas() {
+    if (!p_binding) { return; }
+    [p_binding->p_impl recreateFontAtlas];
+}
+
+
 void MacOS::copy_to_clipboard(const std::string_view& string) {
     if (!p_binding) { return; }
     [p_binding->p_impl copyToClipboard:string.data()];
@@ -66,6 +72,12 @@ void MacOS::copy_to_clipboard(const std::string_view& string) {
 float MacOS::get_screen_dpi() {
     if (!p_binding) { return 1.0; }
     return [p_binding->p_impl getScreenDPI];
+}
+
+
+bool MacOS::is_dark_theme() const {
+    if (!p_binding) { return 1.0; }
+    return [p_binding->p_impl isDarkTheme];
 }
 
 

@@ -3,3 +3,4 @@ Import("env_app")
 
 env_app.add_source_files(env.app_sources, "*.cpp", True)
 env_app.add_source_files(env.app_sources, f'platform_support/platform_{env["platform"]}.cpp', True)
+env_app.add_source_files(env.app_sources, f'platform_support/platform_{env["platform"]}.mm', True)

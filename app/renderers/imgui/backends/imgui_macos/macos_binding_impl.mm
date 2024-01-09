@@ -178,6 +178,10 @@ static void glfw_error_callback(int error, const char* description) {
     [renderEncoder release];
 }
 
+- (void) recreateFontAtlas {
+    ImGui_ImplMetal_CreateFontsTexture(device);
+}
+
 - (bool) windowShouldClose {
     return glfwWindowShouldClose(p_window);
 }
@@ -188,6 +192,20 @@ static void glfw_error_callback(int error, const char* description) {
 
 - (CGFloat) getScreenDPI {
     return p_native_window.screen.backingScaleFactor;
+}
+
+- (bool) isDarkTheme {
+    if (@available(macOS 10.14, *)) {
+        if (![[NSUserDefaults standardUserDefaults] objectForKey:@"AppleInterfaceStyle"]) {
+            return false;
+        }
+        else {
+            return ([[[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"] isEqual:@"Dark"]);
+        }
+    }
+    else {
+        return false;
+    }
 }
 
 - (void) menuCallbackCopy {
