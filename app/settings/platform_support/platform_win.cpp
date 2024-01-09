@@ -1,4 +1,4 @@
-#ifdef ENABLE_PLATFORM_LINUX
+#ifdef ENABLE_PLATFORM_WINDOWS
 
 #include "app/settings/settings_manager.h"
 #include "core/logger.h"
@@ -6,6 +6,7 @@
 
 #include <array>
 #include <charconv>
+#include <ctype.h>
 #include <fstream>
 #include <stdlib.h>
 
@@ -13,20 +14,10 @@
 namespace RCalc {
 
 std::optional<fs::path> SettingsManager::get_data_path() {
-    if (const char* xdg_home = getenv("XDG_DATA_HOME")) {
-        fs::path path { xdg_home };
-        if (path.is_absolute()) {
-            path /= "rcalc";
-            if (!fs::exists(path)) { fs::create_directory(path); }
-            if (!fs::is_directory(path)) { return std::nullopt; }
-            return path;
-        }
-    }
-    
-    if (const char* home = getenv("HOME")) {
+    if (const char* home = getenv("APPDATA")) {
         fs::path path { home };
         if (path.is_absolute()) {
-            path /= ".local/share/rcalc";
+            path /= "rcalc";
             if (!fs::exists(path)) { fs::create_directory(path); }
             if (!fs::is_directory(path)) { return std::nullopt; }
             return path;
@@ -39,5 +30,6 @@ std::optional<fs::path> SettingsManager::get_data_path() {
 #include "file_backing.inc"
 
 }
+
 
 #endif
