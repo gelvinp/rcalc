@@ -228,6 +228,16 @@ if env_base["build_type"] == "application":
         enabled_renderers.sort(key=lambda renderer: renderer_priorities[renderer], reverse=True)
         default_renderer = enabled_renderers[0]
 
+opts.Update(env_base)
+env_base["platform"] = selected_platform
+
+env_base["enabled_renderers"] = enabled_renderers
+env_base["default_renderer"] = default_renderer
+
+env_base.Prepend(CPPPATH=["#"])
+
+env_base["renderer_meta"] = {}
+
 for renderer_name in enabled_renderers:
     tmp_path = "./app/renderers/" + renderer_name
     sys.path.insert(0, tmp_path)

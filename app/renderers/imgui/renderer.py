@@ -18,7 +18,7 @@ def meta():
 
 def get_opts(env):
     from SCons.Variables import BoolVariable
-
+    
     if env["platform"] == "linux":
         return [
             BoolVariable("enable_dbus", "Enable D-Bus support for auto-detecting light/dark mode", True),
