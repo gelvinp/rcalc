@@ -18,6 +18,14 @@ RCALC_CMD(TerminalRenderer, Help) {
 
 
 // @RCalcCommand
+// Description: Configure application settings.
+// Requires: "app/renderers/terminal/terminal_renderer.h"
+RCALC_CMD(TerminalRenderer, Settings) {
+    settings_requested = true;
+}
+
+
+// @RCalcCommand
 // Description: Toggles queer mode.
 // Requires: "app/renderers/terminal/terminal_renderer.h"
 RCALC_CMD(TerminalRenderer, Queer) {

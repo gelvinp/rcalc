@@ -26,6 +26,12 @@ Result<> TerminalRenderer::init() {
     Result<> res = backend.init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
     if (!res) { return res; }
 
+    res = settings.load();
+    if (!res) {
+        Logger::log("Unable to load settings!");
+    }
+    Value::set_precision(settings.precision);
+
     return Ok();
 }
 
@@ -80,6 +86,8 @@ void TerminalRenderer::activate_main_page() {
 
     help_open = false;
     help_close_requested = false;
+    settings_open = false;
+    settings_close_requested = false;
 }
 
 
@@ -95,6 +103,47 @@ void TerminalRenderer::activate_help_page() {
 
     help_open = true;
     help_requested = false;
+    settings_open = false;
+    settings_close_requested = false;
+}
+
+
+void TerminalRenderer::activate_settings_page() {
+    comp_container->DetachAllChildren();
+
+    ftxui::SliderOption<int> slider_options {
+        .value = &settings.precision,
+        .min = 1,
+        .max = std::numeric_limits<Real>::max_digits10,
+        .increment = 1
+    };
+
+    ftxui::Component headers = ftxui::Renderer([this]{
+        return ftxui::vbox({
+            ftxui::text("Settings"),
+            ftxui::separatorEmpty(),
+            ftxui::text(fmt("Precision: %d", this->settings.precision)),
+        });
+    });
+    
+    ftxui::Component precision_slider = ftxui::Slider(slider_options);
+
+    ftxui::Component save_button  = ftxui::Button("Save Changes", [this](){
+        Result<> res = settings.save();
+        if (!res) {
+            Logger::log("Unable to save settings!");
+        }
+    }, ftxui::ButtonOption::Border());
+
+    settings_page = ftxui::Container::Vertical({ headers, precision_slider, save_button });
+    comp_container->Add(settings_page);
+
+    settings_page->SetActiveChild(precision_slider);
+
+    help_open = false;
+    help_close_requested = false;
+    settings_open = true;
+    settings_requested = false;
 }
 
 
@@ -102,11 +151,14 @@ ftxui::Element TerminalRenderer::render() {
     if (help_requested && !help_open) {
         activate_help_page();
     }
-    else if (help_close_requested && help_open) {
+    else if (settings_requested && !settings_open) {
+        activate_settings_page();
+    }
+    else if (help_close_requested || settings_close_requested) {
         activate_main_page();
     }
 
-    if (help_open) {
+    if (help_open || settings_open) {
         return comp_container->Render() | ftxui::border;
     }
 
@@ -223,6 +275,15 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         }
 
         return help_cache->OnEvent(event);
+    }
+    else if (settings_open) {
+        if (event == ftxui::Event::Escape) {
+            settings_close_requested = settings_open;
+            Value::set_precision(settings.precision);
+            return true;
+        }
+
+        return settings_page->OnEvent(event);
     }
 
     if (event.is_character()) {

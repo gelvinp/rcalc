@@ -12,6 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a settings window to the ImGui renderer
   - Choose your color scheme, light mode or dark mode, or automatically select based on your system.
   - Change the UI scale to make RCalc more readable, or give yourself more space.
+  - Change the floating point display precision to suit your needs.
+- Added a settings window to the Terminal renderer
+  - Change the floating point display precision to suit your needs.
+- Settings will be shared between the ImGui and Terminal renderers.
+
+### Changed
+
+- Floating point rendering logic has been overhauled to be more consistent with values less than zero.
+- Examples will always be rendered with precision set to `4` to avoid wrapping.
+- The various Statistics operators render their inputs in individual chunks for more natural line wrapping.
+
+### Fixed
+
+- Fixed a crash in the `\swap` command.
+- Color conversions no longer check for being within a set range when convering *from* CIEXYZ D65.
 
 ## [1.3.1] - 2023-12-27
 

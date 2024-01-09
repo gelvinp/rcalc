@@ -6,6 +6,7 @@
 #include "app/autocomplete.h"
 #include "app/commands/commands.h"
 #include "help_cache.h"
+#include "app/settings/settings_manager.h"
 
 namespace RCalc {
 
@@ -31,6 +32,7 @@ public:
 
     REGISTER_COMMAND(TerminalRenderer, Copy);
     REGISTER_COMMAND(TerminalRenderer, Help);
+    REGISTER_COMMAND(TerminalRenderer, Settings);
     REGISTER_COMMAND(TerminalRenderer, Queer);
     REGISTER_COMMAND(TerminalRenderer, Quit);
     REGISTER_COMMAND(TerminalRenderer, ClearHist);
@@ -69,11 +71,18 @@ private:
 
     void activate_main_page();
     void activate_help_page();
+    void activate_settings_page();
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
 
     AutocompleteManager autocomp;
+
+    SettingsManager settings;
+    bool settings_requested = false;
+    bool settings_close_requested = false;
+    bool settings_open = false;
+    ftxui::Component settings_page;
 
     std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;
     void build_help_cache();
