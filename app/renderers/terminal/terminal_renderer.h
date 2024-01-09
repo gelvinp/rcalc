@@ -21,6 +21,8 @@ public:
     virtual void display_info(std::string_view str) override;
     virtual void display_error(std::string_view str) override;
 
+    static void _display_error(TerminalRenderer* p_renderer, const std::string& str) { p_renderer->display_error(str); };
+
     virtual bool try_renderer_command(std::string_view str) override;
 
     virtual void add_stack_item(const StackItem& item) override;

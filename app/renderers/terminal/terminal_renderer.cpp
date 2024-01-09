@@ -23,7 +23,7 @@ TerminalRenderer::TerminalRenderer(SubmitTextCallback cb_submit_text) :
 Result<> TerminalRenderer::init() {
     command_map.activate(Main::get_app().get_command_map());
     
-    Result<> res = backend.init(std::bind(&TerminalRenderer::display_error, this, std::placeholders::_1));
+    Result<> res = backend.init({ this, &TerminalRenderer::_display_error });
     if (!res) { return res; }
 
     res = settings.load();

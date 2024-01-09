@@ -18,7 +18,7 @@ Result<Application*> Application::create(AppConfig config) {
 
     Result<Renderer*> renderer_res = Renderer::create(
         config.renderer_name.data(),
-        std::bind(&Application::on_renderer_submit_text, p_application, std::placeholders::_1)
+        { p_application, &_on_renderer_submit_text }
     );
 
     if (renderer_res) {

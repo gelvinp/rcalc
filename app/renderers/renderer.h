@@ -15,7 +15,19 @@ class Application;
 
 class Renderer {
 public:
-    typedef std::function<void(std::string_view)> SubmitTextCallback;
+    struct SubmitTextCallback {
+        typedef void (*Callback)(Application*, std::string_view);
+
+        SubmitTextCallback()
+            : p_app(nullptr), callback(nullptr) {}
+        SubmitTextCallback(Application* p_app, Callback callback)
+            : p_app(p_app), callback(callback) {}
+        
+        void operator()(std::string_view str) { if (p_app) { callback(p_app, str); } }
+    private:
+        Application* p_app;
+        Callback callback;
+    };
 
     static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text);
     static const std::span<const char * const> get_enabled_renderers();

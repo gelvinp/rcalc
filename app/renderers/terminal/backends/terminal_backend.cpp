@@ -14,7 +14,7 @@
 
 namespace RCalc {
 
-Result<> TerminalBackend::init(std::function<void(const std::string&)> _cb_report_error) {
+Result<> TerminalBackend::init(ReportErrorCallback _cb_report_error) {
     cb_report_error = _cb_report_error;
     return Ok();
 }

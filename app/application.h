@@ -43,6 +43,7 @@ public:
     REGISTER_COMMAND(Application, Type);
 
     void on_renderer_submit_text(std::string_view str);
+    static void _on_renderer_submit_text(Application* p_app, std::string_view str) { p_app->on_renderer_submit_text(str); }
 
     const RPNStack& get_stack() const { return stack; }
     Renderer* get_renderer() const { return p_renderer; }
@@ -62,7 +63,7 @@ private:
 
     _CommandMap cmd_map;
 
-    typedef std::function<void()> AppCommand;
+    // typedef void(*AppCommand)();
     bool try_application_command(std::string_view str);
     CommandMap<Application> command_map;
 

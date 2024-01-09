@@ -8,9 +8,25 @@
 
 namespace RCalc {
 
+class TerminalRenderer;
+
 class TerminalBackend {
 public:
-    Result<> init(std::function<void(const std::string&)> cb_report_error);
+    struct ReportErrorCallback {
+        typedef void (*Callback)(TerminalRenderer*, const std::string&);
+
+        ReportErrorCallback()
+            : p_renderer(nullptr), callback(nullptr) {}
+        ReportErrorCallback(TerminalRenderer* p_renderer, Callback callback)
+            : p_renderer(p_renderer), callback(callback) {}
+        
+        void operator()(const std::string& str) { if (p_renderer) { callback(p_renderer, str); } }
+    private:
+        TerminalRenderer* p_renderer;
+        Callback callback;
+    };
+
+    Result<> init(ReportErrorCallback cb_report_error);
     void cleanup();
 
     void render_loop(ftxui::Component component);
@@ -20,7 +36,7 @@ public:
     bool close_requested = false;
 
 private:
-    std::function<void(const std::string&)> cb_report_error = nullptr;
+    ReportErrorCallback cb_report_error;
 };
 
 }
