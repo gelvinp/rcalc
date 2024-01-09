@@ -73,9 +73,13 @@ static void glfw_error_callback(int error, const char* description) {
     // App menu
     id appMenu = [NSMenu new];
 
+    id settingsMenuItem = [[NSMenuItem alloc] initWithTitle: @"Settings" action:@selector(menuCallbackSettings) keyEquivalent:@","];
     id hideMenuItem = [[NSMenuItem alloc] initWithTitle: @"Hide RCalc" action:@selector(hide:) keyEquivalent:@"h"];
     id quitMenuItem = [[NSMenuItem alloc] initWithTitle: @"Quit RCalc" action:@selector(terminate:) keyEquivalent:@"q"];
 
+    [settingsMenuItem setTarget:self];
+
+    [appMenu addItem:settingsMenuItem];
     [appMenu addItem:hideMenuItem];
     [appMenu addItem:[NSMenuItem separatorItem]];
     [appMenu addItem:quitMenuItem];
@@ -129,6 +133,9 @@ static void glfw_error_callback(int error, const char* description) {
     [menuBar addItem:helpMenuItem];
 
     [NSApp setMainMenu:menuBar];
+
+    NSDictionary* defaultPreferences = @{ @"Colors": @"System", @"UI_Scale": @1.0f, @"Precision": @8 };
+    [[NSUserDefaults standardUserDefaults] registerDefaults:defaultPreferences];
 
     return RCalc::Ok();
 }
@@ -218,6 +225,10 @@ static void glfw_error_callback(int error, const char* description) {
 
 - (void) menuCallbackHelp {
     _submitTextCallback("\\help");
+}
+
+- (void) menuCallbackSettings {
+    _submitTextCallback("\\settings");
 }
 
 @end
