@@ -16,21 +16,22 @@ def meta():
     }
 
 
-def get_opts():
+def get_opts(env):
     from SCons.Variables import BoolVariable
 
-    return [
-        BoolVariable("enable_dbus", "Enable D-Bus support for auto-detecting light/dark mode", True),
-    ]
+    if env["platform"] == "linux":
+        return [
+            BoolVariable("enable_dbus", "Enable D-Bus support for auto-detecting light/dark mode", True),
+        ]
+    else:
+        return []
 
 
 def configure(env: "Environment"):
     env["enabled_command_scopes"].append(meta()['class'])
 
-    if env["enable_dbus"]:
-        if env["platform"] != "linux":
-            env["enable_dbus"] = False
-        else:
+    if env["platform"] == "linux":
+        if env["enable_dbus"]:
             env.Append(CPPDEFINES=["DBUS_ENABLED"])
             if os.system("pkg-config dbug-1 --exists") != 0:
                 print("Error: D-Bus dev libraries not found. Please either install them or set `enable_dbus=no`.")

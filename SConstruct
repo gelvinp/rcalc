@@ -234,7 +234,7 @@ for renderer_name in enabled_renderers:
     import renderer
 
     if "get_opts" in dir(renderer):
-        for opt in renderer.get_opts():
+        for opt in renderer.get_opts(env_base):
             if not opt[0] in opts.keys():
                 opts.Add(opt)
 

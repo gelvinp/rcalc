@@ -15,7 +15,7 @@ def meta():
     }
 
 
-def get_opts():
+def get_opts(_env):
     from SCons.Variables import BoolVariable
 
     return [
