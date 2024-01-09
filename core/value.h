@@ -57,7 +57,7 @@ public:
 
     static Value find_int(Real value, std::optional<std::string_view> source = std::nullopt, Representation repr = REPR_NONE);
 
-    std::string to_string(DisplayableTag tags = DisplayableTag::NONE) const;
+    std::string to_string(DisplayableTag tags = DisplayableTag::NONE, std::optional<int> precision = std::nullopt) const;
 
     bool is_vec() const;
     bool is_mat() const;
@@ -74,7 +74,7 @@ public:
     Representation repr : 4 = REPR_NONE;
 
     static int get_precision() { return _precision; }
-    static void set_precision(int precision) { _precision = precision; }
+    static void set_precision(int precision);
 
 private:
     Type type : 4 = TYPE_INT;
@@ -102,6 +102,7 @@ private:
     }
 
     static int _precision;
+    static std::string _precision_fmt;
 };
 
 }

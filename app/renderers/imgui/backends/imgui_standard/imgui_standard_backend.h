@@ -3,7 +3,7 @@
 #pragma once
 
 #include "app/renderers/imgui/backends/imgui_backend.h"
-
+#include "app/settings/settings_manager.h"
 #include <GLFW/glfw3.h>
 
 namespace RCalc {
@@ -27,6 +27,7 @@ public:
 
 private:
     GLFWwindow* p_window;
+    fs::path ini_path;
 };
 
 }

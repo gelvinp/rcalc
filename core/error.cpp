@@ -16,6 +16,8 @@ std::ostream& operator<<(std::ostream& os, const Err& error)
 const char* Err::error_strings[] = {
     "Initialization Failure",
     "A specified parameter is invalid",
+    "Load Data Failure",
+    "Save Data Failure",
 };
 
 

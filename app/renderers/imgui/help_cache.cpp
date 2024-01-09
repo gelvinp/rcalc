@@ -44,7 +44,7 @@ void CachedOperator::build() {
                 ss << ", ";
             }
 
-            ss << item.result.to_string();
+            ss << item.result.to_string(DisplayableTag::NONE, 4);
         }
 
         CowVec<StackItem> _items = stack.pop_items(1);

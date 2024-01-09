@@ -10,7 +10,7 @@ RCALC_OP_2(Mat2, Vec2, Vec2, arg0, arg1) {
 }
 
 RCALC_FMT_2(Mat2, arg0, arg1) {
-    return create_displayables_from(fmt_mat2(glm::transpose(Mat2(arg0.result.operator Vec2(), arg1.result.operator Vec2()))));
+    return create_displayables_from(fmt_mat2(glm::transpose(Mat2(arg0.result.operator Vec2(), arg1.result.operator Vec2())), Value::get_precision()));
 }
 
 
@@ -26,7 +26,7 @@ RCALC_OP_3(Mat3, Vec3, Vec3, Vec3, arg0, arg1, arg2) {
 }
 
 RCALC_FMT_3(Mat3, arg0, arg1, arg2) {
-    return create_displayables_from(fmt_mat3(glm::transpose(Mat3(arg0.result.operator Vec3(), arg1.result.operator Vec3(), arg2.result.operator Vec3()))));
+    return create_displayables_from(fmt_mat3(glm::transpose(Mat3(arg0.result.operator Vec3(), arg1.result.operator Vec3(), arg2.result.operator Vec3())), Value::get_precision()));
 }
 
 
@@ -42,7 +42,7 @@ RCALC_OP_4(Mat4, Vec4, Vec4, Vec4, Vec4, arg0, arg1, arg2, arg3) {
 }
 
 RCALC_FMT_4(Mat4, arg0, arg1, arg2, arg3) {
-    return create_displayables_from(fmt_mat4(glm::transpose(Mat4(arg0.result.operator Vec4(), arg1.result.operator Vec4(), arg2.result.operator Vec4(), arg3.result.operator Vec4()))));
+    return create_displayables_from(fmt_mat4(glm::transpose(Mat4(arg0.result.operator Vec4(), arg1.result.operator Vec4(), arg2.result.operator Vec4(), arg3.result.operator Vec4())), Value::get_precision()));
 }
 
 

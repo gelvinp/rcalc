@@ -25,8 +25,8 @@ using namespace ImGuiRendererConstants;
 ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
         cb_submit_text(cb_submit_text),
         command_map(CommandMap<ImGuiRenderer>::get_command_map()),
-        backend(ImGuiBackend::get_platform_backend()),
-        palette(ColorPalettes::COLORS_DARK)
+        palette(ColorPalettes::COLORS_DARK),
+        backend(ImGuiBackend::get_platform_backend())
 {
 }
 
@@ -36,6 +36,12 @@ Result<> ImGuiRenderer::init() {
 
     Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
+
+    res = settings.load();
+    if (!res) {
+        Logger::log("Unable to load settings!");
+    }
+    Value::set_precision(settings.precision);
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -348,7 +354,6 @@ void ImGuiRenderer::render() {
 
     if (settings_requested) {
         settings_open = true;
-        settings.load(); // TODO: Handle errors
         ImGui::OpenPopup("Settings");
         settings_requested = false;
     }
@@ -1002,16 +1007,40 @@ void ImGuiRenderer::render_settings() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
 
     ImGui::TextUnformatted("UI Scale: ");
-    bool currently_dragging = ImGui::SliderFloat("##ui_scale", &settings.ui_scale, 0.5, 2.0, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+    bool scale_currently_dragging = ImGui::SliderFloat("##ui_scale", &settings.ui_scale, 0.5f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 
-    static bool was_dragging = false;
+    static bool scale_was_dragging = false;
 
-    if (currently_dragging && !was_dragging) {
-        was_dragging = true;
+    if (scale_currently_dragging && !scale_was_dragging) {
+        scale_was_dragging = true;
     }
-    else if (was_dragging && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-        was_dragging = false;
+    else if (scale_was_dragging && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+        scale_was_dragging = false;
         style_update_needed = true;
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+
+    ImGui::TextUnformatted("Precision: ");
+    bool precision_currently_dragging = ImGui::SliderInt("##precision", &settings.precision, 1, std::numeric_limits<Real>::max_digits10, "%d", ImGuiSliderFlags_AlwaysClamp);
+
+    static bool precision_was_dragging = false;
+
+    if (precision_currently_dragging && !precision_was_dragging) {
+        precision_was_dragging = true;
+    }
+    else if (precision_was_dragging && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+        precision_was_dragging = false;
+        Value::set_precision(settings.precision);
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+
+    if (ImGui::Button("Save Changes")) {
+        Result<> res = settings.save();
+        if (!res) {
+            Logger::log("Unable to save settings!");
+        }
     }
 
     ImGui::EndPopup();

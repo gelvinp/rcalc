@@ -17,8 +17,6 @@
 
 namespace RCalc {
 
-int Value::_precision = 12;
-
 #pragma region pool
 
 #pragma region pool_macro
@@ -640,7 +638,7 @@ bool Value::is_mat() const {
 
 #pragma region to_string
 
-std::string Value::to_string(DisplayableTag tags) const {
+std::string Value::to_string(DisplayableTag tags, std::optional<int> precision) const {
     switch (type) {
         case TYPE_INT: {
             switch (repr) {
@@ -664,34 +662,43 @@ std::string Value::to_string(DisplayableTag tags) const {
             return (operator BigInt()).get_str();
         }
         case TYPE_REAL: {
-            return fmt("%g", operator Real());
+            char buf[RealFmtContainerSize];
+            fmt_real(operator Real(), precision.value_or(_precision), { buf });
+            return std::string { buf };
         }
         case TYPE_VEC2: {
             const Vec2 value = operator Vec2();
 
             if (tags == DisplayableTag::COL_VEC) {
-                return fmt_col_vec2(value);
+                return fmt_col_vec2(value, precision.value_or(_precision));
             }
 
             switch (repr) {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x]", Int(value.x), Int(value.y));
                 default:
-                    return fmt("[%g, %g]", value.x, value.y);
+                    char buf[2][RealFmtContainerSize];
+                    fmt_real(value.x, precision.value_or(_precision), { buf[0] });
+                    fmt_real(value.y, precision.value_or(_precision), { buf[1] });
+                    return fmt("[%s, %s]", buf[0], buf[1]);
             }
         }
         case TYPE_VEC3: {
             const Vec3 value = operator Vec3();
 
             if (tags == DisplayableTag::COL_VEC) {
-                return fmt_col_vec3(value);
+                return fmt_col_vec3(value, precision.value_or(_precision));
             }
 
             switch (repr) {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z));
                 default:
-                    return fmt("[%g, %g, %g]", value.x, value.y, value.z);
+                    char buf[3][RealFmtContainerSize];
+                    fmt_real(value.x, precision.value_or(_precision), { buf[0] });
+                    fmt_real(value.y, precision.value_or(_precision), { buf[1] });
+                    fmt_real(value.z, precision.value_or(_precision), { buf[2] });
+                    return fmt("[%s, %s, %s]", buf[0], buf[1], buf[2]);
             }
             UNREACHABLE();
         }
@@ -699,28 +706,33 @@ std::string Value::to_string(DisplayableTag tags) const {
             const Vec4 value = operator Vec4();
 
             if (tags == DisplayableTag::COL_VEC) {
-                return fmt_col_vec4(value);
+                return fmt_col_vec4(value, precision.value_or(_precision));
             }
 
             switch (repr) {
                 case REPR_HEX:
                     return fmt("[0x%x, 0x%x, 0x%x, 0x%x]", Int(value.x), Int(value.y), Int(value.z), Int(value.w));
                 default:
-                    return fmt("[%g, %g, %g, %g]", value.x, value.y, value.z, value.w);
+                    char buf[4][RealFmtContainerSize];
+                    fmt_real(value.x, precision.value_or(_precision), { buf[0] });
+                    fmt_real(value.y, precision.value_or(_precision), { buf[1] });
+                    fmt_real(value.z, precision.value_or(_precision), { buf[2] });
+                    fmt_real(value.w, precision.value_or(_precision), { buf[3] });
+                    return fmt("[%s, %s, %s, %s]", buf[0], buf[1], buf[2], buf[3]);
             }
             UNREACHABLE();
         }
         case TYPE_MAT2: {
             const Mat2 value = operator Mat2();
-            return fmt_mat2(value, tags == DisplayableTag::ONE_LINE);
+            return fmt_mat2(value, precision.value_or(_precision), tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_MAT3: {
             const Mat3 value = operator Mat3();
-            return fmt_mat3(value, tags == DisplayableTag::ONE_LINE);
+            return fmt_mat3(value, precision.value_or(_precision), tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_MAT4: {
             const Mat4 value = operator Mat4();
-            return fmt_mat4(value, tags == DisplayableTag::ONE_LINE);
+            return fmt_mat4(value, precision.value_or(_precision), tags == DisplayableTag::ONE_LINE);
         }
         case TYPE_UNIT: {
             const Unit value = operator Unit();
@@ -832,5 +844,18 @@ bool Value::operator==(const Value& other) const {
 
 #undef POOL_COMPARE
 
+
 #pragma endregion equality
+
+#pragma region precision
+
+int Value::_precision = 8;
+std::string Value::_precision_fmt = "%.8g";
+
+void Value::set_precision(int precision) {
+    _precision = std::clamp(precision, 1, std::numeric_limits<Real>::max_digits10);
+    _precision_fmt = fmt("%%.%dg", precision);
+}
+
+#pragma endregion precision
 }

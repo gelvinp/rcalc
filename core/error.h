@@ -60,6 +60,8 @@ enum ErrType
 {
     ERR_INIT_FAILURE,
     ERR_INVALID_PARAM,
+    ERR_LOAD_FAILURE,
+    ERR_SAVE_FAILURE
 };
 
 class Err
