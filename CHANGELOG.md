@@ -22,11 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Floating point rendering logic has been overhauled to be more consistent with values less than zero.
 - Examples will always be rendered with precision set to `4` to avoid wrapping.
 - The various Statistics operators render their inputs in individual chunks for more natural line wrapping.
+- Some unit conversions have additional checks (i.e. negative radius is automatically corrected).
 
 ### Fixed
 
 - Fixed a crash in the `\swap` command.
 - Color conversions no longer check for being within a set range when convering *from* CIEXYZ D65.
+- Spherical coordinate conversions use parameters in the correct order.
 
 ## [1.3.1] - 2023-12-27
 

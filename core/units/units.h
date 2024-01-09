@@ -18,7 +18,7 @@ struct UnitImpl;
 
 struct UnitFamily {
     const char* p_name;
-    Type base_type;
+    const Type base_type;
     const std::span<Unit*> units;
 
     void setup();
@@ -51,9 +51,10 @@ public:
     std::optional<const Unit*> find_unit(std::string_view str);
     const std::span<UnitFamily const * const> get_alphabetical() const;
 
+    void build();
+
 private:
     bool built = false;
-    void build();
 
     static UnitsMap singleton;
 };

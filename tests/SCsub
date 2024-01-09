@@ -10,8 +10,8 @@ if "-Werror" in env_tests["CCFLAGS"]:
 if "/WX" in env_tests["CCFLAGS"]:
     env_tests["CCFLAGS"].remove("/WX")
 
+env_tests.add_source_files(env.test_sources, "*.cpp")
 env_tests.add_source_files(env.test_sources, "core/**/*.cpp", recursive=True)
 
-env_tests.add_source_files(env.test_sources, "*.cpp")
 
 env["extra_sources"].extend(env.test_sources)

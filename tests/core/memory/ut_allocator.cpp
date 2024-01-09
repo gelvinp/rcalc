@@ -187,38 +187,72 @@ TEST_CASE("Allocation Stress Test", "[core][alloc][.long]") {
     }
 }
 
-
-struct UTAllocator_ComplexClass {
+namespace {
+struct ComplexClass {
+    static size_t construct_count;
     static size_t destruct_count;
 
     uint8_t data[sizeof(Allocator::Page::Chunk) * 4];
 
-    UTAllocator_ComplexClass() {}
-    ~UTAllocator_ComplexClass() { ++destruct_count; }
+    ComplexClass() { ++construct_count; }
+    ~ComplexClass() { ++destruct_count; }
 };
 
-size_t UTAllocator_ComplexClass::destruct_count = 0;
+size_t ComplexClass::construct_count = 0;
+size_t ComplexClass::destruct_count = 0;
 
 
 TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
     Allocator::cleanup();
     Allocator::setup();
-    UTAllocator_ComplexClass::destruct_count = 0;
+    ComplexClass::construct_count = 0;
+    ComplexClass::destruct_count = 0;
 
     size_t initial = Allocator::shared.p_page_begin->p_free->contiguous_size;
     CAPTURE(initial);
 
     {
-        std::shared_ptr<UTAllocator_ComplexClass> ptr = Allocator::make_shared<UTAllocator_ComplexClass>();
+        std::shared_ptr<ComplexClass> ptr = Allocator::make_shared<ComplexClass>();
         size_t during = Allocator::shared.p_page_begin->p_free->contiguous_size;
         CAPTURE(during);
         REQUIRE(during == (initial - 5)); // Four chunks of data + 1 chunk of header
-        REQUIRE(UTAllocator_ComplexClass::destruct_count == 0);
+        REQUIRE(ComplexClass::construct_count == 1);
+        REQUIRE(ComplexClass::destruct_count == 0);
     }
 
-    REQUIRE(UTAllocator_ComplexClass::destruct_count == 1);
+    REQUIRE(ComplexClass::construct_count == 1);
+    REQUIRE(ComplexClass::destruct_count == 1);
 
     size_t after = Allocator::shared.p_page_begin->p_free->contiguous_size;
     CAPTURE(after);
     REQUIRE(after == initial);
+}
+
+
+TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
+    Allocator::cleanup();
+    Allocator::setup();
+    ComplexClass::construct_count = 0;
+    ComplexClass::destruct_count = 0;
+
+    size_t initial = Allocator::shared.p_page_begin->p_free->contiguous_size;
+    CAPTURE(initial);
+
+    ComplexClass* ptr = Allocator::create<ComplexClass>();
+    size_t during = Allocator::shared.p_page_begin->p_free->contiguous_size;
+    CAPTURE(during);
+    REQUIRE(during == (initial - 5)); // Four chunks of data + 1 chunk of header
+    REQUIRE(ComplexClass::construct_count == 1);
+    REQUIRE(ComplexClass::destruct_count == 0);
+
+    Allocator::destroy(ptr);
+
+    REQUIRE(ComplexClass::construct_count == 1);
+    REQUIRE(ComplexClass::destruct_count == 1);
+
+    size_t after = Allocator::shared.p_page_begin->p_free->contiguous_size;
+    CAPTURE(after);
+    REQUIRE(after == initial);
+}
+
 }
