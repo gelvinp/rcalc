@@ -23,7 +23,7 @@ public:
     virtual bool app_menu_bar() override { return false; }
     virtual void copy_to_clipboard(const std::string_view& string) override;
     virtual float get_screen_dpi() override;
-    virtual bool is_dark_theme() const override;
+    virtual Result<bool> is_dark_theme() const override;
 
     virtual ~ImGuiMacOSBackend() = default;
 

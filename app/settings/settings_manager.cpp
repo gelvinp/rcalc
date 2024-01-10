@@ -3,6 +3,8 @@
 
 namespace RCalc {
 
+bool SettingsManager::system_color_available = false;
+
 const char* SettingsManager::COLOR_LABELS[3] = {
     "Dark",
     "Light",
@@ -11,7 +13,7 @@ const char* SettingsManager::COLOR_LABELS[3] = {
 
 
 SettingsManager::SettingsManager() {
-    colors = SYSTEM_COLOR_AVAILABLE ? COLORS_SYSTEM : COLORS_DARK;
+    colors = system_color_available ? COLORS_SYSTEM : COLORS_DARK;
     ui_scale = 1.0;
     precision = Value::get_precision();
 }

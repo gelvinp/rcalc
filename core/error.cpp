@@ -18,6 +18,8 @@ const char* Err::error_strings[] = {
     "A specified parameter is invalid",
     "Load Data Failure",
     "Save Data Failure",
+    "Not Implemented",
+    "Not Supported"
 };
 
 

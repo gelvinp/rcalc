@@ -51,7 +51,7 @@ float ImGuiMacOSBackend::get_screen_dpi() {
 }
 
 
-bool ImGuiMacOSBackend::is_dark_theme() const {
+Result<bool> ImGuiMacOSBackend::is_dark_theme() const {
     return binding.is_dark_theme();
 }
 

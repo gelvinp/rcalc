@@ -14,7 +14,9 @@
 namespace RCalc {
 
 std::optional<fs::path> SettingsManager::get_data_path() {
-    if (const char* home = getenv("APPDATA")) {
+    char* home = nullptr;
+    size_t size = 0;
+    if (_dupenv_s(&home, &size, "APPDATA") == 0 && home != nullptr) {
         fs::path path { home };
         if (path.is_absolute()) {
             path /= "rcalc";
@@ -22,6 +24,7 @@ std::optional<fs::path> SettingsManager::get_data_path() {
             if (!fs::is_directory(path)) { return std::nullopt; }
             return path;
         }
+        free(home);
     }
 
     return std::nullopt;

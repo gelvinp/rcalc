@@ -15,8 +15,8 @@ void fmt_real(Real value, int precision, RealFmtContainer buf) {
         RealFmtContainer::iterator first_nonzero_decimal = std::find_if(decimal_point, buf.end(), [](char ch) { return (ch != '0') && std::isdigit(ch); });
         RealFmtContainer::iterator last_nonzero = std::find_if(buf.rbegin(), RealFmtContainer::reverse_iterator { decimal_point }, [](char ch) { return (ch != '0') && std::isdigit(ch); }).base();
 
-        int dist_fnz = std::distance(decimal_point, first_nonzero_decimal);
-        int dist_lnz = std::distance(decimal_point, last_nonzero);
+        int dist_fnz = (int)std::distance(decimal_point, first_nonzero_decimal);
+        int dist_lnz = (int)std::distance(decimal_point, last_nonzero);
 
         std::fill(buf.begin(), buf.end(), '\0');
         if (dist_fnz < precision) {

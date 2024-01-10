@@ -27,7 +27,7 @@ public:
 
     bool close_requested = false;
 
-    virtual bool is_dark_theme() const { return true; };
+    virtual Result<bool> is_dark_theme() const { return Err(ERR_NOT_IMPLEMENTED, "Backend does not support system theme."); };
 
     virtual ~ImGuiBackend() = default;
 };

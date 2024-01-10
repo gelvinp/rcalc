@@ -18,7 +18,9 @@ Result<> SettingsManager::load() {
         if (val < 0 || val >= MAX_COLORS) {
             return Err(ERR_LOAD_FAILURE, "Settings are invalid, please re-save settings."); 
         }
-        colors = static_cast<ColorScheme>(val);
+        if (system_color_available || static_cast<ColorScheme>(val) != COLORS_SYSTEM) {
+            colors = static_cast<ColorScheme>(val);
+        }
     }
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"UI_Scale"]) {
         float val = [[NSUserDefaults standardUserDefaults] floatForKey:@"UI_Scale"];

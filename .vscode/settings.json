@@ -120,7 +120,8 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "*.rh": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20",
     "python.analysis.ignore": [
@@ -133,5 +134,6 @@
         "**/.vscode": true,
         "**/.vs": true
     },
-    "C_Cpp.exclusionPolicy": "checkFilesAndFolders"
+    "C_Cpp.exclusionPolicy": "checkFilesAndFolders",
+    "C_Cpp.dimInactiveRegions": false
 }

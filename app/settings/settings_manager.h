@@ -7,12 +7,6 @@
 
 namespace fs = std::filesystem;
 
-#if (defined(ENABLE_PLATFORM_LINUX) && defined(DBUS_ENABLED)) || defined(ENABLE_PLATFORM_MACOS)
-#define IS_SYSTEM_COLOR_AVAILABLE true
-#else
-#define IS_SYSTEM_COLOR_AVAILABLE false
-#endif
-
 
 namespace RCalc {
 
@@ -25,7 +19,7 @@ struct SettingsManager {
     };
     static const char* COLOR_LABELS[3];
 
-    constexpr static bool SYSTEM_COLOR_AVAILABLE = IS_SYSTEM_COLOR_AVAILABLE;
+    static bool system_color_available;
 
     ColorScheme colors;
     float ui_scale;

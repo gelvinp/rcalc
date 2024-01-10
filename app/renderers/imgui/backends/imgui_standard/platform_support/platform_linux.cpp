@@ -7,7 +7,7 @@
 
 #include <dbus/dbus.h>
 
-bool RCalc::ImGuiStandardBackend::is_dark_theme() const {
+Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
     DBusError error;
     dbus_error_init(&error);
 
@@ -72,7 +72,7 @@ bool RCalc::ImGuiStandardBackend::is_dark_theme() const {
 
 #else
 
-bool RCalc::ImGuiStandardBackend::is_dark_theme() const { return true; }
+bool RCalc::ImGuiStandardBackend::is_dark_theme() const { return Err(ERR_NOT_SUPPORTED, "RCalc must be compiled with D-Bus support on Linux for system theme."); }
 
 #endif
 

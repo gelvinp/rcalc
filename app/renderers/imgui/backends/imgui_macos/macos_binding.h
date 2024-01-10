@@ -28,7 +28,7 @@ public:
 
     void copy_to_clipboard(const std::string_view& string);
     float get_screen_dpi();
-    bool is_dark_theme() const;
+    Result<bool> is_dark_theme() const;
 
     // Rule of 5
     #ifndef __OBJC

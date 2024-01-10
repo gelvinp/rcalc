@@ -28,6 +28,10 @@ ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
         palette(ColorPalettes::COLORS_DARK),
         backend(ImGuiBackend::get_platform_backend())
 {
+    if (backend.is_dark_theme()) {
+        SettingsManager::system_color_available = true;
+    }
+    settings = SettingsManager();
 }
 
 
@@ -998,7 +1002,7 @@ void ImGuiRenderer::render_settings() {
     }
     ImGui::SameLine();
 
-    if (SettingsManager::SYSTEM_COLOR_AVAILABLE) {
+    if (SettingsManager::system_color_available) {
         if (ImGui::RadioButton("System", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_SYSTEM)) {
             style_update_needed = true;
         }
@@ -1057,7 +1061,13 @@ ImGuiStyle ImGuiRenderer::build_style() {
     bool is_dark = settings.colors == SettingsManager::COLORS_DARK;
 
     if (settings.colors == SettingsManager::COLORS_SYSTEM) {
-        is_dark = backend.is_dark_theme();
+        Result<bool> is_dark_res = backend.is_dark_theme();
+        if (is_dark_res) {
+            is_dark = is_dark_res.unwrap();
+        }
+        else {
+            settings.system_color_available = false;
+        }
     }
 
     if (is_dark) {

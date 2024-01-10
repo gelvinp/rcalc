@@ -341,7 +341,7 @@ def configure_msvc(env, vcvars_msvc_config):
 
     ## Libs
 
-    LIBS = ["Shell32"]
+    LIBS = ["Shell32", "Advapi32"]
 
     if env["target"] == "debug":
         LIBS.append("libucrtd")

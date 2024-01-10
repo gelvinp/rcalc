@@ -20,6 +20,7 @@ Result<> SettingsManager::load() {
             "Colors",
             [](SettingsManager& self, std::string_view option) {
                 for (int index = 0; index < MAX_COLORS; ++index) {
+                    if (index == COLORS_SYSTEM && !system_color_available) { continue; }
                     if (option == COLOR_LABELS[index]) {
                         self.colors = static_cast<ColorScheme>(index);
                         return true;
