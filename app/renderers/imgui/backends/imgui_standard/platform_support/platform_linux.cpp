@@ -7,7 +7,7 @@
 
 #include <dbus/dbus.h>
 
-Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
+RCalc::Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
     DBusError error;
     dbus_error_init(&error);
 
@@ -15,7 +15,7 @@ Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
     if (dbus_error_is_set(&error)) {
         Logger::log_info("Failed to open D-Bus connection!\n\t%s", error.message);
         dbus_error_free(&error);
-        return true;
+        return Err(ERR_NOT_SUPPORTED, "Failed to open D-Bus connection.");
     }
 
     DBusMessage* p_msg = dbus_message_new_method_call(
@@ -40,7 +40,7 @@ Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
         Logger::log_info("Failed to read appearance from D-Bus!\n\t%s", error.message);
         dbus_error_free(&error);
         dbus_connection_unref(p_conn);
-        return true;
+        return Err(ERR_NOT_SUPPORTED, "Failed to read appearance from D-Bus.");
     }
 
     DBusMessageIter msg_iter[3];
@@ -57,7 +57,7 @@ Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
             Logger::log_info("D-Bus returned an unexpected value!\n\tIndex: %d, value: %d", index, dbus_message_iter_get_arg_type(&msg_iter[index]));
             dbus_error_free(&error);
             dbus_connection_unref(p_conn);
-            return true;
+        return Err(ERR_NOT_SUPPORTED, "D-Bus returned an unexpected value.");
         }
     }
 
@@ -67,7 +67,7 @@ Result<bool> RCalc::ImGuiStandardBackend::is_dark_theme() const {
     dbus_message_unref(p_resp);
     dbus_connection_unref(p_conn);
 
-    return result == 1;
+    return Ok(result == 1);
 }
 
 #else

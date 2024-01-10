@@ -450,7 +450,7 @@ def configure_mingw(env):
     
     env.Append(CCFLAGS=["-pipe"])
 
-    env.Append(CPPDEFINES=["ENABLE_PLATFORM_WINDOWS"])
+    env.Append(CPPDEFINES=["ENABLE_PLATFORM_WINDOWS", "USING_MINGW"])
     env.Append(CPPDEFINES=["strtok_p=strtok_r"])
 
     env.Append(LINKFLAGS=["-Wl,--stack," + str(STACK_SIZE)])

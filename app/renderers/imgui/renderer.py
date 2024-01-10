@@ -33,8 +33,9 @@ def configure(env: "Environment"):
     if env["platform"] == "linux":
         if env["enable_dbus"]:
             env.Append(CPPDEFINES=["DBUS_ENABLED"])
-            if os.system("pkg-config dbug-1 --exists") != 0:
+            if os.system("pkg-config dbus-1 --exists") != 0:
                 print("Error: D-Bus dev libraries not found. Please either install them or set `enable_dbus=no`.")
+                sys.exit(255)
             env.ParseConfig("pkg-config dbus-1 --cflags --libs")
 
     if env["platform"] == "win" and env["windows_subsystem"] == "console":
