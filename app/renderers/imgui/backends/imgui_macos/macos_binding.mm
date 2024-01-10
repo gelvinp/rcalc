@@ -78,7 +78,7 @@ float MacOS::get_screen_dpi() {
 Result<bool> MacOS::is_dark_theme() const {
     if (!p_binding) { return Err(ERR_INIT_FAILURE, "MacOS binding does not exist yet"); }
     if (@available(macOS 10.14, *)) {
-        return [p_binding->p_impl isDarkTheme];
+        return Ok([p_binding->p_impl isDarkTheme]);
     }
     else {
         return Err(ERR_NOT_SUPPORTED, "MacOS 10.14 or later is required for system theme.");

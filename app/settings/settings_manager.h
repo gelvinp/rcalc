@@ -28,8 +28,6 @@ struct SettingsManager {
     Result<> load();
     Result<> save();
 
-    static std::optional<fs::path> get_data_path();
-
     SettingsManager();
 };
 

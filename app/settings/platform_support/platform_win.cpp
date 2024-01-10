@@ -13,7 +13,7 @@
 
 namespace RCalc {
 
-std::optional<fs::path> SettingsManager::get_data_path() {
+std::optional<fs::path> get_data_path() {
     char* home = nullptr;
     size_t size = 0;
     if (_dupenv_s(&home, &size, "APPDATA") == 0 && home != nullptr) {

@@ -12,7 +12,7 @@
 
 namespace RCalc {
 
-std::optional<fs::path> SettingsManager::get_data_path() {
+std::optional<fs::path> get_data_path() {
     if (const char* xdg_home = getenv("XDG_DATA_HOME")) {
         fs::path path { xdg_home };
         if (path.is_absolute()) {

@@ -8,10 +8,6 @@
 
 namespace RCalc {
 
-std::optional<fs::path> SettingsManager::get_data_path() {
-    return std::nullopt;
-}
-
 Result<> SettingsManager::load() {
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"Colors"]) {
         int val = [[NSUserDefaults standardUserDefaults] integerForKey:@"Colors"];
