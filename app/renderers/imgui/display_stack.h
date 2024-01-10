@@ -4,6 +4,7 @@
 #include "app/stack.h"
 
 #include <string>
+#include <optional>
 #include <vector>
 
 
@@ -33,7 +34,7 @@ struct ImGuiDisplayEntry {
     float height;
     bool valid = false;
     
-    ImGuiDisplayEntry(const StackItem& item);
+    ImGuiDisplayEntry(const StackItem& item, std::optional<int> precision = std::nullopt);
 
     void calculate_size(float max_width, bool scrollbar_visible, bool bottom_align = true);
 };

@@ -10,7 +10,7 @@ namespace RCalc {
 using namespace ImGuiRendererConstants;
 
 
-ImGuiDisplayEntry::ImGuiDisplayEntry(const StackItem& item) {
+ImGuiDisplayEntry::ImGuiDisplayEntry(const StackItem& item, std::optional<int> precision) {
     for (Displayable& disp : *item.p_input) {
         std::string str;
 
@@ -24,7 +24,7 @@ ImGuiDisplayEntry::ImGuiDisplayEntry(const StackItem& item) {
                 break;
             }
             case Displayable::Type::VALUE: {
-                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
+                str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags, precision);
                 break;
             }
             case Displayable::Type::RECURSIVE:

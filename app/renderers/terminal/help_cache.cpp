@@ -378,7 +378,7 @@ void CachedOperator::build() {
                 ss << ", ";
             }
 
-            ss << item.result.to_string();
+            ss << item.result.to_string(DisplayableTag::NONE, 4);
         }
 
         CowVec<StackItem> _items = example_stack.pop_items(1);
@@ -399,7 +399,7 @@ void CachedOperator::build() {
                     break;
                 }
                 case Displayable::Type::VALUE: {
-                    str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags);
+                    str = reinterpret_cast<ValueDisplayable&>(disp).value.to_string(disp.tags, 4);
                     break;
                 }
                 case Displayable::Type::RECURSIVE:

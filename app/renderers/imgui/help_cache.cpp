@@ -50,7 +50,7 @@ void CachedOperator::build() {
         CowVec<StackItem> _items = stack.pop_items(1);
         const StackItem& res = _items[0];
 
-        ImGuiDisplayEntry entry { res };
+        ImGuiDisplayEntry entry { res, 4 };
         entry.output.str = ss.str();
 
         examples.push_back(entry);

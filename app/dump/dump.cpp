@@ -115,8 +115,8 @@ void RCalc::Dump::dump_info() {
                 json example_outputs_formatted = json::array();
 
                 for (const StackItem& item : stack.get_items()) {
-                    example_outputs.push_back(item.result.to_string(DisplayableTag::ONE_LINE));
-                    example_outputs_formatted.push_back(item.result.to_string(item.p_input->tags));
+                    example_outputs.push_back(item.result.to_string(DisplayableTag::ONE_LINE, 4));
+                    example_outputs_formatted.push_back(item.result.to_string(item.p_input->tags, 4));
                 }
 
                 CowVec<StackItem> _items = stack.pop_items(1);
@@ -137,7 +137,7 @@ void RCalc::Dump::dump_info() {
                             break;
                         }
                         case Displayable::Type::VALUE: {
-                            str = reinterpret_cast<const ValueDisplayable&>(disp).value.to_string(disp.tags);
+                            str = reinterpret_cast<const ValueDisplayable&>(disp).value.to_string(disp.tags, 4);
                             break;
                         }
                         case Displayable::Type::RECURSIVE:
