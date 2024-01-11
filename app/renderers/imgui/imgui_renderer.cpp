@@ -257,7 +257,7 @@ void ImGuiRenderer::render() {
 
                 if (ImGui::BeginPopupContextItem()) {
                     if (ImGui::Button("Copy to Clipboard")) {
-                        backend.copy_to_clipboard(entry.output.str);
+                        backend.copy_to_clipboard(entry.result.to_string(DisplayableTag::ONE_LINE));
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -370,7 +370,7 @@ void ImGuiRenderer::render() {
         }
         if (copy_requested || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))) {
             if (!display_stack.entries.empty()) {
-                backend.copy_to_clipboard(display_stack.entries.back().output.str);
+                backend.copy_to_clipboard(display_stack.entries.back().result.to_string(DisplayableTag::ONE_LINE));
             }
             copy_requested = false;
         }

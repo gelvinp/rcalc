@@ -464,7 +464,7 @@ void TerminalRenderer::add_stack_item(const StackItem& item) {
     
     auto input_flow = ftxui::flexbox(input_chunks, flexconf);
 
-    comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_str)));
+    comp_stack->Add(StackEntryComponent::make(std::move(input_chunks), std::move(output_str), item.result));
 
     comp_stack_scroll->OnEvent(ftxui::Event::End);
 }

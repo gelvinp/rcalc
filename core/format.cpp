@@ -138,7 +138,7 @@ std::string fmt_mat2(Mat2 value, int precision, bool one_line) {
 
     if (one_line) {
         return fmt(
-            "mat2([%s, %s], [%s, %s])",
+            "{[%s, %s], [%s, %s]}",
             buf[0], buf[1],
             buf[2], buf[3]
         );
@@ -176,7 +176,7 @@ std::string fmt_mat3(Mat3 value, int precision, bool one_line) {
 
     if (one_line) {
         return fmt(
-            "mat3([%s, %s, %s], [%s, %s, %s], [%s, %s, %s])",
+            "{[%s, %s, %s], [%s, %s, %s], [%s, %s, %s]}",
             buf[0], buf[1], buf[2],
             buf[3], buf[4], buf[5],
             buf[6], buf[7], buf[8]
@@ -240,7 +240,7 @@ std::string fmt_mat4(Mat4 value, int precision, bool one_line) {
 
     if (one_line) {
         return fmt(
-            "mat4([%s, %s, %s, %s], [%s, %s, %s, %s], [%s, %s, %s, %s], [%s, %s, %s, %s])",
+            "{[%s, %s, %s, %s], [%s, %s, %s, %s], [%s, %s, %s, %s], [%s, %s, %s, %s]}",
             buf[0], buf[1], buf[2], buf[3],
             buf[4], buf[5], buf[6], buf[7],
             buf[8], buf[9], buf[10], buf[11],

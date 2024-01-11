@@ -35,6 +35,7 @@ ImGuiDisplayEntry::ImGuiDisplayEntry(const StackItem& item, std::optional<int> p
     }
 
     output.str = item.result.to_string(item.p_input->tags);
+    result = item.result;
 }
 
 

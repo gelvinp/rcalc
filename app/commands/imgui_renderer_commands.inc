@@ -3,7 +3,7 @@
 // Requires: "app/renderers/imgui/imgui_renderer.h"
 RCALC_CMD(ImGuiRenderer, Copy) {
     if (display_stack.entries.size() == 0) { return; }
-    backend.copy_to_clipboard(display_stack.entries.back().output.str);
+    backend.copy_to_clipboard(display_stack.entries.back().result.to_string(DisplayableTag::ONE_LINE));
 }
 
 

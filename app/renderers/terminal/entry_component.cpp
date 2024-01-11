@@ -42,9 +42,10 @@ ftxui::Element StackEntryComponent::RenderEntry(std::optional<ftxui::Color> back
 }
 
 
-ftxui::Component StackEntryComponent::make(ftxui::Elements&& input, std::string&& output) {
+ftxui::Component StackEntryComponent::make(ftxui::Elements&& input, std::string&& output, RCalc::Value result) {
     return ftxui::Make<StackEntryComponent>(
         std::forward<ftxui::Elements&&>(input),
-        std::forward<std::string&&>(output)
+        std::forward<std::string&&>(output),
+        std::forward<RCalc::Value>(result)
     );
 }

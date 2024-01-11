@@ -4,8 +4,7 @@
 // Requires: "app/renderers/terminal/entry_component.h"
 RCALC_CMD(TerminalRenderer, Copy) {
     if (comp_stack->ChildCount() == 0) { return; }
-    backend.copy_to_clipboard(reinterpret_cast<StackEntryComponent*>(comp_stack->ChildAt(comp_stack->ChildCount() - 1).get())->output);
-    // get_backend().copy_to_clipboard(display_stack.entries.back().output.str);
+    backend.copy_to_clipboard(reinterpret_cast<StackEntryComponent*>(comp_stack->ChildAt(comp_stack->ChildCount() - 1).get())->result.to_string(DisplayableTag::ONE_LINE));
 }
 
 

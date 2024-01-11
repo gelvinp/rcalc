@@ -31,6 +31,7 @@ struct ImGuiDisplayLine {
 struct ImGuiDisplayEntry {
     ImGuiDisplayLine input;
     ImGuiDisplayChunk output;
+    Value result;
     float height;
     bool valid = false;
     
