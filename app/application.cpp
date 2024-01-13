@@ -155,6 +155,8 @@ bool Application::try_swizzle(std::string_view str) {
     if (!str.starts_with('.')) { return false; }
     if (str.length() > 5) { return false; }
 
+    if (stack.size() == 0) { return true; }
+
     std::string pattern { str.data() + 1, str.length() - 1 };
     std::transform(pattern.begin(), pattern.end(), pattern.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     CowVec<Real> values;
@@ -282,7 +284,7 @@ bool Application::try_swizzle(std::string_view str) {
     }
 
     StackItem stack_item {
-        create_displayables_from(source_value[0].p_input, ".", pattern),
+        create_displayables_from(source_value[0].get_input_formatted(), ".", pattern),
         std::move(result),
         true
     };

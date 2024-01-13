@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Improved the way that matrices are copied to the clipboard (Copied as one line that can be pasted back into RCalc as a valid matrix instead of formatted on multiple lines).
+- Improved the way that swizzles are formatted (they now respect whether their input is an expression).
+
+### Fixed
+
+- Fixed a crash when swizzling an empty stack.
 
 ## [1.4.0] - 2024-01-09
 
