@@ -1,8 +1,10 @@
 // @RCalcOperator
 // Description: Adds two values together.
 // Example: [3, 5]
+// Requires: <limits>
+// Requires: "core/checked_math.h"
 RCALC_OP_2(Add, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int((Real)arg0 + arg1));
+    return Ok(CheckedMath::add(arg0, arg1));
 }
 
 // @RCalcOperator
@@ -38,8 +40,9 @@ RCALC_FMT_2(Add, arg0, arg1) {
 // @RCalcOperator
 // Description: Subtracts two values.
 // Example: [3, 5]
+// Requires: "core/checked_math.h"
 RCALC_OP_2(Sub, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int((Real)arg0 - arg1));
+    return Ok(CheckedMath::sub(arg0, arg1));
 }
 
 // @RCalcOperator
@@ -56,8 +59,9 @@ RCALC_FMT_2(Sub, arg0, arg1) {
 // @RCalcOperator
 // Description: Multiplies two values together.
 // Example: [3, 5]
+// Requires: "core/checked_math.h"
 RCALC_OP_2(Mul, Int, Int, arg0, arg1) {
-    return Ok(Value::find_int((Real)arg0 * arg1));
+    return Ok(CheckedMath::mul(arg0, arg1));
 }
 
 // @RCalcOperator
