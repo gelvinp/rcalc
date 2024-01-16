@@ -133,11 +133,13 @@ void ImGuiDisplayLine::calculate_size(float max_width) {
 
 void ImGuiDisplayEntry::calculate_size(float max_width, bool scrollbar_visible, bool bottom_align) {
     float available_width = 0.0f;
+    bool output_on_new_line;
 
     if (max_width < 0.0f) { /* Help page example */
         input.calculate_size();
         output.calculate_size();
         available_width = output.size.x;
+        output_on_new_line = false;
     }
     else {
         available_width = max_width - STACK_HORIZ_BIAS - (2.0f * STACK_OUTER_PADDING);
@@ -145,30 +147,46 @@ void ImGuiDisplayEntry::calculate_size(float max_width, bool scrollbar_visible, 
             available_width -= ImGui::GetStyle().ScrollbarSize;
         }
 
-        float output_max_width = available_width / 2.0f - STACK_HORIZ_PADDING;
-        output.calculate_size(output_max_width);
+        input.calculate_size();
+        output.calculate_size();
+        output_on_new_line = ((input.size.x + output.size.x) + STACK_HORIZ_PADDING) > available_width;
 
-        float input_max_width = available_width - output.size.x - STACK_HORIZ_PADDING;
-        input.calculate_size(input_max_width);
-    }
-        
-    height = std::max(input.size.y, output.size.y);
+        if (output_on_new_line) {
+            input.calculate_size(available_width - STACK_HORIZ_PADDING);
+            output.calculate_size(available_width - STACK_HORIZ_PADDING);
+        }
+        else {
+            float output_max_width = available_width / 2.0f - STACK_HORIZ_PADDING;
+            output.calculate_size(output_max_width);
 
-    // Final positioning
-    if (input.size.y < height) {
-        // Move input chunks down
-        float diff = height - input.size.y;
-        if (!bottom_align) { diff /= 2.0f; }
-
-        for (ImGuiDisplayChunk& chunk : input.chunks) {
-            chunk.position.y += diff;
+            float input_max_width = available_width - output.size.x - STACK_HORIZ_PADDING;
+            input.calculate_size(input_max_width);
         }
     }
+
+    if (output_on_new_line) {
+        height = input.size.y + STACK_VERT_PADDING + output.size.y;
+        output.position.y += input.size.y + STACK_VERT_PADDING;
+    }
     else {
-        // Move output chunk down
-        float diff = height - output.size.y;
-        if (!bottom_align) { diff /= 2.0f; }
-        output.position.y += diff;
+        height = std::max(input.size.y, output.size.y);
+
+        // Final positioning
+        if (input.size.y < height) {
+            // Move input chunks down
+            float diff = height - input.size.y;
+            if (!bottom_align) { diff /= 2.0f; }
+
+            for (ImGuiDisplayChunk& chunk : input.chunks) {
+                chunk.position.y += diff;
+            }
+        }
+        else {
+            // Move output chunk down
+            float diff = height - output.size.y;
+            if (!bottom_align) { diff /= 2.0f; }
+            output.position.y += diff;
+        }
     }
 
     output.position.x = available_width - output.size.x;

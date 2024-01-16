@@ -6,6 +6,7 @@ namespace RCalc {
 namespace ImGuiRendererConstants {
 
 const float STACK_HORIZ_PADDING = 16.0f;
+const float STACK_VERT_PADDING = 3.0f;
 const float STACK_HORIZ_BIAS = 8.0f;
 const float STACK_OUTER_PADDING = 4.0f;
 const float STACK_BOTTOM_PADDING = 8.0f;

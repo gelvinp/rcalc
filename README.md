@@ -74,7 +74,7 @@ Additionally, RCalc can run in different modes, either graphically with an ImGui
 Use the same familiar calculator on all of your computers, over SSH, and on servers with no display server (when compiled for that purpose).
 
 Finally, RCalc can be used as a component in other software, such as an (in-development) iOS/iPadOS port called SwiftRPN.
-More details about SwiftRPN will be coming soon.
+If you'd like to join the TestFlight beta for SwiftRPN, feel free to send me a message on Mastodon.
 
 ## Install
 
@@ -145,7 +145,6 @@ In no particular order:
 - Add representation-aware operator implementations (bitwise ops should preserve the representations of their arguments).
 - Add Wayland support for the linux builds (waiting on getting a new computer that can hopefully run wayland).
 - Unit / fuzzing tests
-- Implement iOS-style stack wrapping for ImGui and Terminal renderers
 
 ## Contribute
 
