@@ -120,11 +120,12 @@ RCALC_FMT_2(Div, arg0, arg1) {
 // @RCalcOperator
 // Description: Computes the absolute value of arg0.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr]
 // Example: [3]
 // Example: [-5]
 RCALC_OP_1(Abs, Int, arg0) {
-    return Ok(Value::find_int(std::abs((Real)arg0)));
+    return Ok(CheckedMath::abs(arg0));
 }
 
 // @RCalcOperator
@@ -142,11 +143,12 @@ RCALC_FMT_1(Abs, arg0) {
 // @RCalcOperator
 // Description: Negates arg0.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr]
 // Example: [3]
 // Example: [-5]
 RCALC_OP_1(Neg, Int, arg0) {
-    return Ok(Value::find_int(-(Real)arg0));
+    return Ok(CheckedMath::neg(arg0));
 }
 
 // @RCalcOperator

@@ -1,5 +1,6 @@
 #include "snitch/snitch.hpp"
 #include "core/units/units.h"
+#include "core/comparison.h"
 #include "core/logger.h"
 #include "core/value.h"
 #include "tests/test_serializers.h"
@@ -7,116 +8,9 @@
 #include <numbers>
 
 using namespace RCalc;
+using namespace RCalc::TypeComparison;
 
 namespace {
-
-bool compare(Real a, Real b) {
-    if (a == b) { return true; }
-
-    Real max_diff = fmax(1e-5, fabs(a) * 1e-5);
-    if (fabs(a - b) < max_diff) { return true; }
-
-    // Might be angles
-    a = fmod(a, 2.0 * std::numbers::pi_v<Real>);
-    b = fmod(b, 2.0 * std::numbers::pi_v<Real>);
-
-    if (a < 0.0) { a += (2.0 * std::numbers::pi_v<Real>); }
-    if (b < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
-
-    if (fabs(a - b) < max_diff) { return true; }
-
-    return false;
-}
-
-bool compare(Vec2 a, Vec2 b) {
-    if (compare(a.x, b.x) && compare(a.y, b.y)) { return true; };
-
-    // Might be polar coords
-    if (a.x < 0.0) {
-        a.x *= -1;
-        a.y += std::numbers::pi_v<Real>;
-    }
-    if (b.x < 0.0) {
-        b.x *= -1;
-        b.y += std::numbers::pi_v<Real>;
-    }
-
-    a.y = fmod(a.y, 2.0 * std::numbers::pi_v<Real>);
-    b.y = fmod(b.y, 2.0 * std::numbers::pi_v<Real>);
-
-    if (a.y < 0.0) { a += (2.0 * std::numbers::pi_v<Real>); }
-    if (b.y < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
-
-    if (compare(a.x, b.x) && compare(a.y, b.y)) { return true; }
-
-    return false;
-}
-
-bool compare(Vec3 a, Vec3 b) {
-    if (compare(a.x, b.x) && compare(a.y, b.y) && compare(a.z, b.z)) { return true; }
-
-    Vec3 _a = a, _b = b;
-
-    // Might be polar coords
-    if (a.x < 0.0) {
-        a.x *= -1;
-        a.y += std::numbers::pi_v<Real>;
-    }
-    if (b.x < 0.0) {
-        b.x *= -1;
-        b.y += std::numbers::pi_v<Real>;
-    }
-
-    a.y = fmod(a.y, 2.0 * std::numbers::pi_v<Real>);
-    b.y = fmod(b.y, 2.0 * std::numbers::pi_v<Real>);
-
-    if (a.y < 0.0) { a += (2.0 * std::numbers::pi_v<Real>); }
-    if (b.y < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
-
-    if (compare(a.x, b.x) && compare(a.y, b.y) && compare(a.z, b.z)) { return true; }
-
-    a = _a; b = _b;
-
-    // Might be spherical coords
-    if (a.x < 0.0) {
-        a.x *= -1;
-        a.y *= -1;
-    }
-    if (b.x < 0.0) {
-        b.x *= -1;
-        b.y *= -1;
-    }
-
-    a.y = fmod(a.y, 2.0 * std::numbers::pi_v<Real>);
-    b.y = fmod(b.y, 2.0 * std::numbers::pi_v<Real>);
-
-    if (a.y < 0.0) { a += (2.0 * std::numbers::pi_v<Real>); }
-    if (b.y < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
-
-    if (a.y > std::numbers::pi_v<Real>) {
-        a.y -= (2.0 * std::numbers::pi_v<Real>);
-        a.y *= -1;
-        a.z += std::numbers::pi_v<Real>;
-    }
-    if (b.y > std::numbers::pi_v<Real>) {
-        b.y -= (2.0 * std::numbers::pi_v<Real>);
-        b.y *= -1;
-        b.z += std::numbers::pi_v<Real>;
-    }
-
-    a.z = fmod(a.y, 2.0 * std::numbers::pi_v<Real>);
-    b.z = fmod(b.y, 2.0 * std::numbers::pi_v<Real>);
-    if (a.z < 0.0) { a += (2.0 * std::numbers::pi_v<Real>); }
-    if (b.z < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
-
-    if (compare(a.x, b.x) && compare(a.y, b.y) && compare(a.z, b.z)) { return true; }
-
-    return false;
-}
-
-bool compare(Vec4 a, Vec4 b) {
-    return compare(a.x, b.x) && compare(a.y, b.y) && compare(a.z, b.z) && compare(a.w, b.w);
-}
 
 template<typename T>
 void roundtrip(Unit* p_unit);

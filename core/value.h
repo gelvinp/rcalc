@@ -54,13 +54,14 @@ public:
     Value(Mat3 value, Representation repr = REPR_NONE);
     Value(Mat4 value, Representation repr = REPR_NONE);
     Value(Unit value, Representation repr = REPR_NONE);
-
-    static Value find_int(Real value, std::optional<std::string_view> source = std::nullopt, Representation repr = REPR_NONE);
-
+    
     std::string to_string(DisplayableTag tags = DisplayableTag::NONE, std::optional<int> precision = std::nullopt) const;
 
     bool is_vec() const;
     bool is_mat() const;
+
+    bool is_negative() const;
+    Real get_real() const;
 
     Value() = default;
     ~Value();
@@ -80,11 +81,14 @@ private:
     Type type : 4 = TYPE_INT;
     uint64_t data = 0;
 
-    static Value parse_numeric(std::string_view str, Value&& value, Representation repr = REPR_NONE);
-    static std::optional<Value> parse_real(std::string_view str);
+    static std::optional<Value> parse_scalar(std::string_view str);
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
     static std::optional<Value> parse_unit(std::string_view str);
+
+    static std::optional<std::string> str_oct_to_bin(std::string str);
+    static std::optional<std::string> str_hex_to_bin(std::string str);
+    static std::optional<std::string> str_bin_to_dec(std::string str);
 
     void ref();
     void unref();

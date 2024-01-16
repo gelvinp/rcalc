@@ -35,6 +35,7 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <optional>
 
 // Macros for Programmer(User) use cases.
 
@@ -124,7 +125,7 @@ class bigint {
             str = n.str;
         }
 
-        // RCalc Extension - These will make my life easier
+        // RCalc Extensions - These will make my life easier
         const std::string& get_str() const { return str; }
         
         template<typename real_t>
@@ -134,6 +135,13 @@ class bigint {
             real_t real;
             ss >> real;
             return real;
+        }
+
+        static std::optional<bigint> try_create(std::string s) {
+            bigint res;
+            if (!is_bigint(s)) { return std::nullopt; }
+            res.str = s;
+            return res;
         }
 
         bigint& operator=(bigint other) {

@@ -1,16 +1,11 @@
 // @RCalcOperator
 // Description: Raise arg0 to the power of arg1.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Example: [3, 5]
 // Example: [25, 0.5]
 RCALC_OP_2(Pow, Int, Int, arg0, arg1) {
-    Real value = std::pow(arg0, arg1);
-
-    if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
-    }
-    
-    return Ok(Value::find_int(value));
+    return Ok(CheckedMath::pow(arg0, arg1));
 }
 
 
@@ -35,28 +30,17 @@ RCALC_FMT_2(Pow, arg0, arg1) {
 // @RCalcOperator
 // Description: Raise arg0 to the power of 2.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Example: [3]
 RCALC_OP_1(Sqr, Int, arg0) {
-    Real value = std::pow(arg0, 2.0);
-
-    if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
-    }
-    
-    return Ok(Value::find_int(value));
+    return Ok(CheckedMath::mul(arg0, arg0));
 }
 
 
 // @RCalcOperator
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Real, arg0) {
-    Real value = std::pow(arg0, 2.0);
-
-    if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
-    }
-    
-    return Ok(Value(value));
+    return Ok(CheckedMath::mul(arg0, arg0));
 }
 
 RCALC_FMT_1(Sqr, arg0) {
@@ -67,15 +51,10 @@ RCALC_FMT_1(Sqr, arg0) {
 // @RCalcOperator
 // Description: Raise arg0 to the power of 3.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Example: [3]
 RCALC_OP_1(Cube, Int, arg0) {
-    Real value = std::pow(arg0, 3.0);
-
-    if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
-    }
-    
-    return Ok(Value::find_int(value));
+    return Ok(CheckedMath::pow(arg0, 3));
 }
 
 
@@ -181,12 +160,13 @@ RCALC_FMT_1(Exp, arg) {
 // @RCalcOperator
 // Description: Calculates the nearest integer not less than the given value.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr, real_cast]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Ceil, Real, arg) {
     Real val = std::ceil(arg);
-    return Ok(Value::find_int(val));
+    return Ok(CheckedMath::discretize(val));
 }
 
 RCALC_FMT_1(Ceil, arg) {
@@ -197,12 +177,13 @@ RCALC_FMT_1(Ceil, arg) {
 // @RCalcOperator
 // Description: Calculates the nearest integer not greater than the given value.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr, real_cast]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Floor, Real, arg) {
     Real val = std::floor(arg);
-    return Ok(Value::find_int(val));
+    return Ok(CheckedMath::discretize(val));
 }
 
 RCALC_FMT_1(Floor, arg) {
@@ -213,12 +194,13 @@ RCALC_FMT_1(Floor, arg) {
 // @RCalcOperator
 // Description: Calculates the nearest integer not greater in magnitude than the given value.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr, real_cast]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Trunc, Real, arg) {
     Real val = std::trunc(arg);
-    return Ok(Value::find_int(val));
+    return Ok(CheckedMath::discretize(val));
 }
 
 RCALC_FMT_1(Trunc, arg) {
@@ -229,12 +211,13 @@ RCALC_FMT_1(Trunc, arg) {
 // @RCalcOperator
 // Description: Calculates the nearest integer to the given value, rounding halfway cases away from zero.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr, real_cast]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Round, Real, arg) {
     Real val = std::round(arg);
-    return Ok(Value::find_int(val));
+    return Ok(CheckedMath::discretize(val));
 }
 
 RCALC_FMT_1(Round, arg) {
@@ -263,6 +246,7 @@ RCALC_FMT_1(Sign, arg) {
 // @RCalcOperator
 // Description: Calculates the factorial of an integer.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr]
 // Example: [3]
 RCALC_OP_1(Fact, Int, arg) {
@@ -270,7 +254,7 @@ RCALC_OP_1(Fact, Int, arg) {
     if (arg == 0) { return Ok(Value((Int)1)); }
 
     Real res = std::tgamma((Real)arg + 1.0);
-    return Ok(Value::find_int(res));
+    return Ok(CheckedMath::discretize(res));
 }
 
 RCALC_FMT_1(Fact, arg) {
@@ -281,12 +265,13 @@ RCALC_FMT_1(Fact, arg) {
 // @RCalcOperator
 // Description: Calculates the gamma function of a given number.
 // Requires: <cmath>
+// Requires: "core/checked_math.h"
 // Tags: [no_expr]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Gamma, Real, arg) {
     Real res = std::tgamma((Real)arg);
-    return Ok(Value::find_int(res));
+    return Ok(CheckedMath::discretize(res));
 }
 
 RCALC_FMT_1(Gamma, arg) {

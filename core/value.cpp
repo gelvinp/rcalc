@@ -1,5 +1,6 @@
 #include "value.h"
 
+#include "core/comparison.h"
 #include "core/logger.h"
 #include "core/format.h"
 
@@ -9,6 +10,7 @@
 #include <charconv>
 #include <cstring>
 #include <limits>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -349,25 +351,6 @@ Value& Value::operator=(Value&& value) {
     return *this;
 }
 
-
-Value Value::find_int(Real value, std::optional<std::string_view> source, Representation repr) {
-    // No floating point, check for int64_t
-    if (value <= (Real)std::numeric_limits<Int>::max() && value >= (Real)std::numeric_limits<Int>::min()) {
-        return Value(static_cast<Int>(value), repr);
-    }
-    if (source) {
-        std::string str { source.value() };
-        if (str.starts_with("n")) {
-            str.data()[0] = '-';
-            return Value(str, repr);
-        }
-        return Value(BigInt(str), repr);
-    }
-
-    // BigInt, have to convert through string first
-    return Value(BigInt(fmt("%.0f", value)), repr);
-}
-
 #pragma endregion constructors
 
 #pragma region parse
@@ -378,31 +361,11 @@ std::optional<Value> Value::parse(std::string_view str) {
     if (str.starts_with('{')) { return parse_mat(str); }
     if (str.starts_with('_')) { return parse_unit(str); }
 
-    // Try to parse as number
-    std::optional<Value> real = parse_real(str);
-
-    if (real) {
-        return parse_numeric(str, std::move(real).value(), real.value().repr);
-    }
-
-    return std::nullopt;
-}
-
-Value Value::parse_numeric(std::string_view str, Value&& value, Representation repr) {
-    // Check for floating point
-    if (std::find(str.begin(), str.end(), '.') != str.end() || std::find(str.begin(), str.end(), 'e') != str.end()) {
-        // Contains a decimal separator, treat as float
-        return value;
-    }
-    
-    return find_int(value, str, repr);
+    return parse_scalar(str);
 }
 
 
-std::optional<Value> Value::parse_real(std::string_view sv) {
-    std::stringstream ss;
-    bool negate = false;
-
+std::optional<Value> Value::parse_scalar(std::string_view sv) {
     std::string str { sv };
 
     // Support 1en6
@@ -420,8 +383,8 @@ std::optional<Value> Value::parse_real(std::string_view sv) {
 
     // Check for negate
     if (sv.starts_with('n')) {
-        negate = true;
-        sv = std::string_view(sv.data() + 1, sv.length() - 1);
+        str[0] = '-';
+        sv = std::string_view(str);
     }
 
     // Check for numeric prefixes
@@ -430,8 +393,12 @@ std::optional<Value> Value::parse_real(std::string_view sv) {
         const char* end = sv.data() + sv.size();
         auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 16);
         if (ec == std::errc() && ptr == end) {
-            if (negate) { i_value *= -1; }
-            return Value((Real)i_value, REPR_HEX);
+            return Value(i_value, REPR_HEX);
+        }
+
+        std::optional<std::string> bin_str = str_hex_to_bin(sv.data());
+        if (bin_str) {
+            return Value(BigInt(*str_bin_to_dec(*bin_str)));
         }
     }
     else if (sv.starts_with("0o")) {
@@ -439,8 +406,12 @@ std::optional<Value> Value::parse_real(std::string_view sv) {
         const char* end = sv.data() + sv.size();
         auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 8);
         if (ec == std::errc() && ptr == end) {
-            if (negate) { i_value *= -1; }
-            return Value((Real)i_value, REPR_OCT);
+            return Value(i_value, REPR_OCT);
+        }
+
+        std::optional<std::string> bin_str = str_oct_to_bin(sv.data());
+        if (bin_str) {
+            return Value(BigInt(*str_bin_to_dec(*bin_str)));
         }
     }
     else if (sv.starts_with("0b")) {
@@ -448,20 +419,33 @@ std::optional<Value> Value::parse_real(std::string_view sv) {
         const char* end = sv.data() + sv.size();
         auto [ptr, ec] = std::from_chars(sv.data() + 2, end, i_value, 2);
         if (ec == std::errc() && ptr == end) {
-            if (negate) { i_value *= -1; }
-            return Value((Real)i_value, REPR_BINARY);
+            return Value(i_value, REPR_BINARY);
+        }
+
+        std::optional<std::string> dec_str = str_bin_to_dec(sv.data());
+        if (dec_str) {
+            return Value(BigInt(dec_str.value()));
         }
     }
     else {
-        ss << sv;
+        Int i_value;
+        const char* end = sv.data() + sv.size();
+        auto [ptr, ec] = std::from_chars(sv.data(), end, i_value, 10);
+        if (ec == std::errc() && ptr == end) {
+            return Value(i_value);
+        }
+        
+        std::optional<BigInt> res = bigint::try_create(std::string(sv));
+        if (res) {
+            return Value(res.value());
+        }
     }
 
     Real d_value;
-    ss >> d_value;
-
-    if (ss && ss.eof()) {
-        if (negate) { d_value *= -1; }
-            return Value(d_value, REPR_DECIMAL);
+    const char* end = sv.data() + sv.size();
+    auto [ptr, ec] = std::from_chars(sv.data(), end, d_value);
+    if (ec == std::errc() && ptr == end) {
+        return Value(d_value, REPR_DECIMAL);
     }
 
     return std::nullopt;
@@ -491,12 +475,12 @@ std::optional<Value> Value::parse_vec(std::string_view sv) {
         }
 
         std::string str { token + begin, end - begin };
-        std::optional<Value> real = parse_real(str);
+        std::optional<Value> component = parse_scalar(str);
 
-        if (real) {
+        if (component) {
             if (components.size() >= 4) { return std::nullopt; }
 
-            Real r_value = real.value();
+            Real r_value = component->get_real();
 
             if (negate) { r_value *= -1; }
 
@@ -576,6 +560,8 @@ std::optional<Value> Value::parse_mat(std::string_view sv) {
                 if (value.value().type != TYPE_VEC4) { return std::nullopt; }
                 break;
             }
+            default:
+                UNREACHABLE();
         }
         sub_vecs[idx] = std::move(value.value());
     }
@@ -594,7 +580,7 @@ std::optional<Value> Value::parse_mat(std::string_view sv) {
             return Value(glm::transpose(mat));
         }
         default:
-            return std::nullopt;
+            UNREACHABLE();
     }
 }
 
@@ -605,6 +591,165 @@ std::optional<Value> Value::parse_unit(std::string_view str) {
 }
 
 #pragma endregion parse
+
+
+#pragma region str_convert
+
+// It's damn slow but it's also correct. I might improve this later.
+std::optional<std::string> Value::str_oct_to_bin(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) { return (char)std::tolower(ch); });
+    if (!str.starts_with("0o")) { return std::nullopt; }
+    if (str.find_first_not_of("01234567", 2) != str.npos) { return std::nullopt; }
+
+    str = str.substr(2);
+
+    std::string dec_str = "0b";
+
+    for (char ch : str) {
+        switch (ch) {
+            case '0':
+                dec_str.append("000");
+                break;
+            case '1':
+                dec_str.append("001");
+                break;
+            case '2':
+                dec_str.append("010");
+                break;
+            case '3':
+                dec_str.append("011");
+                break;
+            case '4':
+                dec_str.append("100");
+                break;
+            case '5':
+                dec_str.append("101");
+                break;
+            case '6':
+                dec_str.append("110");
+                break;
+            case '7':
+                dec_str.append("111");
+                break;
+            default:
+                throw std::logic_error("Cannot convert unexpected character from oct/hex to bin!");
+        }
+    }
+
+    return dec_str;
+}
+
+std::optional<std::string> Value::str_hex_to_bin(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) { return (char)std::tolower(ch); });
+    if (!str.starts_with("0x")) { return std::nullopt; }
+    if (str.find_first_not_of("0123456789abcdef", 2) != str.npos) { return std::nullopt; }
+
+    str = str.substr(2);
+
+    std::string dec_str = "0b";
+
+    for (char ch : str) {
+        switch (ch) {
+            case '0':
+                dec_str.append("0000");
+                break;
+            case '1':
+                dec_str.append("0001");
+                break;
+            case '2':
+                dec_str.append("0010");
+                break;
+            case '3':
+                dec_str.append("0011");
+                break;
+            case '4':
+                dec_str.append("0100");
+                break;
+            case '5':
+                dec_str.append("0101");
+                break;
+            case '6':
+                dec_str.append("0110");
+                break;
+            case '7':
+                dec_str.append("0111");
+                break;
+            case '8':
+                dec_str.append("1000");
+                break;
+            case '9':
+                dec_str.append("1001");
+                break;
+            case 'a':
+                dec_str.append("1010");
+                break;
+            case 'b':
+                dec_str.append("1011");
+                break;
+            case 'c':
+                dec_str.append("1100");
+                break;
+            case 'd':
+                dec_str.append("1101");
+                break;
+            case 'e':
+                dec_str.append("1110");
+                break;
+            case 'f':
+                dec_str.append("1111");
+                break;
+            default:
+                throw std::logic_error("Cannot convert unexpected character from oct/hex to bin!");
+        }
+    }
+
+    return dec_str;
+}
+
+std::optional<std::string> Value::str_bin_to_dec(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) { return (char)std::tolower(ch); });
+    if (!str.starts_with("0b")) { return std::nullopt; }
+    if (str.find_first_not_of("01", 2) != str.npos) { return std::nullopt; }
+
+    str = str.substr(2);
+
+    std::string dec_str;
+    
+    while (!str.empty() && str.find_first_not_of("0") != str.npos) {
+        int remainder = 0;
+        std::string working = "";
+
+        for (char ch : str) {
+            int bit = ch == '1' ? 1 : 0;
+            remainder = 2 * remainder + bit;
+
+            if (remainder < 10) {
+                working.append("0");
+            }
+            else {
+                working.append("1");
+                remainder -= 10;
+            }
+        }
+
+        constexpr static const char* decimals[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        assert(remainder < 10);
+        dec_str.append(decimals[remainder]);
+
+        size_t start = working.find_first_not_of('0');
+        if (start == working.npos) {
+            str = working;
+        }
+        else {
+            str = working.substr(start);
+        }
+    }
+
+    std::reverse(dec_str.begin(), dec_str.end());
+    return dec_str;
+}
+
+#pragma endregion str_convert
 
 
 #pragma region is_functions
@@ -633,6 +778,34 @@ bool Value::is_mat() const {
     }
 }
 
+bool Value::is_negative() const {
+    switch (type) {
+        case TYPE_INT:
+            return (operator Int()) < 0;
+        case TYPE_BIGINT:
+            return (operator BigInt()) < 0;
+        case TYPE_REAL:
+            return (operator Real()) < 0.0;
+
+        default:
+            return false;
+    }
+}
+
+Real Value::get_real() const {
+    switch (type) {
+        case TYPE_INT:
+            return Real(operator Int());
+        case TYPE_BIGINT:
+            return (operator BigInt()).get_real<Real>();
+        case TYPE_REAL:
+            return operator Real();
+
+        default:
+            throw std::logic_error("Cannot get non-scalar as a real!");
+    }
+}
+
 #pragma endregion is_functions
 
 
@@ -652,9 +825,9 @@ std::string Value::to_string(DisplayableTag tags, std::optional<int> precision) 
                     return fmt("0b%s", str.c_str() + offset);
                 }
                 case REPR_OCT:
-                    return fmt("0o%o", operator Int());
+                    return fmt("0o%llo", operator Int());
                 case REPR_HEX:
-                    return fmt("0x%x", operator Int());
+                    return fmt("0x%llx", operator Int());
             }
             UNREACHABLE();
         }
@@ -815,7 +988,7 @@ void Value::unref() {
 
 #define POOL_COMPARE(pool_type, enum_type) \
 case enum_type: { \
-    return operator pool_type() == other.operator pool_type(); \
+    return TypeComparison::compare(operator pool_type(), other.operator pool_type()); \
 }
 
 bool Value::operator==(const Value& other) const {
@@ -824,8 +997,9 @@ bool Value::operator==(const Value& other) const {
     switch (type) {
         case TYPE_INT:
             return data == other.data;
+        case TYPE_BIGINT:
+            return operator BigInt() == other.operator BigInt();
         
-        POOL_COMPARE(BigInt, TYPE_BIGINT)
         POOL_COMPARE(Real, TYPE_REAL)
         POOL_COMPARE(Vec2, TYPE_VEC2)
         POOL_COMPARE(Vec3, TYPE_VEC3)

@@ -91,8 +91,8 @@ void Application::on_renderer_submit_text(std::string_view str) {
     if (value) {
         StackItem stack_item {
             create_displayables_from(value.value()),
-            std::move(value).value(),
-            false
+            *value,
+            value->is_negative()
         };
 
         p_renderer->add_stack_item(stack_item);

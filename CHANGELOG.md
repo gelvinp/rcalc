@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved the way that matrices are copied to the clipboard (Copied as one line that can be pasted back into RCalc as a valid matrix instead of formatted on multiple lines).
 - Improved the way that swizzles are formatted (they now respect whether their input is an expression).
 - Improved the way that integer addition, subtraction, and multiplication are checked for BigInt promotion.
+- Negative values are now treated as expressions.
+- BigInt values are parsed more reliably, especially when entered as binary, octal, or hexidecimal numbers. As a side effect, you can no longer enter negative binary, octal, or hexidecimal numbers directly, however negating a prefixed value probably never resulted in what you actually wanted anyways. Further work may be required in this area.
+- Changed the way that the ImGui renderer wraps long lines to put the result on a new line for increased legibility (behaves the same as on iOS).
 
 ### Fixed
 

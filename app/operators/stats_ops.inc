@@ -387,6 +387,7 @@ RCALC_FMT_1_S(NormDist, _arg) {
 // Tags: [no_expr]
 // Requires: <numeric>
 // Requires: <sstream>
+// Requires: "core/checked_math.h"
 // Example: [1, 2, 3, 3]
 RCALC_OP_1_S(Sum, Int, count) {
     if (stack.size() < (size_t)count) {
@@ -442,7 +443,7 @@ RCALC_OP_1_S(Sum, Int, count) {
         return Ok(Value(sum));
     }
     else {
-        return Ok(Value::find_int(sum));
+        return Ok(CheckedMath::discretize(sum));
     }
 }
 

@@ -35,6 +35,10 @@ struct Unit {
     const UnitImpl<T>& get_impl() const {
         return *reinterpret_cast<const UnitImpl<T>*>(p_impl);
     }
+
+    bool operator==(const Unit& other) const {
+        return p_impl == other.p_impl;
+    }
 };
 
 

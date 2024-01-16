@@ -5,7 +5,7 @@
 
 using namespace RCalc;
 
-TEST_CASE("Must be ready", "[core][alloc]") {
+TEST_CASE("Must be ready", "[core][alloc][allocates]") {
     Allocator::cleanup();
 
     SECTION("to realloc") {
@@ -28,7 +28,7 @@ TEST_CASE("Must be ready", "[core][alloc]") {
     }
 }
 
-TEST_CASE("Creates a new page when not enough room", "[core][alloc]") {
+TEST_CASE("Creates a new page when not enough room", "[core][alloc][allocates]") {
     Allocator::cleanup();
 
     constexpr const size_t size = Allocator::DEFAULT_PAGE_SIZE + 1024;
@@ -38,7 +38,7 @@ TEST_CASE("Creates a new page when not enough room", "[core][alloc]") {
     Allocator::free(p_addr);
 }
 
-TEST_CASE("Grows a reservation in place when able", "[core][alloc]") {
+TEST_CASE("Grows a reservation in place when able", "[core][alloc][allocates]") {
     Allocator::cleanup();
 
     constexpr const size_t initial_size = 1024;
@@ -58,7 +58,7 @@ TEST_CASE("Grows a reservation in place when able", "[core][alloc]") {
     Allocator::free(p_expanded_addr);
 }
 
-TEST_CASE("Moves a reservation when unable to grow", "[core][alloc]") {
+TEST_CASE("Moves a reservation when unable to grow", "[core][alloc][allocates]") {
     Allocator::cleanup();
 
     constexpr const size_t count = 1024;
@@ -94,7 +94,7 @@ TEST_CASE("Moves a reservation when unable to grow", "[core][alloc]") {
     Allocator::free(p_expanded_addr);
 }
 
-TEST_CASE("Shrinks a reservation in place", "[core][alloc]") {
+TEST_CASE("Shrinks a reservation in place", "[core][alloc][allocates]") {
     Allocator::cleanup();
 
     constexpr const size_t initial_size = 2048;
@@ -114,7 +114,7 @@ TEST_CASE("Shrinks a reservation in place", "[core][alloc]") {
     Allocator::free(p_shrunk_addr);
 }
 
-TEST_CASE("Allocation Stress Test", "[core][alloc][.long]") {
+TEST_CASE("Allocation Stress Test", "[core][alloc][allocates][.long]") {
     Allocator::cleanup();
     Allocator::setup();
 
@@ -202,7 +202,7 @@ size_t ComplexClass::construct_count = 0;
 size_t ComplexClass::destruct_count = 0;
 
 
-TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
+TEST_CASE("std::shared_ptr deleters", "[core][alloc][allocates]") {
     Allocator::cleanup();
     Allocator::setup();
     ComplexClass::construct_count = 0;
@@ -229,7 +229,7 @@ TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
 }
 
 
-TEST_CASE("std::shared_ptr deleters", "[core][alloc]") {
+TEST_CASE("std::shared_ptr deleters", "[core][alloc][allocates]") {
     Allocator::cleanup();
     Allocator::setup();
     ComplexClass::construct_count = 0;

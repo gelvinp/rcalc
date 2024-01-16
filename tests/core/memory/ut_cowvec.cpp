@@ -3,7 +3,7 @@
 
 using namespace RCalc;
 
-TEST_CASE("Initial size and capacity are zero", "[core][alloc]") {
+TEST_CASE("Initial size and capacity are zero", "[core][cowvec][allocates]") {
     CowVec<int> vec;
 
     REQUIRE(vec.size() == 0);
@@ -19,7 +19,7 @@ TEST_CASE("Initial size and capacity are zero", "[core][alloc]") {
     REQUIRE_THROWS_AS(vec.mut_back(), std::logic_error);
 }
 
-TEST_CASE("Can push back", "[core][alloc]") {
+TEST_CASE("Can push back", "[core][cowvec][allocates]") {
     CowVec<int> vec;
 
     int a = 3;
@@ -31,7 +31,7 @@ TEST_CASE("Can push back", "[core][alloc]") {
     REQUIRE_FALSE(vec.empty());
 }
 
-TEST_CASE("Automatically resizes when needed", "[core][alloc]") {
+TEST_CASE("Automatically resizes when needed", "[core][cowvec][allocates]") {
     CowVec<int> vec;
 
     for (size_t index = 0; index < vec.INITIAL_CAPACITY; ++index) {
@@ -70,7 +70,7 @@ TEST_CASE("Automatically resizes when needed", "[core][alloc]") {
     REQUIRE(vec.mut_back() == vec.INITIAL_CAPACITY);
 }
 
-TEST_CASE("Can manually resize", "[core][alloc]") {
+TEST_CASE("Can manually resize", "[core][cowvec][allocates]") {
     CowVec<int> vec;
 
     REQUIRE(vec.size() == 0);
@@ -111,7 +111,7 @@ TEST_CASE("Can manually resize", "[core][alloc]") {
     REQUIRE(vec.p_data == nullptr);
 }
 
-TEST_CASE("Performs copy on write", "[core][alloc]") {
+TEST_CASE("Performs copy on write", "[core][cowvec][allocates]") {
     CowVec<int> vec_a { 1, 2, 3, 4 };
     CowVec<int> vec_b { vec_a };
 
@@ -230,7 +230,7 @@ TEST_CASE("Performs copy on write", "[core][alloc]") {
     REQUIRE(vec_b.p_data == nullptr);
 }
 
-TEST_CASE("Iterators behave", "[core][alloc]") {
+TEST_CASE("Iterators behave", "[core][cowvec][allocates]") {
     CowVec<int> vec { 1, 2, 3, 4 };
     CowVec<int>::Iterator it = vec.mut_begin();
 
@@ -281,7 +281,7 @@ TEST_CASE("Iterators behave", "[core][alloc]") {
     REQUIRE((vec.mut_end() - vec.mut_begin()) == vec.size());
 }
 
-TEST_CASE("ConstIterators behave", "[core][alloc]") {
+TEST_CASE("ConstIterators behave", "[core][cowvec][allocates]") {
     CowVec<int> vec { 1, 2, 3, 4 };
     CowVec<int>::ConstIterator it = vec.begin();
 
@@ -339,7 +339,7 @@ size_t ComplexClass::copy_count = 0;
 size_t ComplexClass::assign_count = 0;
 size_t ComplexClass::destruct_count = 0;
 
-TEST_CASE("Handles non-trivial classes", "[core][alloc]") {
+TEST_CASE("Handles non-trivial classes", "[core][cowvec][allocates]") {
     ComplexClass::copy_count = 0;
     ComplexClass::assign_count = 0;
     ComplexClass::destruct_count = 0;
