@@ -28,6 +28,21 @@ RCALC_OP_2(Quot, BigInt, BigInt, arg0, arg1) {
 
 // @RCalcOperator
 // Tags: [bigint_cast]
+RCALC_OP_1(Sqr, BigInt, arg0) {
+    return Ok(Value(arg0 * arg0));
+}
+
+
+// @RCalcOperator
+// Tags: [bigint_cast]
+RCALC_OP_1(Cube, BigInt, arg0) {
+    BigInt three { "3" };
+    return Ok(Value(big_pow(arg0, three)));
+}
+
+
+// @RCalcOperator
+// Tags: [bigint_cast]
 RCALC_OP_2(Pow, BigInt, BigInt, arg0, arg1) {
     return Ok(Value(big_pow(arg0, arg1)));
 }

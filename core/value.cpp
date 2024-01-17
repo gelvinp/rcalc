@@ -23,6 +23,12 @@ namespace RCalc {
 
 #pragma region pool_macro
 
+#ifdef TESTS_ENABLED
+#define POOL_VISIBILITY public
+#else
+#define POOL_VISIBILITY private
+#endif
+
 #ifndef NDEBUG
 
 #define DEFINE_POOL(type) \
@@ -120,7 +126,7 @@ public: \
         _refs.resize(new_size); \
     } \
 \
-private: \
+POOL_VISIBILITY: \
     static std::vector<type> _pool; \
     static std::vector<uint8_t> _refs; \
 }; \
@@ -175,7 +181,7 @@ public: \
         _refs.resize(new_size); \
     } \
 \
-private: \
+POOL_VISIBILITY: \
     static std::vector<type> _pool; \
     static std::vector<uint8_t> _refs; \
 }; \
@@ -196,6 +202,8 @@ DEFINE_POOL(Mat2);
 DEFINE_POOL(Mat3);
 DEFINE_POOL(Mat4);
 DEFINE_POOL(Unit);
+
+#undef POOL_VISIBILITY
 
 #pragma endregion pool
 
@@ -308,23 +316,7 @@ case enum_type: { \
 }
 
 Value::~Value() {
-    switch (type) {
-        case TYPE_INT: { break; }
-
-        POOL_FREE(BigInt, TYPE_BIGINT)
-        POOL_FREE(Real, TYPE_REAL)
-        POOL_FREE(Vec2, TYPE_VEC2)
-        POOL_FREE(Vec3, TYPE_VEC3)
-        POOL_FREE(Vec4, TYPE_VEC4)
-        POOL_FREE(Mat2, TYPE_MAT2)
-        POOL_FREE(Mat3, TYPE_MAT3)
-        POOL_FREE(Mat4, TYPE_MAT4)
-        POOL_FREE(Unit, TYPE_UNIT)
-
-        default: {
-            Logger::log_err("Value of type %s not handled during free!", get_type_name());
-        }
-    }
+    unref();
 }
 
 #undef POOL_FREE
@@ -398,7 +390,7 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
 
         std::optional<std::string> bin_str = str_hex_to_bin(sv.data());
         if (bin_str) {
-            return Value(BigInt(*str_bin_to_dec(*bin_str)));
+            return Value(BigInt(*str_bin_to_dec(*bin_str)), REPR_HEX);
         }
     }
     else if (sv.starts_with("0o")) {
@@ -411,7 +403,7 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
 
         std::optional<std::string> bin_str = str_oct_to_bin(sv.data());
         if (bin_str) {
-            return Value(BigInt(*str_bin_to_dec(*bin_str)));
+            return Value(BigInt(*str_bin_to_dec(*bin_str)), REPR_OCT);
         }
     }
     else if (sv.starts_with("0b")) {
@@ -424,7 +416,7 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
 
         std::optional<std::string> dec_str = str_bin_to_dec(sv.data());
         if (dec_str) {
-            return Value(BigInt(dec_str.value()));
+            return Value(BigInt(dec_str.value()), REPR_BINARY);
         }
     }
     else {

@@ -167,7 +167,11 @@ void roundtrip<Vec4>(Unit* p_unit) {
     }
 }
 
+#ifdef GPERF_ENABLED // Non-gperf builds use std-map
 TEST_CASE("Unit Roundtrip", "[core][units]") {
+#else
+TEST_CASE("Unit Roundtrip", "[core][units][allocates]") {
+#endif
     // Make sure every unit can convert a value from itself to the base unit and back while maintaining the same value
 
     UnitsMap& map = UnitsMap::get_units_map();

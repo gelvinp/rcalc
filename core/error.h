@@ -140,21 +140,11 @@ public:
     }
 
     template <typename U = T>
-    typename std::enable_if<std::is_same<U, void>::value, U&&>::type unwrap() const
-    {
-    }
-
-    template <typename U = T>
-    static typename std::enable_if<std::is_same<U, void>::value, U>::type unwrap_move()
-    {
-    }
-
-    template <typename U = T, typename V = OkTypes::Ok<U>>
-    typename std::enable_if<!std::is_same<U, void>::value, V>::type unwrap_or(const U &default_value) const
+    typename std::enable_if<!std::is_same<U, void>::value, U>::type unwrap_or(const U &default_value) const
     {
         if (data.index() == 0)
         {
-            return std::get<V>(data);
+            return std::get<OkTypes::Ok<U>>(data).get();
         }
 
         return default_value;

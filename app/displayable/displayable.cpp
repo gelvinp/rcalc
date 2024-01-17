@@ -102,8 +102,7 @@ std::string Displayable::dbg_display() {
                 break;
             }
             case Type::VALUE: {
-                std::string str = reinterpret_cast<ValueDisplayable*>(&disp)->value.to_string();
-                ss << reinterpret_cast<ValueDisplayable*>(&disp)->value.to_string();
+                ss << reinterpret_cast<ValueDisplayable*>(&disp)->value.to_string(disp.tags);
                 break;
             }
             case Type::RECURSIVE:

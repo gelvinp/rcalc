@@ -77,6 +77,10 @@ public:
     static int get_precision() { return _precision; }
     static void set_precision(int precision);
 
+#ifdef TESTS_ENABLED
+    uint64_t TEST_GET_DATA() const { return data; }
+#endif
+
 private:
     Type type : 4 = TYPE_INT;
     uint64_t data = 0;

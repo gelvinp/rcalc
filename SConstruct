@@ -471,7 +471,7 @@ if selected_platform in available_platforms:
     env["extra_sources"] = []
     
     if env["gperf_path"]:
-        env.Append(CPPDEFINES=["GPERF_ENABLED"]) # Not used anywhere, but will force recompilation
+        env.Append(CPPDEFINES=["GPERF_ENABLED"])
 
     Export("env")
     
