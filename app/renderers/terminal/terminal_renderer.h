@@ -46,6 +46,8 @@ private:
     ftxui::Element render_stack();
     ftxui::Element render_stack_scroll();
 
+    
+
     SubmitTextCallback cb_submit_text;
     CommandMap<TerminalRenderer>& command_map;
 

@@ -12,7 +12,7 @@ class Main
 public:
     RCalc::AppConfig parse_args(int argc, char** pp_argv);
 
-    static RCalc::Application& get_app() { return *p_application; }
+    static RCalc::Application& get_app();
 
 private:
     const char* p_name;

@@ -16,11 +16,12 @@ namespace RCalc {
 
 class Application {
 public:
+    Application();
+
+    Result<> early_init(AppConfig config);
     Result<> init();
     void run();
     void cleanup();
-
-    static Result<Application*> create(AppConfig config);
 
     REGISTER_COMMAND(Application, Clear);
     REGISTER_COMMAND(Application, Pop);
@@ -40,7 +41,6 @@ public:
     const _CommandMap& get_command_map() const { return cmd_map; }
 
 private:
-    Application();
 
     RPNStack _stack_a, _stack_b;
     RPNStack *p_stack_active, *p_stack_backup;

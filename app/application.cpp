@@ -13,23 +13,6 @@
 
 namespace RCalc {
 
-Result<Application*> Application::create(AppConfig config) {
-    Application* p_application = Allocator::create<Application>();
-
-    Result<Renderer*> renderer_res = Renderer::create(
-        config,
-        { p_application, &_on_renderer_submit_text }
-    );
-
-    if (renderer_res) {
-        p_application->p_renderer = renderer_res.unwrap();
-        return Ok(p_application);
-    }
-    else {
-        return renderer_res.unwrap_err();
-    }
-}
-
 Application::Application() :
     op_map(OperatorMap::get_operator_map())
 {
@@ -37,6 +20,22 @@ Application::Application() :
 
     p_stack_active = &_stack_a;
     p_stack_backup = &_stack_b;
+}
+
+
+Result<> Application::early_init(AppConfig config) {
+    Result<Renderer*> renderer_res = Renderer::create(
+        config,
+        { this, &_on_renderer_submit_text }
+    );
+
+    if (renderer_res) {
+        p_renderer = renderer_res.unwrap();
+        return Ok();
+    }
+    else {
+        return renderer_res.unwrap_err();
+    }
 }
 
 Result<> Application::init() {

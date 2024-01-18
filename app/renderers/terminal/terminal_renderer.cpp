@@ -17,6 +17,7 @@ namespace RCalc {
 TerminalRenderer::TerminalRenderer() :
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
+    command_map.activate(Main::get_app().get_command_map());
 }
 
 
@@ -41,8 +42,6 @@ void TerminalRenderer::early_init(const AppConfig& config, SubmitTextCallback cb
 }
 
 Result<> TerminalRenderer::init() {
-    command_map.activate(Main::get_app().get_command_map());
-    
     Result<> res = backend.init({ this, &TerminalRenderer::_display_error });
     if (!res) { return res; }
 

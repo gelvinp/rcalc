@@ -31,6 +31,7 @@ ImGuiRenderer::ImGuiRenderer() :
         SettingsManager::system_color_available = true;
     }
     settings = SettingsManager();
+    command_map.activate(Main::get_app().get_command_map());
 }
 
 
@@ -61,8 +62,6 @@ void ImGuiRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_su
 
 
 Result<> ImGuiRenderer::init() {
-    command_map.activate(Main::get_app().get_command_map());
-
     Result<> res = backend.init(cb_submit_text);
     if (!res) { return res; }
 

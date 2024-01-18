@@ -38,21 +38,20 @@ int main(int argc, char** pp_argv)
     }
     #endif
 
-    RCalc::Result<RCalc::Application*> res = RCalc::Application::create(config);
+    Main::p_application = RCalc::Allocator::create<RCalc::Application>();;
+    RCalc::Result<> res = Main::get_app().early_init(config);
     
     if (!res) {
         std::stringstream ss;
         ss << res.unwrap_err();
         RCalc::Logger::log_err("%s", ss.str().c_str());
     } else {
-        RCalc::Application* p_application = res.unwrap();
-        Main::p_application = p_application;
-        p_application->init();
-        p_application->run();
+        Main::get_app().init();
+        Main::get_app().run();
 
         RCalc::Allocator::set_noop_free(true);
-        p_application->cleanup();
-        RCalc::Allocator::destroy(p_application);
+        Main::get_app().cleanup();
+        RCalc::Allocator::destroy(Main::p_application);
     }
 
     RCalc::cleanup_modules();
@@ -60,6 +59,12 @@ int main(int argc, char** pp_argv)
     RCalc::Allocator::cleanup();
 
     return res ? 0 : 255;
+}
+
+
+RCalc::Application& Main::get_app() {
+    if (p_application) { return *p_application; }
+    throw std::logic_error("Main application is not ready! You must **only** call get_app() during or after Renderer::init()!");
 }
 
 
