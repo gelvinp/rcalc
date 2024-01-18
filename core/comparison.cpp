@@ -1,5 +1,7 @@
 #include "comparison.h"
 
+#include <numbers>
+
 #include "core/value.h"
 
 namespace RCalc::TypeComparison {

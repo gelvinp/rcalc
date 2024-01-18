@@ -434,11 +434,22 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
     }
 
     Real d_value;
+
+#ifdef ENABLE_PLATFORM_MACOS
+    // Floating point char_conv requires MacOS 13.3 or later.
+    std::stringstream ss;
+    ss << sv;
+    ss >> d_value;
+    if (!ss.fail()) {
+        return Value(d_value, REPR_DECIMAL);
+    }
+#else
     const char* end = sv.data() + sv.size();
     auto [ptr, ec] = std::from_chars(sv.data(), end, d_value);
     if (ec == std::errc() && ptr == end) {
         return Value(d_value, REPR_DECIMAL);
     }
+#endif
 
     return std::nullopt;
 }
