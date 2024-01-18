@@ -435,7 +435,7 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
 
     Real d_value;
 
-#ifdef ENABLE_PLATFORM_MACOS
+#if defined(ENABLE_PLATFORM_MACOS) || defined(ENABLE_PLATFORM_IOS)
     // Floating point char_conv requires MacOS 13.3 or later.
     std::stringstream ss;
     ss << sv;

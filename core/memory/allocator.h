@@ -57,7 +57,7 @@ public:
         void (*free_override)(void*);
     };
 
-    void set_func_overrides(std::optional<AllocFuncOverrides> overrides) { shared.func_overrides = overrides; }
+    static void set_func_overrides(std::optional<AllocFuncOverrides> overrides) { shared.func_overrides = overrides; }
 
 #ifndef TESTS_ENABLED
 private:
