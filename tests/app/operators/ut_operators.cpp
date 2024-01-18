@@ -21,7 +21,7 @@ using namespace RCalc::TypeComparison;
 
 //                 for (const char* param : example_params) {
 //                     Value value = Value::parse(param).value();
-//                     stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+//                     stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 //                 }
 
 //                 std::string op_name = filter_name(op->name);
@@ -52,7 +52,7 @@ TEST_CASE("Operator test cases", "[core][allocates]") {
 
                 for (const char* param : test_case.params) {
                     Value value = Value::parse(param).value();
-                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+                    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
                 }
 
                 std::string op_name = filter_name(test.op_name);
@@ -81,7 +81,7 @@ TEST_CASE("Operator test cases", "[core][allocates]") {
 
                 for (const char* param : test_case.params) {
                     Value value = Value::parse(param).value();
-                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+                    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
                 }
 
                 std::string op_name = filter_name(test.op_name);
@@ -100,9 +100,9 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
     CowVec<OpTest> op_tests = get_op_tests();
 
     Value value = Value::parse("1").value();
-    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
     value = Value::parse("2").value();
-    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
     SECTION("Two adds") {
         {
@@ -110,13 +110,13 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
             REQUIRE(err.operator bool());
 
             const CowVec<StackItem>& _items = stack.get_items();
-            REQUIRE(_items.size() == 1);
+            REQUIRE(_items.size() == 1z);
             const StackItem& res = _items[0];
             REQUIRE(res.p_input->dbg_display() == "1 + 2");
         }
 
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("add", stack);
         REQUIRE(err.operator bool());
@@ -139,7 +139,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
         }
 
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("add", stack);
         REQUIRE(err.operator bool());
@@ -162,7 +162,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
         }
 
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("mul", stack);
         REQUIRE(err.operator bool());
@@ -175,7 +175,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
 
     SECTION("Add then add reversed") {
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         {
             Result<std::optional<size_t>> err = op_map.evaluate("add", stack);
@@ -198,7 +198,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
 
     SECTION("Mul then add reversed") {
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         {
             Result<std::optional<size_t>> err = op_map.evaluate("mul", stack);
@@ -221,7 +221,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
 
     SECTION("Add then mul reversed") {
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         {
             Result<std::optional<size_t>> err = op_map.evaluate("add", stack);
@@ -244,7 +244,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
 
     SECTION("Mul then mul reversed") {
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         {
             Result<std::optional<size_t>> err = op_map.evaluate("mul", stack);
@@ -277,7 +277,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
         }
 
         value = Value::parse("3").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("mul", stack);
         REQUIRE(err.operator bool());
@@ -295,9 +295,9 @@ TEST_CASE("Column vectors", "[core][allocates]") {
     CowVec<OpTest> op_tests = get_op_tests();
 
     Value value = Value::parse("{[1, 2], [3, 4]}").value();
-    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
     value = Value::parse("[5, 6]").value();
-    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
     SECTION("Mul") {
         Result<std::optional<size_t>> err = op_map.evaluate("mul", stack);
@@ -326,7 +326,7 @@ TEST_CASE("Negation stack", "[core][allocates]") {
     CowVec<OpTest> op_tests = get_op_tests();
 
     Value value = Value::parse("123").value();
-    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
     {
         Result<std::optional<size_t>> err = op_map.evaluate("neg", stack);
@@ -355,7 +355,7 @@ TEST_CASE("Range", "[core][allocates]") {
 
     SECTION("With zero") {
         Value value = Value::parse("123").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("range", stack);
         REQUIRE(err.operator bool());
@@ -370,7 +370,7 @@ TEST_CASE("Range", "[core][allocates]") {
 
     SECTION("Without zero") {
         Value value = Value::parse("n123").value();
-        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+        stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
 
         Result<std::optional<size_t>> err = op_map.evaluate("range", stack);
         REQUIRE(err.operator bool());

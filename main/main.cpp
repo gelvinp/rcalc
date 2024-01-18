@@ -39,6 +39,7 @@ int main(int argc, char** pp_argv)
     #endif
 
     Main::p_application = RCalc::Allocator::create<RCalc::Application>();;
+    Main::get_app().set_max_stack_size(100000);
     RCalc::Result<> res = Main::get_app().early_init(config);
     
     if (!res) {

@@ -369,14 +369,17 @@ RCALC_FMT_0(e) {
 // Example: [5]
 RCALC_OP_1_S(Range, Int, arg0) {
     // TODO: Implement this better
-    if (arg0 > 10000 || arg0 < -10000) { return Err(ERR_INVALID_PARAM, "Unable to create that many items."); }
+    if (stack.get_max_size()) {
+        Int max_possible_items = *stack.get_max_size() - stack.size();
+        if ((arg0 + 1) > max_possible_items || arg0 < -max_possible_items) { return Err(ERR_STACK_FULL, "Unable to create that many items."); }
+    }
 
     Int from = (arg0 < 0) ? 1 : 0;
     Int to = (arg0 < 0) ? -arg0 : arg0;
-    stack.reserve_items(stack.size() + to);
+    stack.try_reserve_items(stack.size() + to);
     for (Int index = from; index < to; index++) {
         Value value = Value(index);
-        stack.push_item(StackItem{
+        stack.try_push_item(StackItem{
             create_displayables_from(value),
             std::move(value),
             false

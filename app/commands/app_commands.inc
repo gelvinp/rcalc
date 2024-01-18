@@ -20,7 +20,7 @@ RCALC_CMD(Application, Swap) {
     if (stack.size() < 2) { return; }
     CowVec<StackItem> items = stack.pop_items(2);
     std::swap(items.mut_at(0), items.mut_at(1));
-    stack.push_items(std::move(items));
+    stack.try_push_items(std::move(items));
 }
 
 // @RCalcCommand
@@ -28,7 +28,9 @@ RCALC_CMD(Application, Swap) {
 // Requires: "app/application.h"
 RCALC_CMD(Application, Dup) {
     if (stack.size() == 0) { return; }
-    stack.push_item(stack.get_items().back());
+    if (!stack.try_push_item(stack.get_items().back())) {
+        p_renderer->display_error("The stack is full.");
+    }
 }
 
 // @RCalcCommand
@@ -41,20 +43,24 @@ RCALC_CMD(Application, Count) {
     // No floating point, check for int64_t
     if (count > (size_t)std::numeric_limits<int64_t>::max()) {
         Value value { BigInt((long long int)count) };
-        stack.push_item(StackItem {
+        if (!stack.try_push_item(StackItem {
             create_displayables_from("count"),
             std::move(value),
             false
-        });
+        })) {
+            p_renderer->display_error("The stack is full.");
+        }
         return;
     }
 
     Value value { (int64_t)count };
-    stack.push_item(StackItem {
+    if (!stack.try_push_item(StackItem {
         create_displayables_from("count"),
         std::move(value),
         false
-    });
+    })) {
+        p_renderer->display_error("The stack is full.");
+    }
 }
 
 // @RCalcCommand

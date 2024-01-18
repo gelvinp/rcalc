@@ -23,9 +23,9 @@ struct StackItem {
 
 class RPNStack {
 public:
-    void push_item(StackItem item);
-    void push_items(CowVec<StackItem> items);
-    void reserve_items(size_t count);
+    bool try_push_item(StackItem item);
+    bool try_push_items(CowVec<StackItem> items);
+    bool try_reserve_items(size_t count);
 
     size_t size() const;
     void clear();
@@ -38,6 +38,9 @@ public:
     CowVec<StackItem> pop_items(uint64_t count);
 
     const CowVec<StackItem>& get_items() const;
+
+    std::optional<Int> get_max_size() const { return max_size; }
+    void set_max_size(std::optional<Int> new_max_size);
 
     template<typename T, typename... Args>
     void set_message(Args&&... args) {
@@ -78,6 +81,7 @@ public:
 private:
     CowVec<StackItem> stack;
     std::any message;
+    std::optional<Int> max_size = std::nullopt;
 };
 
 }

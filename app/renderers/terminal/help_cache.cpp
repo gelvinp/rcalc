@@ -356,7 +356,7 @@ void CachedOperator::build() {
 
         for (const char* param : example_params) {
             Value value = Value::parse(param).value();
-            example_stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+            example_stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
         }
 
         std::string op_name = filter_name(op.name);

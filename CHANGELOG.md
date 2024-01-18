@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `Sum` operator works to preserve precision when operating on Ints, BigInts, and no Reals.
 - Fixed subtraction between Vec3s and subtraction between Vec4s
 - The TerminalRenderer will now never log to stdout, and will only log when given the `--logfile` argument.
+- The stack now has a maximum size of 100,000 items.
 
 ### Fixed
 

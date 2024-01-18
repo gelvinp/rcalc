@@ -94,9 +94,14 @@ void Application::on_renderer_submit_text(std::string_view str) {
             value->is_negative()
         };
 
-        p_renderer->add_stack_item(stack_item);
-        stack.push_item(std::move(stack_item));
-        swap_stacks();
+        if (stack.try_push_item(stack_item)) {
+            p_renderer->add_stack_item(stack_item);
+            swap_stacks();
+        }
+        else {
+            p_renderer->display_error("The stack is full.");
+        }
+
         return;
     }
 
@@ -181,11 +186,11 @@ bool Application::try_swizzle(std::string_view str) {
                     case 'a':
                     case 'w':
                         p_renderer->display_error(fmt("Swizzle out of bounds for Vec2: '%s'", str.data()));
-                        stack.push_items(std::move(source_value));
+                        stack.try_push_items(std::move(source_value));
                         return true;
                     default:
                         p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
-                        stack.push_items(std::move(source_value));
+                        stack.try_push_items(std::move(source_value));
                         return true;
                 }
             }
@@ -212,11 +217,11 @@ bool Application::try_swizzle(std::string_view str) {
                     case 'a':
                     case 'w':
                         p_renderer->display_error(fmt("Swizzle out of bounds for Vec3: '%s'", str.data()));
-                        stack.push_items(std::move(source_value));
+                        stack.try_push_items(std::move(source_value));
                         return true;
                     default:
                         p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
-                        stack.push_items(std::move(source_value));
+                        stack.try_push_items(std::move(source_value));
                         return true;
                 }
             }
@@ -246,7 +251,7 @@ bool Application::try_swizzle(std::string_view str) {
                         break;
                     default:
                         p_renderer->display_error(fmt("Unrecognized swizzle: '%s'", str.data()));
-                        stack.push_items(std::move(source_value));
+                        stack.try_push_items(std::move(source_value));
                         return true;
                 }
             }
@@ -254,7 +259,7 @@ bool Application::try_swizzle(std::string_view str) {
             break;
         }
         default:
-            stack.push_items(std::move(source_value));
+            stack.try_push_items(std::move(source_value));
             return false;
     }
 
@@ -288,8 +293,13 @@ bool Application::try_swizzle(std::string_view str) {
         true
     };
 
-    p_renderer->add_stack_item(stack_item);
-    stack.push_item(std::move(stack_item));
+    if (stack.try_push_item(std::move(stack_item))) {
+        p_renderer->add_stack_item(stack_item);
+        swap_stacks();
+    }
+    else {
+        p_renderer->display_error("The stack is full.");
+    }
     return true;
 }
 
@@ -297,6 +307,16 @@ bool Application::try_swizzle(std::string_view str) {
 void Application::swap_stacks() {
     *p_stack_backup = stack;
     std::swap(p_stack_backup, p_stack_active);
+}
+
+
+void Application::set_max_stack_size(std::optional<Int> new_max_size) {
+    stack.set_max_size(new_max_size);
+    _stack_a = stack;
+    _stack_b = stack;
+    if (p_renderer) {
+        p_renderer->replace_stack_items(stack.get_items());
+    }
 }
 
 

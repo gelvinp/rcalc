@@ -6,19 +6,38 @@
 
 namespace RCalc {
 
-void RPNStack::push_item(StackItem item) {
+
+bool RPNStack::try_push_item(StackItem item) {
+    if (max_size && (stack.size() + 1) > (size_t)*max_size) { return false; }
     stack.push_back(item);
+    return true;
 }
 
 
-void RPNStack::push_items(CowVec<StackItem> items) {
+bool RPNStack::try_push_items(CowVec<StackItem> items) {
+    if (max_size && (stack.size() + items.size()) > (size_t)*max_size) { return false; }
     for (auto it = items.begin(); it < items.end(); ++it) {
         stack.push_back(*it);
     }
+    return true;
 }
 
-void RPNStack::reserve_items(size_t count) {
+bool RPNStack::try_reserve_items(size_t count) {
+    if (max_size && (stack.size() + count) > (size_t)*max_size) { return false; }
     stack.reserve(count);
+    return true;
+}
+
+
+void RPNStack::set_max_size(std::optional<Int> new_max_size) {
+    max_size = new_max_size;
+
+    if (max_size && stack.size() > *max_size) {
+        for (size_t from_index = stack.size() - *max_size, to_index = 0; to_index < *new_max_size; ++to_index, ++from_index) {
+            stack.mut_at(to_index) = stack.at(from_index);
+        }
+        stack.resize(*new_max_size);
+    }
 }
 
 

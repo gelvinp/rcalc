@@ -98,7 +98,7 @@ void RCalc::Dump::dump_info() {
                     example_params.push_back(param);
 
                     Value value = Value::parse(param).value();
-                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+                    stack.try_push_item(StackItem { create_displayables_from(value), std::move(value), false });
                 }
 
                 rendered_example["params"] = example_params;

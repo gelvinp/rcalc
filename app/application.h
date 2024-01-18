@@ -40,6 +40,9 @@ public:
     _CommandMap& get_command_map() { return cmd_map; }
     const _CommandMap& get_command_map() const { return cmd_map; }
 
+    std::optional<Int> get_max_stack_size() const { return stack.get_max_size(); }
+    void set_max_stack_size(std::optional<Int> new_max_size);
+
 private:
 
     RPNStack _stack_a, _stack_b;

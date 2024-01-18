@@ -372,7 +372,7 @@ class Operator:
         lines.append('\tif (!res) {')
 
         if self.param_count > 0:
-            lines.append('\t\tstack.push_items(std::move(values));')
+            lines.append('\t\tstack.try_push_items(std::move(values));')
         
         lines.extend([
             '\t\treturn res.unwrap_err();',
@@ -390,11 +390,13 @@ class Operator:
             '\tbool stack_mutated_in_op = !stack_post_pop.same_ref(stack.get_items());',
             '\tstack_post_pop.unref();',
             '',
-            '\tstack.push_item(StackItem {',
+            '\tif (!stack.try_push_item(StackItem {',
             '\t\tformat,',
             "\t\tstd::move(value),",
             f"\t\t{'true' if self.is_expression else 'false'}",
-            "\t});",
+            "\t})) {",
+            '\t\treturn Err(ERR_STACK_FULL);',
+            '\t}',
             '',
             '\tif (stack_mutated_in_op) {',
             "\t\treturn Ok(std::optional<size_t> { std::nullopt });",
