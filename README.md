@@ -1,7 +1,17 @@
 # RCalc
 
 <p align="center">
-    <img src="docs/images/header.jpg" alt="RCalc Logo">
+    <picture>
+        <source
+            srcset="docs/images/header-light.jpg"
+            media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
+        />
+        <source
+            srcset="docs/images/header.jpg"
+            media="(prefers-color-scheme: dark)"
+        />
+        <img src="docs/images/header.jpg" alt="RCalc Logo">
+    </picture>
 </p>
 
 RCalc is an RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)) calculator written in C++.

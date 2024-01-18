@@ -165,7 +165,7 @@ class Processor:
 
         for family in self.data['unit_families']:
             lines.extend([
-                f"## {family['name']} Commands",
+                f"## {family['name']} Units",
                 '',
                 f"Base type: {family['base_type']}",
                 ''
