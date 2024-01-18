@@ -258,7 +258,9 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
         if (
             arg->compare("--dump-info") == 0
         ) {
+            Main::p_application = RCalc::Allocator::create<RCalc::Application>();;
             RCalc::Dump::dump_info();
+            RCalc::Allocator::destroy(Main::p_application);
             exit(0);
         }
         #endif
