@@ -32,8 +32,8 @@ bool RPNStack::try_reserve_items(size_t count) {
 void RPNStack::set_max_size(std::optional<Int> new_max_size) {
     max_size = new_max_size;
 
-    if (max_size && stack.size() > *max_size) {
-        for (size_t from_index = stack.size() - *max_size, to_index = 0; to_index < *new_max_size; ++to_index, ++from_index) {
+    if (max_size && stack.size() > (size_t)*max_size) {
+        for (size_t from_index = stack.size() - *max_size, to_index = 0; to_index < (size_t)*new_max_size; ++to_index, ++from_index) {
             stack.mut_at(to_index) = stack.at(from_index);
         }
         stack.resize(*new_max_size);

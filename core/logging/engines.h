@@ -14,6 +14,8 @@ namespace RCalc {
 class StdOutLogger : public Logging::Engine
 {
 public:
+    virtual ~StdOutLogger() = default;
+
     virtual void set_min_severity(Logging::Severity severity) override { min_severity = severity; }
     virtual void log(Logging::Severity severity, std::string message) override;
 
@@ -26,7 +28,7 @@ class FileLogger : public Logging::Engine
 {
 public:
     FileLogger() = default;
-    ~FileLogger() = default;
+    virtual ~FileLogger() = default;
 
     FileLogger(const FileLogger&) = delete;
     FileLogger(FileLogger&&) = delete;
@@ -49,7 +51,7 @@ class CompoundLogger : public Logging::Engine
 {
 public:
     CompoundLogger() = default;
-    ~CompoundLogger() = default;
+    virtual ~CompoundLogger() = default;
 
     CompoundLogger(const CompoundLogger&) = delete;
     CompoundLogger(CompoundLogger&&) = delete;

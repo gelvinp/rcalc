@@ -29,6 +29,8 @@ public:
 class Logger
 {
 public:
+    virtual ~Logger() = default;
+    
     static std::shared_ptr<Logging::Engine> get_global_engine() { return global_engine; }
     static void set_global_engine(std::shared_ptr<Logging::Engine> engine) { global_engine = engine; }
 

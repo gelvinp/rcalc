@@ -11,12 +11,14 @@ TEST_CASE("Initial size and capacity are zero", "[core][cowvec][allocates]") {
     REQUIRE(vec.empty());
     REQUIRE(vec.begin() == vec.end());
     REQUIRE(vec.mut_begin() == vec.mut_end());
+    #ifndef NDEBUG
     REQUIRE_THROWS_AS(vec.at(1), std::logic_error);
     REQUIRE_THROWS_AS(vec.mut_at(1), std::logic_error);
     REQUIRE_THROWS_AS(vec.front(), std::logic_error);
     REQUIRE_THROWS_AS(vec.back(), std::logic_error);
     REQUIRE_THROWS_AS(vec.mut_front(), std::logic_error);
     REQUIRE_THROWS_AS(vec.mut_back(), std::logic_error);
+    #endif
 }
 
 TEST_CASE("Can push back", "[core][cowvec][allocates]") {
