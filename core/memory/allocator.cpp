@@ -16,6 +16,10 @@
 namespace RCalc {
 
 void* Allocator::alloc(size_t size_bytes) {
+    if (shared.func_overrides) {
+        return shared.func_overrides->alloc_override(size_bytes);
+    }
+
     if (shared.not_ready()) { shared.setup(); }
     shared.ENSURE_CORRECTNESS();
 
@@ -49,6 +53,10 @@ void* Allocator::alloc(size_t size_bytes) {
 }
 
 void* Allocator::realloc(void* p_addr, size_t new_size_bytes) {
+    if (shared.func_overrides) {
+        return shared.func_overrides->realloc_override(p_addr, new_size_bytes);
+    }
+
     if (shared.not_ready()) {
         throw std::logic_error("Cannot reallocate before allocator is setup!");
     }
@@ -98,6 +106,10 @@ void* Allocator::realloc(void* p_addr, size_t new_size_bytes) {
 }
 
 void Allocator::free(void* p_addr) {
+    if (shared.func_overrides) {
+        return shared.func_overrides->free_override(p_addr);
+    }
+
     if (shared.not_ready()) {
         throw std::logic_error("Cannot free before allocator is setup!");
     }

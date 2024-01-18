@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a `Frac` operator for Reals, which returns the fractional component.
 - Added a `Median` operator to calculate the median of a group of values.
 - Added `SampStdDev` and `SampNormDist` operators to use the *sample* standard deviation.
+- Added a new `--logfile` command line argument to send application logs to a file.
 
 ### Changed
 
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified that `StdDev` and `NormDist` use the *population* standard deviation.
 - The `Sum` operator works to preserve precision when operating on Ints, BigInts, and no Reals.
 - Fixed subtraction between Vec3s and subtraction between Vec4s
+- The TerminalRenderer will now never log to stdout, and will only log when given the `--logfile` argument.
 
 ### Fixed
 

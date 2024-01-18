@@ -51,6 +51,14 @@ public:
         Allocator::free(reinterpret_cast<void*>(p_addr));
     }
 
+    struct AllocFuncOverrides {
+        void* (*alloc_override)(size_t);
+        void* (*realloc_override)(void*, size_t);
+        void (*free_override)(void*);
+    };
+
+    void set_func_overrides(std::optional<AllocFuncOverrides> overrides) { shared.func_overrides = overrides; }
+
 #ifndef TESTS_ENABLED
 private:
 #endif
@@ -127,6 +135,8 @@ private:
         std::thread::id _thread_id;
         #endif
     };
+
+    std::optional<AllocFuncOverrides> func_overrides;
 
     bool noop_free_enabled = false;
 
