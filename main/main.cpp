@@ -29,7 +29,7 @@ int main(int argc, char** pp_argv)
 
     #ifdef TESTS_ENABLED
     if (config.test_config && config.test_config->run_tests) {
-        int res = RCalc::test_main(config.test_config.value());
+        int res = RCalc::test_main(config);
         
         RCalc::cleanup_modules();
         RCalc::Allocator::cleanup();
@@ -56,6 +56,7 @@ int main(int argc, char** pp_argv)
     }
 
     RCalc::cleanup_modules();
+    RCalc::Logger::set_global_engine(nullptr);
     RCalc::Allocator::cleanup();
 
     return res ? 0 : 255;
@@ -74,12 +75,6 @@ RCalc::AppConfig Main::parse_args(int argc, char** pp_argv)
     }
 
     RCalc::AppConfig config = parse_args_internal(args);
-
-    if (config.quiet) {
-        RCalc::Logger::configure(RCalc::Logger::LOG_ERROR);
-    } else if (config.verbose) {
-        RCalc::Logger::configure(RCalc::Logger::LOG_VERBOSE);
-    }
 
     return config;
 }
@@ -114,6 +109,10 @@ void Main::print_help(bool print_description)
 
     std::cout << "Run Options:\n";
     std::cout << "  --renderer <renderer>       Select an available renderer.\n";
+    std::cout << "  --logfile <path>            Store application logs to the file at <path>\n";
+    std::cout << "        Will overwrite any existing file at <path>.\n";
+    std::cout << "        ImGui renderer will log to both this file and stdout.\n";
+    std::cout << "        Terminal renderer will only log to this file, and won't log otherwise.\n";
     std::cout << "\n";
 
     #ifndef NDEBUG
@@ -228,6 +227,17 @@ RCalc::AppConfig Main::parse_args_internal(const std::vector<std::string_view>& 
                 exit(255);
             }
             config.renderer_name = validate_renderer(arg);
+            continue;
+        }
+
+        if (arg->compare("--logfile") == 0)
+        {
+            if (++arg == args.end()) {
+                std::cout << "Error: No logfile path specified!\n\n";
+                print_help();
+                exit(255);
+            }
+            config.logfile_path = *arg;
             continue;
         }
 

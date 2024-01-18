@@ -1,40 +1,45 @@
 #pragma once
 
 #include <cstdarg>
+#include <fstream>
 #include <string>
+#include <string_view>
+#include <memory>
 
 namespace RCalc {
+
+namespace Logging {
+
+enum Severity
+{
+    LOG_VERBOSE = 0,
+    LOG_STANDARD = 1,
+    LOG_ERROR = 2
+};
+
+class Engine {
+public:
+    virtual void set_min_severity(Severity severity) = 0;
+    virtual void log(Severity severity, std::string message) = 0;
+};
+
+}
 
 
 class Logger
 {
 public:
-    enum Mode
-    {
-        LOG_ERROR = 0,
-        LOG_STANDARD = 1,
-        LOG_VERBOSE = 2
-    };
-
-    static void configure(Mode new_mode);
+    static std::shared_ptr<Logging::Engine> get_global_engine() { return global_engine; }
+    static void set_global_engine(std::shared_ptr<Logging::Engine> engine) { global_engine = engine; }
 
     static void log(const char* p_format, ...);
     static void log_err(const char* p_format, ...);
     static void log_info(const char* p_format, ...);
 
 private:
-    Mode mode;
-    static Logger* global_logger;
+    static std::shared_ptr<Logging::Engine> global_engine;
 
-    void logf(Mode mode, const char* p_format, va_list args);
-    virtual void logv(std::string message) = 0;
-};
-
-
-// Logs to std::cout
-class StdLogger : public Logger
-{
-    virtual void logv(std::string message) override;
+    static void logf(Logging::Severity severity, const char* p_format, va_list args);
 };
 
 }

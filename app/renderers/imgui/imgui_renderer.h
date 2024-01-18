@@ -12,13 +12,15 @@
 #include "app/autocomplete.h"
 #include "app/help_text.h"
 #include "app/settings/settings_manager.h"
+#include "core/logging/engines.h"
 
 namespace RCalc {
 
 class ImGuiRenderer : public Renderer {
 public:
-    ImGuiRenderer(SubmitTextCallback cb_submit_text);
+    ImGuiRenderer();
 
+    virtual void early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) override;
     virtual Result<> init() override;
     virtual void render_loop() override;
     virtual void cleanup() override;

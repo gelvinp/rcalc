@@ -80,7 +80,7 @@ TEST_CASE("Parses Reals correctly", "[core][allocates]") {
 TEST_CASE("Parses Vecs correctly", "[core][allocates]") {
     REQUIRE(compare(Value::parse("[123456789, n987654321]").value().operator Vec2(), Vec2 { 123456789.0, -987654321.0 }));
     REQUIRE(compare(Value::parse("[123456789, n987654321, 0.123456789]").value().operator Vec3(), Vec3 { 123456789.0, -987654321.0, 0.123456789 }));
-    REQUIRE(compare(Value::parse("[123456789, n987654321, 0.123456789, n18446744073709551615]").value().operator Vec4(), Vec4 { 123456789.0, -987654321.0, 0.123456789, -18446744073709551615 }));
+    REQUIRE(compare(Value::parse("[123456789, n987654321, 0.123456789, n18446744073709551615]").value().operator Vec4(), Vec4 { 123456789.0, -987654321.0, 0.123456789, -18446744073709551615.0 }));
 }
 
 TEST_CASE("Parses Mats correctly", "[core][allocates]") {

@@ -2,11 +2,11 @@
 
 #ifdef TESTS_ENABLED
 
-#include "test_config.h"
+#include "app/app_config.h"
 
 namespace RCalc {
 
-int test_main(TestConfig config);
+int test_main(AppConfig config);
 
 }
 

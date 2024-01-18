@@ -22,8 +22,7 @@
 namespace RCalc {
 using namespace ImGuiRendererConstants;
 
-ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
-        cb_submit_text(cb_submit_text),
+ImGuiRenderer::ImGuiRenderer() :
         command_map(CommandMap<ImGuiRenderer>::get_command_map()),
         palette(ColorPalettes::COLORS_DARK),
         backend(ImGuiBackend::get_platform_backend())
@@ -32,6 +31,32 @@ ImGuiRenderer::ImGuiRenderer(SubmitTextCallback cb_submit_text) :
         SettingsManager::system_color_available = true;
     }
     settings = SettingsManager();
+}
+
+
+void ImGuiRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) {
+    std::shared_ptr<CompoundLogger> logger = Allocator::make_shared<CompoundLogger>();
+    logger->add_engine(Allocator::make_shared<StdOutLogger>());
+
+    if (config.logfile_path) {
+        std::shared_ptr<FileLogger> file_logger = Allocator::make_shared<FileLogger>();
+
+        if (file_logger->open_file(*config.logfile_path)) {
+            logger->add_engine(file_logger);
+        }
+        else {
+            display_error("Unable to open logfile!");
+        }
+    }
+
+    if (config.quiet) {
+        logger->set_min_severity(RCalc::Logging::LOG_ERROR);
+    } else if (config.verbose) {
+        logger->set_min_severity(RCalc::Logging::LOG_VERBOSE);
+    }
+    Logger::set_global_engine(logger);
+
+    this->cb_submit_text = cb_submit_text;
 }
 
 

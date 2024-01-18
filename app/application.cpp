@@ -17,7 +17,7 @@ Result<Application*> Application::create(AppConfig config) {
     Application* p_application = Allocator::create<Application>();
 
     Result<Renderer*> renderer_res = Renderer::create(
-        config.renderer_name.data(),
+        config,
         { p_application, &_on_renderer_submit_text }
     );
 

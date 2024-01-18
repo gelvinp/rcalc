@@ -26,8 +26,6 @@ bool compare(Real a, Real b) {
 
     if (fabs(a - b) < max_diff) { return true; }
 
-    Logger::log_err("%f does not equal %f!", a, b);
-
     return false;
 }
 

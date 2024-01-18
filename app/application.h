@@ -5,9 +5,7 @@
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
 
-#ifdef TESTS_ENABLED
-#include "tests/test_config.h"
-#endif
+#include "app_config.h"
 
 #include <functional>
 #include <string>
@@ -15,16 +13,6 @@
 #include <optional>
 
 namespace RCalc {
-
-struct AppConfig {
-    bool quiet = false;
-    bool verbose = false;
-    std::string renderer_name;
-
-    #ifdef TESTS_ENABLED
-    std::optional<TestConfig> test_config;
-    #endif
-};
 
 class Application {
 public:

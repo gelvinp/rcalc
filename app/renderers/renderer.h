@@ -3,6 +3,7 @@
 #include "core/value.h"
 #include "core/error.h"
 #include "app/stack.h"
+#include "app/app_config.h"
 
 #include <functional>
 #include <string>
@@ -29,9 +30,10 @@ public:
         Callback callback;
     };
 
-    static Result<Renderer*> create(const std::string_view& name, SubmitTextCallback cb_submit_text);
+    static Result<Renderer*> create(const AppConfig& config, SubmitTextCallback cb_submit_text);
     static const std::span<const char * const> get_enabled_renderers();
 
+    virtual void early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) = 0;
     virtual Result<> init() = 0;
     virtual void render_loop() = 0;
     virtual void cleanup() = 0;

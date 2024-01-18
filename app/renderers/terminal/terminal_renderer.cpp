@@ -6,6 +6,7 @@
 #include "scroll_component.h"
 #include "app/operators/operators.h"
 #include "main/main.h"
+#include "core/memory/allocator.h"
 
 #include <algorithm>
 #include <cstring>
@@ -13,12 +14,31 @@
 
 namespace RCalc {
 
-TerminalRenderer::TerminalRenderer(SubmitTextCallback cb_submit_text) :
-    cb_submit_text(cb_submit_text),
+TerminalRenderer::TerminalRenderer() :
     command_map(CommandMap<TerminalRenderer>::get_command_map())
 {
 }
 
+
+void TerminalRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) {
+    if (config.logfile_path) {
+        std::shared_ptr<FileLogger> logger = Allocator::make_shared<FileLogger>();
+
+        if (config.quiet) {
+            logger->set_min_severity(RCalc::Logging::LOG_ERROR);
+        } else if (config.verbose) {
+            logger->set_min_severity(RCalc::Logging::LOG_VERBOSE);
+        }
+
+        if (logger->open_file(*config.logfile_path)) {
+            Logger::set_global_engine(logger);
+        }
+        else {
+            display_error("Unable to open logfile!");
+        }
+    }
+    this->cb_submit_text = cb_submit_text;
+}
 
 Result<> TerminalRenderer::init() {
     command_map.activate(Main::get_app().get_command_map());

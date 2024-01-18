@@ -7,8 +7,9 @@ namespace RCalc {
 
 class RendererTemplate : public Renderer {
 public:
-    RendererTemplate(SubmitTextCallback cb_submit_text);
+    RendererTemplate();
 
+    virtual void early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) override;
     virtual Result<> init() override;
     virtual void render_loop() override;
     virtual void cleanup() override;

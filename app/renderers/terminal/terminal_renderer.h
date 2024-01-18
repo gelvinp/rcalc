@@ -7,13 +7,15 @@
 #include "app/commands/commands.h"
 #include "help_cache.h"
 #include "app/settings/settings_manager.h"
+#include "core/logging/engines.h"
 
 namespace RCalc {
 
 class TerminalRenderer : public Renderer {
 public:
-    TerminalRenderer(SubmitTextCallback cb_submit_text);
+    TerminalRenderer();
 
+    virtual void early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) override;
     virtual Result<> init() override;
     virtual void render_loop() override;
     virtual void cleanup() override;
