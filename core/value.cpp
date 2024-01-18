@@ -440,7 +440,7 @@ std::optional<Value> Value::parse_scalar(std::string_view sv) {
     std::stringstream ss;
     ss << sv;
     ss >> d_value;
-    if (!ss.fail()) {
+    if (ss && ss.eof()) {
         return Value(d_value, REPR_DECIMAL);
     }
 #else

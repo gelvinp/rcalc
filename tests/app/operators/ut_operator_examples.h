@@ -10,10 +10,16 @@ namespace {
 struct OpTestCase {
     RCalc::CowVec<const char *> params;
     const char * result; // When calling to_string with ONE_LINE tag
+
+    OpTestCase(RCalc::CowVec<const char *> params, const char* result)
+        : params(params), result(result) {}
 };
 
 struct OpErrTestCase {
     RCalc::CowVec<const char *> params;
+
+    OpErrTestCase(RCalc::CowVec<const char *> params)
+        : params(params) {}
 };
 
 struct OpTest {
