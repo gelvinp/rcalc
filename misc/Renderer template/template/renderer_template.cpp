@@ -3,7 +3,7 @@
 
 namespace RCalc {
 
-RendererTemplate::RendererTemplate(SubmitTextCallback cb_submit_text) {}
+RendererTemplate::RendererTemplate(SubmitTextCallback submit_text) {}
 
 Result<> RendererTemplate::init() { return Ok(); }
 void RendererTemplate::render_loop() { while(true) {} }

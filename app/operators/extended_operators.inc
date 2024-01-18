@@ -270,7 +270,7 @@ RCALC_OP_1(Fact, Int, arg) {
     if (arg == 0) { return Ok(Value((Int)1)); }
 
     Real res = std::tgamma((Real)arg + 1.0);
-    return Ok(CheckedMath::discretize(res));
+    return Ok(CheckedMath::discretize(res + 0.01));
 }
 
 RCALC_FMT_1(Fact, arg) {

@@ -21,7 +21,7 @@ TerminalRenderer::TerminalRenderer() :
 }
 
 
-void TerminalRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) {
+void TerminalRenderer::early_init(const AppConfig& config, SubmitTextCallback submit_text) {
     if (config.logfile_path) {
         std::shared_ptr<FileLogger> logger = Allocator::make_shared<FileLogger>();
 
@@ -38,7 +38,7 @@ void TerminalRenderer::early_init(const AppConfig& config, SubmitTextCallback cb
             display_error("Unable to open logfile!");
         }
     }
-    this->cb_submit_text = cb_submit_text;
+    cb_submit_text = submit_text;
 }
 
 Result<> TerminalRenderer::init() {

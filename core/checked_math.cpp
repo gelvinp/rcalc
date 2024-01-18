@@ -2,7 +2,8 @@
 
 #include "core/format.h"
 
-#ifdef MSVC
+#ifdef _MSC_VER
+#define ENABLE_INTSAFE_SIGNED_FUNCTIONS
 #include <intsafe.h>
 #endif
 
@@ -12,22 +13,23 @@
 
 namespace RCalc {
 
-#if __has_builtin(__builtin_add_overflow)
+#ifdef _MSC_VER
 
 Value CheckedMath::add(Int a, Int b) {
+    static_assert(sizeof(Int) == sizeof(INT64));
     Int res;
-    if (__builtin_add_overflow(a, b, &res)) {
+    if (Int64Add(a, b, reinterpret_cast<INT64*>(&res)) != S_OK) {
         return Value(BigInt(a) + BigInt(b));
     }
     return Value(res);
 }
 
-#elif defined(MSVC)
+#else
+#if __has_builtin(__builtin_add_overflow)
 
 Value CheckedMath::add(Int a, Int b) {
-    static_assert(sizeof(Int) == sizeof(LONG));
     Int res;
-    if (LongAdd(reinterpret_cast<LONG>(a), reinterpret_cast<LONG>(b), reinterpret_cast<LONG*>(&res)) != S_OK) {
+    if (__builtin_add_overflow(a, b, &res)) {
         return Value(BigInt(a) + BigInt(b));
     }
     return Value(res);
@@ -43,24 +45,26 @@ Value CheckedMath::add(Int a, Int b) {
 }
 
 #endif
+#endif
 
+#ifdef _MSC_VER
+
+Value CheckedMath::sub(Int a, Int b) {
+    static_assert(sizeof(Int) == sizeof(INT64));
+    Int res;
+    if (Int64Sub(a, b, reinterpret_cast<INT64*>(&res)) != S_OK) {
+        return Value(BigInt(a) - BigInt(b));
+    }
+    return Value(res);
+}
+
+#else
 #if __has_builtin(__builtin_sub_overflow)
 
 Value CheckedMath::sub(Int a, Int b) {
     Int res;
     if (__builtin_sub_overflow(a, b, &res)) {
         return Value(BigInt(a) - BigInt(b));
-    }
-    return Value(res);
-}
-
-#elif defined(MSVC)
-
-Value CheckedMath::sub(Int a, Int b) {
-    static_assert(sizeof(Int) == sizeof(LONG));
-    Int res;
-    if (LongSub(reinterpret_cast<LONG>(a), reinterpret_cast<LONG>(b), reinterpret_cast<LONG*>(&res)) != S_OK) {
-        return Value(BigInt(a) + BigInt(b));
     }
     return Value(res);
 }
@@ -75,24 +79,26 @@ Value CheckedMath::sub(Int a, Int b) {
 }
 
 #endif
+#endif
 
+#ifdef _MSC_VER
+
+Value CheckedMath::mul(Int a, Int b) {
+    static_assert(sizeof(Int) == sizeof(INT64));
+    Int res;
+    if (Int64Mult(a, b, reinterpret_cast<INT64*>(&res)) != S_OK) {
+        return Value(BigInt(a) * BigInt(b));
+    }
+    return Value(res);
+}
+
+#else
 #if __has_builtin(__builtin_mul_overflow)
 
 Value CheckedMath::mul(Int a, Int b) {
     Int res;
     if (__builtin_mul_overflow(a, b, &res)) {
         return Value(BigInt(a) * BigInt(b));
-    }
-    return Value(res);
-}
-
-#elif defined(MSVC)
-
-Value CheckedMath::mul(Int a, Int b) {
-    static_assert(sizeof(Int) == sizeof(LONG));
-    Int res;
-    if (LongMult(reinterpret_cast<LONG>(a), reinterpret_cast<LONG>(b), reinterpret_cast<LONG*>(&res)) != S_OK) {
-        return Value(BigInt(a) + BigInt(b));
     }
     return Value(res);
 }
@@ -106,6 +112,7 @@ Value CheckedMath::mul(Int a, Int b) {
     return Value(res);
 }
 
+#endif
 #endif
 
 Value CheckedMath::abs(Int a) {
@@ -133,6 +140,70 @@ Value CheckedMath::neg(Int a) {
     }
 }
 
+#ifdef _MSC_VER
+
+Value CheckedMath::pow(Int base, Int exp) {
+    static_assert(sizeof(Int) == sizeof(INT64));
+    if (exp < 0) {
+        return Value(std::pow((Real)base, (Real)exp));
+    }
+    else if (exp == 0) { return Value(Int(1)); }
+
+    Int base_i = base, res_i = 1;
+    BigInt base_b { base }, res_b { 1 };
+    bool is_bigint = false;
+
+    while (exp > 1) {
+        if ((exp % 2) == 1) {
+            Int tmp;
+            if (!is_bigint) {
+                if (Int64Mult(base_i, res_i, &tmp) != S_OK) {
+                    is_bigint = true;
+                    base_b = BigInt(base_i);
+                    res_b = BigInt(res_i);
+                }
+                else {
+                    res_i = tmp;
+                }
+            }
+            if (is_bigint) {
+                res_b *= base_b;
+            }
+            --exp;
+        }
+        Int tmp;
+        if (!is_bigint) {
+            if (Int64Mult(base_i, base_i, &tmp) != S_OK) {
+                is_bigint = true;
+                base_b = BigInt(base_i);
+                res_b = BigInt(res_i);
+            }
+            else {
+                base_i = tmp;
+            }
+        }
+        if (is_bigint) {
+            base_b *= base_b;
+        }
+        exp >>= 1;
+    }
+
+    Int tmp;
+    if (!is_bigint) {
+        if (Int64Mult(base_i, res_i, &tmp) != S_OK) {
+            is_bigint = true;
+            base_b = BigInt(base_i);
+            res_b = BigInt(res_i);
+        }
+        else {
+            return tmp;
+        }
+    }
+    
+    return base_b * res_b;
+}
+
+#else
 #if __has_builtin(__builtin_mul_overflow)
 
 Value CheckedMath::pow(Int base, Int exp) {
@@ -195,69 +266,6 @@ Value CheckedMath::pow(Int base, Int exp) {
     return base_b * res_b;
 }
 
-#elif defined(MSVC)
-
-Value CheckedMath::pow(Int base, Int exp) {
-    if (exp < 0) {
-        return Value(std::pow((Real)base, (Real)exp));
-    }
-    else if (exp == 0) { return Value(Int(1)); }
-
-    Int base_i = base, res_i = 1;
-    BigInt base_b { base }, res_b { 1 };
-    bool is_bigint = false;
-
-    while (exp > 1) {
-        if ((exp % 2) == 1) {
-            Int tmp;
-            if (!is_bigint) {
-                //LongMult(reinterpret_cast<LONG>(a), reinterpret_cast<LONG>(b), reinterpret_cast<LONG*>(&res)) != S_OK
-                if (LongMult(reinterpret_cast<LONG>(base_i), reinterpret_cast<LONG>(res_i), reinterpret_cast<LONG*>(&tmp)) != S_OK) {
-                    is_bigint = true;
-                    base_b = BigInt(base_i);
-                    res_b = BigInt(res_i);
-                }
-                else {
-                    res_i = tmp;
-                }
-            }
-            if (is_bigint) {
-                res_b *= base_b;
-            }
-            --exp;
-        }
-        Int tmp;
-        if (!is_bigint) {
-            if (LongMult(reinterpret_cast<LONG>(base_i), reinterpret_cast<LONG>(base_i), reinterpret_cast<LONG*>(&tmp)) != S_OK) {
-                is_bigint = true;
-                base_b = BigInt(base_i);
-                res_b = BigInt(res_i);
-            }
-            else {
-                base_i = tmp;
-            }
-        }
-        if (is_bigint) {
-            base_b *= base_b;
-        }
-        exp >>= 1;
-    }
-
-    Int tmp;
-    if (!is_bigint) {
-        if (LongMult(reinterpret_cast<LONG>(base_i), reinterpret_cast<LONG>(res_i), reinterpret_cast<LONG*>(&tmp)) != S_OK) {
-            is_bigint = true;
-            base_b = BigInt(base_i);
-            res_b = BigInt(res_i);
-        }
-        else {
-            return tmp;
-        }
-    }
-    
-    return base_b * res_b;
-}
-
 #else
 
 Value CheckedMath::pow(Int base, Int exp) {
@@ -292,6 +300,7 @@ Value CheckedMath::pow(Int base, Int exp) {
     return Value(res_b);
 }
 
+#endif
 #endif
 
 

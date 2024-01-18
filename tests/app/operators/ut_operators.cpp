@@ -110,7 +110,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
             REQUIRE(err.operator bool());
 
             const CowVec<StackItem>& _items = stack.get_items();
-            REQUIRE(_items.size() == 1z);
+            REQUIRE(_items.size() == (size_t)1);
             const StackItem& res = _items[0];
             REQUIRE(res.p_input->dbg_display() == "1 + 2");
         }

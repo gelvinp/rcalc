@@ -35,7 +35,7 @@ ImGuiRenderer::ImGuiRenderer() :
 }
 
 
-void ImGuiRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_submit_text) {
+void ImGuiRenderer::early_init(const AppConfig& config, SubmitTextCallback submit_text) {
     std::shared_ptr<CompoundLogger> logger = Allocator::make_shared<CompoundLogger>();
     logger->add_engine(Allocator::make_shared<StdOutLogger>());
 
@@ -57,7 +57,7 @@ void ImGuiRenderer::early_init(const AppConfig& config, SubmitTextCallback cb_su
     }
     Logger::set_global_engine(logger);
 
-    this->cb_submit_text = cb_submit_text;
+    cb_submit_text = submit_text;
 }
 
 

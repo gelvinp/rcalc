@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <cfloat>
+#include <string>
 
 using namespace RCalc;
 using namespace RCalc::TypeComparison;
@@ -17,12 +18,12 @@ TEST_CASE("Value is constructed correctly", "[core][allocates]") {
         REQUIRE(value.operator Int() == 0);
     }
 
-#define TypeTest(type, type_id, source_values...) \
+#define TypeTest(type, type_id, ...) \
     SECTION(#type) { \
-        type source { source_values }; \
+        type source { __VA_ARGS__ }; \
         Value value { source }; \
         REQUIRE(value.get_type() == type_id); \
-        REQUIRE(value.get_type_name() == Value::get_type_name(type_id)); \
+        REQUIRE(std::string(value.get_type_name()) == Value::get_type_name(type_id)); \
         REQUIRE(value.operator type() == source); \
     }
 
