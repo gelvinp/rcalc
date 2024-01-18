@@ -45,7 +45,7 @@ TEST_CASE("Small enough Reals are rounded to zero", "[core][allocates]") {
     REQUIRE(value.operator Real() == 0.0);
 }
 
-TEST_CASE("Parses Ints correctly", "[core]") {
+TEST_CASE("Parses Ints correctly", "[core][allocates]") {
     REQUIRE(Value::parse("0").value().operator Int() == 0);
     REQUIRE(Value::parse("123456789").value().operator Int() == 123456789);
     REQUIRE(Value::parse("-123456789").value().operator Int() == -123456789);
@@ -58,7 +58,7 @@ TEST_CASE("Parses Ints correctly", "[core]") {
     REQUIRE(Value::parse("n9223372036854775808").value().operator Int() == std::numeric_limits<Int>::min());
 }
 
-TEST_CASE("Parses BigInts correctly", "[core]") {
+TEST_CASE("Parses BigInts correctly", "[core][allocates]") {
     REQUIRE(Value::parse("18446744073709551615").value().operator BigInt() == BigInt("18446744073709551615"));
     REQUIRE(Value::parse("n18446744073709551615").value().operator BigInt() == BigInt("-18446744073709551615"));
     REQUIRE(Value::parse("0b1111111111111111111111111111111111111111111111111111111111111111").value().operator BigInt() == BigInt("18446744073709551615"));
@@ -70,26 +70,26 @@ TEST_CASE("Parses BigInts correctly", "[core]") {
     REQUIRE(Value::parse("0xfedcba9876543210").value().operator BigInt() == BigInt("18364758544493064720"));
 }
 
-TEST_CASE("Parses Reals correctly", "[core]") {
+TEST_CASE("Parses Reals correctly", "[core][allocates]") {
     REQUIRE(compare(Value::parse("1e6").value().operator Real(), 1000000.0));
     REQUIRE(compare(Value::parse("1en6").value().operator Real(), 0.000001));
     REQUIRE(compare(Value::parse("123.456").value().operator Real(), 123.456));
     REQUIRE(compare(Value::parse("0.123000000456").value().operator Real(), 0.123000000456));
 }
 
-TEST_CASE("Parses Vecs correctly", "[core]") {
+TEST_CASE("Parses Vecs correctly", "[core][allocates]") {
     REQUIRE(compare(Value::parse("[123456789, n987654321]").value().operator Vec2(), Vec2 { 123456789.0, -987654321.0 }));
     REQUIRE(compare(Value::parse("[123456789, n987654321, 0.123456789]").value().operator Vec3(), Vec3 { 123456789.0, -987654321.0, 0.123456789 }));
     REQUIRE(compare(Value::parse("[123456789, n987654321, 0.123456789, n18446744073709551615]").value().operator Vec4(), Vec4 { 123456789.0, -987654321.0, 0.123456789, -18446744073709551615 }));
 }
 
-TEST_CASE("Parses Mats correctly", "[core]") {
+TEST_CASE("Parses Mats correctly", "[core][allocates]") {
     REQUIRE(compare(Value::parse("{[1, 2], [3, 4]}").value().operator Mat2(), Mat2 { { 1.0, 3.0 }, { 2.0, 4.0 } }));
     REQUIRE(compare(Value::parse("{[1, 2, 3], [4, 5, 6], [7, 8, 9]}").value().operator Mat3(), Mat3 { { 1.0, 4.0, 7.0 }, { 2.0, 5.0, 8.0 }, { 3.0, 6.0, 9.0 } }));
     REQUIRE(compare(Value::parse("{[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]}").value().operator Mat4(), Mat4 { { 1.0, 5.0, 9.0, 13.0 }, { 2.0, 6.0, 10.0, 14.0 }, { 3.0, 7.0, 11.0, 15.0 }, { 4.0, 8.0, 12.0, 16.0 } }));
 }
 
-TEST_CASE("Parses Units correctly", "[core]") {
+TEST_CASE("Parses Units correctly", "[core][allocates]") {
     UnitsMap& map = UnitsMap::get_units_map();
     map.build();
 
@@ -102,7 +102,7 @@ TEST_CASE("Parses Units correctly", "[core]") {
     }
 }
 
-TEST_CASE("Does not parse non-values", "[core]") {
+TEST_CASE("Does not parse non-values", "[core][allocates]") {
     REQUIRE_FALSE(Value::parse("Not a value!").has_value());
     REQUIRE_FALSE(Value::parse("add").has_value());
     REQUIRE_FALSE(Value::parse("\\clear").has_value());
@@ -146,9 +146,9 @@ TEST_CASE("to_string", "[core][allocates]") {
     Value::set_precision(4);
     REQUIRE(Value::parse("12.34")->to_string() == "12.34");
     REQUIRE(Value::parse("0.123")->to_string() == "0.123");
-    REQUIRE(Value::parse("0.1234")->to_string() == "1.234e-01");
-    REQUIRE(Value::parse("0.12344")->to_string() == "1.234e-01");
-    REQUIRE(Value::parse("0.12345")->to_string() == "1.235e-01");
+    REQUIRE(Value::parse("0.1234")->to_string() == "0.1234");
+    REQUIRE(Value::parse("0.12344")->to_string() == "0.1234");
+    REQUIRE(Value::parse("0.12345")->to_string() == "0.1235");
     REQUIRE(Value::parse("0.0001")->to_string() == "0.0001");
     REQUIRE(Value::parse("0.00001")->to_string() == "1e-05");
     REQUIRE(Value::parse("1000.5")->to_string() == "1000");

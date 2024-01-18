@@ -7,7 +7,7 @@
 namespace RCalc {
 
 void fmt_real(Real value, int precision, RealFmtContainer buf) {
-    if (std::log10(value) < 0) {
+    if (std::log10(std::fabs(value)) < 0) {
         std::fill(buf.begin(), buf.end(), '\0');
         snprintf(buf.data(), buf.size(), "%.*f", precision, value);
 
@@ -20,12 +20,7 @@ void fmt_real(Real value, int precision, RealFmtContainer buf) {
 
         std::fill(buf.begin(), buf.end(), '\0');
         if (dist_fnz < precision) {
-            if (dist_lnz <= precision) {
-                snprintf(buf.data(), buf.size(), "%.*f", std::min(dist_lnz - 1, precision), value);
-                return;
-            }
-
-            snprintf(buf.data(), buf.size(), "%.*e", std::min(dist_lnz - dist_fnz - 1, precision), value);
+            snprintf(buf.data(), buf.size(), "%.*f", std::min(dist_lnz - 1, precision), value);
             return;
         }
     }

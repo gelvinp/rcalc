@@ -1,5 +1,8 @@
+#pragma once
+
 #include <vector>
 #include <span>
+#include <string_view>
 #include "types.h"
 
 #include "core/memory/cowvec.h"
@@ -34,6 +37,7 @@ bool operator==(const std::span<const T>& lhs, const RCalc::CowVec<T>& rhs) {
 
 namespace RCalc::TypeComparison {
 
+bool compare(std::string_view a, std::string_view b);
 bool compare(RCalc::Real a, RCalc::Real b);
 bool compare(RCalc::Vec2 a, RCalc::Vec2 b);
 bool compare(RCalc::Vec3 a, RCalc::Vec3 b);

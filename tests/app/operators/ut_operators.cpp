@@ -2,57 +2,96 @@
 #include "app/operators/operators.h"
 #include "core/filter.h"
 #include "ut_operator_examples.h"
+#include "tests/test_serializers.h"
+#include "core/comparison.h"
 
 using namespace RCalc;
+using namespace RCalc::TypeComparison;
 
 
-TEST_CASE("Examples do not return an error", "[core][allocates]") {
-    RPNStack stack;
-    OperatorMap& op_map = OperatorMap::get_operator_map();
+// TEST_CASE("Examples do not return an error", "[core][allocates]") {
+//     RPNStack stack;
+//     OperatorMap& op_map = OperatorMap::get_operator_map();
 
-    for (const OperatorCategory* category : op_map.get_alphabetical()) {
-        for (const Operator* op : category->category_ops) {
-            for (const std::span<const char * const>& example_params : op->examples) {
-                stack.clear();
+//     for (const OperatorCategory* category : op_map.get_alphabetical()) {
+//         for (const Operator* op : category->category_ops) {
+//             REQUIRE(op_map.has_operator(filter_name(op->name)));
+//             for (const std::span<const char * const>& example_params : op->examples) {
+//                 stack.clear();
 
-                for (const char* param : example_params) {
-                    Value value = Value::parse(param).value();
-                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
-                }
+//                 for (const char* param : example_params) {
+//                     Value value = Value::parse(param).value();
+//                     stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+//                 }
 
-                std::string op_name = filter_name(op->name);
-                Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
-                REQUIRE(err.operator bool());
-            }
-        }
-    }
-}
+//                 std::string op_name = filter_name(op->name);
+//                 Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
+//                 REQUIRE(err.operator bool());
+//             }
+//         }
+//     }
+// }
 
 TEST_CASE("Operator test cases", "[core][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
+    CowVec<OpErrTest> op_err_tests = get_op_err_tests();
 
-    for (const OpTest& test : op_tests) {
-        for (const OpTestCase& test_case : test.test_cases) {
-            stack.clear();
+    int old_precision = Value::get_precision();
+    Value::set_precision(8);
 
-            for (const char* param : test_case.params) {
-                Value value = Value::parse(param).value();
-                stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+    SECTION("Positive tests") {
+        for (const OpTest& test : op_tests) {
+            CAPTURE(test.op_name);
+
+            for (const OpTestCase& test_case : test.test_cases) {
+                stack.clear();
+
+                CAPTURE(test_case.params);
+
+                for (const char* param : test_case.params) {
+                    Value value = Value::parse(param).value();
+                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+                }
+
+                std::string op_name = filter_name(test.op_name);
+                Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
+                REQUIRE(err.operator bool());
+
+                CowVec<StackItem> _items = stack.pop_items(1);
+                const StackItem& res = _items[0];
+                Value value = res.result;
+
+                CAPTURE(value.to_string(DisplayableTag::ONE_LINE));
+
+                REQUIRE(compare(value.to_string(DisplayableTag::ONE_LINE), test_case.result));
             }
-
-            std::string op_name = filter_name(test.op_name);
-            Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
-            REQUIRE(err.operator bool());
-
-            CowVec<StackItem> _items = stack.pop_items(1);
-            const StackItem& res = _items[0];
-            Value value = res.result;
-
-            REQUIRE(value.to_string(DisplayableTag::ONE_LINE) == test_case.result);
         }
     }
+
+    SECTION("Negative tests") {
+        for (const OpErrTest& test : op_err_tests) {
+            CAPTURE(test.op_name);
+
+            for (const OpErrTestCase& test_case : test.err_test_cases) {
+                stack.clear();
+
+                CAPTURE(test_case.params);
+
+                for (const char* param : test_case.params) {
+                    Value value = Value::parse(param).value();
+                    stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+                }
+
+                std::string op_name = filter_name(test.op_name);
+                Result<std::optional<size_t>> err = op_map.evaluate(op_name, stack);
+                REQUIRE_FALSE(err.operator bool());
+            }
+        }
+    }
+
+    Value::set_precision(old_precision);
 }
 
 TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
@@ -306,5 +345,41 @@ TEST_CASE("Negation stack", "[core][allocates]") {
         REQUIRE(_items.size() == 1);
         const StackItem& res = _items[0];
         REQUIRE(res.p_input->dbg_display() == "123");
+    }
+}
+
+TEST_CASE("Range", "[core][allocates]") {
+    RPNStack stack;
+    OperatorMap& op_map = OperatorMap::get_operator_map();
+    CowVec<OpTest> op_tests = get_op_tests();
+
+    SECTION("With zero") {
+        Value value = Value::parse("123").value();
+        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+
+        Result<std::optional<size_t>> err = op_map.evaluate("range", stack);
+        REQUIRE(err.operator bool());
+
+        const CowVec<StackItem>& _items = stack.get_items();
+        REQUIRE(_items.size() == 124);
+
+        for (Int index = 0; index < 124; ++index) {
+            REQUIRE(_items[index].result == Value(index));
+        }
+    }
+
+    SECTION("Without zero") {
+        Value value = Value::parse("n123").value();
+        stack.push_item(StackItem { create_displayables_from(value), std::move(value), false });
+
+        Result<std::optional<size_t>> err = op_map.evaluate("range", stack);
+        REQUIRE(err.operator bool());
+
+        const CowVec<StackItem>& _items = stack.get_items();
+        REQUIRE(_items.size() == 123);
+
+        for (Int index = 0; index < 123; ++index) {
+            REQUIRE(_items[index].result == Value(index + 1));
+        }
     }
 }

@@ -1,6 +1,13 @@
 #include "comparison.h"
 
+#include "core/value.h"
+
 namespace RCalc::TypeComparison {
+
+bool compare(std::string_view a, std::string_view b) {
+    Value parsed_a = *Value::parse(a), parsed_b = *Value::parse(b);
+    return parsed_a == parsed_b;
+}
 
 bool compare(Real a, Real b) {
     if (a == b) { return true; }
@@ -16,6 +23,8 @@ bool compare(Real a, Real b) {
     if (b < 0.0) { b += (2.0 * std::numbers::pi_v<Real>); }
 
     if (fabs(a - b) < max_diff) { return true; }
+
+    Logger::log_err("%f does not equal %f!", a, b);
 
     return false;
 }

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Implemented `Sqr` and `Cube` operators for BigInts.
+- Implemented `Neg` operator for Vec3s and Vec4s.
+- Added a `Frac` operator for Reals, which returns the fractional component.
+- Added a `Median` operator to calculate the median of a group of values.
+- Added `SampStdDev` and `SampNormDist` operators to use the *sample* standard deviation.
+
 ### Changed
 
 - Improved the way that matrices are copied to the clipboard (Copied as one line that can be pasted back into RCalc as a valid matrix instead of formatted on multiple lines).
@@ -15,10 +23,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Negative values are now treated as expressions.
 - BigInt values are parsed more reliably, especially when entered as binary, octal, or hexidecimal numbers. As a side effect, you can no longer enter negative binary, octal, or hexidecimal numbers directly, however negating a prefixed value probably never resulted in what you actually wanted anyways. Further work may be required in this area.
 - Changed the way that the ImGui renderer wraps long lines to put the result on a new line for increased legibility (behaves the same as on iOS).
+- Passing a negative value to `range` will skip `0`, going from 1...arg0 instead. The old behavior was to crash.
+- Floating point rendering logic has been slightly adjusted again.
+- Clarified that `StdDev` and `NormDist` use the *population* standard deviation.
+- The `Sum` operator works to preserve precision when operating on Ints, BigInts, and no Reals.
+- Fixed subtraction between Vec3s and subtraction between Vec4s
 
 ### Fixed
 
 - Fixed a crash when swizzling an empty stack.
+- Improved validation around inputs to the gamma operator. Additionally, the gamma operator now correctly returns Real numbers.
+- Fix the bitwise `Not` operator returning too many digits.
+
+### Removed
+
+- Removed the Factorial operator for BigInts, due to performance reasons. Factorials can still *return* BigInt's.
+- The rounding operators (ceil, floor, trunc, round) will no longer operator on Ints or BigInts.
 
 ## [1.4.0] - 2024-01-09
 

@@ -70,20 +70,32 @@ RCALC_OP_2(Sub, Vec2, Vec2, arg0, arg1) {
 // @RCalcOperator
 // Requires: <glm/vec3.hpp>
 RCALC_OP_2(Sub, Vec3, Vec3, arg0, arg1) {
-    return Ok(Value(arg0 + arg1));
+    return Ok(Value(arg0 - arg1));
 }
 
 // @RCalcOperator
 // Requires: <glm/vec4.hpp>
 RCALC_OP_2(Sub, Vec4, Vec4, arg0, arg1) {
-    return Ok(Value(arg0 + arg1));
+    return Ok(Value(arg0 - arg1));
 }
 
 
 // @RCalcOperator
 // Requires: <glm/vec2.hpp>
-// Example: [[1, 2]]
 RCALC_OP_1(Neg, Vec2, arg0) {
+    return Ok(Value(arg0 * -1.0));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec3.hpp>
+// Example: [[1, 2, 3]]
+RCALC_OP_1(Neg, Vec3, arg0) {
+    return Ok(Value(arg0 * -1.0));
+}
+
+// @RCalcOperator
+// Requires: <glm/vec4.hpp>
+RCALC_OP_1(Neg, Vec4, arg0) {
     return Ok(Value(arg0 * -1.0));
 }
 

@@ -282,7 +282,57 @@ RCALC_FMT_1_S(Avg, _arg) {
 
 
 // @RCalcOperator
-// Description: Calculate the standard deviation of the top arg0 values on the stack.
+// Description: Calculate the median value of the top arg0 values on the stack.
+// Category: Statistics
+// Tags: [no_expr]
+// Requires: <numeric>
+// Requires: <sstream>
+// Example: [1, 2, 3, 3]
+RCALC_OP_1_S(Median, Int, count) {
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute avg, not enough elements on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute avg, all elements must be scalar types.");
+        }
+    }
+
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<std::pair<Real, Value>> values = get_zipped_reals(stack.pop_items(count), input_disp_front);
+
+    std::sort(values.mut_begin(), values.mut_end(), [](const std::pair<Real, Value>& a, const std::pair<Real, Value>& b) {
+        return a.first < b.first;
+    });
+
+    Value median;
+
+    if ((values.size() % 2) == 1) {
+        median = values[((values.size() + 1) / 2) - 1].second;
+    }
+    else {
+        median = Value(Real((values[(values.size() / 2) - 1].first + values[(values.size() / 2)].first) / 2.0));
+    }
+
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
+    return Ok(median);
+}
+
+RCALC_FMT_1_S(Median, _arg) {
+    UNUSED(_arg);
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("median(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
+    return p_disp;
+}
+
+
+// @RCalcOperator
+// Description: Calculate the population standard deviation of the top arg0 values on the stack.
 // Category: Statistics
 // Tags: [no_expr]
 // Requires: <numeric>
@@ -332,7 +382,59 @@ RCALC_FMT_1_S(StdDev, _arg) {
 
 
 // @RCalcOperator
-// Description: Calculate the [average, standard deviation] of the top arg0 values on the stack.
+// Description: Calculate the sample standard deviation of the top arg0 values on the stack.
+// Category: Statistics
+// Tags: [no_expr]
+// Requires: <numeric>
+// Requires: <sstream>
+// Requires: <cmath>
+// Requires: "app/operators/stats.h"
+// Example: [1, 2, 3, 3]
+RCALC_OP_1_S(SampStdDev, Int, count) {
+    if (count < 2) { return Err(ERR_INVALID_PARAM, "Cannot compute standard deviation from one sample."); }
+
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute stddev, not enough elements on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute stddev, all elements must be scalar types.");
+        }
+    }
+
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
+    
+    Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
+
+    CowVec<Real> sqr_dev;
+    sqr_dev.reserve(count);
+
+    for (Real real : values) {
+        Real dev = real - avg;
+        sqr_dev.push_back(dev * dev);
+    }
+
+    Real variance = std::accumulate(sqr_dev.begin(), sqr_dev.end(), 0.0) / (count - 1);
+    return Ok(Value(std::sqrt(variance)));
+}
+
+RCALC_FMT_1_S(SampStdDev, _arg) {
+    UNUSED(_arg);
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("samp_stddev(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
+    return p_disp;
+}
+
+
+// @RCalcOperator
+// Description: Calculate the [average, population standard deviation] of the top arg0 values on the stack.
 // Category: Statistics
 // Tags: [no_expr]
 // Requires: <numeric>
@@ -341,6 +443,8 @@ RCALC_FMT_1_S(StdDev, _arg) {
 // Requires: "app/operators/stats.h"
 // Example: [1, 2, 3, 3]
 RCALC_OP_1_S(NormDist, Int, count) {
+    if (count < 2) { return Err(ERR_INVALID_PARAM, "Cannot compute standard deviation from one sample."); }
+
     if (stack.size() < (size_t)count) {
         return Err(ERR_INVALID_PARAM, "Cannot compute stddev, not enough elements on the stack.");
     }
@@ -382,6 +486,56 @@ RCALC_FMT_1_S(NormDist, _arg) {
 
 
 // @RCalcOperator
+// Description: Calculate the [average, sample standard deviation] of the top arg0 values on the stack.
+// Category: Statistics
+// Tags: [no_expr]
+// Requires: <numeric>
+// Requires: <sstream>
+// Requires: <cmath>
+// Requires: "app/operators/stats.h"
+// Example: [1, 2, 3, 3]
+RCALC_OP_1_S(SampNormDist, Int, count) {
+    if (stack.size() < (size_t)count) {
+        return Err(ERR_INVALID_PARAM, "Cannot compute stddev, not enough elements on the stack.");
+    }
+
+    for (Type type : stack.peek_types_vec(count)) {
+        switch (type) {
+        case TYPE_INT:
+        case TYPE_BIGINT:
+        case TYPE_REAL:
+            break;
+        default:
+            return Err(ERR_INVALID_PARAM, "Cannot compute stddev, all elements must be scalar types.");
+        }
+    }
+
+    std::shared_ptr<Displayable> input_disp_front;
+    CowVec<Real> values = get_reals(stack.pop_items(count), input_disp_front);
+    
+    Real avg = std::accumulate(values.begin(), values.end(), 0.0) / count;
+    stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
+
+    CowVec<Real> sqr_dev;
+    sqr_dev.reserve(count);
+
+    for (Real real : values) {
+        Real dev = real - avg;
+        sqr_dev.push_back(dev * dev);
+    }
+
+    Real variance = std::accumulate(sqr_dev.begin(), sqr_dev.end(), 0.0) / (count - 1);
+    return Ok(Value(Vec2(avg, std::sqrt(variance))));
+}
+
+RCALC_FMT_1_S(SampNormDist, _arg) {
+    UNUSED(_arg);
+    std::shared_ptr<Displayable> p_disp = create_displayables_from("samp_normdist(", stack.get_message<std::shared_ptr<Displayable>>(), ")");
+    return p_disp;
+}
+
+
+// @RCalcOperator
 // Description: Calculate the sum of the top arg0 values on the stack.
 // Category: Statistics
 // Tags: [no_expr]
@@ -412,21 +566,33 @@ RCALC_OP_1_S(Sum, Int, count) {
     // For input formatting
     std::shared_ptr<Displayable> input_disp, input_disp_front;
 
-    Real sum = 0.0;
+    BigInt bi_sum { "0" };
+    Real r_sum = 0.0;
     for (const StackItem& item : stack.pop_items(count)) {
         switch (item.result.get_type()) {
         case TYPE_INT:
-            sum += (Real)(item.result.operator Int());
+            if (is_real) {
+                r_sum += (Real)(item.result.operator Int());
+            }
+            else {
+                bi_sum += BigInt(item.result.operator Int());
+            }
             break;
         case TYPE_BIGINT:
-            sum += (item.result.operator BigInt()).get_real<Real>();
+            if (is_real) {
+                r_sum += (item.result.operator BigInt()).get_real<Real>();
+            }
+            else {
+                bi_sum += item.result.operator BigInt();
+            }
             break;
         case TYPE_REAL:
-            sum += (Real)item.result;
+            r_sum += (Real)item.result;
             break;
         default:
             UNREACHABLE();
         }
+
         if (input_disp) {
             input_disp->p_next = create_displayables_from(", ", item.result);
             input_disp = input_disp->p_next->p_next;
@@ -440,10 +606,12 @@ RCALC_OP_1_S(Sum, Int, count) {
     stack.set_message<std::shared_ptr<Displayable>>(input_disp_front);
 
     if (is_real) {
-        return Ok(Value(sum));
+        return Ok(Value(r_sum));
     }
     else {
-        return Ok(CheckedMath::discretize(sum));
+        std::optional<Value> discretized = Value::parse(bi_sum.get_str());
+        if (!discretized) { return Err(ERR_INVALID_PARAM, "Unable to calculate sum."); }
+        return Ok(*discretized);
     }
 }
 

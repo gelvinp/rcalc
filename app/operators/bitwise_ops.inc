@@ -52,13 +52,13 @@ RCALC_OP_1(Not, Int, arg0) {
     uint64_t inverted = ~std::bit_cast<uint64_t>(arg0);
 
     // // Cut it off at the same number of bits used in arg0
-    // int width = std::bit_width(std::bit_cast<uint64_t>(arg0));
-    // if (width == 64) { return Ok(Value(std::bit_cast<int64_t>(inverted), REPR_BINARY)); }
+    int width = std::bit_width(std::bit_cast<uint64_t>(arg0));
+    if (width == 64) { return Ok(Value(std::bit_cast<int64_t>(inverted), REPR_BINARY)); }
 
-    // uint64_t mask = (1 << width) - 1;
-    // uint64_t res = inverted & mask;
+    uint64_t mask = (1 << width) - 1;
+    uint64_t res = inverted & mask;
 
-    return Ok(Value(std::bit_cast<int64_t>(inverted), REPR_BINARY));
+    return Ok(Value(std::bit_cast<int64_t>(res), REPR_BINARY));
 }
 
 RCALC_FMT_1(Not, arg0) {

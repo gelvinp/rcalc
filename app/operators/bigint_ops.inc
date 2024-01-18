@@ -64,13 +64,6 @@ RCALC_OP_1(Abs, BigInt, arg) {
 
 // @RCalcOperator
 // Tags: [no_expr]
-RCALC_OP_1(Fact, BigInt, arg) {
-    return Ok(Value(big_fact(arg)));
-}
-
-
-// @RCalcOperator
-// Tags: [no_expr]
 RCALC_OP_1(Neg, BigInt, arg) {
     return Ok(Value(arg * BigInt("-1")));
 }

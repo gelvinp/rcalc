@@ -231,6 +231,7 @@ RCALC_OP_2(Div, Mat4, Vec4, arg0, arg1) {
 // Requires: <glm/mat2x2.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Vec2, Mat2, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -238,6 +239,7 @@ RCALC_OP_2(Div, Vec2, Mat2, arg0, arg1) {
 // Requires: <glm/mat3x3.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Vec3, Mat3, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -245,6 +247,7 @@ RCALC_OP_2(Div, Vec3, Mat3, arg0, arg1) {
 // Requires: <glm/mat4x4.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Vec4, Mat4, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -252,6 +255,7 @@ RCALC_OP_2(Div, Vec4, Mat4, arg0, arg1) {
 // Requires: <glm/mat2x2.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Mat2, Mat2, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -259,6 +263,7 @@ RCALC_OP_2(Div, Mat2, Mat2, arg0, arg1) {
 // Requires: <glm/mat3x3.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Mat3, Mat3, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -266,6 +271,7 @@ RCALC_OP_2(Div, Mat3, Mat3, arg0, arg1) {
 // Requires: <glm/mat4x4.hpp>
 // Tags: [real_cast]
 RCALC_OP_2(Div, Mat4, Mat4, arg0, arg1) {
+    if (glm::determinant(arg1) == 0) { return Err(ERR_INVALID_PARAM, "Divisor matrix has determinant of zero!"); }
     return Ok(Value(arg0 / arg1));
 }
 
@@ -327,7 +333,7 @@ RCALC_FMT_1(TPose, arg0) {
 
 
 // @RCalcOperator
-// Description: Calculates the determinant matrix of arg0
+// Description: Calculates the determinant of arg0
 // Category: Matrix
 // Requires: <glm/mat2x2.hpp>
 // Tags: [no_expr]
@@ -361,7 +367,7 @@ RCALC_FMT_1(Det, arg0) {
 // Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Col, Mat2, Int, arg0, arg1) {
-    if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat2", arg1)); }
+    if (arg1 < 0 || arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat2", arg1)); }
     return Ok(Value(arg0[(Mat2::length_type)arg1]));
 }
 
@@ -369,16 +375,16 @@ RCALC_OP_2(Col, Mat2, Int, arg0, arg1) {
 // Requires: <glm/mat3x3.hpp>
 // Requires: "core/format.h"
 RCALC_OP_2(Col, Mat3, Int, arg0, arg1) {
-    if (arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat3", arg1)); }
-    return Ok(Value(arg0[(Mat2::length_type)arg1]));
+    if (arg1 < 0 || arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat3", arg1)); }
+    return Ok(Value(arg0[(Mat3::length_type)arg1]));
 }
 
 // @RCalcOperator
 // Requires: <glm/mat4x4.hpp>
 // Requires: "core/format.h"
 RCALC_OP_2(Col, Mat4, Int, arg0, arg1) {
-    if (arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat4", arg1)); }
-    return Ok(Value(arg0[(Mat2::length_type)arg1]));
+    if (arg1 < 0 || arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Column index %d is out of bounds for Mat4", arg1)); }
+    return Ok(Value(arg0[(Mat4::length_type)arg1]));
 }
 
 RCALC_FMT_2(Col, arg0, arg1) {
@@ -394,7 +400,7 @@ RCALC_FMT_2(Col, arg0, arg1) {
 // Tags: [no_expr]
 // Example: [{[1, 2], [3, 4]}, 0]
 RCALC_OP_2(Row, Mat2, Int, arg0, arg1) {
-    if (arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat2", arg1)); }
+    if (arg1 < 0 || arg1 >= 2) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat2", arg1)); }
     return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
 }
 
@@ -402,16 +408,16 @@ RCALC_OP_2(Row, Mat2, Int, arg0, arg1) {
 // Requires: <glm/mat3x3.hpp>
 // Requires: "core/format.h"
 RCALC_OP_2(Row, Mat3, Int, arg0, arg1) {
-    if (arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat3", arg1)); }
-    return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
+    if (arg1 < 0 || arg1 >= 3) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat3", arg1)); }
+    return Ok(Value(glm::transpose(arg0)[(Mat3::length_type)arg1]));
 }
 
 // @RCalcOperator
 // Requires: <glm/mat4x4.hpp>
 // Requires: "core/format.h"
 RCALC_OP_2(Row, Mat4, Int, arg0, arg1) {
-    if (arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat4", arg1)); }
-    return Ok(Value(glm::transpose(arg0)[(Mat2::length_type)arg1]));
+    if (arg1 < 0 || arg1 >= 4) { return Err(ERR_INVALID_PARAM, fmt("Row index %d is out of bounds for Mat4", arg1)); }
+    return Ok(Value(glm::transpose(arg0)[(Mat4::length_type)arg1]));
 }
 
 RCALC_FMT_2(Row, arg0, arg1) {

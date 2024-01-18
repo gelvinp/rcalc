@@ -145,6 +145,8 @@ In no particular order:
 - Add representation-aware operator implementations (bitwise ops should preserve the representations of their arguments).
 - Add Wayland support for the linux builds (waiting on getting a new computer that can hopefully run wayland).
 - Unit / fuzzing tests
+- Max stack item count + system for responding to low-mem notifications / interrupting `range` eval.
+- Non-static pluggable Logger to be swapped out (Don't interrupt terminal renderer, hide during tests, etc...)
 
 ## Contribute
 

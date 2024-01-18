@@ -40,7 +40,7 @@ RCALC_OP_1(Sqr, Int, arg0) {
 // @RCalcOperator
 // Requires: <cmath>
 RCALC_OP_1(Sqr, Real, arg0) {
-    return Ok(CheckedMath::mul(arg0, arg0));
+    return Ok(Value(arg0 * arg0));
 }
 
 RCALC_FMT_1(Sqr, arg0) {
@@ -64,7 +64,7 @@ RCALC_OP_1(Cube, Real, arg0) {
     Real value = std::pow(arg0, 3.0);
 
     if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
+        return Err(ERR_INVALID_PARAM, "Result of cube is NaN!");
     }
     
     return Ok(Value(value));
@@ -84,7 +84,7 @@ RCALC_OP_1(Sqrt, Real, arg0) {
     Real value = std::sqrt(arg0);
 
     if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
+        return Err(ERR_INVALID_PARAM, "Result of sqrt is NaN!");
     }
     
     return Ok(Value(value));
@@ -104,7 +104,7 @@ RCALC_OP_1(Cbrt, Real, arg0) {
     Real value = std::cbrt(arg0);
 
     if (std::isnan(value)) {
-        return Err(ERR_INVALID_PARAM, "Result of pow is NaN!");
+        return Err(ERR_INVALID_PARAM, "Result of cbrt is NaN!");
     }
     
     return Ok(Value(value));
@@ -161,7 +161,7 @@ RCALC_FMT_1(Exp, arg) {
 // Description: Calculates the nearest integer not less than the given value.
 // Requires: <cmath>
 // Requires: "core/checked_math.h"
-// Tags: [no_expr, real_cast]
+// Tags: [no_expr]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Ceil, Real, arg) {
@@ -178,7 +178,7 @@ RCALC_FMT_1(Ceil, arg) {
 // Description: Calculates the nearest integer not greater than the given value.
 // Requires: <cmath>
 // Requires: "core/checked_math.h"
-// Tags: [no_expr, real_cast]
+// Tags: [no_expr]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Floor, Real, arg) {
@@ -195,7 +195,7 @@ RCALC_FMT_1(Floor, arg) {
 // Description: Calculates the nearest integer not greater in magnitude than the given value.
 // Requires: <cmath>
 // Requires: "core/checked_math.h"
-// Tags: [no_expr, real_cast]
+// Tags: [no_expr]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Trunc, Real, arg) {
@@ -212,7 +212,7 @@ RCALC_FMT_1(Trunc, arg) {
 // Description: Calculates the nearest integer to the given value, rounding halfway cases away from zero.
 // Requires: <cmath>
 // Requires: "core/checked_math.h"
-// Tags: [no_expr, real_cast]
+// Tags: [no_expr]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Round, Real, arg) {
@@ -222,6 +222,22 @@ RCALC_OP_1(Round, Real, arg) {
 
 RCALC_FMT_1(Round, arg) {
     return create_displayables_from("round(", arg.p_input, ")");
+}
+
+
+// @RCalcOperator
+// Description: Calculates the fractional component with the same sign as arg0.
+// Requires: <cmath>
+// Tags: [no_expr]
+// Example: [3.5]
+// Example: [-3.5]
+RCALC_OP_1(Frac, Real, arg) {
+    Real _integral;
+    return Ok(Value(std::modf(arg, &_integral)));
+}
+
+RCALC_FMT_1(Frac, arg) {
+    return create_displayables_from("frac(", arg.p_input, ")");
 }
 
 
@@ -266,12 +282,16 @@ RCALC_FMT_1(Fact, arg) {
 // Description: Calculates the gamma function of a given number.
 // Requires: <cmath>
 // Requires: "core/checked_math.h"
-// Tags: [no_expr]
+// Requires: "core/comparison.h"
+// Tags: [no_expr, real_cast]
 // Example: [3.5]
 // Example: [-3.5]
 RCALC_OP_1(Gamma, Real, arg) {
+    Real _integral;
+    if (arg < 0 && TypeComparison::compare(std::modf(arg, &_integral), 0.0)) { return Err(ERR_INVALID_PARAM, "Gamma function is not defined for negative integers!"); }
+    if (TypeComparison::compare(arg, 0.0)) { return Err(ERR_INVALID_PARAM, "Gamma function is not defined for zero!"); }
     Real res = std::tgamma((Real)arg);
-    return Ok(CheckedMath::discretize(res));
+    return Ok(Value(res));
 }
 
 RCALC_FMT_1(Gamma, arg) {
@@ -286,6 +306,18 @@ RCALC_FMT_1(Gamma, arg) {
 RCALC_OP_2(Quot, Int, Int, arg0, arg1) {
     auto [quot, _rem] = std::div(arg0, arg1);
     return Ok(Value((Int)quot));
+}
+
+// @RCalcOperator
+// Tags: [real_cast]
+// Requires: "core/checked_math.h"
+RCALC_OP_2(Quot, Real, Real, arg0, arg1) {
+    if (std::isnan(arg0 / arg1)) {
+        return Err(ERR_INVALID_PARAM, "Result of Quot is NaN!");
+    }
+    Real integral;
+    std::modf((arg0 / arg1), &integral);
+    return Ok(CheckedMath::discretize(integral));
 }
 
 RCALC_FMT_2(Quot, arg0, arg1) {
@@ -329,14 +361,20 @@ RCALC_FMT_0(e) {
 
 
 // @RCalcOperator
-// Description: Generates a range of numbers from 0 to arg0.
+// Description: Generates a range of numbers from 0 to arg0 when arg0 is positive, and from 1 to +arg0 when arg0 is negative.
 // Category: Range
 // Tags: [no_expr]
+// Requires: "core/checked_math.h"
 // Example: [3]
 // Example: [5]
 RCALC_OP_1_S(Range, Int, arg0) {
-    stack.reserve_items(stack.size() + arg0);
-    for (Int index = 0; index < arg0; index++) {
+    // TODO: Implement this better
+    if (arg0 > 10000 || arg0 < -10000) { return Err(ERR_INVALID_PARAM, "Unable to create that many items."); }
+
+    Int from = (arg0 < 0) ? 1 : 0;
+    Int to = (arg0 < 0) ? -arg0 : arg0;
+    stack.reserve_items(stack.size() + to);
+    for (Int index = from; index < to; index++) {
         Value value = Value(index);
         stack.push_item(StackItem{
             create_displayables_from(value),
@@ -344,7 +382,7 @@ RCALC_OP_1_S(Range, Int, arg0) {
             false
         });
     }
-    Value last = Value(arg0);
+    Value last = Value(to);
     stack.set_message<std::string>(last.to_string());
     return Ok(std::move(last));
 }
