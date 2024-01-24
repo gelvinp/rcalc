@@ -502,6 +502,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
     // Check for basic arithmetic operators
     switch ((char)p_cb_data->EventChar) {
         case '+':
+            if (!(ImGui::IsKeyDown(ImGuiKey_KeypadAdd) || ImGui::IsKeyDown(ImGuiKey_Equal))) { return 0; }
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
@@ -510,6 +511,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
             self->cb_submit_text("add");
             return 1;
         case '-':
+            if (!(ImGui::IsKeyDown(ImGuiKey_KeypadSubtract) || ImGui::IsKeyDown(ImGuiKey_Minus))) { return 0; }
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
@@ -518,6 +520,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
             self->cb_submit_text("sub");
             return 1;
         case '*':
+            if (!(ImGui::IsKeyDown(ImGuiKey_KeypadMultiply) || ImGui::IsKeyDown(ImGuiKey_8))) { return 0; }
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;
@@ -526,6 +529,7 @@ int ImGuiRenderer::scratchpad_input_filter_callback(ImGuiInputTextCallbackData* 
             self->cb_submit_text("mul");
             return 1;
         case '/':
+            if (!(ImGui::IsKeyDown(ImGuiKey_KeypadDivide) || ImGui::IsKeyDown(ImGuiKey_Slash))) { return 0; }
             if (!self->scratchpad.empty()) {
                 self->submit_scratchpad();
                 self->scratchpad_needs_clear = true;

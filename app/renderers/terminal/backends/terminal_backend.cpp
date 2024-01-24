@@ -44,4 +44,16 @@ void TerminalBackend::copy_to_clipboard(const std::string_view& string) {
 #endif
 }
 
+std::string TerminalBackend::get_clipboard() {
+    std::string out;
+#ifdef MODULE_CLIP_ENABLED
+    if (!clip::get_text(out)) {
+        cb_report_error("Failed to access the clipboard!");
+    }
+#else
+    cb_report_error("RCalc was not compiled with terminal clipboard support!");
+#endif
+    return out;
+}
+
 }

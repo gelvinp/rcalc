@@ -412,6 +412,11 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         return true;
     }
 
+    if (event == ftxui::Event::Special({22})) {
+        scratchpad.append(backend.get_clipboard());
+        return true;
+    }
+
     return comp_stack_scroll->OnEvent(event);
 }
 

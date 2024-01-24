@@ -32,6 +32,7 @@ public:
     void render_loop(ftxui::Component component);
     
     void copy_to_clipboard(const std::string_view& string);
+    std::string get_clipboard();
 
     bool close_requested = false;
 
