@@ -1,14 +1,9 @@
 #include "application.h"
 
-#include "core/logger.h"
 #include "core/format.h"
 #include "core/memory/allocator.h"
 
 #include <algorithm>
-#include <cmath>
-#include <ranges>
-#include <set>
-#include <sstream>
 
 
 namespace RCalc {

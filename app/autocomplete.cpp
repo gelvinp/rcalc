@@ -3,8 +3,6 @@
 #include "app/application.h"
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
-#include "core/format.h"
-#include "core/comparison.h"
 
 #include <algorithm>
 
