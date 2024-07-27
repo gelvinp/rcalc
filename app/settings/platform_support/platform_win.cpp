@@ -5,6 +5,7 @@
 #include "core/types.h"
 
 #include <array>
+#include <algorithm>
 #include <charconv>
 #include <ctype.h>
 #include <fstream>

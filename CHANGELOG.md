@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [2.0.1] - 2024-07-26
 
 ### Changed
 
 - Allow pasting minus signs into the scratchpad without immediately calling subtract.
+
+### Fixed
+
+- Added an include that I never needed before
 
 ## [2.0.0] - 2024-01-18
 
