@@ -8,4 +8,5 @@ OperatorMap& OperatorMap::get_operator_map() {
 	return singleton;
 }
 
+
 }

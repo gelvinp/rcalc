@@ -4,6 +4,7 @@
 #include "app/renderers/renderer.h"
 #include "app/operators/operators.h"
 #include "app/commands/commands.h"
+#include "variable_map.h"
 
 #include "app_config.h"
 
@@ -11,6 +12,7 @@
 #include <string>
 #include <string_view>
 #include <optional>
+
 
 namespace RCalc {
 
@@ -30,6 +32,9 @@ public:
     REGISTER_COMMAND(Application, Count);
     REGISTER_COMMAND(Application, Undo);
     REGISTER_COMMAND(Application, Type);
+    REGISTER_COMMAND(Application, Store);
+    REGISTER_COMMAND(Application, Load);
+    REGISTER_COMMAND(Application, ClearVars);
 
     void on_renderer_submit_text(std::string_view str);
     static void _on_renderer_submit_text(Application* p_app, std::string_view str) { p_app->on_renderer_submit_text(str); }
@@ -43,6 +48,8 @@ public:
     std::optional<Int> get_max_stack_size() const { return stack.get_max_size(); }
     void set_max_stack_size(std::optional<Int> new_max_size);
 
+    VariableMap& get_variable_map() { return variable_map; }
+
 private:
 
     RPNStack _stack_a, _stack_b;
@@ -51,6 +58,8 @@ private:
     RPNStack stack;
     Renderer* p_renderer;
     OperatorMap& op_map;
+
+    VariableMap variable_map;
 
     _CommandMap cmd_map;
 

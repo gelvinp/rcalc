@@ -10,6 +10,7 @@
 #include "constants.h"
 #include "main/main.h"
 #include "imgui_ext.h"
+#include "imgui_stdlib.h"
 
 #include <algorithm>
 #include <cmath>
@@ -128,7 +129,8 @@ void ImGuiRenderer::render() {
                 ImGui::MenuItem("Copy Answer", "Ctrl+C", &copy_requested);
                 ImGui::MenuItem("Duplicate Item", "Ctrl+D", &dup_requested);
                 ImGui::MenuItem("Show Help", "F1", &help_requested);
-                ImGui::MenuItem("Settings", nullptr, &settings_requested);
+                ImGui::MenuItem("Settings", "F12", &settings_requested);
+                ImGui::MenuItem("Show Variables", "F2", &variables_requested);
                 ImGui::Separator();
                 ImGui::MenuItem("Quit", "Ctrl+Q", &backend.close_requested);
                 ImGui::EndMenu();
@@ -285,6 +287,13 @@ void ImGuiRenderer::render() {
                         ImGui::CloseCurrentPopup();
                     }
 
+                    if (ImGui::Button("Save as Variable", ImVec2 { ImGui::GetContentRegionAvail().x, 0 })) {
+                        variable_name = "";
+                        variable_value = entry.result;
+                        ImGui::CloseCurrentPopup();
+                        save_variable_name_requested = true;
+                    }
+
                     ImGui::EndPopup();
                 }
 
@@ -301,6 +310,38 @@ void ImGuiRenderer::render() {
         }
 
         ImGui::EndChild();
+    }
+
+    if (save_variable_name_requested) {
+        save_variable_name_requested = false;
+        ImGui::OpenPopup("save_variable_name");
+    }
+
+    if (ImGui::BeginPopup("save_variable_name")) {
+        ImGui::TextUnformatted("Variable Name:");
+        ImGui::SameLine();
+        if (ImGui::IsWindowAppearing()) { ImGui::SetKeyboardFocusHere(); }
+        if (
+          ImGui::InputText(
+            "##save_variable_name",
+            &variable_name,
+            ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll
+          )
+        ) {
+          if (variable_name != "") {
+            cb_submit_text.p_app->get_variable_map().store(variable_name, variable_value.value());
+            ImGui::CloseCurrentPopup();
+          }
+        }
+
+        if (ImGui::Button("Confirm")) {
+            if (variable_name != "") {
+                cb_submit_text.p_app->get_variable_map().store(variable_name, variable_value.value());
+                ImGui::CloseCurrentPopup();
+            }
+        }
+
+        ImGui::EndPopup();
     }
 
     // Gets stuck when the stack is empty
@@ -352,7 +393,7 @@ void ImGuiRenderer::render() {
         submit_scratchpad();
     }
 
-    if (scratchpad_needs_focus && !help_requested && !help_open && !settings_requested && !settings_open) {
+    if (scratchpad_needs_focus && !help_requested && !help_open && !settings_requested && !settings_open && !variables_open) {
         ImGui::SetKeyboardFocusHere(-1);
         scratchpad_needs_focus = false;
         stack_needs_scroll_down = false;
@@ -366,6 +407,7 @@ void ImGuiRenderer::render() {
         && !help_open
         && !settings_requested
         && !settings_open
+        && !variables_open
     ) {
         ImGui::SetKeyboardFocusHere(-1);
     }
@@ -377,6 +419,7 @@ void ImGuiRenderer::render() {
         help_version_copied = false;
         ImGui::OpenPopup("Help");
         help_requested = false;
+        message = "";
     }
     render_help();
 
@@ -384,8 +427,18 @@ void ImGuiRenderer::render() {
         settings_open = true;
         ImGui::OpenPopup("Settings");
         settings_requested = false;
+        message = "";
     }
     render_settings();
+
+    if (variables_requested) {
+        variables_open = true;
+        variables_cache.clear();
+        ImGui::OpenPopup("Variables");
+        variables_requested = false;
+        message = "";
+    }
+    render_variables();
 
     // Handle shortcuts
     if (backend.app_menu_bar()) {
@@ -405,6 +458,12 @@ void ImGuiRenderer::render() {
         if (!help_open && ImGui::IsKeyDown(ImGuiKey_F1)) {
             help_requested = true;
         }
+        if (!settings_open && ImGui::IsKeyDown(ImGuiKey_F12)) {
+            settings_requested = true;
+        }
+        if (!variables_open && ImGui::IsKeyDown(ImGuiKey_F2)) {
+            variables_requested = true;
+        }
     }
     if (ImGui::IsKeyPressed(ImGuiKey_Delete) && scratchpad_empty) {
         cb_submit_text("\\pop");
@@ -417,6 +476,9 @@ void ImGuiRenderer::render() {
     }
     if (settings_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         settings_open = false;
+    }
+    if (variables_open && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        variables_open = false;
     }
     if (!should_suggest_previous && ImGui::IsKeyPressed(ImGuiKey_Tab) && (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift))) {
         should_suggest_previous = true;
@@ -1080,6 +1142,86 @@ void ImGuiRenderer::render_settings() {
     if (style_update_needed) {
         update_style = build_style();
     }
+}
+
+
+void ImGuiRenderer::render_variables() {
+    ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
+    ImGui::SetNextWindowSize(ImVec2(viewport_size.x * 0.95f, viewport_size.y * 0.95f), ImGuiCond_Appearing);
+
+    if (!ImGui::BeginPopupModal("Variables", &variables_open)) { return; }
+
+    if (cb_submit_text.p_app->get_variable_map().get_values().empty()) {
+        ImGui::TextUnformatted("No variables have been stored.");
+    }
+    else {
+        if (variables_cache.empty()) {
+            for (const auto& [name, value] : cb_submit_text.p_app->get_variable_map().get_values()) {
+                std::string value_str = value.to_string();
+                variables_cache.push_back(value_str);
+            }
+        }
+
+        if (ImGui::BeginTable("Variables", 3, ImGuiTableFlags_Borders)) {
+            ImGui::TableSetupColumn("Name");
+            ImGui::TableSetupColumn("Value");
+            ImGui::TableSetupColumn("Actions");
+            ImGui::TableHeadersRow();
+
+            int index = 0;
+
+            for (const auto& [name, value] : cb_submit_text.p_app->get_variable_map().get_values()) {
+                ImGui::PushID(index);
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(name.c_str());
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(variables_cache[index++].c_str());
+
+                ImGui::TableSetColumnIndex(2);
+                if (ImGui::Button("Menu")) {
+                    ImGui::OpenPopup("actions_popup");
+                }
+
+                if (ImGui::BeginPopup("actions_popup")) {
+                    if (ImGui::MenuItem("Insert Name")) {
+                        std::string name_str = "\"" + name + "\"";
+                        cb_submit_text(name_str);
+                        variables_open = false;
+                    }
+                    if (ImGui::MenuItem("Insert Value")) {
+                        std::string name_str = "\"" + name + "\"";
+                        cb_submit_text(name_str);
+                        cb_submit_text("\\load");
+                        variables_open = false;
+                    }
+                    if (ImGui::MenuItem("Copy Name")) {
+                        std::string name_str = "\"" + name + "\"";
+                        backend.copy_to_clipboard(name_str);
+                        variables_open = false;
+                    }
+                    if (ImGui::MenuItem("Copy Value")) {
+                        std::string value_str = value.to_string();
+                        backend.copy_to_clipboard(value_str);
+                        variables_open = false;
+                    }
+                    if (ImGui::MenuItem("Remove")) {
+                        cb_submit_text.p_app->get_variable_map().remove(name);
+                    }
+
+                    ImGui::EndPopup();
+                }
+
+                ImGui::PopID();
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    ImGui::EndPopup();
 }
 
 

@@ -99,11 +99,15 @@ void Application::on_renderer_submit_text(std::string_view str) {
 
         return;
     }
+    else if (str == "\"\"") {
+        p_renderer->display_error("Identifier cannot be empty.");
+        return;
+    }
 
     // Try to parse as Operator third
 
     if (op_map.has_operator(str)) {
-        Result<std::optional<size_t>> res = op_map.evaluate(str, stack);
+        Result<std::optional<size_t>> res = op_map.evaluate(str, stack, variable_map);
         if (!res) {
             p_renderer->display_error(res.unwrap_err().get_message());
             return;

@@ -11,7 +11,7 @@ import atexit
 
 
 Tags = ['reversable', 'bigint_cast', 'real_cast', 'no_expr'] # Need a string in set check, not ordered
-Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8, 'Unit': 9 } # Need a string in set check, ordered
+Types = { 'Int': 0, 'BigInt': 1, 'Real': 2, 'Vec2': 3, 'Vec3': 4, 'Vec4': 5, 'Mat2': 6, 'Mat3': 7, 'Mat4': 8, 'Unit': 9, 'Identifier': 10 } # Need a string in set check, ordered
 
 
 class Capture:
@@ -310,7 +310,9 @@ class Operator:
         if included:
             lines.append('')
             
-        lines.append(f"Result<std::optional<size_t>> OP_Eval_{self.name}(RPNStack& stack, const Operator& op) {{")
+        lines.extend([
+            f"Result<std::optional<size_t>> OP_Eval_{self.name}(RPNStack& stack, const Operator& op, OptionalVariables variables) {{",
+        ])
 
         perm_types = [perm.get_stack_types() for _name, perm in self.permutations.items()]
         perm_types.sort(key=lambda types: [Types[t] for t in types])
@@ -319,6 +321,7 @@ class Operator:
             call = self.calls['']
             lines.extend([
                 "\tUNUSED(op);",
+                "\tUNUSED(variables);",
                 '\tCowVec<StackItem> stack_post_pop = stack.get_items();',
                 ''
             ])
@@ -332,7 +335,7 @@ class Operator:
         else:
             param_string = "paramters" if self.param_count > 1 else "parameter"
             lines.extend([
-                f"\tCowVec<Type> types = stack.peek_types_vec({self.param_count});",
+                f"\tCowVec<Type> types = stack.peek_types_vec({self.param_count}, variables);",
                 '',
                 '\tif (types.empty()) {',
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op requires {self.param_count} {param_string}");',
@@ -345,7 +348,7 @@ class Operator:
                 f'\t\treturn Err(ERR_INVALID_PARAM, "{self.name} op does not recognize " + stack.display_types({self.param_count}));',
                 "\t}",
                 "\tsize_t index = std::distance(op.allowed_types.begin(), it);",
-                f"\tCowVec<StackItem> values = stack.pop_items({self.param_count});",
+                f"\tCowVec<StackItem> values = stack.pop_items({self.param_count}, variables);",
                 '\tCowVec<StackItem> stack_post_pop = stack.get_items();',
                 "",
                 "\tswitch (index) {"
@@ -550,7 +553,8 @@ class OperatorMapBuilder:
             "/* THIS FILE IS GENERATED DO NOT EDIT */", "",
             "#include \"operators.h\"",
             "#include \"operators_internal.gen.h\"", ""
-            '#include "core/comparison.h"', ''
+            '#include "core/comparison.h"',
+            '#include "app/variable_map.h"', ''
         ]
 
         self.operator_requires.sort()
@@ -939,10 +943,10 @@ class OperatorMapBuilder:
             '\treturn operator_map.contains(str);',
             '}',
             '',
-            'Result<std::optional<size_t>> OperatorMap::evaluate(std::string_view str, RPNStack& stack) {',
+            'Result<std::optional<size_t>> OperatorMap::evaluate(std::string_view str, RPNStack& stack, OptionalVariables variables) {',
             '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map.find(str)->second;',
-            '\treturn op.evaluate(stack, op);',
+            '\treturn op.evaluate(stack, op, variables);',
             '}',
             '',
             '}'
@@ -1027,10 +1031,10 @@ class OperatorMapBuilder:
             '\treturn Operators::GPerf::in_word_set(str.data(), str.size()) != nullptr;',
             '}',
             '',
-            'Result<std::optional<size_t>> OperatorMap::evaluate(std::string_view str, RPNStack& stack) {',
+            'Result<std::optional<size_t>> OperatorMap::evaluate(std::string_view str, RPNStack& stack, OptionalVariables variables) {',
             '\tif (!built) { build(); }',
             '\tconst Operator& op = *operator_map[Operators::GPerf::hash(str.data(), str.size()) - MIN_HASH_VALUE];',
-            '\treturn op.evaluate(stack, op);',
+            '\treturn op.evaluate(stack, op, variables);',
             '}',
             '',
             '}'

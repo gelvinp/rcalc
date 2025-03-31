@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Major Feature: Variables
+
+- Added a new type, Identifier, which gives variables a name. Identifiers are any value that begins and ends with double quotes (e.g. "var"). Identifiers are _NOT_ case sensitive, and they _CANNOT_ be empty.
+- Save and load variables with the new '\store' and '\load' commands. Store expects the stack to contain the value to be stored followed by the identifier, and it consumes the identifier. Load expects an identifier, which is replaced on the stack by the loaded value.
+- Clear all stored variables with the new '\clearvars' command.
+- Use variables directly in expressions. When invoking an operator against a variable, it will be automatically loaded as its value.
+- Graphically create, view, and manage your variables when using the ImGui renderer, as an alternative to the commands.
+- Graphically view and manage your variables when using the Terminal renderer, as an alternative to the commands. (The Terminal renderer does not implement right-clicking to save a value as a variable.)
+- Both renderers can use the new '\variables' command or the F2 key to view and manage variables.
+
+### Changed
+
+- The Terminal renderer now supports the F1 shortcut to open the help menu, and the F12 shortcut to open the settings menu.
+- The ImGui renderer now supports the F12 shortcut to open the settings menu.
+
 ## [2.0.1] - 2024-07-26
 
 ### Changed

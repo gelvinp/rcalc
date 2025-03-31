@@ -70,6 +70,30 @@ CowVec<Type> RPNStack::peek_types_vec(uint64_t count) const {
 }
 
 
+CowVec<Type> RPNStack::peek_types_vec(uint64_t count, OptionalVariables variables) const {
+    if (stack.size() < count) { return {}; }
+
+    CowVec<Type> types;
+    types.reserve(count);
+    for (uint64_t idx = count; idx > 0; --idx) {
+        Value result = stack[stack.size() - idx].result;
+        Type type = result.get_type();
+
+        if (type == TYPE_IDENTIFIER && variables) {
+            std::optional<Value> value = variables->get().load(result);
+            if (value) {
+                types.push_back(value->get_type());
+                continue;
+            }
+        }
+
+        types.push_back(type);
+    }
+
+    return types;
+}
+
+
 std::string RPNStack::display_types(uint64_t count) const {
     uint64_t safe_count = std::min((size_t)count, stack.size());
 
@@ -100,6 +124,30 @@ CowVec<StackItem> RPNStack::pop_items(uint64_t count) {
     CowVec<StackItem> items;
     items.reserve(count);
     for (uint64_t idx = safe_count; idx > 0; --idx) {
+        items.push_back(std::move(stack[stack.size() - idx]));
+    }
+    stack.resize(stack.size() - safe_count);
+
+    return items;
+}
+
+
+CowVec<StackItem> RPNStack::pop_items(uint64_t count, OptionalVariables variables) {
+    uint64_t safe_count = std::min((size_t)count, stack.size());
+
+    CowVec<StackItem> items;
+    items.reserve(count);
+    for (uint64_t idx = safe_count; idx > 0; --idx) {
+        StackItem& item = stack.mut_at(stack.size() - idx);
+
+        if (item.result.get_type() == TYPE_IDENTIFIER && variables) {
+            std::optional<Value> value = variables->get().load(item.result);
+            if (value) {
+                item.result = value.value();
+                item.p_input = create_displayables_from("load(", item.p_input, ")");
+            }
+        }
+
         items.push_back(std::move(stack[stack.size() - idx]));
     }
     stack.resize(stack.size() - safe_count);

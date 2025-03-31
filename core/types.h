@@ -7,6 +7,7 @@
 #include <glm/mat2x2.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
+#include <string>
 
 namespace RCalc {
 
@@ -20,6 +21,7 @@ typedef glm::dvec4 Vec4;
 typedef glm::dmat2 Mat2;
 typedef glm::dmat3 Mat3;
 typedef glm::dmat4 Mat4;
+typedef std::string Identifier;
 
 enum Type: uint8_t {
     TYPE_INT,
@@ -32,6 +34,7 @@ enum Type: uint8_t {
     TYPE_MAT3,
     TYPE_MAT4,
     TYPE_UNIT,
+    TYPE_IDENTIFIER,
     MAX_TYPE
 };
 

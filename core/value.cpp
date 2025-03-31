@@ -202,6 +202,7 @@ DEFINE_POOL(Mat2);
 DEFINE_POOL(Mat3);
 DEFINE_POOL(Mat4);
 DEFINE_POOL(Unit);
+DEFINE_POOL(Identifier);
 
 #undef POOL_VISIBILITY
 
@@ -220,7 +221,8 @@ const char* type_names[MAX_TYPE] = {
     "Mat2",
     "Mat3",
     "Mat4",
-    "Unit"
+    "Unit",
+    "Identifier",
 };
 
 const char* Value::get_type_name(Type type) {
@@ -278,6 +280,7 @@ POOL_CONVERT(Mat2, TYPE_MAT2);
 POOL_CONVERT(Mat3, TYPE_MAT3);
 POOL_CONVERT(Mat4, TYPE_MAT4);
 POOL_CONVERT(Unit, TYPE_UNIT);
+POOL_CONVERT(Identifier, TYPE_IDENTIFIER);
 
 #undef ASSERT_TYPE
 #undef POOL_CONVERT
@@ -306,6 +309,7 @@ POOL_CONSTRUCT(Mat2, TYPE_MAT2);
 POOL_CONSTRUCT(Mat3, TYPE_MAT3);
 POOL_CONSTRUCT(Mat4, TYPE_MAT4);
 POOL_CONSTRUCT(Unit, TYPE_UNIT);
+POOL_CONSTRUCT(Identifier, TYPE_IDENTIFIER);
 
 #undef POOL_CONSTRUCT
 
@@ -352,6 +356,7 @@ std::optional<Value> Value::parse(std::string_view str) {
     if (str.starts_with('[')) { return parse_vec(str); }
     if (str.starts_with('{')) { return parse_mat(str); }
     if (str.starts_with('_')) { return parse_unit(str); }
+    if (str.starts_with('"') && str.ends_with('"')) { return parse_identifier(str); }
 
     return parse_scalar(str);
 }
@@ -591,6 +596,12 @@ std::optional<Value> Value::parse_unit(std::string_view str) {
     std::optional<Unit const*> unit = UnitsMap::get_units_map().find_unit(str);
     if (unit) { return Value(*unit.value()); }
     return std::nullopt;
+}
+
+std::optional<Value> Value::parse_identifier(std::string_view str) {
+    if (str.length() <= 2) { return std::nullopt; }
+    Identifier identifier { str.substr(1, str.length() - 2) };
+    return Value(identifier);
 }
 
 #pragma endregion parse
@@ -914,6 +925,10 @@ std::string Value::to_string(DisplayableTag tags, std::optional<int> precision) 
             const Unit value = operator Unit();
             return fmt("%s", value.p_name);
         }
+        case TYPE_IDENTIFIER: {
+            const Identifier value = operator Identifier();
+            return fmt("\"%s\"", value.c_str());
+        }
 
         default: {
             Logger::log_err("Value of type %s not handled during to_string!", get_type_name());
@@ -947,6 +962,7 @@ void Value::ref() {
         POOL_REF(Mat3, TYPE_MAT3)
         POOL_REF(Mat4, TYPE_MAT4)
         POOL_REF(Unit, TYPE_UNIT)
+        POOL_REF(Identifier, TYPE_IDENTIFIER)
 
         default: {
             Logger::log_err("Value of type %s not handled during ref!", get_type_name());
@@ -976,6 +992,7 @@ void Value::unref() {
         POOL_UNREF(Mat3, TYPE_MAT3)
         POOL_UNREF(Mat4, TYPE_MAT4)
         POOL_UNREF(Unit, TYPE_UNIT)
+        POOL_UNREF(Identifier, TYPE_IDENTIFIER)
 
         default: {
             Logger::log_err("Value of type %s not handled during unref!", get_type_name());
@@ -1010,6 +1027,7 @@ bool Value::operator==(const Value& other) const {
         POOL_COMPARE(Mat2, TYPE_MAT2)
         POOL_COMPARE(Mat3, TYPE_MAT3)
         POOL_COMPARE(Mat4, TYPE_MAT4)
+        POOL_COMPARE(Identifier, TYPE_IDENTIFIER)
         
         case TYPE_UNIT:
             return operator RCalc::Unit().p_impl == other.operator RCalc::Unit().p_impl;

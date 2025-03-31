@@ -8,6 +8,7 @@
 #include "help_cache.h"
 #include "app/settings/settings_manager.h"
 #include "core/logging/engines.h"
+#include "variables_cache.h"
 
 namespace RCalc {
 
@@ -40,6 +41,7 @@ public:
     REGISTER_COMMAND(TerminalRenderer, Queer);
     REGISTER_COMMAND(TerminalRenderer, Quit);
     REGISTER_COMMAND(TerminalRenderer, ClearHist);
+    REGISTER_COMMAND(TerminalRenderer, Variables);
 
 private:
     ftxui::Element render();
@@ -78,6 +80,7 @@ private:
     void activate_main_page();
     void activate_help_page();
     void activate_settings_page();
+    void activate_variables_page();
 
     std::vector<std::string> history;
     std::optional<size_t> history_state = std::nullopt;
@@ -92,6 +95,12 @@ private:
 
     std::vector<TerminalHelpCache::CachedOperatorCategory> help_op_cache;
     void build_help_cache();
+
+    bool variables_requested = false;
+    bool variables_close_requested = false;
+    bool variables_open = false;
+    ftxui::Component variables_cache;
+    TerminalVariablesCache::VariablesCacheData variables_data;
 
     TerminalBackend backend;
 };

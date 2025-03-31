@@ -107,6 +107,8 @@ void TerminalRenderer::activate_main_page() {
     help_close_requested = false;
     settings_open = false;
     settings_close_requested = false;
+    variables_open = false;
+    variables_close_requested = false;
 }
 
 
@@ -124,6 +126,9 @@ void TerminalRenderer::activate_help_page() {
     help_requested = false;
     settings_open = false;
     settings_close_requested = false;
+    variables_open = false;
+    variables_close_requested = false;
+    message = "";
 }
 
 
@@ -163,6 +168,31 @@ void TerminalRenderer::activate_settings_page() {
     help_close_requested = false;
     settings_open = true;
     settings_requested = false;
+    variables_open = false;
+    variables_close_requested = false;
+    message = "";
+}
+
+
+void TerminalRenderer::activate_variables_page() {
+    comp_container->DetachAllChildren();
+
+    variables_cache = TerminalVariablesCache::build_variables_cache(
+        variables_data,
+        cb_submit_text,
+        variables_close_requested,
+        backend
+    );
+    
+    comp_container->Add(variables_cache);
+
+    help_open = false;
+    help_requested = false;
+    settings_open = false;
+    settings_close_requested = false;
+    variables_open = true;
+    variables_requested = false;
+    message = "";
 }
 
 
@@ -173,11 +203,14 @@ ftxui::Element TerminalRenderer::render() {
     else if (settings_requested && !settings_open) {
         activate_settings_page();
     }
-    else if (help_close_requested || settings_close_requested) {
+    else if (variables_requested && !variables_open) {
+        activate_variables_page();
+    }
+    else if (help_close_requested || settings_close_requested || variables_close_requested) {
         activate_main_page();
     }
 
-    if (help_open || settings_open) {
+    if (help_open || settings_open || variables_open) {
         return comp_container->Render() | ftxui::border;
     }
 
@@ -303,6 +336,28 @@ bool TerminalRenderer::handle_event(ftxui::Event event) {
         }
 
         return settings_page->OnEvent(event);
+    }
+    else if (variables_open) {
+        if (event == ftxui::Event::Escape) {
+            variables_close_requested = variables_open;
+            return true;
+        }
+
+        return variables_cache->OnEvent(event);
+    }
+    else {
+        if (event == ftxui::Event::F1) {
+            help_requested = true;
+            return true;
+        }
+        else if (event == ftxui::Event::F2) {
+            variables_requested = true;
+            return true;
+        }
+        else if (event == ftxui::Event::F12) {
+            settings_requested = true;
+            return true;
+        }
     }
 
     if (event.is_character()) {

@@ -110,6 +110,23 @@ To convert a value, push it onto the stack, followed by the unit you want to con
 [1, 1.5708] <enter> _polar <enter> _cartxy <enter> convert <enter> = [0, 1]
 [200, 164, 237] <enter> _rgb <enter> _hsl <enter> convert <enter> = [269.589, 66.9725, 78.6275]
 )foo"
+    },
+    {
+        "Using Variables",
+R"foo(You can store the results of your calculations in variables for later use by storing it with an Identifier. An Identifier is any value that begins and ends with double quotes ("").
+Identifiers are NOT case sensitive, and CANNOT be empty.
+
+Use the \store command to store a value with an Identifier, for example:
+6.28 <enter> "tau" <enter> \store <enter>
+
+Now, you can use the the \load command to retrieve the value, for example:
+"tau" <enter> \load <enter>
+will push the value 6.28 back onto the stack.
+
+You can also use variables directly in calculations, for example:
+"tau" <enter> 2 /
+will give the result 3.14.
+)foo"
     }
 };
 

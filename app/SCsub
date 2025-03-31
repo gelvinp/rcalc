@@ -12,16 +12,16 @@ if env["build_type"] == "application":
     SConscript("renderers/SCsub")
     SConscript("settings/SCsub")
 
+lib = env_app.add_library("app", env.app_sources)
+
+env.Prepend(LIBS=[lib])
+
 SConscript("operators/SCsub")
 SConscript("commands/SCsub")
 SConscript("displayable/SCsub")
 SConscript("dump/SCsub")
 
-lib = env_app.add_library("app", env.app_sources)
-
 # Dependency stuff
 if env["build_type"] == "application":
     env_app.Depends(env_app["commands_gen_path"], env_app["renderers_gen_path"])
     env_app.Depends(lib, env_app["renderers_gen_path"])
-
-env.Prepend(LIBS=[lib])
