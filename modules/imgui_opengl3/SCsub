@@ -8,5 +8,6 @@ if "/WX" in env_imgui["CCFLAGS"]:
     env_imgui["CCFLAGS"].remove("/WX")
 
 env.Append(CPPPATH=["#/modules/imgui_opengl3/"])
+env_imgui.Append(CPPPATH=["#/modules/imgui_core/"])
 
 env_imgui.add_source_files(env.modules_sources, "*.cpp")

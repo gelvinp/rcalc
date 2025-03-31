@@ -5,11 +5,11 @@
 
 // These are defined from build-time configuration.
 // clang-format off
-#define SNITCH_VERSION "1.2.3"
-#define SNITCH_FULL_VERSION "1.2.3.0be2936"
+#define SNITCH_VERSION "1.3.2"
+#define SNITCH_FULL_VERSION "1.3.2.cec4a04"
 #define SNITCH_VERSION_MAJOR 1
-#define SNITCH_VERSION_MINOR 2
-#define SNITCH_VERSION_PATCH 3
+#define SNITCH_VERSION_MINOR 3
+#define SNITCH_VERSION_PATCH 2
 
 
 #define SNITCH_MAX_TEST_CASES 5000
@@ -36,6 +36,8 @@
 
 #define SNITCH_MAX_PATH_LENGTH 1024
 
+#define SNITCH_MAX_REPORTER_SIZE_BYTES 128
+
 #define SNITCH_DEFINE_MAIN 0
 
 #define SNITCH_WITH_EXCEPTIONS 1
@@ -48,6 +50,8 @@
 
 #define SNITCH_CONSTEXPR_FLOAT_USE_BITCAST 1
 
+#define SNITCH_APPEND_TO_CHARS 1
+
 #define SNITCH_DECOMPOSE_SUCCESSFUL_ASSERTIONS 0
 
 #define SNITCH_WITH_ALL_REPORTERS 0
@@ -56,7 +60,12 @@
 
 #define SNITCH_WITH_CATCH2_REPORTER 0
 
+#define SNITCH_WITH_MULTITHREADING 1
+
 #define SNITCH_SHARED_LIBRARY 0
+
+#define SNITCH_ENABLE 1
+
 // clang-format on
 
 #if defined(_MSC_VER)
@@ -74,9 +83,22 @@
 #    define SNITCH_WITH_EXCEPTIONS 0
 #endif
 
+#if defined(SNITCH_WITH_MULTITHREADING)
+#    define SNITCH_THREAD_LOCAL thread_local
+#else
+#    define SNITCH_THREAD_LOCAL
+#endif
+
 #if !defined(__cpp_lib_bit_cast)
 #    undef SNITCH_CONSTEXPR_FLOAT_USE_BITCAST
 #    define SNITCH_CONSTEXPR_FLOAT_USE_BITCAST 0
+#endif
+
+#if (!defined(__cpp_lib_to_chars)) || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE <= 11) ||     \
+(defined(_LIBCPP_VERSION) && _LIBCPP_VERSION <= 14000) ||                                      \
+(defined(_MSC_VER) && _MSC_VER <= 1924)
+#    undef SNITCH_APPEND_TO_CHARS
+#    define SNITCH_APPEND_TO_CHARS 0
 #endif
 
 #if SNITCH_SHARED_LIBRARY

@@ -6,5 +6,6 @@ if "-Werror" in env_imgui["CCFLAGS"]:
     env_imgui["CCFLAGS"].remove("-Werror")
 
 env.Append(CPPPATH=["#/modules/imgui_metal/"])
+env_imgui.Append(CPPPATH=["#/modules/imgui_core/"])
 
 env_imgui.add_source_files(env.modules_sources, "*.mm")

@@ -12,12 +12,11 @@ sources = [
     "upstream/src/snitch_main.cpp",
     "upstream/src/snitch_matcher.cpp",
     "upstream/src/snitch_registry.cpp",
-    "upstream/src/snitch_reporter_catch2_xml.cpp",
     "upstream/src/snitch_reporter_console.cpp",
-    "upstream/src/snitch_reporter_teamcity.cpp",
     "upstream/src/snitch_section.cpp",
     "upstream/src/snitch_string_utility.cpp",
-    "upstream/src/snitch_test_data.cpp"
+    "upstream/src/snitch_test_data.cpp",
+    "upstream/src/snitch_time.cpp"
 ]
 
 env_snitch = env.Clone()

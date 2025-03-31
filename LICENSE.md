@@ -61,7 +61,7 @@ under the following license:
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2023 Omar Cornut
+Copyright (c) 2014-2025 Omar Cornut
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -522,7 +522,7 @@ THE SOFTWARE.
 
 The files in modules/clip/upstream are available under the following license:
 
-Copyright (c) 2015-2023 David Capello
+Copyright (c) 2015-2024 David Capello
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
