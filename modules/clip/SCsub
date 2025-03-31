@@ -8,7 +8,7 @@ if "/WX" in env_clip["CCFLAGS"]:
     env_clip["CCFLAGS"].remove("/WX")
 
 env_clip.add_source_files(env.modules_sources, "upstream/clip.cpp")
-env_clip.add_source_files(env.modules_sources, "upstream/image.cpp")
+env_clip.Append(CPPPATH=["#/modules/clip/upstream"])
 
 if env["platform"] == "linux":
     if env["windowing"] == "x11":
