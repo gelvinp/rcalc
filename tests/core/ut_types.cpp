@@ -5,7 +5,7 @@
 
 TEST_CASE("Types are castable", "[core]") {
     using namespace RCalc;
-    constexpr const Type ALL_TYPES[MAX_TYPE] = { TYPE_INT, TYPE_BIGINT, TYPE_REAL, TYPE_VEC2, TYPE_VEC3, TYPE_VEC4, TYPE_MAT2, TYPE_MAT3, TYPE_MAT4, TYPE_UNIT };
+    constexpr const Type ALL_TYPES[MAX_TYPE] = { TYPE_INT, TYPE_BIGINT, TYPE_REAL, TYPE_VEC2, TYPE_VEC3, TYPE_VEC4, TYPE_MAT2, TYPE_MAT3, TYPE_MAT4, TYPE_UNIT, TYPE_IDENTIFIER };
     const std::span<const Type> all_types { ALL_TYPES };
 
     SECTION("To themselves") {
@@ -18,6 +18,7 @@ TEST_CASE("Types are castable", "[core]") {
         for (int index = TYPE_VEC2; index < MAX_TYPE; ++index) {
             Type from_type = ALL_TYPES[index];
             for (Type to_type : all_types) {
+                CAPTURE(from_type, to_type);
                 if (from_type == to_type) { continue; }
                 REQUIRE_FALSE(is_type_castable(from_type, to_type));
             }

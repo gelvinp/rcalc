@@ -3,6 +3,7 @@
 #include "core/value.h"
 #include "app/displayable/displayable.h"
 #include "core/memory/cowvec.h"
+#include "variable_map.h"
 
 #include <any>
 #include <optional>
@@ -33,9 +34,11 @@ public:
 
     std::string peek_types(uint64_t count) const;
     CowVec<Type> peek_types_vec(uint64_t count) const;
+    CowVec<Type> peek_types_vec(uint64_t count, OptionalVariables variables) const;
     std::string display_types(uint64_t count) const;
 
     CowVec<StackItem> pop_items(uint64_t count);
+    CowVec<StackItem> pop_items(uint64_t count, OptionalVariables variables);
 
     const CowVec<StackItem>& get_items() const;
 

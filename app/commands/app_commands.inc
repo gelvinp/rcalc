@@ -75,10 +75,64 @@ RCALC_CMD(Application, Undo) {
 // Requires: "app/application.h"
 // Requires: "core/format.h"
 RCALC_CMD(Application, Type) {
-    if (stack.size() == 0) { return; }
+    if (stack.size() == 0) { p_renderer->display_error("The stack is empty."); return; }
 
     const StackItem& back = stack.get_items().back();
     std::string type_info = fmt("Type: %s", Value::get_type_name(back.result.get_type()));
 
     p_renderer->display_info(type_info);
+}
+
+// @RCalcCommand
+// Description: Store the value arg0 in the identifier arg1.
+// Requires: "app/application.h"
+RCALC_CMD(Application, Store) {
+    if (stack.size() < 2) { p_renderer->display_error("Not enough arguments."); return; }
+
+    const StackItem& back = stack.get_items().back();
+    if (back.result.get_type() != TYPE_IDENTIFIER) { p_renderer->display_error("No identifier given."); return; }
+
+    Identifier var_name = back.result;
+
+    stack.pop_items(1);
+    const StackItem& value = stack.get_items().back();
+
+    variable_map.store(var_name, value.result);
+
+    std::string value_str = value.result.to_string();
+    std::string type_info = fmt("Value '%s' stored in variable \"%s\".", value_str.c_str(), var_name.c_str());
+    p_renderer->display_info(type_info);
+}
+
+// @RCalcCommand
+// Description: Loads the value stored in the identifier arg0.
+// Requires: "app/application.h"
+RCALC_CMD(Application, Load) {
+    if (stack.size() == 0) { p_renderer->display_error("No identifier given."); return; }
+
+    const StackItem& back = stack.get_items().back();
+    if (back.result.get_type() != TYPE_IDENTIFIER) { p_renderer->display_error("No identifier given."); return; }
+
+    Identifier var_name = back.result;
+    std::optional<Value> value = variable_map.load(var_name);
+    
+    if (!value) {
+        std::string error = fmt("No value stored in variable \"%s\".", var_name.c_str());
+        p_renderer->display_error(error);
+        return;
+    }
+
+    stack.pop_items(1);
+
+    StackItem item {};
+    item.p_input = create_displayables_from("load(\"", var_name, "\")");
+    item.result = value.value();
+    stack.try_push_item(item);
+}
+
+// @RCalcCommand
+// Description: Clears all stored variables.
+// Requires: "app/application.h"
+RCALC_CMD(Application, ClearVars) {
+    variable_map.clear();
 }

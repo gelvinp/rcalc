@@ -40,6 +40,7 @@ public:
     REGISTER_COMMAND(ImGuiRenderer, Queer);
     REGISTER_COMMAND(ImGuiRenderer, Quit);
     REGISTER_COMMAND(ImGuiRenderer, ClearHist);
+    REGISTER_COMMAND(ImGuiRenderer, Variables);
 
 private:
     void render();
@@ -66,6 +67,13 @@ private:
     bool should_suggest_previous = false;
     bool settings_requested = false;
     bool settings_open = false;
+    bool variables_requested = false;
+    bool variables_open = false;
+    bool save_variable_name_requested = false;
+
+    std::string variable_name;
+    std::optional<Value> variable_value = std::nullopt;
+    CowVec<std::string> variables_cache;
 
     ImGuiDisplayStack display_stack;
 
@@ -89,6 +97,7 @@ private:
     void submit_scratchpad();
     void render_help();
     void render_settings();
+    void render_variables();
 
     static int scratchpad_input_callback(ImGuiInputTextCallbackData* p_cb_data);
     static int scratchpad_input_edit_callback(ImGuiInputTextCallbackData* p_cb_data);

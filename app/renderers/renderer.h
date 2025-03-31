@@ -25,7 +25,7 @@ public:
             : p_app(p_app), callback(callback) {}
         
         void operator()(std::string_view str) { if (p_app) { callback(p_app, str); } }
-    private:
+        
         Application* p_app;
         Callback callback;
     };

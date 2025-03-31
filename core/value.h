@@ -41,6 +41,7 @@ public:
     operator Mat3() const;
     operator Mat4() const;
     operator Unit() const;
+    operator Identifier() const;
 
     bool operator==(const Value& other) const;
 
@@ -54,6 +55,7 @@ public:
     Value(Mat3 value, Representation repr = REPR_NONE);
     Value(Mat4 value, Representation repr = REPR_NONE);
     Value(Unit value, Representation repr = REPR_NONE);
+    Value(Identifier value, Representation repr = REPR_NONE);
     
     std::string to_string(DisplayableTag tags = DisplayableTag::NONE, std::optional<int> precision = std::nullopt) const;
 
@@ -89,6 +91,7 @@ private:
     static std::optional<Value> parse_vec(std::string_view sv);
     static std::optional<Value> parse_mat(std::string_view sv);
     static std::optional<Value> parse_unit(std::string_view str);
+    static std::optional<Value> parse_identifier(std::string_view str);
 
     static std::optional<std::string> str_oct_to_bin(std::string str);
     static std::optional<std::string> str_hex_to_bin(std::string str);

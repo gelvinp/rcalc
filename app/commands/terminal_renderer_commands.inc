@@ -47,3 +47,11 @@ RCALC_CMD(TerminalRenderer, ClearHist) {
     history.clear();
     history_state = std::nullopt;
 }
+
+
+// @RCalcCommand
+// Description: Displays the variables list.
+// Requires: "app/renderers/imgui/imgui_renderer.h"
+RCALC_CMD(TerminalRenderer, Variables) {
+    variables_requested = true;
+}
