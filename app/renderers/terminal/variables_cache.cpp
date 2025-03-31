@@ -94,7 +94,7 @@ namespace RCalc::TerminalVariablesCache {
 
             ftxui::Button(
                 "Remove",
-                [name, &variables, &variables_close_requested, &data, index]() mutable {
+                [name, &variables, &data, index]() mutable {
                     variables.remove(name);
                     data.menu_open.mut_at(index) = false;
                 },
