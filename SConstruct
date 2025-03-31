@@ -148,6 +148,7 @@ opts.Add("extra_suffix", "Extra suffix for all binary files", "")
 opts.Add("default_renderer", "The default renderer to use on program start", "")
 opts.Add("gperf_path", "The path to gperf for generating maps, leave blank to use std::map", "")
 opts.Add(BoolVariable("debug_alloc", "Enable allocator debugging. Will slow down RCalc considerably.", False))
+opts.Add(EnumVariable("use_lto", "Link Time Optimization", "default", ("default", "yes", "no")))
 
 opts.Add("CXX", "C++ compiler", os.environ.get("CXX"))
 opts.Add("CC", "C compiler", os.environ.get("CC"))

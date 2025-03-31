@@ -57,8 +57,22 @@ def configure(env: "Environment"):
     if env["build_type"] != "staticlib":
         print("iOS builds are only supported as a static library. Please re-run with 'build_type=staticlib'")
         sys.exit(255)
-    
-    env["lto"] = "none"
+
+    # LTO
+    if env["target"] == "release":
+        if env["use_lto"] == "no":
+            env["lto"] = "none"
+        else:
+            env["lto"] = "thin"
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
+    else:
+        if env["use_lto"] != "yes":
+            env["lto"] = "none"
+        else:
+            env["lto"] = "thin"
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
 
     env["ENV"]["PATH"] = env["IOS_TOOLCHAIN_PATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
 

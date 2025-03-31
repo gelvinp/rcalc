@@ -60,11 +60,19 @@ def configure(env: "Environment"):
     
     # LTO
     if env["target"] == "release":
-        env.Append(CCFLAGS=["-flto=thin"])
-        env.Append(LINKFLAGS=["-flto=thin"])
-        env["lto"] = "thin"
+        if env["use_lto"] == "no":
+            env["lto"] = "none"
+        else:
+            env["lto"] = "thin"
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
     else:
-        env["lto"] = "none"
+        if env["use_lto"] != "yes":
+            env["lto"] = "none"
+        else:
+            env["lto"] = "thin"
+            env.Append(CCFLAGS=["-flto=thin"])
+            env.Append(LINKFLAGS=["-flto=thin"])
     
     env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
     
