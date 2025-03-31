@@ -77,12 +77,25 @@ def configure(env: "Environment"):
 
     
     # LTO
-    if (env["target"] == "release") and ("OSXCROSS_ROOT" not in os.environ):
-        env.Append(CCFLAGS=["-flto=thin"])
-        env.Append(LINKFLAGS=["-flto=thin"])
-        env["lto"] = "thin"
-    else:
+    if "OSXCROSS_ROOT" in os.environ:
+        # LTO is not working with osxcross :/
+        # https://github.com/tpoechtrager/osxcross/issues/366
         env["lto"] = "none"
+    else:
+        if (env["target"] == "release"):
+            if env["use_lto"] == "no":
+                env["lto"] = "none"
+            else:
+                env["lto"] = "thin"
+                env.Append(CCFLAGS=["-flto=thin"])
+                env.Append(LINKFLAGS=["-flto=thin"])
+        else:
+            if env["use_lto"] != "yes":
+                env["lto"] = "none"
+            else:
+                env["lto"] = "thin"
+                env.Append(CCFLAGS=["-flto=thin"])
+                env.Append(LINKFLAGS=["-flto=thin"])
     
     env.Append(LINKFLAGS=["-rpath", "@executable_path/"])
     

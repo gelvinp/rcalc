@@ -64,22 +64,46 @@ def configure(env: "Environment"):
     # LTO
     if env["target"] == "release":
         if env["use_llvm"]:
-            env.Append(CCFLAGS=["-flto=thin"])
-            env.Append(LINKFLAGS=["-flto=thin"])
-            env["lto"] = "thin"
-        else:
-            env.Append(CCFLAGS=["-flto"])
-
-            if env.GetOption("num_jobs") > 1:
-                env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
+            if env["use_lto"] == "no":
+                env["lto"] = "none"
             else:
-                env.Append(LINKFLAGS=["-flto"])
-            
-            env["RANLIB"] = "gcc-ranlib"
-            env["AR"] = "gcc-ar"
-            env["lto"] = "full"
+                env["lto"] = "thin"
+                env.Append(CCFLAGS=["-flto=thin"])
+                env.Append(LINKFLAGS=["-flto=thin"])
+        else:
+            if env["use_lto"] == "no":
+                env["lto"] = "none"
+            else:
+                env.Append(CCFLAGS=["-flto"])
+
+                if env.GetOption("num_jobs") > 1:
+                    env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
+                else:
+                    env.Append(LINKFLAGS=["-flto"])
+                env["lto"] = "full"
     else:
-        env["lto"] = "none"
+        if env["use_llvm"]:
+            if env["use_lto"] != "yes":
+                env["lto"] = "none"
+            else:
+                env["lto"] = "thin"
+                env.Append(CCFLAGS=["-flto=thin"])
+                env.Append(LINKFLAGS=["-flto=thin"])
+        else:
+            if env["use_lto"] != "yes":
+                env["lto"] = "none"
+            else:
+                env.Append(CCFLAGS=["-flto"])
+
+                if env.GetOption("num_jobs") > 1:
+                    env.Append(LINKFLAGS=["-flto=" + str(env.GetOption("num_jobs"))])
+                else:
+                    env.Append(LINKFLAGS=["-flto"])
+                env["lto"] = "full"
+    
+    if not env["use_llvm"]:
+        env["RANLIB"] = "gcc-ranlib"
+        env["AR"] = "gcc-ar"
     
     env.Append(CCFLAGS=["-pipe"])
 
