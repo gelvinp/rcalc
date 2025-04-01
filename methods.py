@@ -411,6 +411,7 @@ def package_static_lib(target, source, env):
         "app/displayable/displayable.h",
         "app/help_text.h",
         "app/autocomplete.h",
+        "app/variable_map.h",
         "modules/register_modules.h",
         "modules/bigint/bigint.h",
         "assets/license.gen.h"

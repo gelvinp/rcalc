@@ -3,6 +3,8 @@
 
 #include <version> // for C++ feature check macros
 
+#include <cstddef> // Needed for MacOS (for some reason)
+
 // These are defined from build-time configuration.
 // clang-format off
 #define SNITCH_VERSION "1.3.2"
