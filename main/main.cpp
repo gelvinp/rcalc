@@ -47,8 +47,8 @@ int main(int argc, char** pp_argv)
         ss << res.unwrap_err();
         RCalc::Logger::log_err("%s", ss.str().c_str());
     } else {
-        Main::get_app().init();
-        Main::get_app().run();
+        res = Main::get_app().init();
+        if (res) { Main::get_app().run(); }
 
         RCalc::Allocator::set_noop_free(true);
         Main::get_app().cleanup();
