@@ -60,6 +60,7 @@ class Application;
 - (void) menuCallbackDuplicate;
 - (void) menuCallbackHelp;
 - (void) menuCallbackSettings;
+- (void) menuCallbackVariables;
 
 @end
 

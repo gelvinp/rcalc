@@ -1090,9 +1090,10 @@ void ImGuiRenderer::render_settings() {
     if (ImGui::RadioButton("Light", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_LIGHT)) {
         style_update_needed = true;
     }
-    ImGui::SameLine();
 
     if (SettingsManager::system_color_available) {
+        ImGui::SameLine();
+        
         if (ImGui::RadioButton("System", reinterpret_cast<int*>(&settings.colors), SettingsManager::COLORS_SYSTEM)) {
             style_update_needed = true;
         }

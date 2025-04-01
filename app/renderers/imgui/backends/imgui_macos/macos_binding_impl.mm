@@ -93,11 +93,18 @@ static void glfw_error_callback(int error, const char* description) {
     id copyMenuItem = [[NSMenuItem alloc] initWithTitle: @"Copy Answer" action:@selector(menuCallbackCopy) keyEquivalent: @"c"];
     id duplicateMenuItem = [[NSMenuItem alloc] initWithTitle: @"Duplicate Item" action:@selector(menuCallbackDuplicate) keyEquivalent: @"d"];
 
+    unichar f2 = NSF2FunctionKey;
+    NSString* f2key = [NSString stringWithCharacters:&f2 length:1];
+    id variablesMenuItem = [[NSMenuItem alloc] initWithTitle: @"Show Variables" action:@selector(menuCallbackVariables) keyEquivalent: f2key];
+    [variablesMenuItem setKeyEquivalentModifierMask:0];
+
     [copyMenuItem setTarget:self];
     [duplicateMenuItem setTarget:self];
+    [variablesMenuItem setTarget:self];
 
     [fileMenu addItem:copyMenuItem];
     [fileMenu addItem:duplicateMenuItem];
+    [fileMenu addItem:variablesMenuItem];
 
     id fileMenuItem = [NSMenuItem new];
     [fileMenuItem setSubmenu:fileMenu];
@@ -229,6 +236,10 @@ static void glfw_error_callback(int error, const char* description) {
 
 - (void) menuCallbackSettings {
     _submitTextCallback("\\settings");
+}
+
+- (void) menuCallbackVariables {
+    _submitTextCallback("\\variables");
 }
 
 @end
