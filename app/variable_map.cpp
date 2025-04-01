@@ -4,8 +4,11 @@
 namespace RCalc {
 
 void VariableMap::store(std::string name, Value value) {
-    auto pair = std::make_pair<std::string, Value>(std::string { name }, Value { value });
-    values.push_back(pair);
+    for (size_t index = 0; index < values.size(); ++index) {
+        const auto& [e_name, _value] = values[index];
+        if (e_name == name) { values.mut_at(index).second = value; return; }
+    }
+    values.emplace_back(name, value);
 }
 
 std::optional<Value> VariableMap::load(const std::string& name) const {

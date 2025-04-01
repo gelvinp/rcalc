@@ -1158,8 +1158,7 @@ void ImGuiRenderer::render_variables() {
     else {
         if (variables_cache.empty()) {
             for (const auto& [name, value] : cb_submit_text.p_app->get_variable_map().get_values()) {
-                std::string value_str = value.to_string();
-                variables_cache.push_back(value_str);
+                variables_cache.emplace_back(value.to_string());
             }
         }
 
