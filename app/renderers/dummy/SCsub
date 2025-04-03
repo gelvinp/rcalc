@@ -1,0 +1,4 @@
+Import("env")
+Import("env_app")
+
+env_app.add_source_files(env.app_sources, "*.cpp", True)

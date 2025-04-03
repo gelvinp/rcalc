@@ -43,9 +43,6 @@ available_platforms = []
 platform_opts = {}
 platform_flags = {}
 
-available_renderers = []
-renderer_priorities = {}
-
 start_time = time.time()
 
 for platform_path in sorted(glob.glob("platform/*")):
@@ -66,24 +63,6 @@ for platform_path in sorted(glob.glob("platform/*")):
     
     sys.path.remove(tmp_path)
     sys.modules.pop("detect")
-
-
-for renderer_path in sorted(glob.glob(os.path.join("app", "renderers/*"))):
-    if not os.path.isdir(renderer_path) or not os.path.exists(renderer_path + "/renderer.py"):
-        continue
-    
-    tmp_path = "./" + renderer_path
-    sys.path.insert(0, tmp_path)
-    import renderer
-
-    if renderer.is_available():
-        renderer_name = renderer_path.replace("app/renderers/", "")
-        renderer_name = renderer_name.replace("app\\renderers\\", "")
-        available_renderers.append(renderer_name)
-        renderer_priorities[renderer_name] = renderer.get_priority()
-    
-    sys.path.remove(tmp_path)
-    sys.modules.pop("renderer")
 
 
 env_base = Environment()
@@ -158,12 +137,36 @@ opts.Add("CFLAGS", "Flags for the C compiler only", os.environ.get("CFLAGS"))
 opts.Add("CXXFLAGS", "Flags for the C++ compiler only", os.environ.get("CXXFLAGS"))
 opts.Add("LINKFLAGS", "Flags for the linker", os.environ.get("LINKFLAGS"))
 
-for renderer in available_renderers:
-    opts.Add(BoolVariable(f"enable_{renderer}_renderer", f"Enable the {renderer} renderer.", True))
-
 opts.Update(env_base)
 
 opts.Add(BoolVariable("tests_enabled", "Enable running tests from the command line.", env_base["target"] == "debug"))
+opts.Update(env_base)
+
+# Get available renderers
+
+available_renderers = []
+renderer_priorities = {}
+
+for renderer_path in sorted(glob.glob(os.path.join("app", "renderers/*"))):
+    if not os.path.isdir(renderer_path) or not os.path.exists(renderer_path + "/renderer.py"):
+        continue
+    
+    tmp_path = "./" + renderer_path
+    sys.path.insert(0, tmp_path)
+    import renderer
+
+    if renderer.is_available(env_base):
+        renderer_name = renderer_path.replace("app/renderers/", "")
+        renderer_name = renderer_name.replace("app\\renderers\\", "")
+        available_renderers.append(renderer_name)
+        renderer_priorities[renderer_name] = renderer.get_priority()
+    
+    sys.path.remove(tmp_path)
+    sys.modules.pop("renderer")
+
+for renderer in available_renderers:
+    opts.Add(BoolVariable(f"enable_{renderer}_renderer", f"Enable the {renderer} renderer.", True))
+
 opts.Update(env_base)
 
 # Select platform

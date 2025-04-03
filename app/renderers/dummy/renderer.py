@@ -3,13 +3,13 @@ def get_priority():
 
 
 def is_available(env: "Environment"):
-    return True
+    return env["tests_enabled"]
 
 
 def meta():
     return {
-        'header': 'app/renderers/template/renderer_template.h',
-        'class': 'RendererTemplate'
+        'header': 'app/renderers/dummy/dummy_renderer.h',
+        'class': 'DummyRenderer'
     }
 
 
