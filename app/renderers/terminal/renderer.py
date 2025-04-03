@@ -4,7 +4,7 @@ def get_priority():
     return 1
 
 
-def is_available():
+def is_available(env: "Environment"):
     return True
 
 
