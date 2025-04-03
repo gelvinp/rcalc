@@ -20,4 +20,10 @@ lcov -r coverage.info "/usr/include/c++" -ignore-errors inconsistent -ignore-err
 lcov -r coverage.info "modules" -ignore-errors inconsistent -output-file coverage.info
 lcov -r coverage.info "tests" -ignore-errors inconsistent -output-file coverage.info
 lcov -r coverage.info "main" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "app/renderers" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "app/dump" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "app/settings" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "app/commands/*renderer*" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "app/commands/*Renderer*" -ignore-errors inconsistent -output-file coverage.info
+lcov -r coverage.info "core/logging" -ignore-errors inconsistent -output-file coverage.info
 genhtml coverage.info -ignore-errors inconsistent --output-directory coverage.gen

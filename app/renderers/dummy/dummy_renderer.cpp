@@ -10,8 +10,16 @@ Result<> DummyRenderer::init() { return Ok(); }
 void DummyRenderer::render_loop() {}
 void DummyRenderer::cleanup() {}
 
-void DummyRenderer::display_info(std::string_view str) {}
-void DummyRenderer::display_error(std::string_view str) {}
+void DummyRenderer::display_info(std::string_view str) {
+    last_message = str;
+    last_message_was_error = false;
+}
+
+void DummyRenderer::display_error(std::string_view str) {
+    last_message = str;
+    last_message_was_error = true;
+}
+
 
 bool DummyRenderer::try_renderer_command(std::string_view str) { return false; }
 

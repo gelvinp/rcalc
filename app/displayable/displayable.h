@@ -55,8 +55,6 @@ struct Displayable {
     Iterator begin();
     Iterator end() { return Iterator(nullptr); }
 
-    Displayable& back();
-
     static std::shared_ptr<Displayable> create(const char*);
     static std::shared_ptr<Displayable> create(std::string);
     static std::shared_ptr<Displayable> create(Value);

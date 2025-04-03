@@ -1027,10 +1027,12 @@ bool Value::operator==(const Value& other) const {
         POOL_COMPARE(Mat2, TYPE_MAT2)
         POOL_COMPARE(Mat3, TYPE_MAT3)
         POOL_COMPARE(Mat4, TYPE_MAT4)
-        POOL_COMPARE(Identifier, TYPE_IDENTIFIER)
         
         case TYPE_UNIT:
             return operator RCalc::Unit().p_impl == other.operator RCalc::Unit().p_impl;
+        
+        case TYPE_IDENTIFIER:
+            return operator RCalc::Identifier() == other.operator RCalc::Identifier();
 
         default:
             UNREACHABLE();
