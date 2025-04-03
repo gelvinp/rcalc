@@ -4,6 +4,7 @@
 #include "core/logger.h"
 #include "core/value.h"
 #include "tests/test_serializers.h"
+#include "app/application.h"
 
 #include <numbers>
 
@@ -13,11 +14,12 @@ using namespace RCalc::TypeComparison;
 namespace {
 
 template<typename T>
-void roundtrip(Unit* p_unit);
+void roundtrip(const char* from, const char* through);
 
 template<>
-void roundtrip<Real>(Unit* p_unit) {
-    const UnitImpl<Real>& impl = p_unit->get_impl<Real>();
+void roundtrip<Real>(const char* from, const char* through) {
+    CAPTURE(from);
+    CAPTURE(through);
 
     constexpr std::array<Real, 20> values = {
         1.0,
@@ -44,18 +46,34 @@ void roundtrip<Real>(Unit* p_unit) {
 
     for (Real value : values) {
         CAPTURE(value);
-        Result<Real> roundtripped = impl.to_base(value).and_then<Real>(impl.from_base);
-        if (roundtripped) {
-            // Not all of those values might be valid for every unit
-            CAPTURE(roundtripped.unwrap());
-            REQUIRE(compare(value, roundtripped.unwrap()));
+        Value original { value };
+
+        Application app;
+        app.early_init({ .renderer_name = "dummy" });
+
+        app.on_renderer_submit_text(original.to_string());
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text("convert");
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text("convert");
+
+        if (app.get_stack().get_items().size() > 1) {
+            // Invalid conversion
+            continue;
         }
+
+        Value roundtripped = app.get_stack().get_items().at(0).result;
+        CAPTURE((Real)roundtripped);
+        REQUIRE(compare(value, roundtripped));
     }
 }
 
 template<>
-void roundtrip<Vec2>(Unit* p_unit) {
-    const UnitImpl<Vec2>& impl = p_unit->get_impl<Vec2>();
+void roundtrip<Vec2>(const char* from, const char* through) {
+    CAPTURE(from);
+    CAPTURE(through);
 
     constexpr std::array<Vec2, 20> values = {
         Vec2 { 0.0 },
@@ -82,18 +100,34 @@ void roundtrip<Vec2>(Unit* p_unit) {
 
     for (Vec2 value : values) {
         CAPTURE(value);
-        Result<Vec2> roundtripped = impl.to_base(value).and_then<Vec2>(impl.from_base);
-        if (roundtripped) {
-            // Not all of those values might be valid for every unit
-            CAPTURE(roundtripped.unwrap()); 
-            REQUIRE(compare(value, roundtripped.unwrap()));
+        Value original { value };
+
+        Application app;
+        app.early_init({ .renderer_name = "dummy" });
+
+        app.on_renderer_submit_text(original.to_string());
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text("convert");
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text("convert");
+
+        if (app.get_stack().get_items().size() > 1) {
+            // Invalid conversion
+            continue;
         }
+
+        Value roundtripped = app.get_stack().get_items().at(0).result;
+        CAPTURE((Vec2)roundtripped);
+        REQUIRE(compare(value, roundtripped));
     }
 }
 
 template<>
-void roundtrip<Vec3>(Unit* p_unit) {
-    const UnitImpl<Vec3>& impl = p_unit->get_impl<Vec3>();
+void roundtrip<Vec3>(const char* from, const char* through) {
+    CAPTURE(from);
+    CAPTURE(through);
 
     constexpr std::array<Vec3, 20> values = {
         Vec3 { 0.0 },
@@ -120,18 +154,34 @@ void roundtrip<Vec3>(Unit* p_unit) {
 
     for (Vec3 value : values) {
         CAPTURE(value);
-        Result<Vec3> roundtripped = impl.to_base(value).and_then<Vec3>(impl.from_base);
-        if (roundtripped) {
-            // Not all of those values might be valid for every unit
-            CAPTURE(roundtripped.unwrap());
-            REQUIRE(compare(value, roundtripped.unwrap()));
+        Value original { value };
+
+        Application app;
+        app.early_init({ .renderer_name = "dummy" });
+
+        app.on_renderer_submit_text(original.to_string());
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text("convert");
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text("convert");
+
+        if (app.get_stack().get_items().size() > 1) {
+            // Invalid conversion
+            continue;
         }
+
+        Value roundtripped = app.get_stack().get_items().at(0).result;
+        CAPTURE((Vec3)roundtripped);
+        REQUIRE(compare(value, roundtripped));
     }
 }
 
 template<>
-void roundtrip<Vec4>(Unit* p_unit) {
-    const UnitImpl<Vec4>& impl = p_unit->get_impl<Vec4>();
+void roundtrip<Vec4>(const char* from, const char* through) {
+    CAPTURE(from);
+    CAPTURE(through);
 
     constexpr std::array<Vec4, 20> values = {
         Vec4 { 0.0 },
@@ -158,12 +208,27 @@ void roundtrip<Vec4>(Unit* p_unit) {
 
     for (Vec4 value : values) {
         CAPTURE(value);
-        Result<Vec4> roundtripped = impl.to_base(value).and_then<Vec4>(impl.from_base);
-        if (roundtripped) {
-            // Not all of those values might be valid for every unit
-            CAPTURE(roundtripped.unwrap());
-            REQUIRE(compare(value, roundtripped.unwrap()));
+        Value original { value };
+
+        Application app;
+        app.early_init({ .renderer_name = "dummy" });
+
+        app.on_renderer_submit_text(original.to_string());
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text("convert");
+        app.on_renderer_submit_text(through);
+        app.on_renderer_submit_text(from);
+        app.on_renderer_submit_text("convert");
+
+        if (app.get_stack().get_items().size() > 1) {
+            // Invalid conversion
+            continue;
         }
+
+        Value roundtripped = app.get_stack().get_items().at(0).result;
+        CAPTURE((Vec4)roundtripped);
+        REQUIRE(compare(value, roundtripped));
     }
 }
 
@@ -176,36 +241,78 @@ TEST_CASE("Unit Roundtrip", "[core][units][allocates]") {
 
     UnitsMap& map = UnitsMap::get_units_map();
     map.build();
+    int starting_precision = Value::get_precision();
+    Value::set_precision(15);
 
     for (UnitFamily const * const p_family : map.get_alphabetical()) {
         CAPTURE(p_family->p_name);
-        for (Unit* p_unit : p_family->units) {
-            CAPTURE(p_unit->p_name);
+        const Unit* base;
 
-            REQUIRE(map.find_unit(p_unit->p_usage) == p_unit);
+        if (std::string_view { p_family->p_name } == "Angle") {
+            base = map.find_unit("_rad").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Area") {
+            base = map.find_unit("_acre").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Color3Comp") {
+            base = map.find_unit("_ciexyz").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Color4Comp") {
+            base = map.find_unit("_ciexyza").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Coord2D") {
+            base = map.find_unit("_cartxy").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Coord3D") {
+            base = map.find_unit("_cartxyz").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Length") {
+            base = map.find_unit("_m").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Mass") {
+            base = map.find_unit("_kg").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Storage") {
+            base = map.find_unit("_byte").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Temperature") {
+            base = map.find_unit("_c").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Time") {
+            base = map.find_unit("_s").value();
+        }
+        else if (std::string_view { p_family->p_name } == "Volume") {
+            base = map.find_unit("_m3").value();
+        }
+
+        for (size_t i = 0; i < p_family->units.size(); ++i) {
+            Unit* from = p_family->units[i];
+
             switch (p_family->base_type) {
                 case TYPE_REAL:
-                    roundtrip<Real>(p_unit);
+                    roundtrip<Real>(from->p_usage, base->p_usage);
                     break;
 
                 case TYPE_VEC2:
-                    roundtrip<Vec2>(p_unit);
+                    roundtrip<Vec2>(from->p_usage, base->p_usage);
                     break;
 
-                case TYPE_VEC3:
-                    roundtrip<Vec3>(p_unit);
+                case TYPE_VEC3: {
+                    roundtrip<Vec3>(from->p_usage, base->p_usage);
                     break;
-
-                case TYPE_VEC4:
-                    roundtrip<Vec4>(p_unit);
+                }    
+                case TYPE_VEC4: {
+                    roundtrip<Vec4>(from->p_usage, base->p_usage);
                     break;
-                
+                }    
                 default:
                     Logger::log_err("[Unit Roundtrip] No test case for type %s", Value::get_type_name(p_family->base_type));
                     throw std::logic_error("No test case for this type!");
             }
         }
     }
+
+    Value::set_precision(starting_precision);
 }
 
 }

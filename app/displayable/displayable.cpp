@@ -56,17 +56,6 @@ void Displayable::Iterator::increment() {
 }
 
 
-Displayable& Displayable::back() {
-    Displayable* p_back = {};
-
-    for (Displayable& displayable : *this) {
-        p_back = &displayable;
-    }
-
-    return *p_back;
-}
-
-
 std::shared_ptr<Displayable> Displayable::create(const char* p_char) {
     return Allocator::make_shared<ConstCharDisplayable>(p_char);
     // return std::shared_ptr<Displayable>(reinterpret_cast<Displayable*>(new ConstCharDisplayable(p_char)));
