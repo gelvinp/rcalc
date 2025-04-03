@@ -9,7 +9,7 @@ using namespace RCalc;
 using namespace RCalc::TypeComparison;
 
 
-// TEST_CASE("Examples do not return an error", "[core][allocates]") {
+// TEST_CASE("Examples do not return an error", "[app][operators][allocates]") {
 //     RPNStack stack;
 //     OperatorMap& op_map = OperatorMap::get_operator_map();
 
@@ -32,7 +32,7 @@ using namespace RCalc::TypeComparison;
 //     }
 // }
 
-TEST_CASE("Operator test cases", "[core][allocates]") {
+TEST_CASE("Operator test cases", "[app][operators][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
@@ -94,7 +94,7 @@ TEST_CASE("Operator test cases", "[core][allocates]") {
     Value::set_precision(old_precision);
 }
 
-TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
+TEST_CASE("Addition/Multiplication expressions", "[app][operators][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
@@ -289,7 +289,7 @@ TEST_CASE("Addition/Multiplication expressions", "[core][allocates]") {
     }
 }
 
-TEST_CASE("Column vectors", "[core][allocates]") {
+TEST_CASE("Column vectors", "[app][operators][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
@@ -320,7 +320,7 @@ TEST_CASE("Column vectors", "[core][allocates]") {
     }
 }
 
-TEST_CASE("Negation stack", "[core][allocates]") {
+TEST_CASE("Negation stack", "[app][operators][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
@@ -348,7 +348,7 @@ TEST_CASE("Negation stack", "[core][allocates]") {
     }
 }
 
-TEST_CASE("Range", "[core][allocates]") {
+TEST_CASE("Range", "[app][operators][allocates]") {
     RPNStack stack;
     OperatorMap& op_map = OperatorMap::get_operator_map();
     CowVec<OpTest> op_tests = get_op_tests();
