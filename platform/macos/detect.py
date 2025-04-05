@@ -11,7 +11,7 @@ def get_name():
 
 
 def is_available():
-    if sys.platform != "darwin":
+    if (sys.platform != "darwin") and ("OSXCROSS_ROOT" not in os.environ):
         return False
     
     if os.system("pkg-config --version > /dev/null"):
@@ -27,6 +27,7 @@ def get_opts():
     return [
         BoolVariable("use_asan", "Compile with -fsanitize=address", False),
         BoolVariable("use_coverage", "Compile with the needed flags to measure test coverage", False),
+        ("osxcross_sdk", "OSXCross SDK version", "darwin24.4"),
     ]
 
 
@@ -47,6 +48,23 @@ def configure(env: "Environment"):
 
         sys.exit(255)
     
+    if "OSXCROSS_ROOT" in os.environ:
+        root = os.environ.get("OSXCROSS_ROOT", "")
+
+        if env["arch"] == "arm64":
+            prefix = root + "/target/bin/arm64-apple-" + env["osxcross_sdk"] + "-"
+        else:
+            prefix = root + "/target/bin/x86_64-apple-" + env["osxcross_sdk"] + "-"
+        
+        env["CC"] = prefix + "cc"
+        env["CXX"] = prefix + "c++"
+        env["AR"] = prefix + "ar"
+        env["RANLIB"] = prefix + "ranlib"
+        env["AS"] = prefix + "as"
+    else:
+        env["CC"] = "clang"
+        env["CXX"] = "clang++"
+    
 
     if env["arch"] == "arm64":
         env.Append(ASFLAGS=["-arch", "arm64", "-mmacosx-version-min=11.0"])
@@ -59,7 +77,7 @@ def configure(env: "Environment"):
 
     
     # LTO
-    if env["target"] == "release":
+    if (env["target"] == "release") and ("OSXCROSS_ROOT" not in os.environ):
         env.Append(CCFLAGS=["-flto=thin"])
         env.Append(LINKFLAGS=["-flto=thin"])
         env["lto"] = "thin"
