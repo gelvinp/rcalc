@@ -1,7 +1,7 @@
 short_name = "rcalc"
 name = "RCalc"
 major = 2
-minor = 0
-patch = 1
+minor = 1
+patch = 0
 status = "dev"
-year = 2024
+year = 2025
