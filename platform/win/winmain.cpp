@@ -1,6 +1,6 @@
 extern int main(int argc, char** pp_argv);
 
-#include <Windows.h>
+#include <windows.h>
 #include "core/coredef.h"
 
 EXTERN_C BOOL WINAPI _CRT_INIT(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved);

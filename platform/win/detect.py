@@ -136,7 +136,7 @@ def is_available():
         prefix = os.getenv("MINGW_PREFIX", "")
 
         if try_cmd("gcc --version", prefix, "") or try_cmd("clang --version", prefix, ""):
-            if not os.system(f"{prefix}/bin/pkg-config --version > /dev/null"):
+            if (os.name == "nt") != bool(os.system(f"{prefix}/bin/pkg-config --version > /dev/null")):
                 print("Error: pkg-config not found. Windows (mingw) platform is unavailable.")
                 return False
         
@@ -408,9 +408,6 @@ def configure_mingw(env):
         env.extra_suffix += ".terminal"
 
     ## Compiler configuration
-
-    if os.name != "nt":
-        env["PROGSUFFIX"] = env["PROGSUFFIX"] + ".exe"  # for linux cross-compilation
 
     mingw_bin_prefix = get_mingw_bin_prefix(env["mingw_prefix"], env["arch"])
 

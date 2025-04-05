@@ -1,6 +1,6 @@
 #ifdef ENABLE_PLATFORM_WINDOWS
 
-#include <Windows.h>
+#include <windows.h>
 
 #include "app/renderers/imgui/backends/imgui_standard/imgui_standard_backend.h"
 #include "core/logger.h"
