@@ -1,6 +1,7 @@
 #include "variables_cache.h"
 #include "scroll_component.h"
 #include "app/application.h"
+#include "terminal_renderer.h"
 
 #include "ftxui/dom/table.hpp"
 
@@ -8,6 +9,10 @@ namespace RCalc::TerminalVariablesCache {
 
     ftxui::Component build_variables_cache(VariablesCacheData& data, Renderer::SubmitTextCallback cb_submit_text, bool& variables_close_requested, TerminalBackend& backend) {
     VariableMap& variables = cb_submit_text.p_app->get_variable_map();
+
+#ifndef MODULE_CLIP_ENABLED
+    UNUSED(backend);
+#endif
 
     ftxui::Component v_lines = ftxui::Container::Vertical({});
 
@@ -42,7 +47,11 @@ namespace RCalc::TerminalVariablesCache {
             "Menu",
             [index, &data] {
                 for (size_t menu_idx = 0; menu_idx < data.menu_open.size(); ++menu_idx) {
-                    data.menu_open.mut_at(menu_idx) = menu_idx == index;
+                    if (menu_idx == index) {
+                        data.menu_open.mut_at(menu_idx) = !data.menu_open[menu_idx];
+                    } else {
+                        data.menu_open.mut_at(menu_idx) = false;
+                    }
                 }
             },
             ftxui::ButtonOption::Ascii()
@@ -115,6 +124,7 @@ namespace RCalc::TerminalVariablesCache {
 
     ftxui::Component table = ftxui::Renderer(layout, [&] {
         std::vector<std::vector<ftxui::Element>> table_data;
+
         table_data.push_back({
             ftxui::text("Name") | ftxui::flex,
             ftxui::text("Value") | ftxui::flex,
@@ -123,9 +133,18 @@ namespace RCalc::TerminalVariablesCache {
 
         size_t index = 0;
         for (const auto& [name, value] : variables.get_values()) {
+            ftxui::Element value_element;
+            std::string value_str = value.to_string();
+
+            if (value_str.find('\n') == value_str.npos) {
+              value_element = ftxui::text(value_str);
+            } else {
+              value_element = ftxui::vbox(TerminalRenderer::split_lines(value_str));
+            }
+
             table_data.push_back({
                 ftxui::text(name) | ftxui::flex,
-                ftxui::text(value.to_string()) | ftxui::flex,
+                value_element | ftxui::flex,
                 data.action_butttons[index]->Render() | ftxui::flex
             });
             index++;

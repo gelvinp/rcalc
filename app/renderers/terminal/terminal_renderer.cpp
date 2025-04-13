@@ -221,9 +221,15 @@ ftxui::Element TerminalRenderer::render() {
             comp_scratchpad->Render()
         });
     }
-
-    auto message_element = ftxui::text(message);
     
+    ftxui::Element message_element;
+
+    if (message.find('\n') == message.npos) {
+      message_element = ftxui::text(message);
+    } else {
+      message_element = ftxui::vbox(split_lines(message));
+    }
+
     if (message_is_error) {
         message_element |= ftxui::color(ftxui::Color::Red);
     }

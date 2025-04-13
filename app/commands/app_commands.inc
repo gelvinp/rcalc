@@ -100,7 +100,15 @@ RCALC_CMD(Application, Store) {
     variable_map.store(var_name, value.result);
 
     std::string value_str = value.result.to_string();
-    std::string type_info = fmt("Value '%s' stored in variable \"%s\".", value_str.c_str(), var_name.c_str());
+
+    const char* fmt_str = "Value '%s' stored in variable \"%s\".";
+
+    // Check for matrix formatting
+    if (value_str.find('\n') != value_str.npos) {
+      fmt_str = "Value\n%s\nstored in variable \"%s\".";
+    }
+
+    std::string type_info = fmt(fmt_str, value_str.c_str(), var_name.c_str());
     p_renderer->display_info(type_info);
 }
 
