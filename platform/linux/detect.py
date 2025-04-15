@@ -63,6 +63,8 @@ def configure(env: "Environment"):
     
     # LTO
     if env["target"] == "release":
+        env.Append(LINKFLAGS=["-static-libgcc", "-static-libstdc++"])
+
         if env["use_llvm"]:
             if env["use_lto"] == "no":
                 env["lto"] = "none"
